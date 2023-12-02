@@ -1,0 +1,38 @@
+{
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node --max_old_space_size=16384 ./node_modules/vite/bin/vite.js build",
+    "preview": "vite preview",
+    "lint": "tsc && eslint \"src/**/*.ts\"",
+    "postinstall": "npm run util:copy-assets",
+    "util:copy-assets": "npx ncp ./node_modules/@esri/calcite-components/dist/calcite/assets/ ./public/assets/"
+  },
+  "dependencies": {
+    "@esri/calcite-components-react": "^1.4.3",
+    "@tanstack/react-query": "^4.29.19",
+    "arcgis-react": "1.0.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-syntax-highlighter": "^15.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.9",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.6",
+    "@types/react-syntax-highlighter": "^15.5.7",
+    "@vitejs/plugin-react-swc": "^3.3.2",
+    "autoprefixer": "^10.4.14",
+    "eslint": "^7.32.0",
+    "eslint-config-custom": "*",
+    "postcss": "^8.4.26",
+    "tailwindcss": "^3.3.3",
+    "tsconfig": "*",
+    "typescript": "^5.1.6",
+    "vite": "^4.4.4",
+    "vitest": "^0.33.0"
+  }
+}
