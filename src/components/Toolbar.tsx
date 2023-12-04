@@ -4,38 +4,49 @@ import {
   CalciteActionBar,
   CalciteActionGroup,
   CalciteAction,
-  CalcitePanel,
   CalciteBlock,
   CalciteIcon,
   CalciteLabel,
+  CalciteNotice,
   CalciteSegmentedControl,
   CalciteSegmentedControlItem,
   CalciteSlider,
-  CalciteNotice,
 } from '@esri/calcite-components-react'
+import { useTheme } from '../contexts/ThemeProvider'
+import InfoSidebar from './InfoSidebar'
+import LayersSidebar from './LayersSidebar'
 
-function Toolbar({
-  setTheme,
-  theme,
-}: {
-  setTheme: (theme: any) => void
-  theme: any
-}) {
+type SidebarComponents = 'Info' | 'Layers'
+// | 'Map Configurations'
+// | 'Geological Unit Search'
+
+function Toolbar() {
   const [panelClosed, setPanelClosed] = useState(true)
   const [shellPanelCollapsed, setShellPanelCollapsed] = useState(true)
   const [panelHeading, setPanelHeading] = useState('Layers')
+  const [activeComponent, setActiveComponent] = useState<SidebarComponents>()
+
+  const { setTheme, theme } = useTheme()
 
   const handleActionClick = (text: string) => {
-    console.log(text)
-
     setPanelClosed(!panelClosed)
     setShellPanelCollapsed(!shellPanelCollapsed)
     setPanelHeading(text)
+    setActiveComponent(text as SidebarComponents)
   }
 
-  const handlePanelClose = () => {
-    setPanelClosed(true)
-    setShellPanelCollapsed(true)
+  const componentMap: Record<SidebarComponents, JSX.Element> = {
+    Info: (
+      <InfoSidebar
+        setPanelClosed={setPanelClosed}
+        setShellPanelCollapsed={setShellPanelCollapsed}
+        panelHeading={panelHeading}
+        panelClosed={panelClosed}
+      />
+    ),
+    Layers: <LayersSidebar />,
+    // 'Map Configurations': <MapConfigurationsSidebar />,
+    // 'Geological Unit Search': <GeologicalUnitSearchSidebar />,
   }
 
   return (
@@ -50,7 +61,7 @@ function Toolbar({
           <CalciteAction
             text='Add'
             icon='information-f'
-            onClick={() => handleActionClick('info')}
+            onClick={() => handleActionClick('Info')}
           />
           <CalciteAction
             active={!panelClosed}
@@ -63,20 +74,14 @@ function Toolbar({
         <CalciteActionGroup>
           <CalciteAction
             text='Undo'
-            icon='undo'
+            icon='sliders-horizontal'
             onClick={() => handleActionClick('Undo')}
           />
           <CalciteAction
             text='Redo'
             indicator
-            icon='redo'
+            icon='data-magnifying-glass'
             onClick={() => handleActionClick('Redo')}
-          />
-          <CalciteAction
-            text='Save'
-            disabled
-            icon='save'
-            onClick={() => handleActionClick('Save')}
           />
           <CalciteAction
             icon={theme === 'dark' ? 'brightness' : 'moon'}
@@ -85,41 +90,42 @@ function Toolbar({
           />
         </CalciteActionGroup>
       </CalciteActionBar>
-      <CalcitePanel
-        heading={panelHeading}
-        closed={panelClosed}
-        onCalcitePanelClose={handlePanelClose}
+      {/* <ExpandedSidebar
+        setPanelClosed={setPanelClosed}
+        setShellPanelCollapsed={setShellPanelCollapsed}
+        panelHeading={panelHeading}
+        panelClosed={panelClosed}
+      /> */}
+      {activeComponent && componentMap[activeComponent]}
+      {/* <CalciteBlock
+        collapsible
+        heading='Layer effects'
+        description='Adjust blur, highlight, and more'
       >
-        <CalciteBlock
-          collapsible
-          heading='Layer effects'
-          description='Adjust blur, highlight, and more'
-        >
-          <CalciteIcon scale='s' slot='icon' icon='effects' />
-          <CalciteLabel>
-            Effect type
-            <CalciteSegmentedControl width='full'>
-              <CalciteSegmentedControlItem value='Blur' />
-              <CalciteSegmentedControlItem checked value='Highlight' />
-              <CalciteSegmentedControlItem value='Party mode' />
-            </CalciteSegmentedControl>
-          </CalciteLabel>
-          <CalciteLabel>
-            Effect intensity
-            <CalciteSlider />
-          </CalciteLabel>
-        </CalciteBlock>
-        <CalciteBlock
-          collapsible
-          heading='Symbology'
-          description='Select type, color, and transparency'
-        >
-          <CalciteIcon scale='s' slot='icon' icon='map-pin' />
-          <CalciteNotice open>
-            <div slot='message'>The viewers are going to love this</div>
-          </CalciteNotice>
-        </CalciteBlock>
-      </CalcitePanel>
+        <CalciteIcon scale='s' slot='icon' icon='effects' />
+        <CalciteLabel>
+          Effect type
+          <CalciteSegmentedControl width='full'>
+            <CalciteSegmentedControlItem value='Blur' />
+            <CalciteSegmentedControlItem checked value='Highlight' />
+            <CalciteSegmentedControlItem value='Party mode' />
+          </CalciteSegmentedControl>
+        </CalciteLabel>
+        <CalciteLabel>
+          Effect intensity
+          <CalciteSlider />
+        </CalciteLabel>
+      </CalciteBlock>
+      <CalciteBlock
+        collapsible
+        heading='Symbology'
+        description='Select type, color, and transparency'
+      >
+        <CalciteIcon scale='s' slot='icon' icon='map-pin' />
+        <CalciteNotice open>
+          <div slot='message'>The viewers are going to love this</div>
+        </CalciteNotice>
+      </CalciteBlock> */}
     </CalciteShellPanel>
   )
 }

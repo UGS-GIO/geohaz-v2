@@ -8,7 +8,7 @@ import Header from './components/Header'
 import Toolbar from './components/Toolbar'
 
 export function App() {
-  const { theme, setTheme } = useTheme()
+  const { theme } = useTheme()
 
   // Set the ArcGIS theme on the document head
   useEffect(() => {
@@ -24,7 +24,7 @@ export function App() {
   return (
     <div style={{ colorScheme: theme }} className={`${theme}`}>
       <CalciteShell className={`calcite-mode-${theme} bg-dotted`}>
-        <Toolbar setTheme={setTheme} theme={theme} />
+        <Toolbar />
         <Header />
         <FullScreenMap />
       </CalciteShell>

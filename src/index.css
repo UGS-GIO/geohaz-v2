@@ -29,3 +29,9 @@ calcite-action-group {
   border-width: unset;
   border-block-end: 1px solid var(--calcite-ui-border-3);
 }
+
+calcite-button {
+  --calcite-ui-brand: #d26e03;
+  --calcite-ui-brand-hover: #e77c33; 
+  --calcite-ui-brand-press: #b65c02; 
+}
