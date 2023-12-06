@@ -29,8 +29,13 @@ function Toolbar() {
   const { setTheme, theme } = useTheme()
 
   const handleActionClick = (text: string) => {
-    setPanelClosed(!panelClosed)
-    setShellPanelCollapsed(!shellPanelCollapsed)
+    if (text === panelHeading) {
+      setPanelClosed(!panelClosed)
+      setShellPanelCollapsed(!shellPanelCollapsed)
+    } else {
+      setPanelClosed(false)
+      setShellPanelCollapsed(false)
+    }
     setPanelHeading(text)
     setActiveComponent(text as SidebarComponents)
   }
