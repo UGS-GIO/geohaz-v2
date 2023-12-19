@@ -10,7 +10,7 @@ import {
   CalciteSlider,
 } from '@esri/calcite-components-react'
 
-const LayersSidebar = () => {
+const LayersSidebar: React.FC = () => {
   return (
     // <CalciteAccordion scale='l' selection-mode='multi'>
     //   {Array.from({ length: 5 }, (_, i) => (

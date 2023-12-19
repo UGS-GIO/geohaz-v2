@@ -15,15 +15,15 @@ import {
 import { useTheme } from '../contexts/ThemeProvider'
 import InfoSidebar from './InfoSidebar'
 import LayersSidebar from './LayersSidebar'
+import MapConfigurationsSidebar from './MapConfigurationsSidebar'
 
-type SidebarComponents = 'Info' | 'Layers'
-// | 'Map Configurations'
+type SidebarComponents = 'Info' | 'Layers' | 'Map Configurations'
 // | 'Geological Unit Search'
 
 function Toolbar() {
   const [panelClosed, setPanelClosed] = useState(true)
   const [shellPanelCollapsed, setShellPanelCollapsed] = useState(true)
-  const [panelHeading, setPanelHeading] = useState('Layers')
+  const [panelHeading, setPanelHeading] = useState('')
   const [activeComponent, setActiveComponent] = useState<SidebarComponents>()
 
   const { setTheme, theme } = useTheme()
@@ -50,9 +50,11 @@ function Toolbar() {
       />
     ),
     Layers: <LayersSidebar />,
-    // 'Map Configurations': <MapConfigurationsSidebar />,
+    'Map Configurations': <MapConfigurationsSidebar />,
     // 'Geological Unit Search': <GeologicalUnitSearchSidebar />,
   }
+
+  console.log(panelHeading === 'Layers')
 
   return (
     <CalciteShellPanel
@@ -64,31 +66,32 @@ function Toolbar() {
       <CalciteActionBar slot='action-bar'>
         <CalciteActionGroup>
           <CalciteAction
-            text='Add'
+            text='Info'
             icon='information-f'
             onClick={() => handleActionClick('Info')}
           />
           <CalciteAction
-            active={!panelClosed}
+            active={panelHeading === 'Layers'}
             text='Layers'
-            indicator
             icon='layers'
             onClick={() => handleActionClick('Layers')}
           />
         </CalciteActionGroup>
         <CalciteActionGroup>
           <CalciteAction
+            active={panelHeading === 'Map Configurations'}
             text='Undo'
             icon='sliders-horizontal'
             onClick={() => handleActionClick('Undo')}
           />
           <CalciteAction
-            text='Redo'
-            indicator
+            active={panelHeading === 'Geological Unit Search'}
+            text='Geological Unit Search'
             icon='data-magnifying-glass'
             onClick={() => handleActionClick('Redo')}
           />
           <CalciteAction
+            active={!panelClosed}
             icon={theme === 'dark' ? 'brightness' : 'moon'}
             text='Toggle theme'
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
