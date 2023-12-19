@@ -78,9 +78,23 @@ function InfoSidebar({
       </CalciteModal>
 
       <div className='text-start mt-3 my-1 mx-2 '>
-        <CalciteLink href='https://google.com/' target='_blank'>
+        <CalciteLink
+          style={{ color: 'green' }}
+          href='https://google.com/'
+          target='_blank'
+        >
           Google
         </CalciteLink>
+      </div>
+      <div>
+        <a
+          style={{ color: 'green' }}
+          href='https://google.com/'
+          target='_blank'
+          rel='noreferrer'
+        >
+          Google
+        </a>
       </div>
     </CalcitePanel>
   )
