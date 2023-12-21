@@ -2,12 +2,9 @@ import {
   CalciteBlock,
   CalciteButton,
   CalciteLink,
-  CalciteModal,
-  CalcitePanel,
 } from '@esri/calcite-components-react'
-import React from 'react'
 
-const MapConfigurationsSidebar: React.FC = () => {
+function MapConfigurations () {
   return (
     <div>
       {/* <CalcitePanel heading='Map Configurations'> */}
@@ -51,4 +48,4 @@ const MapConfigurationsSidebar: React.FC = () => {
   )
 }
 
-export default MapConfigurationsSidebar
+export default MapConfigurations

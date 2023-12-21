@@ -7,30 +7,13 @@ import {
   CalciteModal,
 } from '@esri/calcite-components-react'
 
-interface InfoSidebarProps {
-  setPanelClosed: React.Dispatch<React.SetStateAction<boolean>>
-  setShellPanelCollapsed: React.Dispatch<React.SetStateAction<boolean>>
-  panelHeading: string
-  panelClosed: boolean
-}
-
-function InfoSidebar({
-  setPanelClosed,
-  setShellPanelCollapsed,
-  panelHeading,
-  panelClosed,
-}: InfoSidebarProps) {
+function Info() {
   const [modalOpen, setModalOpen] = useState(false)
-  const handlePanelClose = () => {
-    setPanelClosed(true)
-    setShellPanelCollapsed(true)
-  }
+
 
   return (
     <CalcitePanel
-      heading={panelHeading}
-      closed={panelClosed}
-      onCalcitePanelClose={handlePanelClose}
+
     >
       <CalciteBlock
         className='text-start my-1'
@@ -100,4 +83,4 @@ function InfoSidebar({
   )
 }
 
-export default InfoSidebar
+export default Info
