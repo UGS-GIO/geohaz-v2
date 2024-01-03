@@ -35,3 +35,14 @@ calcite-button {
   --calcite-ui-brand-hover: #e77c33; 
   --calcite-ui-brand-press: #b65c02; 
 }
+
+
+calcite-segmented-control-item[aria-checked="true"] {
+  --calcite-ui-brand: #d26e03;
+  --calcite-ui-brand-hover: #e77c33; 
+  --calcite-ui-brand-press: #b65c02; 
+}
+
+calcite-segmented-control-item:hover:active:not([aria-checked="true"]) {
+  border: 1px solid purple; /* Change this to your desired border color */
+}
