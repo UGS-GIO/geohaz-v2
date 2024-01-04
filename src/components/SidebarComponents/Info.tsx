@@ -1,20 +1,17 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   CalcitePanel,
   CalciteBlock,
   CalciteButton,
-  CalciteLink,
   CalciteModal,
 } from '@esri/calcite-components-react'
+import { Link } from '../shared'
 
 function Info() {
   const [modalOpen, setModalOpen] = useState(false)
 
-
   return (
-    <CalcitePanel
-
-    >
+    <CalcitePanel>
       <CalciteBlock
         className='text-start my-1'
         // collapsible
@@ -44,6 +41,9 @@ function Info() {
           Open Data Disclaimer
         </CalciteButton>
       </div>
+      <div className='text-start mt-3 my-1 mx-2'>
+        <Link text='Contact Webmaster' href='https://google.com/' />
+      </div>
 
       <CalciteModal
         open={modalOpen}
@@ -59,26 +59,6 @@ function Info() {
           pariatur.
         </p>
       </CalciteModal>
-
-      <div className='text-start mt-3 my-1 mx-2 '>
-        <CalciteLink
-          style={{ color: 'green' }}
-          href='https://google.com/'
-          target='_blank'
-        >
-          Google
-        </CalciteLink>
-      </div>
-      <div>
-        <a
-          style={{ color: 'green' }}
-          href='https://google.com/'
-          target='_blank'
-          rel='noreferrer'
-        >
-          Google
-        </a>
-      </div>
     </CalcitePanel>
   )
 }
