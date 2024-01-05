@@ -26,7 +26,7 @@ function Info() {
       <CalciteBlock open heading='Data Sources'>
         <p>The data used in this map is from the following sources: lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
       </CalciteBlock>
-      <div className='text-start mt-3 my-1 mx-2'>
+      <div className='text-start my-2 mx-2'>
         <CalciteButton
           alignment='center'
           onClick={() => setModalOpen(!modalOpen)}
@@ -34,10 +34,7 @@ function Info() {
           Open Data Disclaimer
         </CalciteButton>
       </div>
-      <div className='text-start mt-3 my-1 mx-2'>
-        <Link text='Contact Webmaster' href='https://google.com/' />
-      </div>
-
+      <Link text='Contact Webmaster' href='https://google.com/' />
       <CalciteModal
         open={modalOpen}
         onCalciteModalClose={() => setModalOpen(false)}

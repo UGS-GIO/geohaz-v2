@@ -33,10 +33,11 @@ function MapConfigurations() {
           Toggle Basemap Labels
         </CalciteLabel>
       </CalciteBlock>
-      <CalciteBlock open heading="Reload map in 2D mode" description="For faster load times">
-        <div className='text-start mx-2'>
-          <Link text='Reload map in 2D mode' href='https://google.com/' />
-        </div>
+      <CalciteBlock open heading="">
+        <Link text='Reload map in 2D mode' href='https://google.com/' />
+        <p className='text-gray-400 ml-2 text-sm'>
+          3D view only
+        </p>
       </CalciteBlock>
     </CalcitePanel>
   )
