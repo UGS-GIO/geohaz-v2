@@ -19,20 +19,19 @@ function MapConfigurations() {
         </CalciteSegmentedControl>
       </CalciteBlock>
       <CalciteBlock className='pt-1' open heading="">
-        <CalciteLabel layout='inline'>
+        <CalciteLabel layout='inline' >
           <CalciteCheckbox />
-          Toggle Basemap Blending
+          Toggle Vertical Exaggeration
         </CalciteLabel>
-        <CalciteLabel layout='inline'>
+        <CalciteLabel>
+          <span className='text-gray-400 ml-6'>
+            3D view only
+          </span>
+        </CalciteLabel>
+        <CalciteLabel className='mt-2' layout='inline'>
           <CalciteCheckbox />
           Toggle Basemap Labels
         </CalciteLabel>
-        <CalciteLabel>
-          <p className='text-gray-400 ml-6'>
-            3D view only
-          </p>
-        </CalciteLabel>
-
       </CalciteBlock>
       <CalciteBlock open heading="Reload map in 2D mode" description="For faster load times">
         <div className='text-start mx-2'>
