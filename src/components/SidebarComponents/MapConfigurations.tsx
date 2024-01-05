@@ -11,8 +11,8 @@ import { Link } from '../shared'
 function MapConfigurations() {
   return (
     <CalcitePanel>
-      <CalciteBlock open heading="Map Configurations" description="" />
-      <CalciteBlock open heading="Location Coordinate Format" description="Decimal Degrees, Degrees, Minutes, Seconds">
+      <CalciteBlock open heading="Map Configurations" />
+      <CalciteBlock open heading="Location Coordinate Format">
         <CalciteSegmentedControl width="full">
           <CalciteSegmentedControlItem value="Decimal Degrees" />
           <CalciteSegmentedControlItem checked value="Degrees, Minutes, Seconds" />

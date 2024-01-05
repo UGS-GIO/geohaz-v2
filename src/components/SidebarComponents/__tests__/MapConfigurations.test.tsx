@@ -20,8 +20,8 @@ test('renders Location Coordinate Format block', () => {
     expect(block).toBeInTheDocument()
 })
 
-test('renders Toggle Basemap Blending checkbox', () => {
-    const checkbox = screen.getByText('Toggle Basemap Blending')
+test('renders Toggle Vertical Exaggeration checkbox', () => {
+    const checkbox = screen.getByText('Toggle Vertical Exaggeration')
     expect(checkbox).toBeInTheDocument()
 })
 
