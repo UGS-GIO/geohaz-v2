@@ -1,0 +1,25 @@
+name: Deploy to Firebase Hosting on PR
+'on': pull_request
+jobs:
+  build_and_preview:
+    if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci && npm run build
+      - name: Set Firebase service account and project ID
+        id: vars
+        run: |
+          if [[ "${{ github.base_ref }}" == "master" ]]; then
+            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD" >> $GITHUB_ENV
+            echo "PROJECT_ID=ut-dnr-ugs-hazards-dev" >> $GITHUB_ENV
+          else
+            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV" >> $GITHUB_ENV
+            echo "PROJECT_ID=ut-dnr-ugs-hazards-dev" >> $GITHUB_ENV
+          fi
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
+          projectId: '${{ env.PROJECT_ID }}'
+          expires: 2d
