@@ -25,9 +25,16 @@ jobs:
             echo "::set-output name=serviceAccount::${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV }}"
             echo "::set-output name=projectId::ut-dnr-ugs-hazards-dev"
           fi
+      - name: Prepare Firebase preview channel ID
+        id: prepare_channel_id
+        run: |
+          CHANNEL_ID="${{ github.head_ref }}"
+          CHANNEL_ID="${CHANNEL_ID//\//-}"
+          echo "::set-output name=channelId::${CHANNEL_ID}"
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ steps.set_env.outputs.serviceAccount }}'
           projectId: '${{ steps.set_env.outputs.projectId }}'
+          channelId: '${{ steps.prepare_channel_id.outputs.channelId }}'
           expires: 5d
