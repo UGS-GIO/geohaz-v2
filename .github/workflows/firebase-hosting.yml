@@ -7,39 +7,27 @@ name: Deploy to Firebase Hosting
   pull_request:
 
 jobs:
-  deploy_to_prod:
-    if: github.ref == 'refs/heads/master'
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: npm ci && npm run build
+      - name: Set Firebase service account and project ID
+        id: set_env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "::set-output name=serviceAccount::${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD }}"
+            echo "::set-output name=projectId::ut-dnr-ugs-hazards-prod"
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "::set-output name=serviceAccount::${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV }}"
+            echo "::set-output name=projectId::ut-dnr-ugs-hazards-dev"
+          else
+            echo "::set-output name=serviceAccount::${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV }}"
+            echo "::set-output name=projectId::ut-dnr-ugs-hazards-dev"
+          fi
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD }}'
-          projectId: ut-dnr-ugs-hazards-prod
-
-  deploy_to_dev:
-    if: github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: npm ci && npm run build
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV }}'
-          projectId: ut-dnr-ugs-hazards-dev
-
-  pr_preview:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: npm ci && npm run build
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV }}'
-          channelId: pr-${{ github.event.pull_request.number }}
-          projectId: ut-dnr-ugs-hazards-dev
+          firebaseServiceAccount: '${{ steps.set_env.outputs.serviceAccount }}'
+          projectId: '${{ steps.set_env.outputs.projectId }}'
+          expires: 5d
