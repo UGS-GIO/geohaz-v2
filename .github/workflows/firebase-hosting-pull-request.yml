@@ -13,6 +13,6 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV }}'
-          projectId: ut-dnr-ugs-hazards-dev
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD }}'
+          projectId: ut-dnr-ugs-hazards-prod
           expires: 1d
