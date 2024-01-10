@@ -1,0 +1,27 @@
+name: Deploy to Firebase Hosting on merge
+'on':
+  push:
+    branches:
+      - master
+      - develop
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci && npm run build
+      - name: Set Firebase service account and project ID
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD" >> $GITHUB_ENV
+            echo "PROJECT_ID=ut-dnr-ugs-hazards-prod" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV" >> $GITHUB_ENV
+            echo "PROJECT_ID=ut-dnr-ugs-hazards-dev" >> $GITHUB_ENV
+          fi
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
+          channelId: live
+          projectId: '${{ env.PROJECT_ID }}'

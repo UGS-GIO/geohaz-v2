@@ -32,6 +32,7 @@
     "autoprefixer": "^10.4.16",
     "eslint": "^7.32.0",
     "eslint-config-custom": "*",
+    "firebase-tools": "^13.0.2",
     "jsdom": "^23.0.1",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
