@@ -1,35 +1,45 @@
 import {
   CalciteBlock,
-  CalciteButton,
-  CalciteIcon,
   CalciteLabel,
-  CalciteLink,
-  CalciteNotice,
   CalciteSegmentedControl,
   CalciteSegmentedControlItem,
-  CalciteSlider,
+  CalciteCheckbox,
+  CalcitePanel
 } from '@esri/calcite-components-react'
-
+import { Link } from '../shared'
 
 function MapConfigurations() {
   return (
-    <div>
-
-      <CalciteBlock open heading="Layer effects" description="Adjust blur, highlight, and more">
-        <CalciteIcon scale="s" slot="icon" icon="effects" />
-        <CalciteLabel>
-          Effect type
-          <CalciteSegmentedControl width="full">
-            <CalciteSegmentedControlItem value="Blur" />
-            <CalciteSegmentedControlItem checked value="Highlight" />
-          </CalciteSegmentedControl>
+    <CalcitePanel>
+      <CalciteBlock open heading="Map Configurations" />
+      <CalciteBlock open heading="Location Coordinate Format">
+        <CalciteSegmentedControl width="full">
+          <CalciteSegmentedControlItem value="Decimal Degrees" />
+          <CalciteSegmentedControlItem checked value="Degrees, Minutes, Seconds" />
+        </CalciteSegmentedControl>
+      </CalciteBlock>
+      <CalciteBlock className='pt-1' open heading="">
+        <CalciteLabel layout='inline' >
+          <CalciteCheckbox />
+          Toggle Vertical Exaggeration
         </CalciteLabel>
         <CalciteLabel>
-          Effect intensity
-          <CalciteSlider />
+          <span className='text-gray-400 ml-6'>
+            3D view only
+          </span>
+        </CalciteLabel>
+        <CalciteLabel className='mt-2' layout='inline'>
+          <CalciteCheckbox />
+          Toggle Basemap Labels
         </CalciteLabel>
       </CalciteBlock>
-    </div>
+      <CalciteBlock open heading="">
+        <Link text='Reload map in 2D mode' href='https://google.com/' />
+        <p className='text-gray-400 ml-2 text-sm'>
+          3D view only
+        </p>
+      </CalciteBlock>
+    </CalcitePanel>
   )
 }
 
