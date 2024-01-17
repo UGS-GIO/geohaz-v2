@@ -13,6 +13,7 @@
     "util:copy-assets": "npx ncp ./node_modules/@esri/calcite-components/dist/calcite/assets/ ./public/assets/"
   },
   "dependencies": {
+    "@arcgis/core": "^4.28.10",
     "@esri/calcite-components-react": "^1.4.3",
     "@tanstack/react-query": "^4.29.19",
     "arcgis-react": "1.0.8",
