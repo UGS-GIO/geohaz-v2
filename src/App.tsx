@@ -6,6 +6,7 @@ import { useTheme } from './contexts/ThemeProvider'
 import FullScreenMap from './components/FullScreenMap'
 import Header from './components/Header'
 import Toolbar from './components/Toolbar'
+import { MapProvider } from './contexts/MapProvider'
 
 export function App() {
   const { theme } = useTheme()
@@ -22,12 +23,14 @@ export function App() {
   }, [theme])
 
   return (
-    <div style={{ colorScheme: theme }} className={`${theme}`}>
-      <CalciteShell className={`calcite-mode-${theme} bg-dotted`}>
-        <Toolbar />
-        <Header />
-        <FullScreenMap />
-      </CalciteShell>
-    </div>
+    <MapProvider>
+      <div style={{ colorScheme: theme }} className={`${theme}`}>
+        <CalciteShell className={`calcite-mode-${theme} bg-dotted`}>
+          <Toolbar />
+          <Header />
+          <FullScreenMap />
+        </CalciteShell>
+      </div>
+    </MapProvider>
   )
 }
