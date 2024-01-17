@@ -78,10 +78,6 @@ export function init(container: HTMLDivElement) {
         map: map,
         zoom: 8,
         center: [-112, 39.5],
-        padding: {
-            top: 50,
-            bottom: 0
-        },
         highlightOptions: {
             color: new Color([255, 255, 0, 1]),
             haloColor: new Color("white"),
