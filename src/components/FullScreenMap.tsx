@@ -1,6 +1,6 @@
 import { useRef, useEffect, useContext } from 'react'
 import { MapContext } from '../contexts/MapProvider'
-import Home from './widgets/Home'
+import MapWidgets from './widgets/MapWidgets'
 
 function FullScreenMap() {
   const mapRef = useRef(null)
@@ -10,10 +10,11 @@ function FullScreenMap() {
     if (mapRef.current && loadMap) {
       loadMap(mapRef.current as HTMLDivElement)
     }
+
   }, [mapRef, loadMap])
 
   return <div ref={mapRef} style={{ height: '100vh', width: '100%' }}>
-    <Home />
+    <MapWidgets />
   </div>
 }
 
