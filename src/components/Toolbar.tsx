@@ -13,12 +13,9 @@ const actionItems: ActionItem[] = [
 export function Toolbar() {
   const { currentAction, actions, shellPanelCollapsed } = useCalciteActionBar(
     actionItems,
-    window.location.hash
-      ? decodeURI(window.location.hash.slice(1))
-      : actionItems[0].name
+    undefined
   );
   const { setTheme, theme } = useTheme()
-
   return (
     <CalciteShellPanel
       widthScale='l'
