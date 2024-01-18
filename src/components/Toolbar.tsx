@@ -11,7 +11,7 @@ const actionItems: ActionItem[] = [
 ];
 
 export function Toolbar() {
-  const { currentAction, actions } = useCalciteActionBar(
+  const { currentAction, actions, shellPanelCollapsed } = useCalciteActionBar(
     actionItems,
     window.location.hash
       ? decodeURI(window.location.hash.slice(1))
@@ -24,6 +24,7 @@ export function Toolbar() {
       widthScale='l'
       slot='panel-start'
       position='start'
+      collapsed={shellPanelCollapsed}
     >
       <CalciteActionBar slot='action-bar'>
         <CalciteActionGroup>
