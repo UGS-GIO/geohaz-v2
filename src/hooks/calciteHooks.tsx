@@ -1,5 +1,5 @@
 import { CalciteAction } from '@esri/calcite-components-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 export type ActionItem = {
   name: string;
@@ -14,18 +14,28 @@ export type UseCalciteActionBarProps = {
   shellPanelCollapsed: boolean;
 };
 
+// This hook is used to dynamically create the action bar buttons and handle the state of the action bar
 export function useCalciteActionBar(
   items: ActionItem[],
-  defaultValue: ActionItem['name']
+  defaultValue: ActionItem['name'] | undefined
 ): UseCalciteActionBarProps {
   const [currentActionName, setCurrentActionName] = useState<string | undefined>(defaultValue);
   const [shellPanelCollapsed, setShellPanelCollapsed] = useState<boolean>(true);
 
+  // handle the click event for the action buttons
+  const handleClick = useCallback((item: ActionItem) => {
+    const isActive = currentActionName === item.name;
+    setShellPanelCollapsed(isActive);
+    setCurrentActionName(isActive ? undefined : item.name);
+  }, [currentActionName, setShellPanelCollapsed, setCurrentActionName]);
+
+  // determine which action is currently active
   const currentAction = useMemo(
     () => items.find((example) => example.name === currentActionName),
     [currentActionName, items]
   );
 
+  // dynamically create the action buttons
   const actions = useMemo(
     () =>
       items.map((item) => (
@@ -33,15 +43,11 @@ export function useCalciteActionBar(
           key={item.name}
           text={item.name}
           icon={item.icon}
-          onClick={() => {
-            const isActive = currentActionName === item.name;
-            setShellPanelCollapsed(isActive);
-            setCurrentActionName(isActive ? undefined : item.name);
-          }}
+          onClick={() => handleClick(item)}
           active={currentActionName === item.name ? true : undefined}
         />
       )),
-    [currentActionName, items]
+    [currentActionName, items, handleClick]
   );
 
   return {
