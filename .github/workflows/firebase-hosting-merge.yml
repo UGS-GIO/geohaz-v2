@@ -30,11 +30,12 @@ jobs:
       - uses: actions/checkout@v3
       - run: npm ci && npm run build
       - name: Set Firebase service account and project ID
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+         run: |
+          release_created=${{ needs.release-please.outputs.release_created }}
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]] && [[ "$release_created" == "true" ]]; then
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-hazards-prod" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]] && [[ "$release_created" == "true" ]]; then
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-hazards-dev" >> $GITHUB_ENV
           fi
