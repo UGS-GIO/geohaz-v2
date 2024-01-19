@@ -1,6 +1,6 @@
 import React, { lazy } from 'react'
 import { CalciteAction, CalciteActionBar, CalciteActionGroup, CalciteShellPanel } from '@esri/calcite-components-react';
-import { useCalciteActionBar, ActionItem } from '../hooks/calciteHooks';
+import { useCalciteActionBar, ActionItem } from '../hooks/useCalciteActionBar';
 import { useTheme } from '../contexts/ThemeProvider';
 
 const actionItems: ActionItem[] = [

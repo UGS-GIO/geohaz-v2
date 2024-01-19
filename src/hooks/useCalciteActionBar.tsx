@@ -8,7 +8,7 @@ export type ActionItem = {
   component: React.LazyExoticComponent<() => JSX.Element>;
 };
 
-export type UseCalciteActionBarProps = {
+type UseCalciteActionBarProps = {
   currentAction?: ActionItem;
   actions: JSX.Element[];
   shellPanelCollapsed: boolean;
