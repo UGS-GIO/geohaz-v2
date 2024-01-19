@@ -25,15 +25,16 @@ jobs:
 
   build_and_deploy:
     runs-on: ubuntu-latest
+    needs: release-please
     steps:
       - uses: actions/checkout@v3
       - run: npm ci && npm run build
       - name: Set Firebase service account and project ID
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]] && ${{ needs.release-please.outputs.release_created }}; then
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-hazards-prod" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]] && ${{ needs.release-please.outputs.release_created }}; then
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-hazards-dev" >> $GITHUB_ENV
           fi
