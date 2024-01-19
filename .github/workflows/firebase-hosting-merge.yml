@@ -5,6 +5,24 @@ name: Deploy to Firebase Hosting on merge
       - master
       - develop
 jobs:
+   release-please:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release-please.outputs.release_created }}
+
+    steps:
+      - name: 🚀 Create Release
+        id: release-please
+        uses: agrc/release-composite-action@v1
+        with:
+          prerelease: ${{ github.ref_name == 'dev' }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          github-app-id: ${{ secrets.UGRC_RELEASE_BOT_APP_ID }}
+          github-app-key: ${{ secrets.UGRC_RELEASE_BOT_APP_KEY }}
+          github-app-name: ${{ secrets.UGRC_RELEASE_BOT_NAME }}
+          github-app-email: ${{ secrets.UGRC_RELEASE_BOT_EMAIL }}
+
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
@@ -12,13 +30,14 @@ jobs:
       - run: npm ci && npm run build
       - name: Set Firebase service account and project ID
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]] && ${{ needs.release-please.outputs.release_created }}; then
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-hazards-prod" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]] && ${{ needs.release-please.outputs.release_created }}; then
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-hazards-dev" >> $GITHUB_ENV
           fi
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
