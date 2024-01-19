@@ -16,9 +16,10 @@ import {
     quadRenderer,
     colorize
 } from "./renderers";
+import { LayerConfig } from "./types/mappingTypes";
 
 
-const landslideCompConfig = {
+const landslideCompConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/4',
     options: {
@@ -35,7 +36,7 @@ const landslideCompConfig = {
     },
 };
 
-const landslideDepositConfig = {
+const landslideDepositConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/3',
     options: {
@@ -51,7 +52,7 @@ const landslideDepositConfig = {
     },
 };
 
-const landslideSusceptibilityConfig = {
+const landslideSusceptibilityConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/2',
     options: {
@@ -93,7 +94,7 @@ const landslideSusceptibilityConfig = {
     },
 };
 
-const epicentersRecentConfig = {
+const epicentersRecentConfig: LayerConfig & { featureReduction: object } = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/0',
     options: {
@@ -119,7 +120,7 @@ const epicentersRecentConfig = {
 // };
 
 
-const epicentersMiningConfig = {
+const epicentersMiningConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/1',
     options: {
@@ -137,7 +138,7 @@ const epicentersMiningConfig = {
     },
 };
 
-const liquefactionConfig = {
+const liquefactionConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/2',
     options: {
@@ -181,7 +182,7 @@ const liquefactionConfig = {
     },
 };
 
-const shakingVectorConfig = {
+const shakingVectorConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/ArcGIS/rest/services/Utah_Earthquake_Hazards/FeatureServer/5',
     options: {
@@ -191,7 +192,7 @@ const shakingVectorConfig = {
     },
 };
 
-const shakingRasterConfig = {
+const shakingRasterConfig: LayerConfig = {
     type: 'imagery',
     url: 'https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/GroundshakingRaster/ImageServer',
     options: {
@@ -208,7 +209,7 @@ const shakingRasterConfig = {
     },
 };
 
-const qFaultsConfig = {
+const qFaultsConfig: LayerConfig = {
     type: 'map-image',
     url: 'https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults_with_labels/MapServer',
     options: {
@@ -233,7 +234,7 @@ const qFaultsConfig = {
     },
 };
 
-const faultRuptureConfig = {
+const faultRuptureConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/3',
     options: {
@@ -274,7 +275,7 @@ const faultRuptureConfig = {
     },
 };
 
-const eolianSusConfig = {
+const eolianSusConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/19',
     options: {
@@ -309,7 +310,7 @@ const eolianSusConfig = {
     },
 };
 
-const tectonicDefConfig = {
+const tectonicDefConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/16',
     options: {
@@ -354,7 +355,7 @@ const tectonicDefConfig = {
     },
 };
 
-const bedrockPotConfig = {
+const bedrockPotConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/17',
     options: {
@@ -400,7 +401,7 @@ const bedrockPotConfig = {
     },
 };
 
-const rockfallHazConfig = {
+const rockfallHazConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/15',
     options: {
@@ -445,7 +446,7 @@ const rockfallHazConfig = {
     },
 };
 
-const pipingSusConfig = {
+const pipingSusConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/13',
     options: {
@@ -485,7 +486,7 @@ const pipingSusConfig = {
     },
 };
 
-const expansiveSoilConfig = {
+const expansiveSoilConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/10',
     options: {
@@ -525,7 +526,7 @@ const expansiveSoilConfig = {
     },
 };
 
-const groundwaterSusConfig = {
+const groundwaterSusConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/1',
     options: {
@@ -565,7 +566,7 @@ const groundwaterSusConfig = {
     },
 };
 
-const radonSusConfig = {
+const radonSusConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/14',
     options: {
@@ -605,7 +606,7 @@ const radonSusConfig = {
     },
 };
 
-const corrosiveSoilConfig = {
+const corrosiveSoilConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/7',
     options: {
@@ -645,7 +646,7 @@ const corrosiveSoilConfig = {
     },
 };
 
-const collapsibleSoilConfig = {
+const collapsibleSoilConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/6',
     options: {
@@ -685,7 +686,7 @@ const collapsibleSoilConfig = {
     },
 };
 
-const solubleSoilConfig = {
+const solubleSoilConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/18',
     options: {
@@ -725,7 +726,7 @@ const solubleSoilConfig = {
     },
 };
 
-const calicheConfig = {
+const calicheConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/5',
     options: {
@@ -765,7 +766,7 @@ const calicheConfig = {
     },
 };
 
-const floodHazardConfig = {
+const floodHazardConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/0',
     options: {
@@ -805,7 +806,7 @@ const floodHazardConfig = {
     },
 };
 
-const earthFissureConfig = {
+const earthFissureConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/8',
     options: {
@@ -845,7 +846,7 @@ const earthFissureConfig = {
     },
 };
 
-const erosionZoneConfig = {
+const erosionZoneConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/9',
     options: {
@@ -885,7 +886,7 @@ const erosionZoneConfig = {
     },
 };
 
-const groundSubsidenceConfig = {
+const groundSubsidenceConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/11',
     options: {
@@ -925,7 +926,7 @@ const groundSubsidenceConfig = {
     },
 };
 
-const karstFeaturesConfig = {
+const karstFeaturesConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/12',
     options: {
@@ -965,14 +966,14 @@ const karstFeaturesConfig = {
     },
 };
 
-const soilHazardsConfig = {
+const soilHazardsConfig: LayerConfig = {
     type: 'group',
     title: 'Problem Soil and Rock Hazards',
     visible: true,
     layers: [eolianSusConfig, solubleSoilConfig, bedrockPotConfig, tectonicDefConfig, radonSusConfig, pipingSusConfig, karstFeaturesConfig, erosionZoneConfig, expansiveSoilConfig, earthFissureConfig, corrosiveSoilConfig, collapsibleSoilConfig, calicheConfig],
 };
 
-const quadBoundariesConfig = {
+const quadBoundariesConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/0',
     options: {
@@ -993,12 +994,12 @@ const quadBoundariesConfig = {
                 },
             },
         },
-        renderer: quadRenderer, // Make sure quadRenderer is defined
+        renderer: quadRenderer,
         visible: true,
     },
 };
 
-const hazardStudyConfig = {
+const hazardStudyConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/1',
     options: {
@@ -1008,12 +1009,12 @@ const hazardStudyConfig = {
         popupTemplate: {
             outFields: ['*'],
             title: '<b>Mapped Areas</b>',
-            content: studyAreasPopup, // Make sure studyAreasPopup is defined
+            content: studyAreasPopup,
         },
     },
 };
 
-const lidarBoundsConfig = {
+const lidarBoundsConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/2',
     options: {
@@ -1023,7 +1024,7 @@ const lidarBoundsConfig = {
     },
 };
 
-const airphotoPointsConfig = {
+const airphotoPointsConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/3',
     options: {
@@ -1034,7 +1035,7 @@ const airphotoPointsConfig = {
     },
 };
 
-const notMappedConfig = {
+const notMappedConfig: LayerConfig = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/4',
     options: {
@@ -1044,28 +1045,28 @@ const notMappedConfig = {
     },
 };
 
-const floodHazardsConfig = {
+const floodHazardsConfig: LayerConfig = {
     type: 'group',
     title: 'Flooding Hazards',
     visible: true,
-    layers: [floodHazardConfig, groundwaterSusConfig], // Make sure floodHazardConfig and groundwaterSusConfig are defined
+    layers: [floodHazardConfig, groundwaterSusConfig],
 };
 
-const earthquakesConfig = {
+const earthquakesConfig: LayerConfig = {
     type: 'group',
     title: 'Earthquake Hazards',
     visible: true,
     layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsConfig],
 };
 
-const landslidesConfig = {
+const landslidesConfig: LayerConfig = {
     type: 'group',
     title: 'Landslide Hazards',
     visible: true,
     layers: [landslideCompConfig, landslideSusceptibilityConfig, landslideDepositConfig, rockfallHazConfig],
 };
 
-const layersConfig = [
+const layersConfig: LayerConfig[] = [
     quadBoundariesConfig,
     notMappedConfig,
     hazardStudyConfig,
