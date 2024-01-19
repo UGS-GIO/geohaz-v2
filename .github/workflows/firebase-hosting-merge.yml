@@ -4,13 +4,13 @@ name: Deploy to Firebase Hosting on merge
     branches:
       - master
       - develop
+
 jobs:
-   release-please:
+  release-please:
     name: Create release
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release-please.outputs.release_created }}
-
     steps:
       - name: 🚀 Create Release
         id: release-please
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v3
       - run: npm ci && npm run build
       - name: Set Firebase service account and project ID
-         run: |
+        run: |
           release_created=${{ needs.release-please.outputs.release_created }}
           if [[ "${{ github.ref }}" == "refs/heads/master" ]] && [[ "$release_created" == "true" ]]; then
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD" >> $GITHUB_ENV
