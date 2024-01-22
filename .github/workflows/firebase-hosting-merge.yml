@@ -2,9 +2,7 @@ name: Deploy to Firebase Hosting on merge
 'on':
   push:
     branches:
-      # - master
-      # - develop
-        - ALL-1535/husky
+      - master
 
 jobs:
   build_and_deploy:
