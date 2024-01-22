@@ -1,27 +1,41 @@
 name: Deploy to Firebase Hosting on merge
 'on':
-  push:
-    branches:
-      - master
-      - develop
+ push:
+   branches:
+     - master
+     - develop
+
 jobs:
-  build_and_deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: npm ci && npm run build
-      - name: Set Firebase service account and project ID
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD" >> $GITHUB_ENV
-            echo "PROJECT_ID=ut-dnr-ugs-hazards-prod" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV" >> $GITHUB_ENV
-            echo "PROJECT_ID=ut-dnr-ugs-hazards-dev" >> $GITHUB_ENV
-          fi
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
-          channelId: live
-          projectId: '${{ env.PROJECT_ID }}'
+ build_and_deploy:
+   permissions:
+     contents: write
+     issues: write
+     pull-requests: write
+   runs-on: ubuntu-latest
+   steps:
+     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+     - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+       with:
+         cache: npm
+         node-version: lts/*
+     - run: npm ci && npm run build
+     - run: npx semantic-release@21.0.2
+       env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+     - name: Set Firebase service account and project ID
+       run: |
+         if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+           echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_PROD" >> $GITHUB_ENV
+           echo "PROJECT_ID=ut-dnr-ugs-hazards-prod" >> $GITHUB_ENV
+         elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+           echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_HAZARDS_DEV" >> $GITHUB_ENV
+           echo "PROJECT_ID=ut-dnr-ugs-hazards-dev" >> $GITHUB_ENV
+         fi
+
+
+     - uses: FirebaseExtended/action-hosting-deploy@v0
+       with:
+         repoToken: '${{ secrets.GITHUB_TOKEN }}'
+         firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
+         channelId: live
+         projectId: '${{ env.PROJECT_ID }}'
