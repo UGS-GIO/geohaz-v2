@@ -1,46 +1,28 @@
-import Map from '@arcgis/core/Map'
 import SceneView from '@arcgis/core/views/SceneView'
+import MapView from '@arcgis/core/views/MapView'
 import layers from '../config/layers'
-import Color from '@arcgis/core/Color'
-import { LayerConfig, MapApp } from './types/mappingTypes'
-import { createLayer, setPopupAlignment } from './util/mappingUtils'
+import { MapApp } from './types/mappingTypes'
+import { addLayersToMap, createMap, createView, setPopupAlignment } from './util/mappingUtils'
 
 
 // Create a global app object to store the view
 const app: MapApp = {}
 
 // Initialize the app
-export function init(container: HTMLDivElement) {
+export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): SceneView | MapView {
     // Destroy the view if it exists
     if (app.view) {
         app.view.destroy()
     }
 
     // Create a new map and view
-    const map = new Map({
-        basemap: 'topo-vector',
-    })
+    const map = createMap()
 
-    const view = new SceneView({
-        container: container,
-        map: map,
-        zoom: 8,
-        center: [-112, 39.5],
-        highlightOptions: {
-            color: new Color([255, 255, 0, 1]),
-            haloColor: new Color("white"),
-            haloOpacity: 0.9,
-            fillOpacity: 0.2
-        }
-    })
+    // Create the view
+    const view = createView(container, map, initialView)
 
     // Add layers to the map
-    layers.forEach((layerConfig: LayerConfig) => {
-        const layer = createLayer(layerConfig)
-        if (layer) {
-            map.add(layer)
-        }
-    })
+    addLayersToMap(map, layers)
 
     // prevent collision with the edges of the view
     setPopupAlignment(view);
