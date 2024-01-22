@@ -1,42 +1,32 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   CalcitePanel,
   CalciteBlock,
   CalciteButton,
-  CalciteLink,
   CalciteModal,
 } from '@esri/calcite-components-react'
+import { Link } from '../shared'
 
 function Info() {
   const [modalOpen, setModalOpen] = useState(false)
 
-
   return (
-    <CalcitePanel
-
-    >
-      <CalciteBlock
-        className='text-start my-1'
-        // collapsible
-        heading='Map Details'
-        description='Check out what’s new in Version 3.1! Basemap blending is turned on
+    <CalcitePanel>
+      <CalciteBlock open heading='Map Details'>
+        <p>Check out what&apos;s new in Version 3.1! Basemap blending is turned on
           by default, the footprint layer can now be filtered by scale, and
           there is a Geologic Unit Search tool found under the Map Config
-          Controls button.'
-      />
+          Controls button.</p>
+      </CalciteBlock>
 
-      <CalciteBlock
-        className='text-start my-1'
-        heading='How To Use This Map'
-        description='The 3D map responds to keyboard navigation keys (←↑↓→), as well as mouse wheel zooming and drag panning.'
-      />
+      <CalciteBlock open heading='How To Use This Map'>
+        <p>The 3D map responds to keyboard navigation keys (←↑↓→), as well as mouse wheel zooming and drag panning.</p>
+      </CalciteBlock>
 
-      <CalciteBlock
-        className='text-start my-1'
-        heading='Data Sources'
-        description='The data used in this map is from the following sources: lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
-      />
-      <div className='text-start mt-3 my-1 mx-2'>
+      <CalciteBlock open heading='Data Sources'>
+        <p>The data used in this map is from the following sources: lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+      </CalciteBlock>
+      <div className='text-start my-2 mx-2'>
         <CalciteButton
           alignment='center'
           onClick={() => setModalOpen(!modalOpen)}
@@ -44,7 +34,7 @@ function Info() {
           Open Data Disclaimer
         </CalciteButton>
       </div>
-
+      <Link text='Contact Webmaster' href='https://google.com/' />
       <CalciteModal
         open={modalOpen}
         onCalciteModalClose={() => setModalOpen(false)}
@@ -59,26 +49,6 @@ function Info() {
           pariatur.
         </p>
       </CalciteModal>
-
-      <div className='text-start mt-3 my-1 mx-2 '>
-        <CalciteLink
-          style={{ color: 'green' }}
-          href='https://google.com/'
-          target='_blank'
-        >
-          Google
-        </CalciteLink>
-      </div>
-      <div>
-        <a
-          style={{ color: 'green' }}
-          href='https://google.com/'
-          target='_blank'
-          rel='noreferrer'
-        >
-          Google
-        </a>
-      </div>
     </CalcitePanel>
   )
 }

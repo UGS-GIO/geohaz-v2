@@ -1,11 +1,12 @@
-import calcitePreset from './calcite-preset';
+// removing this import temporarily because it breaks tailwindcss
+// import calcitePreset from './calcite-preset';
 
 /** @type {import('tailwindcss').Config} */
 export default {
   // Use manual theming rather than Tailwind's automatic dark mode
   darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  presets: [calcitePreset],
+  // presets: [calcitePreset],
   theme: {
     extend: {
       boxShadow: {
