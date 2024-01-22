@@ -3,57 +3,100 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import TileLayer from "@arcgis/core/layers/TileLayer";
+import Map from '@arcgis/core/Map'
 import MapView from "@arcgis/core/views/MapView";
 import SceneView from "@arcgis/core/views/SceneView";
-import { LayerConfig, layerTypeMapping } from "../types/mappingTypes";
+import { LayerProps, layerTypeMapping } from "../types/mappingTypes";
+import Color from "@arcgis/core/Color";
+
+// Create a new map
+export const createMap = () => {
+    return new Map({
+        basemap: 'topo-vector',
+    })
+}
+
+// Create a new view
+export const createView = (container: HTMLDivElement, map: Map, viewType: 'map' | 'scene' = 'scene') => {
+
+    // Common options for both MapView and SceneView
+    const commonOptions = {
+        container: container,
+        map: map,
+        zoom: 8,
+        center: [-112, 39.5],
+        highlightOptions: {
+            color: new Color([255, 255, 0, 1]),
+            haloColor: new Color("white"),
+            haloOpacity: 0.9,
+            fillOpacity: 0.2
+        }
+    }
+
+    return viewType === 'scene'
+        ? new SceneView({ ...commonOptions })
+        : new MapView({ ...commonOptions });
+}
+
+// Dynamically add layers to the map
+export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
+    // Add layers to the map
+    layers.forEach((layer: LayerProps) => {
+        const createdLayer = createLayer(layer)
+        if (createdLayer) {
+            map.add(createdLayer)
+        }
+    })
+}
 
 // Helper function to reduce code duplication in createLayer
-function createLayerFromUrl(layerConfig: LayerConfig, LayerType: any) {
-    // Create a layer based on the layerConfig
-    if ('url' in layerConfig) {
+function createLayerFromUrl(layer: LayerProps, LayerType: any) {
+    // Create a layer based on the layer props
+    if ('url' in layer) {
         return new LayerType({
-            url: layerConfig.url,
-            ...layerConfig.options,
+            url: layer.url,
+            ...layer.options,
         });
     }
 
-    if (layerConfig.type === 'group') {
-        if (layerConfig.layers) {
+    if (layer.type === 'group') {
+        if (layer.layers) {
             // Create an array of group layers by mapping the layers and filtering out any undefined elements
-            const groupedLayers = layerConfig.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer)[];
+            const groupedLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer)[];
             return new GroupLayer({
-                title: layerConfig.title,
-                visible: layerConfig.visible,
+                title: layer.title,
+                visible: layer.visible,
                 layers: groupedLayers
             });
         }
     }
 
-    console.warn(`Missing URL in layerConfig: ${JSON.stringify(layerConfig)}`);
+    console.warn(`Missing URL in layer props: ${JSON.stringify(layer)}`);
     return undefined;
 
 }
 
-export const createLayer = (layerConfig: LayerConfig): FeatureLayer | TileLayer | GroupLayer | MapImageLayer | undefined => {
+// Create a layer based on the layer props
+export const createLayer = (layer: LayerProps): FeatureLayer | TileLayer | GroupLayer | MapImageLayer | undefined => {
     // Handle the special case for group layers
-    if (layerConfig.type === 'group' && layerConfig.layers) {
-        const groupLayers = layerConfig.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer)[];
+    if (layer.type === 'group' && layer.layers) {
+        const groupLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer)[];
         return new GroupLayer({
-            title: layerConfig.title,
-            visible: layerConfig.visible,
+            title: layer.title,
+            visible: layer.visible,
             layers: groupLayers
         });
     }
 
     // Get the LayerType from the mapping
-    const LayerType = layerTypeMapping[layerConfig.type];
+    const LayerType = layerTypeMapping[layer.type];
 
     // If the LayerType exists, create a new layer
     if (LayerType) {
-        return createLayerFromUrl(layerConfig, LayerType);
+        return createLayerFromUrl(layer, LayerType);
     }
 
-    console.warn(`Unsupported layer type: ${layerConfig.type}`);
+    console.warn(`Unsupported layer type: ${layer.type}`);
     return undefined;
 }
 

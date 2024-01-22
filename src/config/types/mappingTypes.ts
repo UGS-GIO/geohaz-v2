@@ -7,13 +7,13 @@ import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
 
 export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group'
-export interface LayerConfig {
+export interface LayerProps {
     type: LayerType
     url?: string
     options?: object
     title?: string
     visible?: boolean
-    layers?: LayerConfig[]
+    layers?: LayerProps[]
 }
 
 // Define a mapping of layer types to their corresponding classes
