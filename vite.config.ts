@@ -1,3 +1,6 @@
+/// <reference types="vite/client" />
+/// <reference types="vitest" />
+
 import react from '@vitejs/plugin-react-swc';
 import { defineConfig } from 'vitest/config';
 
@@ -11,4 +14,10 @@ export default defineConfig((props) => ({
   esbuild: {
     treeShaking: true,
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    css: true,
+    setupFiles: './src/test/setup.ts',
+  }
 }));

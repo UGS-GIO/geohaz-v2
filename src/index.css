@@ -7,11 +7,9 @@
   .bg-dotted {
     background-size: 16px 16px;
     background-color: var(--calcite-ui-background);
-    background-image: radial-gradient(
-      circle,
-      var(--calcite-ui-border-3) 1px,
-      transparent 1px
-    );
+    background-image: radial-gradient(circle,
+        var(--calcite-ui-border-3) 1px,
+        transparent 1px);
   }
 }
 
@@ -32,17 +30,13 @@ calcite-action-group {
 
 calcite-button {
   --calcite-ui-brand: #d26e03;
-  --calcite-ui-brand-hover: #e77c33; 
-  --calcite-ui-brand-press: #b65c02; 
+  --calcite-ui-brand-hover: #e77c33;
+  --calcite-ui-brand-press: #b65c02;
 }
 
 
 calcite-segmented-control-item[aria-checked="true"] {
   --calcite-ui-brand: #d26e03;
-  --calcite-ui-brand-hover: #e77c33; 
-  --calcite-ui-brand-press: #b65c02; 
-}
-
-calcite-segmented-control-item:hover:active:not([aria-checked="true"]) {
-  border: 1px solid purple; /* Change this to your desired border color */
+  --calcite-ui-brand-hover: #e77c33;
+  --calcite-ui-brand-press: #b65c02;
 }
