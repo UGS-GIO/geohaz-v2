@@ -8,11 +8,19 @@ name: Deploy to Firebase Hosting on merge
 
 jobs:
   build_and_deploy:
+    permissions:
+      contents: write
+      issues: write
+      pullrequests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        with:
+          cache: npm
+          node-version: lts/*
       - run: npm ci && npm run build
-      - run: npx -p node@v18-lts -c "npx semantic-release"
+      - run: npx semantic-release@21.0.2
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set Firebase service account and project ID
