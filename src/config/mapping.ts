@@ -4,7 +4,6 @@ import layers from '../config/layers'
 import { MapApp } from './types/mappingTypes'
 import { addLayersToMap, createMap, createView, setPopupAlignment } from './util/mappingUtils'
 
-
 // Create a global app object to store the view
 const app: MapApp = {}
 
