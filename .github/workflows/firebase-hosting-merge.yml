@@ -11,14 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 20
-
       - run: npm ci && npm run build
-      - run: npx semantic-release
+      - run: npx -p node@v18-lts -c "npx semantic-release"
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Set Firebase service account and project ID
