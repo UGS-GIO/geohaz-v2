@@ -11,8 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - with:
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
           node-version: 20
+
       - run: npm ci && npm run build
       - run: npx semantic-release
         env: 
