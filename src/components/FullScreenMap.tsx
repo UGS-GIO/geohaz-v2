@@ -1,26 +1,21 @@
-import { useRef, useEffect } from 'react'
-import Map from '@arcgis/core/Map'
-import MapView from '@arcgis/core/views/MapView'
+import { useRef, useEffect, useContext } from 'react'
+import { MapContext } from '../contexts/MapProvider'
+import MapWidgets from './widgets/MapWidgets'
 
 function FullScreenMap() {
-  const mapDiv = useRef(null)
+  const mapRef = useRef(null)
+  const { loadMap } = useContext(MapContext)
 
   useEffect(() => {
-    if (mapDiv.current) {
-      const map = new Map({
-        basemap: 'topo-vector',
-      })
-
-      new MapView({
-        container: mapDiv.current,
-        map: map,
-        zoom: 4,
-        center: [15, 65], // Longitude, latitude
-      })
+    if (mapRef.current && loadMap) {
+      loadMap(mapRef.current as HTMLDivElement)
     }
-  }, [])
 
-  return <div ref={mapDiv} style={{ height: '100vh', width: '100%' }} />
+  }, [mapRef, loadMap])
+
+  return <div ref={mapRef} style={{ height: '100vh', width: '100%' }}>
+    <MapWidgets />
+  </div>
 }
 
 export default FullScreenMap
