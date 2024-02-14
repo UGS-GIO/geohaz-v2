@@ -11,10 +11,10 @@ const Layers: React.FC = () => {
   }
 
   return (
-    <>
+    <div className='overflow-y-auto'>
       <CalciteBlock heading='Layer List and Controls' className='mb-1' />
       {layerList}
-    </>
+    </div>
   );
 };
 

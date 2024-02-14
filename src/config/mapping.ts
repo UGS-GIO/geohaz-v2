@@ -7,9 +7,6 @@ import { addLayersToMap, createMap, createView, setPopupAlignment } from './util
 // Create a global app object to store the view
 const app: MapApp = {}
 
-// console.log(app);
-
-
 // Initialize the app
 export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): SceneView | MapView {
     // // Destroy the view if it exists

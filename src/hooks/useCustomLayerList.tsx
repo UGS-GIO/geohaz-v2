@@ -13,9 +13,11 @@ const useCustomLayerList = () => {
                 if (layer.layer.type === 'group') {
                     return (
                         <CalciteBlock collapsible key={index} heading={layer.title} className='mb-1'>
-                            {layer.children.map((childLayer, childIndex) => (
-                                <LayerAccordion key={childIndex} layerName={childLayer.title} layerId={childLayer.layer.id} />
-                            ))}
+                            {layer.children.map((childLayer, childIndex) => {
+                                return (
+                                    <LayerAccordion key={childIndex} layerName={childLayer.title} layerId={childLayer.layer.id} />
+                                )
+                            })}
                         </CalciteBlock>
                     );
                 }

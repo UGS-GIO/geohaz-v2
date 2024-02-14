@@ -172,7 +172,6 @@ const rendererLiquefaction = {
 
 //symbolize shakingRaster
 function colorize(pixelData: any) {
-    console.log("coloring");
     let pixelBlock, factor, minValue, maxValue;
 
     if (
@@ -299,7 +298,7 @@ const quadRenderer = {
         type: "simple-fill",
         color: [0, 0, 0, 0],
         outline: {
-            width: 1,
+            width: "1px",
             color: "#db0202",
         }
 

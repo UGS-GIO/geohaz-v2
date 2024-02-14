@@ -1067,13 +1067,13 @@ const landslidesConfig: LayerProps = {
 };
 
 const layersConfig: LayerProps[] = [
-    quadBoundariesConfig,
-    notMappedConfig,
-    hazardStudyConfig,
+    // quadBoundariesConfig,
+    // notMappedConfig,
+    // hazardStudyConfig,
     soilHazardsConfig,
     landslidesConfig,
-    floodHazardsConfig,
-    earthquakesConfig,
+    // earthquakesConfig,
+    // floodHazardsConfig,
 ];
 
 export default layersConfig;
