@@ -8,8 +8,6 @@ import { addLayersToMap, createMap, createView, setPopupAlignment } from './util
 const app: MapApp = {}
 
 function handleRendererType(layer: __esri.FeatureLayer | __esri.Sublayer, renderers: { renderer: __esri.Symbol, id: string | number, label: string, url: string }[]) {
-    console.log('layerRendererType', layer.renderer.type);
-
     if (layer.renderer.type === 'unique-value') {
         const renderer = layer.renderer as __esri.UniqueValueRenderer;
         const uniqueValueInfosRenderers = renderer.uniqueValueInfos.map((info) => {
@@ -36,8 +34,6 @@ function handleRendererType(layer: __esri.FeatureLayer | __esri.Sublayer, render
 
 function handleMapImageLayerRendererType(layerArr: MapImageLayerType, renderers: MapImageLayerRenderer[], url: string) {
     layerArr.layers.forEach((layer, index) => {
-        console.log('handleMapImageLayerRendererType layer', index, layer, url);
-
         // TODO find the matching layer in the mapImageLayer using a combination of the layer.id and the url
         layer.legend.forEach((legendELement) => {
 
@@ -48,8 +44,6 @@ function handleMapImageLayerRendererType(layerArr: MapImageLayerType, renderers:
                 url: url
             })
 
-
-
             // how to convert base64 to img element
             // let base64Image = 'iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAL0lEQVQ4jWNhoDJgGTVw1MBha+AzBob/1DBMioGBkQXGoIaBDAxDJgxHDRzmBgIAnEYCbD8DJqQAAAAASUVORK5CYII=';
             // let img = document.createElement('img');
@@ -58,67 +52,6 @@ function handleMapImageLayerRendererType(layerArr: MapImageLayerType, renderers:
     })
     return renderers
 }
-// export const getRenderers = async function (view: SceneView | MapView, map: __esri.Map) {
-//     let renderers: { renderer: __esri.Symbol, id: string, label: string }[] = [];
-
-//     await view.when();
-
-//     for (let index = 0; index < map.layers.length; index++) {
-//         let layer = map.layers.getItemAt(index);
-
-//         // handle group
-//         if (layer.type === 'group') {
-//             let newLayer = layer as __esri.GroupLayer;
-//             newLayer.allLayers.forEach(async (groupSublayer) => {
-//                 if (groupSublayer.type === 'feature') {
-//                     let sublayerTyped = groupSublayer as unknown as __esri.FeatureLayer;
-//                     handleRendererType(sublayerTyped, renderers);
-//                 } else if (groupSublayer.type === 'map-image') {
-//                     // TODO: handle sublayers
-//                     const sublayerTyped = groupSublayer as __esri.MapImageLayer;
-//                     const sublayer = sublayerTyped.allSublayers.forEach(async (sublayer) => {
-//                         console.log('sublayer', sublayer);
-//                         // const sublayerTyped = sublayer as __esri.Sublayer;
-//                         const loadLayer = sublayerTyped.parent;
-//                         console.log(loadLayer, 'loadLayer');
-
-//                     });
-//                     console.log('map-image', sublayer);
-
-//                 }
-
-//                 else {
-//                     console.error('grouplayer type not supported, please add it to the getRenderers function', groupSublayer.type);
-//                 }
-//             });
-//         } else if (layer.type === 'map-image') {
-//             let mapImageLayer = layer as __esri.MapImageLayer;
-//             mapImageLayer.allSublayers.forEach(async (sublayer) => {
-//                 console.log('sublayer', sublayer);
-//                 console.log('sublayerType', sublayer.type);
-//                 handleRendererType(sublayer as __esri.Sublayer, renderers)
-//             })
-
-//             console.log('map-image', mapImageLayer);
-
-//         } else if (layer.type === 'feature') {
-//             let layerTyped = layer as __esri.FeatureLayer;
-//             handleRendererType(layerTyped, renderers);
-//         } else {
-//             console.error('Layertype not supported, please add it to the getRenderers function', layer.type);
-//         }
-
-//         // if (layer.visible) {
-//         //     await loadLayer.load();
-//         //     const layer1 = layer as __esri.FeatureLayer | __esri.Sublayer;
-//         //     renderers.push(layer1.renderer);
-//         // }
-//     }
-
-//     return renderers;
-// };
-
-// Initialize the app
 
 export const getRenderers = async function (view: SceneView | MapView, map: __esri.Map) {
     let renderers: RegularLayerRenderer[] = [];
@@ -156,7 +89,6 @@ const handleGroupLayer = async (layer: __esri.GroupLayer, renderers: RegularLaye
 };
 
 const handleMapImageLayer = async (layer: __esri.MapImageLayer, renderers: MapImageLayerRenderer[]) => {
-    console.log('map-image', layer);
 
     // call out and retrieve legend object from this
     // https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults_with_labels/MapServer/legend?f=pjson

@@ -16,8 +16,6 @@ interface FindLegendElementProps {
 
 
 async function findLegendElements({ view, layerId }: FindLegendElementProps) {
-    console.log('FIND LEGEND ELEMENTS', view, layerId);
-
     let foundLayer: __esri.Layer | __esri.Sublayer | undefined = undefined;
 
     const legend = new Legend({
@@ -53,8 +51,6 @@ async function findLegendElements({ view, layerId }: FindLegendElementProps) {
         }
     });
 
-    console.log('FOUND LEGEND ELEMENTS', foundLegendElements);
-
     return foundLegendElements;
 }
 
@@ -75,9 +71,6 @@ const useCustomLegend = ({ layerId }: UseCustomLegendProps) => {
     //     console.error('Error fetching legend data:', error);
     //     return <p>Error fetching legend information</p>;
     // }
-
-    // Handle the legend elements here
-    // ...
 
     return { legendElements, layerId };
 };
