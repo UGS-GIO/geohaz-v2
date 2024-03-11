@@ -2,6 +2,9 @@ import { createContext, useEffect, useState } from "react";
 import type SceneView from "@arcgis/core/views/SceneView";
 import type MapView from "@arcgis/core/views/MapView";
 import LayerList from "@arcgis/core/widgets/LayerList";
+import { getRenderers } from "../config/mapping";
+import { RendererProps } from "../config/types/mappingTypes";
+import Legend from "@arcgis/core/widgets/Legend";
 
 
 type MapContextProps = {
@@ -9,6 +12,7 @@ type MapContextProps = {
     activeLayers?: __esri.Collection<__esri.ListItem>, // add a layers property to the context
     loadMap?: (container: HTMLDivElement) => Promise<void>
     setActiveLayers?: (layers: __esri.Collection<__esri.ListItem>) => void
+    getRenderer?: (id: string, layerName: string) => Promise<RendererProps | undefined>
 }
 
 export const MapContext = createContext<MapContextProps>({});
@@ -24,6 +28,11 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         const layerList = new LayerList({
             view: view,
         });
+
+        // // Create Legend widgeta
+        // const legend = new Legend({
+        //     view: view,
+        // });
 
         // Get LayerList view model
         const layerListViewModel = layerList.viewModel;
@@ -46,10 +55,24 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         setView(init(container, 'scene'))
     }
 
+    async function getRenderer(id: string, layerName: string): Promise<RendererProps | undefined> {
 
+        console.log('getRendererById', layerName);
+
+        if (!view || !view.map) return;
+        const { renderers, mapImageRenderers } = await getRenderers(view, view.map as __esri.Map);
+        const RegularLayerRenderer = renderers.filter(renderer => renderer.id === id);
+        const MapImageLayerRenderer = mapImageRenderers.filter(renderer => renderer.id === id);
+        console.log('mapImageRenderers', MapImageLayerRenderer);
+
+        return {
+            MapImageLayerRenderer,
+            RegularLayerRenderer,
+        };
+    };
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers }}>
+        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, getRenderer }}>
             {children}
         </MapContext.Provider>
     )

@@ -5,7 +5,7 @@ import LayerAccordion from '../components/widgets/LayerlistAccordion';
 
 const useCustomLayerList = () => {
     const { activeLayers } = useContext(MapContext);
-    const [layerList, setLayerList] = useState<__esri.Collection<JSX.Element>>();
+    const [layerList, setLayerList] = useState<__esri.Collection<JSX.Element>>();    
 
     useEffect(() => {
         if (activeLayers) {
@@ -14,15 +14,19 @@ const useCustomLayerList = () => {
                     return (
                         <CalciteBlock collapsible key={index} heading={layer.title} className='mb-1'>
                             {layer.children.map((childLayer, childIndex) => {
-                                return (
-                                    <LayerAccordion key={childIndex} layerName={childLayer.title} layerId={childLayer.layer.id} />
-                                )
+
+                                // return (
+                                //     <LayerAccordion key={childIndex} layerName={childLayer.title} layerId={childLayer.layer.id} />
+                                // )
+                               return <LayerAccordion key={childIndex} layer={childLayer} />
                             })}
                         </CalciteBlock>
                     );
                 }
 
-                return <LayerAccordion key={index} layerName={layer.layer.title} layerId={layer.layer.id} />;
+                // return <LayerAccordion key={index} layerName={layer.layer.title} layerId={layer.layer.id} />;
+                return <LayerAccordion key={index} layer={layer} />
+
             });
 
             setLayerList(list);
