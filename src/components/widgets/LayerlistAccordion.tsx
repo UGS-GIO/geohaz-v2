@@ -24,11 +24,12 @@ const LayerAccordion: React.FC<LayerAccordionProps> = ({ layer }) => {
 
     const layerId = layer.layer.id;
     const layerTitle = layer.layer.title;
+    const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
 
     const { data: legendData } = useQuery(
         {
             queryKey: ['legendHTML', layer.layer],
-            queryFn: () => getRenderer ? getRenderer(layerId) : Promise.resolve(undefined),
+            queryFn: () => getRenderer ? getRenderer(layerId, typeNarrowedLayer.url) : Promise.resolve(undefined),
         }
     );
 

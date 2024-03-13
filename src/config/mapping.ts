@@ -34,23 +34,16 @@ function handleRendererType(layer: __esri.FeatureLayer | __esri.Sublayer, render
 
 function handleMapImageLayerRendererType(layerArr: MapImageLayerType, renderers: MapImageLayerRenderer[], url: string) {
     layerArr.layers.forEach((layer, index) => {
-        // TODO find the matching layer in the mapImageLayer using a combination of the layer.id and the url
         layer.legend.forEach((legendELement) => {
-
             renderers.push({
                 label: legendELement.label,
                 imageData: legendELement.imageData,
                 id: index.toString(),
                 url: url
             })
-
-            // how to convert base64 to img element
-            // let base64Image = 'iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAL0lEQVQ4jWNhoDJgGTVw1MBha+AzBob/1DBMioGBkQXGoIaBDAxDJgxHDRzmBgIAnEYCbD8DJqQAAAAASUVORK5CYII=';
-            // let img = document.createElement('img');
-            // img.src = 'data:image/png;base64,' + base64Image;
         });
     })
-    return renderers
+
 }
 
 export const getRenderers = async function (view: SceneView | MapView, map: __esri.Map) {
@@ -63,11 +56,11 @@ export const getRenderers = async function (view: SceneView | MapView, map: __es
         let layer = map.layers.getItemAt(index);
 
         if (layer.type === 'group') {
-            handleGroupLayer(layer as __esri.GroupLayer, renderers, mapImageRenderers);
+            await handleGroupLayer(layer as __esri.GroupLayer, renderers, mapImageRenderers);
         } else if (layer.type === 'map-image') {
-            handleMapImageLayer(layer as __esri.MapImageLayer, mapImageRenderers);
+            await handleMapImageLayer(layer as __esri.MapImageLayer, mapImageRenderers);
         } else if (layer.type === 'feature') {
-            handleFeatureLayer(layer as __esri.FeatureLayer, renderers);
+            await handleFeatureLayer(layer as __esri.FeatureLayer, renderers);
         } else {
             console.error('Layertype not supported, please add it to the getRenderers function', layer.type);
         }
@@ -89,23 +82,13 @@ const handleGroupLayer = async (layer: __esri.GroupLayer, renderers: RegularLaye
 };
 
 const handleMapImageLayer = async (layer: __esri.MapImageLayer, renderers: MapImageLayerRenderer[]) => {
-
-    // call out and retrieve legend object from this
-    // https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults_with_labels/MapServer/legend?f=pjson
-
+    // call the legend endpoint to get the legend
     const legend = await fetch(
         `${layer.url}/legend?f=pjson`
     );
 
     const response: MapImageLayerType = await legend.json();
-
     handleMapImageLayerRendererType(response, renderers, layer.url)
-
-    // layer.allSublayers.forEach(async (sublayer) => {
-    //     console.log('sublayer', sublayer);
-
-    //     handleRendererType(sublayer as __esri.Sublayer, renderers);
-    // });
 };
 
 const handleFeatureLayer = async (layer: __esri.FeatureLayer, renderers: RegularLayerRenderer[]) => {

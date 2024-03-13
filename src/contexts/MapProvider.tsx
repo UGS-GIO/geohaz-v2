@@ -10,7 +10,7 @@ type MapContextProps = {
     activeLayers?: __esri.Collection<__esri.ListItem>, // add a layers property to the context
     loadMap?: (container: HTMLDivElement) => Promise<void>
     setActiveLayers?: (layers: __esri.Collection<__esri.ListItem>) => void
-    getRenderer?: (id: string) => Promise<RendererProps | undefined>
+    getRenderer?: (id: string, url: string) => Promise<RendererProps | undefined>
 }
 
 export const MapContext = createContext<MapContextProps>({});
@@ -48,11 +48,14 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         setView(init(container, 'scene'))
     }
 
-    async function getRenderer(id: string): Promise<RendererProps | undefined> {
+    async function getRenderer(id: string, url: string): Promise<RendererProps | undefined> {
         if (!view || !view.map) return;
         const { renderers, mapImageRenderers } = await getRenderers(view, view.map as __esri.Map);
         const RegularLayerRenderer = renderers.filter(renderer => renderer.id === id);
-        const MapImageLayerRenderer = mapImageRenderers.filter(renderer => renderer.id === id);
+        const MapImageLayerRenderer = mapImageRenderers.filter(renderer => renderer.url === url);
+
+        console.log('RegularLayerRenderer', RegularLayerRenderer);
+        console.log('MapImageLayerRenderer', MapImageLayerRenderer);
 
         return {
             MapImageLayerRenderer,
