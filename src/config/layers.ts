@@ -215,6 +215,7 @@ const qFaultsConfig: LayerProps = {
     options: {
         sublayers: [
             {
+                title: 'Quaternary_Faults',
                 id: 0,
                 visible: true,
                 popupTemplate: {
@@ -224,6 +225,7 @@ const qFaultsConfig: LayerProps = {
                 },
             },
             {
+                title: 'Labels',
                 id: 1,
                 visible: true,
             },
