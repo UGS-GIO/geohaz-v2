@@ -15,7 +15,8 @@ function handleRendererType(layer: __esri.FeatureLayer | __esri.Sublayer, render
                 renderer: info.symbol,
                 id: layer.id,
                 label: info.label,
-                url: layer.url
+                url: layer.url,
+                title: layer.title
             }
         });
         renderers.push(...uniqueValueInfosRenderers);
@@ -39,7 +40,8 @@ function handleMapImageLayerRendererType(layerArr: MapImageLayerType, renderers:
                 label: legendELement.label,
                 imageData: legendELement.imageData,
                 id: index.toString(),
-                url: url
+                url: url,
+                title: layer.layerName
             })
         });
     })

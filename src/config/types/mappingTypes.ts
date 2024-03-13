@@ -31,6 +31,7 @@ export type MapImageLayerRenderer = {
     imageData: string;
     id: string;
     url: string;
+    title: string;
 };
 
 export type RegularLayerRenderer = {
