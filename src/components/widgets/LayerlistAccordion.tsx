@@ -3,6 +3,7 @@ import { CalciteBlock, CalciteLabel, CalciteSlider, CalciteSwitch, CalciteAccord
 import { CalciteSliderCustomEvent } from "@esri/calcite-components";
 import { MapContext } from '../../contexts/MapProvider';
 import useLegendPreview from '../../hooks/useLegendPreview';
+import { RendererProps } from '../../config/types/mappingTypes';
 
 interface LayerAccordionProps { layer: __esri.ListItem }
 
@@ -16,14 +17,24 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
     const [layerOpacity, setLayerOpacity] = useState(1);
     const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
-    const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer);
+    const defaultGetRenderer: (id: string, url?: string | undefined) => Promise<RendererProps | undefined> = () => Promise.resolve(undefined);
 
+    const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer || defaultGetRenderer);
     useEffect(() => {
         if (activeLayers && layerId) {
             const foundLayer = findLayerById(activeLayers, layerId);
             setCurrentLayer(foundLayer);
             setLayerVisibility(foundLayer?.visible);
             setLayerOpacity(foundLayer?.layer.opacity || 1);
+
+            // Initialize sublayerVisibility
+            if (isMapImageLayer(foundLayer.layer) && foundLayer.layer.sublayers) {
+                const initialSublayerVisibility: Record<string, boolean> = {};
+                foundLayer.layer.sublayers.forEach(sublayer => {
+                    initialSublayerVisibility[String(sublayer.id)] = sublayer.visible;
+                });
+                setSublayerVisibility(initialSublayerVisibility);
+            }
         }
     }, [activeLayers, layerId]);
 
@@ -78,7 +89,7 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                                 <CalciteAccordionItem heading={`${sublayer.title} Controls`}>
                                     <CalciteLabel layout="inline">
                                         Visibility
-                                        <CalciteSwitch onCalciteSwitchChange={() => handleSublayerVisibilityToggle(sublayer)} checked={sublayerVisibility[sublayer.id]} />
+                                        <CalciteSwitch onCalciteSwitchChange={() => handleSublayerVisibilityToggle(sublayer)} checked={sublayerVisibility[sublayer.id] || undefined} />
                                     </CalciteLabel>
                                     <CalciteLabel>
                                         Opacity
@@ -96,18 +107,18 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                                 <span>{preview.label}</span>
                             </div>
                         ))}
+                        <CalciteAccordionItem heading={`${layerTitle} Controls`}>
+                            <CalciteLabel layout="inline">
+                                Visibility2
+                                <CalciteSwitch onCalciteSwitchChange={handleVisibilityToggle} checked={layerVisibility} />
+                            </CalciteLabel>
+                            <CalciteLabel>
+                                Opacity
+                                <CalciteSlider onCalciteSliderChange={(e) => handleOpacityChange(e)} value={layerOpacity * 100} />
+                            </CalciteLabel>
+                        </CalciteAccordionItem>
                     </CalciteAccordionItem>
                 )}
-                <CalciteAccordionItem heading={`${layerTitle} Controls`}>
-                    <CalciteLabel layout="inline">
-                        Visibility
-                        <CalciteSwitch onCalciteSwitchChange={handleVisibilityToggle} checked={layerVisibility} />
-                    </CalciteLabel>
-                    <CalciteLabel>
-                        Opacity
-                        <CalciteSlider onCalciteSliderChange={(e) => handleOpacityChange(e)} value={layerOpacity * 100} />
-                    </CalciteLabel>
-                </CalciteAccordionItem>
             </CalciteAccordion>
         </CalciteBlock >
     );
