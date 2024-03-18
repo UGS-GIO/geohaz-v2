@@ -77,3 +77,6 @@ type MapImageLayerLayer = {
 export type MapImageLayerType = {
     layers: MapImageLayerLayer[];
 };
+
+export type GetRenderer = (layerId: string, url: string | undefined) => Promise<RendererProps | undefined>;
+

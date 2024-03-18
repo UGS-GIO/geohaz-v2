@@ -1,67 +1,22 @@
-import { useContext, useEffect, useState } from 'react'; import { CalciteBlock, CalciteLabel, CalciteSlider, CalciteSwitch, CalciteAccordion, CalciteAccordionItem } from '@esri/calcite-components-react'; import { CalciteSliderCustomEvent } from "@esri/calcite-components"; import { MapContext } from '../../contexts/MapProvider'; import * as symbolUtils from "@arcgis/core/symbols/support/symbolUtils.js"; import { useQuery } from '@tanstack/react-query'; import { MapImageLayerRenderer, RegularLayerRenderer } from '../../config/types/mappingTypes';
+import { useContext, useEffect, useState } from 'react';
+import { CalciteBlock, CalciteLabel, CalciteSlider, CalciteSwitch, CalciteAccordion, CalciteAccordionItem } from '@esri/calcite-components-react';
+import { CalciteSliderCustomEvent } from "@esri/calcite-components";
+import { MapContext } from '../../contexts/MapProvider';
+import useLegendPreview from '../../hooks/useLegendPreview';
 
 interface LayerAccordionProps { layer: __esri.ListItem }
 
 const findLayerById = (layers: __esri.Collection<__esri.ListItem>, id: string) => { const flatLayers = layers.flatten(layer => layer.children || []); return flatLayers.find(layer => String(layer.layer.id) === String(id)); };
 
 const LayerAccordion = ({ layer }: LayerAccordionProps) => {
+    const { id: layerId, title: layerTitle } = layer.layer;
     const { activeLayers, getRenderer } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
     const [layerVisibility, setLayerVisibility] = useState<boolean | undefined>();
     const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
     const [layerOpacity, setLayerOpacity] = useState(1);
-    const [preview, setPreview] = useState<{ html: HTMLElement, label: string, title?: string }[]>();
-
-    const layerId = layer.layer.id;
-    const layerTitle = layer.layer.title;
     const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
-
-    const { data: legendData } = useQuery(
-        {
-            queryKey: ['legendHTML', layer.layer],
-            queryFn: () => getRenderer ? getRenderer(layerId, typeNarrowedLayer.url) : Promise.resolve(undefined),
-        }
-    );
-
-    useEffect(() => {
-        const generatePreview = async (rendererData: MapImageLayerRenderer | RegularLayerRenderer) => {
-            let html: HTMLElement | null = null;
-            let title = '';
-            const label = rendererData.label;
-
-            if ('renderer' in rendererData) {
-                html = await symbolUtils.renderPreviewHTML(rendererData.renderer);
-            } else if ('imageData' in rendererData) {
-                title = rendererData.title;
-                const imgHTML = `<img src="data:image/png;base64,${rendererData.imageData}" alt="${label}" />`;
-                const range = document.createRange();
-                const fragment = range.createContextualFragment(imgHTML);
-                html = fragment.firstChild as HTMLElement;
-            }
-
-            if (html) {
-                return { html, label, title };
-            }
-            return null;
-        };
-
-        const generateAllPreviews = async () => {
-            if (legendData) {
-                const allRenderers = [...legendData.MapImageLayerRenderer, ...legendData.RegularLayerRenderer];
-                const previews = [];
-                for (let sublayerIndex = 0; sublayerIndex < allRenderers.length; sublayerIndex++) {
-                    const rendererData = allRenderers[sublayerIndex];
-                    const preview = await generatePreview(rendererData);
-                    if (preview) {
-                        previews.push(preview);
-                    }
-                }
-                setPreview(previews);
-            }
-        };
-        generateAllPreviews();
-    }, [legendData]);
-
+    const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer);
 
     useEffect(() => {
         if (activeLayers && layerId) {
