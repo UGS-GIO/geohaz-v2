@@ -8,6 +8,7 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     const { activeLayers, getRenderer } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
     const [layerVisibility, setLayerVisibility] = useState<boolean | undefined>();
+    const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
     const [layerOpacity, setLayerOpacity] = useState(1);
     const [preview, setPreview] = useState<{ html: HTMLElement, label: string, title?: string }[]>();
 
@@ -89,7 +90,7 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
 
     const handleSublayerVisibilityToggle = (sublayer: __esri.Sublayer) => {
         sublayer.visible = !sublayer.visible;
-        setLayerVisibility(sublayer.visible ? sublayer.visible : undefined);
+        setSublayerVisibility(prevState => ({ ...prevState, [sublayer.id]: sublayer.visible }));
     };
 
     const handleSublayerOpacityChange = (event: CalciteSliderCustomEvent<void>, sublayer: __esri.Sublayer) => {
@@ -122,11 +123,12 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                                 <CalciteAccordionItem heading={`${sublayer.title} Controls`}>
                                     <CalciteLabel layout="inline">
                                         Visibility
-                                        <CalciteSwitch onCalciteSwitchChange={() => handleSublayerVisibilityToggle(sublayer)} checked={layerVisibility} />
+                                        <CalciteSwitch onCalciteSwitchChange={() => handleSublayerVisibilityToggle(sublayer)} checked={sublayerVisibility[sublayer.id]} />
                                     </CalciteLabel>
                                     <CalciteLabel>
                                         Opacity
-                                        <CalciteSlider onCalciteSliderChange={(e) => handleSublayerOpacityChange(e, sublayer)} value={sublayer.opacity * 100} />                                    </CalciteLabel>
+                                        <CalciteSlider onCalciteSliderChange={(e) => handleSublayerOpacityChange(e, sublayer)} value={sublayer.opacity * 100} />
+                                    </CalciteLabel>
                                 </CalciteAccordionItem>
                             </CalciteAccordionItem>
                         )

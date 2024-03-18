@@ -54,9 +54,6 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         const RegularLayerRenderer = renderers.filter(renderer => renderer.id === id);
         const MapImageLayerRenderer = mapImageRenderers.filter(renderer => renderer.url === url);
 
-        console.log('RegularLayerRenderer', RegularLayerRenderer);
-        console.log('MapImageLayerRenderer', MapImageLayerRenderer);
-
         return {
             MapImageLayerRenderer,
             RegularLayerRenderer,
