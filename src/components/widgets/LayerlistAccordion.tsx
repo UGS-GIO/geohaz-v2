@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
-import { CalciteBlock, CalciteLabel, CalciteSlider, CalciteSwitch, CalciteAccordion, CalciteAccordionItem } from '@esri/calcite-components-react';
+import { CalciteAccordion, CalciteAccordionItem } from '@esri/calcite-components-react';
 import { CalciteSliderCustomEvent } from "@esri/calcite-components";
 import { MapContext } from '../../contexts/MapProvider';
 import useLegendPreview from '../../hooks/useLegendPreview';
 import { RendererProps } from '../../config/types/mappingTypes';
+import LayerControls from '../LayerControls';
+import { findLayerById } from '../../config/mapping';
 
 interface LayerAccordionProps { layer: __esri.ListItem }
-
-const findLayerById = (layers: __esri.Collection<__esri.ListItem>, id: string) => { const flatLayers = layers.flatten(layer => layer.children || []); return flatLayers.find(layer => String(layer.layer.id) === String(id)); };
 
 const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer.layer;
@@ -17,6 +17,8 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
     const [layerOpacity, setLayerOpacity] = useState(1);
     const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
+
+    // this gets around a typescript error because getRenderer can be undefined
     const defaultGetRenderer: (id: string, url?: string | undefined) => Promise<RendererProps | undefined> = () => Promise.resolve(undefined);
 
     const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer || defaultGetRenderer);
@@ -69,58 +71,56 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
 
 
     return (
-        <CalciteBlock heading={`${layerTitle}`} collapsible >
-            <CalciteAccordion>
-                {isMapImageLayer(typeNarrowedLayer) && typeNarrowedLayer.sublayers && typeNarrowedLayer.sublayers.length > 0 ? (
-                    typeNarrowedLayer.sublayers.map((sublayer: __esri.Sublayer, index: number) => {
-                        return (
-                            <CalciteAccordionItem heading={sublayer.title} key={index}>
-                                {preview && preview.map((previewItem, index) => {
-                                    if (previewItem.title === sublayer.title) {
-                                        return (
-                                            <div key={index} className='flex items-end space-x-4 py-1'>
-                                                <span dangerouslySetInnerHTML={{ __html: previewItem.html.outerHTML || '' }} />
-                                                <span>{previewItem.label}</span>
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                })}
-                                <CalciteAccordionItem heading={`${sublayer.title} Controls`}>
-                                    <CalciteLabel layout="inline">
-                                        Visibility
-                                        <CalciteSwitch onCalciteSwitchChange={() => handleSublayerVisibilityToggle(sublayer)} checked={sublayerVisibility[sublayer.id] || undefined} />
-                                    </CalciteLabel>
-                                    <CalciteLabel>
-                                        Opacity
-                                        <CalciteSlider onCalciteSliderChange={(e) => handleSublayerOpacityChange(e, sublayer)} value={sublayer.opacity * 100} />
-                                    </CalciteLabel>
+        <CalciteAccordion className='mb-2'>
+            {isMapImageLayer(typeNarrowedLayer) && typeNarrowedLayer.sublayers && typeNarrowedLayer.sublayers.length > 0 ? (
+                <CalciteAccordionItem expanded heading={layerTitle}>
+                    {
+                        typeNarrowedLayer.sublayers.map((sublayer: __esri.Sublayer, index: number) => {
+                            return (
+                                <CalciteAccordionItem heading={sublayer.title} key={index} expanded>
+                                    <div className="flex flex-col items-start" key={index}>
+                                        <LayerControls
+                                            layerVisibility={sublayerVisibility[sublayer.id] || undefined}
+                                            handleVisibilityToggle={() => handleSublayerVisibilityToggle(sublayer)}
+                                            layerOpacity={sublayer.opacity}
+                                            handleOpacityChange={(e) => handleSublayerOpacityChange(e, sublayer)}
+                                        />
+                                        {preview && preview.map((previewItem, index) => {
+                                            if (previewItem.title === sublayer.title) {
+                                                return (
+                                                    <div key={index} className='flex items-end space-x-4 py-1'>
+                                                        <span dangerouslySetInnerHTML={{ __html: previewItem.html.outerHTML || '' }} />
+                                                        <span>{previewItem.label}</span>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })}
+                                    </div>
                                 </CalciteAccordionItem>
-                            </CalciteAccordionItem>
-                        )
-                    })
-                ) : (
-                    <CalciteAccordionItem heading={`${layerTitle}`}>
+                            )
+                        })
+                    }
+                </CalciteAccordionItem>
+            ) : (
+                <CalciteAccordionItem expanded heading={layerTitle}>
+                    <div className="flex flex-col items-start">
+                        <LayerControls
+                            layerVisibility={layerVisibility}
+                            handleVisibilityToggle={handleVisibilityToggle}
+                            layerOpacity={layerOpacity}
+                            handleOpacityChange={handleOpacityChange}
+                        />
                         {preview && preview.map((preview, index) => (
                             <div key={index} className='flex items-end space-x-4 py-1'>
                                 <span dangerouslySetInnerHTML={{ __html: preview.html.outerHTML || '' }} />
                                 <span>{preview.label}</span>
                             </div>
                         ))}
-                        <CalciteAccordionItem heading={`${layerTitle} Controls`}>
-                            <CalciteLabel layout="inline">
-                                Visibility2
-                                <CalciteSwitch onCalciteSwitchChange={handleVisibilityToggle} checked={layerVisibility} />
-                            </CalciteLabel>
-                            <CalciteLabel>
-                                Opacity
-                                <CalciteSlider onCalciteSliderChange={(e) => handleOpacityChange(e)} value={layerOpacity * 100} />
-                            </CalciteLabel>
-                        </CalciteAccordionItem>
-                    </CalciteAccordionItem>
-                )}
-            </CalciteAccordion>
-        </CalciteBlock >
+                    </div>
+                </CalciteAccordionItem>
+            )}
+        </CalciteAccordion>
     );
 }
 

@@ -97,6 +97,8 @@ const handleFeatureLayer = async (layer: __esri.FeatureLayer, renderers: Regular
     handleRendererType(layer, renderers);
 };
 
+export const findLayerById = (layers: __esri.Collection<__esri.ListItem>, id: string) => { const flatLayers = layers.flatten(layer => layer.children || []); return flatLayers.find(layer => String(layer.layer.id) === String(id)); };
+
 export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): SceneView | MapView {
     // // Destroy the view if it exists
     // if (app.view) {
