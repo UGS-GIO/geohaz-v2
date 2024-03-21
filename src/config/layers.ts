@@ -1076,7 +1076,6 @@ const layersConfig: LayerProps[] = [
     landslidesConfig,
     earthquakesConfig,
     floodHazardsConfig,
-    qFaultsConfig
 ];
 
 export default layersConfig;
