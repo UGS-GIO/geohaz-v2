@@ -106,7 +106,7 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                 <CalciteAccordionItem expanded heading={layerTitle}>
                     <div className="flex flex-col items-start">
                         <LayerControls
-                            layerVisibility={layerVisibility}
+                            layerVisibility={layerVisibility || undefined}
                             handleVisibilityToggle={handleVisibilityToggle}
                             layerOpacity={layerOpacity}
                             handleOpacityChange={handleOpacityChange}
