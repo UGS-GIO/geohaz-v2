@@ -85,7 +85,7 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                                             layerOpacity={sublayer.opacity}
                                             handleOpacityChange={(e) => handleSublayerOpacityChange(e, sublayer)}
                                         />
-                                        {preview && preview.map((previewItem, index) => {
+                                        {/* {preview && preview.map((previewItem, index) => {
                                             if (previewItem.title === sublayer.title) {
                                                 return (
                                                     <div key={index} className='flex items-end space-x-4 py-1'>
@@ -95,7 +95,7 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                                                 );
                                             }
                                             return null;
-                                        })}
+                                        })} */}
                                     </div>
                                 </CalciteAccordionItem>
                             )
@@ -111,12 +111,12 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                             layerOpacity={layerOpacity}
                             handleOpacityChange={handleOpacityChange}
                         />
-                        {preview && preview.map((preview, index) => (
+                        {/* {preview && preview.map((preview, index) => (
                             <div key={index} className='flex items-end space-x-4 py-1'>
                                 <span dangerouslySetInnerHTML={{ __html: preview.html.outerHTML || '' }} />
                                 <span>{preview.label}</span>
                             </div>
-                        ))}
+                        ))} */}
                     </div>
                 </CalciteAccordionItem>
             )}
