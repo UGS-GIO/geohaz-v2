@@ -53,6 +53,7 @@ export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
 function createLayerFromUrl(layer: LayerProps, LayerType: any) {
     // Create a layer based on the layer props
     if ('url' in layer) {
+
         return new LayerType({
             url: layer.url,
             ...layer.options,
@@ -63,11 +64,7 @@ function createLayerFromUrl(layer: LayerProps, LayerType: any) {
         if (layer.layers) {
             // Create an array of group layers by mapping the layers and filtering out any undefined elements
             const groupedLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer)[];
-            return new GroupLayer({
-                title: layer.title,
-                visible: layer.visible,
-                layers: groupedLayers
-            });
+            return groupedLayers;
         }
     }
 
@@ -84,7 +81,7 @@ export const createLayer = (layer: LayerProps): FeatureLayer | TileLayer | Group
         return new GroupLayer({
             title: layer.title,
             visible: layer.visible,
-            layers: groupLayers
+            layers: groupLayers,
         });
     }
 

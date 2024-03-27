@@ -15,7 +15,7 @@
   "dependencies": {
     "@arcgis/core": "^4.28.10",
     "@esri/calcite-components-react": "^1.4.3",
-    "@tanstack/react-query": "^4.29.19",
+    "@tanstack/react-query": "^5.18.1",
     "arcgis-react": "1.0.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
