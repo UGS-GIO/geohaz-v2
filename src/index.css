@@ -40,3 +40,19 @@ calcite-segmented-control-item[aria-checked="true"] {
   --calcite-ui-brand-hover: #e77c33;
   --calcite-ui-brand-press: #b65c02;
 }
+
+
+/* 
+  basic styling for the text inside of a feature widget, 
+  possibly consider using tailwind classes directly in the component, 
+  but i cannot find a way to do that yet
+*/
+.esri-feature {
+  letter-spacing: 0em;
+  line-height: 1.55rem;
+  font-feature-settings:
+    "liga" 1,
+    "calt" 0;
+  background: #fff;
+  padding: 1em;
+}

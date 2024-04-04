@@ -2,7 +2,7 @@ import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
 import layers from '../config/layers'
 import { MapApp, MapImageLayerRenderer, MapImageLayerType, RegularLayerRenderer } from './types/mappingTypes'
-import { addLayersToMap, createMap, createView, setPopupAlignment } from './util/mappingUtils'
+import { addLayersToMap, createMap, createView, expandClickHandlers, pointerMoveHandlers, setPopupAlignment } from './util/mappingUtils'
 
 // Create a global app object to store the view
 const app: MapApp = {}
@@ -116,6 +116,10 @@ export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): S
 
     // prevent collision with the edges of the view
     setPopupAlignment(view);
+    // track pointer movements
+    pointerMoveHandlers(view);
+    // expand widget handler
+    expandClickHandlers(view);
 
     return view
 }

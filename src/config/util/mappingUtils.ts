@@ -7,13 +7,24 @@ import Map from '@arcgis/core/Map'
 import MapView from "@arcgis/core/views/MapView";
 import SceneView from "@arcgis/core/views/SceneView";
 import { LayerProps, layerTypeMapping } from "../types/mappingTypes";
+import * as promiseUtils from "@arcgis/core/core/promiseUtils.js";
 import Color from "@arcgis/core/Color";
+import Feature from "@arcgis/core/widgets/Feature";
+import Graphic from "@arcgis/core/Graphic";
+import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
+import Point from "@arcgis/core/geometry/Point.js";
+import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
+import Expand from "@arcgis/core/widgets/Expand";
+
 
 // Create a new map
 export const createMap = () => {
-    return new Map({
+
+    const map = new Map({
         basemap: 'topo-vector',
-    })
+    });
+
+    return map;
 }
 
 // Create a new view
@@ -126,5 +137,82 @@ export function setPopupAlignment(view: SceneView | MapView) {
 
             return "top-center";
         };
+    });
+}
+
+export function pointerMoveHandlers(view: SceneView | MapView) {
+
+    view.when().then(() => {
+        const debouncedUpdate = promiseUtils.debounce(async (event: __esri.ViewPointerMoveEvent) => {
+            const feature = view.ui.find("coordinate-feature-widget");
+            var point = view.toMap({ x: event.x, y: event.y });
+            var mp: Point = webMercatorUtils.webMercatorToGeographic(point) as Point;
+
+            if (feature) {
+                const typedFeature = feature as Feature;
+                typedFeature.graphic = new Graphic({
+                    popupTemplate: {
+                        title: "Coordinates",
+                        content: `Lat: ${mp?.y.toFixed(3)}, Lon: ${mp?.x.toFixed(3)}`
+                    },
+                });
+            }
+        });
+
+        // Listen for the pointer-move event on the View
+        view.on("pointer-move", (event) => {
+            debouncedUpdate(event).catch((err) => {
+                if (!promiseUtils.isAbortError(err)) {
+                    throw err;
+                }
+            });
+        });
+
+    });
+
+}
+
+export function expandClickHandlers(view: SceneView | MapView) {
+    view.when().then(() => {
+        const bgExpand = view.ui.find("basemap-gallery-expand") as Expand | undefined;
+
+        if (bgExpand) {
+            bgExpand.when().then(() => {
+                const basemapGallery = bgExpand?.content as BasemapGallery;
+                // Watch for changes on the active basemap and collapse the expand widget if the view is mobile size
+                reactiveUtils.watch(
+                    () => basemapGallery.activeBasemap,
+                    () => {
+
+                        const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
+
+                        if (mobileSize) {
+                            console.log('mobileSize', mobileSize);
+
+                            bgExpand.collapse();
+                        }
+                    }
+                );
+            });
+        }
+
+        const debouncedUpdate = promiseUtils.debounce(async () => {
+            if (bgExpand) {
+                const typedExpand = bgExpand as Expand;
+                typedExpand.collapse();
+            }
+        });
+
+        const handleEvent = () => {
+            debouncedUpdate().catch((err) => {
+                if (!promiseUtils.isAbortError(err)) {
+                    console.error(err);
+                }
+            });
+        };
+
+        view.on("click", handleEvent);
+        view.on("double-click", handleEvent);
+        view.on("drag", handleEvent);
     });
 }
