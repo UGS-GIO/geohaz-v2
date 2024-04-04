@@ -183,12 +183,8 @@ export function expandClickHandlers(view: SceneView | MapView) {
                 reactiveUtils.watch(
                     () => basemapGallery.activeBasemap,
                     () => {
-
                         const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
-
                         if (mobileSize) {
-                            console.log('mobileSize', mobileSize);
-
                             bgExpand.collapse();
                         }
                     }
@@ -196,6 +192,7 @@ export function expandClickHandlers(view: SceneView | MapView) {
             });
         }
 
+        // Debounce the update to prevent the expand widget from opening and closing rapidly
         const debouncedUpdate = promiseUtils.debounce(async () => {
             if (bgExpand) {
                 const typedExpand = bgExpand as Expand;
