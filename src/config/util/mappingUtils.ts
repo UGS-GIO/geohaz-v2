@@ -143,7 +143,8 @@ export function setPopupAlignment(view: SceneView | MapView) {
 export function pointerMoveHandlers(view: SceneView | MapView) {
 
     view.when().then(() => {
-        const debouncedUpdate = promiseUtils.debounce(async (event: __esri.ViewPointerMoveEvent) => {
+        // Set up the feature widget to display coordinates
+        const debouncedUpdate = promiseUtils.debounce(async (event: __esri.ViewPointerMoveEvent | __esri.ViewClickEvent) => {
             const feature = view.ui.find("coordinate-feature-widget");
             var point = view.toMap({ x: event.x, y: event.y });
             var mp: Point = webMercatorUtils.webMercatorToGeographic(point) as Point;
@@ -159,14 +160,31 @@ export function pointerMoveHandlers(view: SceneView | MapView) {
             }
         });
 
-        // Listen for the pointer-move event on the View
-        view.on("pointer-move", (event) => {
-            debouncedUpdate(event).catch((err) => {
-                if (!promiseUtils.isAbortError(err)) {
-                    throw err;
-                }
+        const mobile = view.heightBreakpoint === "xsmall" && view.widthBreakpoint === "xsmall";
+
+
+        // track pointer movements while not on mobile and update the feature widget
+        if (!mobile) {
+            // Listen for the pointer-move event on the View
+            view.on("pointer-move", (event) => {
+                debouncedUpdate(event).catch((err) => {
+                    if (!promiseUtils.isAbortError(err)) {
+                        throw err;
+                    }
+                });
             });
-        });
+        }
+
+        // track click events while on mobile and update the feature widget
+        if (mobile) {
+            view.on("click", (event) => {
+                debouncedUpdate(event).catch((err) => {
+                    if (!promiseUtils.isAbortError(err)) {
+                        throw err;
+                    }
+                });
+            });
+        }
 
     });
 
