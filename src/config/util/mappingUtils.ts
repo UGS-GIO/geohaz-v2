@@ -140,94 +140,94 @@ export function setPopupAlignment(view: SceneView | MapView) {
     });
 }
 
-export function pointerMoveHandlers(view: SceneView | MapView) {
+// export function pointerMoveHandlers(view: SceneView | MapView) {
 
-    view.when().then(() => {
-        // Set up the feature widget to display coordinates
-        const debouncedUpdate = promiseUtils.debounce(async (event: __esri.ViewPointerMoveEvent | __esri.ViewClickEvent) => {
-            const feature = view.ui.find("coordinate-feature-widget");
-            var point = view.toMap({ x: event.x, y: event.y });
-            var mp: Point = webMercatorUtils.webMercatorToGeographic(point) as Point;
+//     view.when().then(() => {
+//         // Set up the feature widget to display coordinates
+//         const debouncedUpdate = promiseUtils.debounce(async (event: __esri.ViewPointerMoveEvent | __esri.ViewClickEvent) => {
+//             const feature = view.ui.find("coordinate-feature-widget");
+//             var point = view.toMap({ x: event.x, y: event.y });
+//             var mp: Point = webMercatorUtils.webMercatorToGeographic(point) as Point;
 
-            if (feature) {
-                const typedFeature = feature as Feature;
-                typedFeature.graphic = new Graphic({
-                    popupTemplate: {
-                        title: "Coordinates",
-                        content: `Lat: ${mp?.y.toFixed(3)}, Lon: ${mp?.x.toFixed(3)}`
-                    },
-                });
-            }
-        });
+//             if (feature) {
+//                 const typedFeature = feature as Feature;
+//                 typedFeature.graphic = new Graphic({
+//                     popupTemplate: {
+//                         title: "Coordinates",
+//                         content: `Lat: ${mp?.y.toFixed(3)}, Lon: ${mp?.x.toFixed(3)}`
+//                     },
+//                 });
+//             }
+//         });
 
-        const mobile = view.heightBreakpoint === "xsmall" && view.widthBreakpoint === "xsmall";
+//         const mobile = view.heightBreakpoint === "xsmall" && view.widthBreakpoint === "xsmall";
 
 
-        // track pointer movements while not on mobile and update the feature widget
-        if (!mobile) {
-            // Listen for the pointer-move event on the View
-            view.on("pointer-move", (event) => {
-                debouncedUpdate(event).catch((err) => {
-                    if (!promiseUtils.isAbortError(err)) {
-                        throw err;
-                    }
-                });
-            });
-        }
+//         // track pointer movements while not on mobile and update the feature widget
+//         if (!mobile) {
+//             // Listen for the pointer-move event on the View
+//             view.on("pointer-move", (event) => {
+//                 debouncedUpdate(event).catch((err) => {
+//                     if (!promiseUtils.isAbortError(err)) {
+//                         throw err;
+//                     }
+//                 });
+//             });
+//         }
 
-        // track click events while on mobile and update the feature widget
-        if (mobile) {
-            view.on("click", (event) => {
-                debouncedUpdate(event).catch((err) => {
-                    if (!promiseUtils.isAbortError(err)) {
-                        throw err;
-                    }
-                });
-            });
-        }
+//         // track click events while on mobile and update the feature widget
+//         if (mobile) {
+//             view.on("click", (event) => {
+//                 debouncedUpdate(event).catch((err) => {
+//                     if (!promiseUtils.isAbortError(err)) {
+//                         throw err;
+//                     }
+//                 });
+//             });
+//         }
 
-    });
+//     });
 
-}
+// }
 
-export function expandClickHandlers(view: SceneView | MapView) {
-    view.when().then(() => {
-        const bgExpand = view.ui.find("basemap-gallery-expand") as Expand | undefined;
+// export function expandClickHandlers(view: SceneView | MapView) {
+//     view.when().then(() => {
+//         const bgExpand = view.ui.find("basemap-gallery-expand") as Expand | undefined;
 
-        if (bgExpand) {
-            bgExpand.when().then(() => {
-                const basemapGallery = bgExpand?.content as BasemapGallery;
-                // Watch for changes on the active basemap and collapse the expand widget if the view is mobile size
-                reactiveUtils.watch(
-                    () => basemapGallery.activeBasemap,
-                    () => {
-                        const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
-                        if (mobileSize) {
-                            bgExpand.collapse();
-                        }
-                    }
-                );
-            });
-        }
+//         if (bgExpand) {
+//             bgExpand.when().then(() => {
+//                 const basemapGallery = bgExpand?.content as BasemapGallery;
+//                 // Watch for changes on the active basemap and collapse the expand widget if the view is mobile size
+//                 reactiveUtils.watch(
+//                     () => basemapGallery.activeBasemap,
+//                     () => {
+//                         const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
+//                         if (mobileSize) {
+//                             bgExpand.collapse();
+//                         }
+//                     }
+//                 );
+//             });
+//         }
 
-        // Debounce the update to prevent the expand widget from opening and closing rapidly
-        const debouncedUpdate = promiseUtils.debounce(async () => {
-            if (bgExpand) {
-                const typedExpand = bgExpand as Expand;
-                typedExpand.collapse();
-            }
-        });
+//         // Debounce the update to prevent the expand widget from opening and closing rapidly
+//         const debouncedUpdate = promiseUtils.debounce(async () => {
+//             if (bgExpand) {
+//                 const typedExpand = bgExpand as Expand;
+//                 typedExpand.collapse();
+//             }
+//         });
 
-        const handleEvent = () => {
-            debouncedUpdate().catch((err) => {
-                if (!promiseUtils.isAbortError(err)) {
-                    console.error(err);
-                }
-            });
-        };
+//         const handleEvent = () => {
+//             debouncedUpdate().catch((err) => {
+//                 if (!promiseUtils.isAbortError(err)) {
+//                     console.error(err);
+//                 }
+//             });
+//         };
 
-        view.on("click", handleEvent);
-        view.on("double-click", handleEvent);
-        view.on("drag", handleEvent);
-    });
-}
+//         view.on("click", handleEvent);
+//         view.on("double-click", handleEvent);
+//         view.on("drag", handleEvent);
+//     });
+// }

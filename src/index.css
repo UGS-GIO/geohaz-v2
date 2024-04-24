@@ -19,6 +19,8 @@ body {
   line-height: 1.5;
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* Fix Tailwind unsetting Calcite borders */
@@ -55,4 +57,17 @@ calcite-segmented-control-item[aria-checked="true"] {
     "calt" 0;
   background: #fff;
   padding: 1em;
+}
+
+.mouse-info {
+  display: inline-block;
+  position: absolute;
+  bottom:20px;
+  left:50%;
+  text-align: center;
+  font-family: 'Open Sans SemiBold';
+  font-size: 10pt;
+  color: #fff;
+  text-shadow: 0 0 3px #000,0 0 3px #000,0 0 3px #000;
+  filter: glow(color=black,strength=1);
 }

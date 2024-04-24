@@ -12,17 +12,17 @@ import { MapContext } from '../../contexts/MapProvider';
 const MapWidgets: React.FC = () => {
     const { view } = useContext(MapContext);
 
-    const coordinateFeatureConfig = {
-        id: 'coordinate-feature-widget',
-        graphic: {
-            popupTemplate: {
-                title: 'Coordinates',
-                content: 'Mouse over the map to show coordinates...'
-            }
-        },
-        map: view?.map,
-        spatialReference: view?.spatialReference
-    };
+    // const coordinateFeatureConfig = {
+    //     id: 'coordinate-feature-widget',
+    //     graphic: {
+    //         popupTemplate: {
+    //             title: 'Coordinates',
+    //             content: 'Mouse over the map to show coordinates...'
+    //         }
+    //     },
+    //     map: view?.map,
+    //     spatialReference: view?.spatialReference
+    // };
 
     const expandConfig = {
         id: 'basemap-gallery-expand',
@@ -37,11 +37,11 @@ const MapWidgets: React.FC = () => {
     useArcGISWidget([
         { WrappedWidget: Home, position: 'top-left' },
         { WrappedWidget: Locate, position: 'top-left' },
-        {
-            WrappedWidget: Feature, // mouse over the map to show coordinates
-            position: 'bottom-right',
-            config: coordinateFeatureConfig
-        },
+        // {
+        //     WrappedWidget: Feature, // mouse over the map to show coordinates
+        //     position: 'bottom-right',
+        //     config: coordinateFeatureConfig
+        // },
         {
             WrappedWidget: Expand,
             position: 'top-right',

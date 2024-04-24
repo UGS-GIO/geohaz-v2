@@ -24,8 +24,8 @@ export function App() {
   return (
     <div style={{ colorScheme: theme }} className={`${theme}`}>
       <CalciteShell className={`calcite-mode-${theme} bg-dotted`}>
-        <Toolbar />
-        <Header />
+        {/* <Toolbar /> */}
+        {/* <Header /> */}
         <FullScreenMap />
       </CalciteShell>
     </div>

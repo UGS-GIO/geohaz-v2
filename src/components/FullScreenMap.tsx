@@ -1,6 +1,7 @@
 import { useRef, useEffect, useContext } from 'react'
 import { MapContext } from '../contexts/MapProvider'
 import MapWidgets from './widgets/MapWidgets'
+import MouseInfo from './widgets/MouseInfo'
 
 function FullScreenMap() {
   const mapRef = useRef(null)
@@ -13,8 +14,9 @@ function FullScreenMap() {
 
   }, [mapRef, loadMap])
 
-  return <div ref={mapRef} style={{ height: '100vh', width: '100%' }}>
+  return <div ref={mapRef} style={{ height: '100%', width: '100%' }}>
     <MapWidgets />
+    <MouseInfo />
   </div>
 }
 

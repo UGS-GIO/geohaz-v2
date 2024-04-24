@@ -1,8 +1,10 @@
 import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
+import Map from '@arcgis/core/Map'
 import layers from '../config/layers'
 import { MapApp, MapImageLayerRenderer, MapImageLayerType, RegularLayerRenderer } from './types/mappingTypes'
-import { addLayersToMap, createMap, createView, expandClickHandlers, pointerMoveHandlers, setPopupAlignment } from './util/mappingUtils'
+import { addLayersToMap, createMap, createView, setPopupAlignment } from './util/mappingUtils'
+import Color from '@arcgis/core/Color'
 
 // Create a global app object to store the view
 const app: MapApp = {}
@@ -106,10 +108,38 @@ export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): S
     // }
 
     // Create a new map and view
-    const map = createMap()
+    // const map = createMap()
+    const map = new Map({
+        basemap: 'topo-vector',
+    });
+
+    // console.log('map', map);
 
     // Create the view
-    const view = createView(container, map, initialView)
+    // const view = createView(container, map, initialView)
+    const view = new MapView({
+        container: container,
+        map: map,
+        zoom: 8,
+        center: [-112, 39.5],
+        highlightOptions: {
+            color: new Color([255, 255, 0, 1]),
+            haloColor: new Color("white"),
+            haloOpacity: 0.9,
+            fillOpacity: 0.2
+        }
+    });
+
+    console.log("height and width", view.heightBreakpoint, view.widthBreakpoint, view.width, view.height, view.ready)
+
+    // console.log('view', view);
+
+    // const { heightBreakpoint, widthBreakpoint } = view;
+    // const { height, width, ready } = view;
+
+    // console.log('height, width', heightBreakpoint, widthBreakpoint, width, height, ready);
+    // console.log("heigt wiedth another way", view.heightBreakpoint, view.widthBreakpoint, view.width, view.height, view.ready)
+
 
     // Add layers to the map
     addLayersToMap(map, layers)
@@ -117,9 +147,9 @@ export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): S
     // prevent collision with the edges of the view
     setPopupAlignment(view);
     // track pointer movements
-    pointerMoveHandlers(view);
-    // expand widget handler
-    expandClickHandlers(view);
+    // pointerMoveHandlers(view);
+    // // expand widget handler
+    // expandClickHandlers(view);
 
     return view
 }
