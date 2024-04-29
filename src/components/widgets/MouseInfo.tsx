@@ -14,10 +14,6 @@ const MouseInfo = ({ view }: { view: MapView | SceneView }) => {
     const [scale, setScale] = useState<string>('');
     const [mobile, setMobile] = useState<boolean>(false);
 
-    console.log('help', view);
-
-
-
     useEffect(() => {
         if (!view) {
             return;
