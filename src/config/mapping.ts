@@ -1,4 +1,5 @@
 import SceneView from '@arcgis/core/views/SceneView'
+import config from '@arcgis/core/config';
 import MapView from '@arcgis/core/views/MapView'
 import Map from '@arcgis/core/Map'
 import layers from '../config/layers'
@@ -101,11 +102,11 @@ const handleFeatureLayer = async (layer: __esri.FeatureLayer, renderers: Regular
 
 export const findLayerById = (layers: __esri.Collection<__esri.ListItem>, id: string) => { const flatLayers = layers.flatten(layer => layer.children || []); return flatLayers.find(layer => String(layer.layer.id) === String(id)); };
 
-export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): SceneView | MapView {
+export function init(container: HTMLDivElement, initialView?: 'map' | 'scene'): SceneView | MapView {
     // // Destroy the view if it exists
-    // if (app.view) {
-    //     app.view.destroy()
-    // }
+    if (app.view) {
+        app.view.destroy()
+    }
 
     // Create a new map and view
     // const map = createMap()
@@ -116,31 +117,19 @@ export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): S
     // console.log('map', map);
 
     // Create the view
-    // const view = createView(container, map, initialView)
-    const view = new MapView({
-        container: container,
-        map: map,
-        zoom: 8,
-        center: [-112, 39.5],
-        highlightOptions: {
-            color: new Color([255, 255, 0, 1]),
-            haloColor: new Color("white"),
-            haloOpacity: 0.9,
-            fillOpacity: 0.2
-        }
-    });
-
-    console.log("height and width", view.heightBreakpoint, view.widthBreakpoint, view.width, view.height, view.ready)
-
-    // console.log('view', view);
-
-    // const { heightBreakpoint, widthBreakpoint } = view;
-    // const { height, width, ready } = view;
-
-    // console.log('height, width', heightBreakpoint, widthBreakpoint, width, height, ready);
-    // console.log("heigt wiedth another way", view.heightBreakpoint, view.widthBreakpoint, view.width, view.height, view.ready)
-
-
+    const view = createView(container, map, initialView)
+    // const view = new MapView({
+    //     container: container,
+    //     map: map,
+    //     zoom: 8,
+    //     center: [-112, 39.5],
+    //     highlightOptions: {
+    //         color: new Color([255, 255, 0, 1]),
+    //         haloColor: new Color("white"),
+    //         haloOpacity: 0.9,
+    //         fillOpacity: 0.2
+    //     }
+    // });
     // Add layers to the map
     addLayersToMap(map, layers)
 
@@ -153,3 +142,28 @@ export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): S
 
     return view
 }
+
+// config.apiKey = import.meta.env.VITE_API_KEY;
+
+// export function init(container: HTMLDivElement) {
+//     if (app.view) {
+//         app.view.destroy()
+//     }
+
+//     const map = new Map({
+//         basemap: 'topo-vector',
+//     })
+
+//     const view = new MapView({
+//         map,
+//         container,
+//         ui: {
+//             components: ['attribution',]
+//         }
+//     })
+
+//     console.log(view.heightBreakpoint)
+
+
+//     return view;
+// }

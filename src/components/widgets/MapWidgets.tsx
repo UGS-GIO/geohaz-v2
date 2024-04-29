@@ -4,13 +4,29 @@ import useArcGISWidget from '../../hooks/useArcGISWidget';
 import Feature from "@arcgis/core/widgets/Feature.js";
 import Expand from '@arcgis/core/widgets/Expand';
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery.js";
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { MapContext } from '../../contexts/MapProvider';
+import ReactDOM from 'react-dom/client';
+import MouseInfo from './MouseInfo';
 
 
 // ArcGIS JS SDK Widgets that are overlaid on the map
 const MapWidgets: React.FC = () => {
+
     const { view } = useContext(MapContext);
+    useEffect(() => {
+
+        if (view !== undefined) {
+            let widgetNode = document.createElement('div');
+            let widgetRoot = ReactDOM.createRoot(widgetNode);
+            view?.ui.add(widgetNode, 'top-left');
+            widgetRoot.render(<MouseInfo view={view} />);
+            return () => {
+                view?.ui.remove(widgetNode);
+                widgetRoot.unmount();
+            }
+        }
+    }, [view]);
 
     // const coordinateFeatureConfig = {
     //     id: 'coordinate-feature-widget',
