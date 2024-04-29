@@ -1,7 +1,6 @@
 import Home from '@arcgis/core/widgets/Home';
 import Locate from '@arcgis/core/widgets/Locate';
 import useArcGISWidget from '../../hooks/useArcGISWidget';
-import Feature from "@arcgis/core/widgets/Feature.js";
 import Expand from '@arcgis/core/widgets/Expand';
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery.js";
 import { useContext, useEffect } from 'react';
@@ -14,8 +13,8 @@ import MouseInfo from './MouseInfo';
 const MapWidgets: React.FC = () => {
 
     const { view } = useContext(MapContext);
-    useEffect(() => {
 
+    useEffect(() => {
         if (view !== undefined) {
             let widgetNode = document.createElement('div');
             let widgetRoot = ReactDOM.createRoot(widgetNode);
@@ -27,6 +26,10 @@ const MapWidgets: React.FC = () => {
             }
         }
     }, [view]);
+
+
+
+
 
     // const coordinateFeatureConfig = {
     //     id: 'coordinate-feature-widget',
