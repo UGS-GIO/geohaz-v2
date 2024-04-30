@@ -7,8 +7,21 @@ import { useContext, useEffect, useRef } from 'react';
 import { MapContext } from '../../contexts/MapProvider';
 import ReactDOM from 'react-dom/client';
 import MouseInfo from './MouseInfo';
-import MouseInfoPortal from '../../config/portals/MouseInfoPortal';
+import Portal from '../../config/portals/Portal';
 import Feature from '@arcgis/core/widgets/Feature';
+
+// in order to embed the MouseInfo component into the Feature widget, we need to create a portal
+// and attach the MouseInfo component to it
+// this is because the Feature widget only accepts a DOM node as its content
+// and the MouseInfo component is a React component
+// so we need to render the MouseInfo component into a DOM node
+// and then pass that DOM node to the Feature widget
+
+// to do another example, we could create a portal for the BasemapGallery widget
+// and render the BasemapGallery component into this portal
+// then we could pass this portal to the Expand widget as its content
+// and then we could pass the Expand widget to the useArcGISWidget hook
+// and it would render the Expand widget into the view
 
 // ArcGIS JS SDK Widgets that are overlaid on the map
 const MapWidgets: React.FC = () => {
@@ -26,9 +39,9 @@ const MapWidgets: React.FC = () => {
 
             // Render the MouseInfoPortal component with MouseInfo as a child into this root
             root.current.render(
-                <MouseInfoPortal mount={coordinateFeatureRoot.current}>
+                <Portal mount={coordinateFeatureRoot.current}>
                     <MouseInfo view={view} />
-                </MouseInfoPortal>
+                </Portal>
             );
         }
 
@@ -47,7 +60,6 @@ const MapWidgets: React.FC = () => {
             id: 'coordinate-feature-widget',
             graphic: {
                 popupTemplate: {
-                    title: 'Coordinates',
                     content: coordinateFeatureRoot.current // Set the content to the DOM node
                 }
             },

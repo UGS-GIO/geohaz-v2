@@ -60,22 +60,11 @@ calcite-segmented-control-item[aria-checked="true"] {
   padding: 1em;
 }
 
-/* .mouse-info {
-  display: inline-block;
-  position: absolute;
-  bottom:20px;
-  left:50%;
-  text-align: center;
-  font-family: 'Open Sans SemiBold';
-  font-size: 10pt;
-  color: #fff;
-  text-shadow: 0 0 3px #000,0 0 3px #000,0 0 3px #000;
-  filter: glow(color=black,strength=1);
-} */
-
-.mouse-info {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+/* 
+  basic styling for the text inside of a feature widget, 
+  possibly consider using tailwind classes directly in the component, 
+  but i cannot find a way to do that yet
+*/
+.esri-component.esri-feature.esri-widget {
+  background-color: #424242;
 }
