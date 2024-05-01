@@ -16,7 +16,7 @@ const MapWidgets: React.FC = () => {
         id: 'coordinate-feature-widget',
         graphic: {
             popupTemplate: {
-                content: isMobile ? 'Pan around the map to update the coordinates.' : 'Mouse over the map to update the coordinates.'
+                content: isMobile ? '' : 'Mouse over the map to update the coordinates.'
             }
         },
         map: view?.map,
