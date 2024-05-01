@@ -34,7 +34,7 @@ function Info() {
           Open Data Disclaimer
         </CalciteButton>
       </div>
-      <Link text='Contact Webmaster' href='https://google.com/' />
+      <Link text='Contact Webmaster' href='https://geology.utah.gov/about-us/contact-webmaster/' />
       <CalciteModal
         open={modalOpen}
         onCalciteModalClose={() => setModalOpen(false)}
