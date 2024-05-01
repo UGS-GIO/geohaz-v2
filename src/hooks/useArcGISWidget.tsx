@@ -46,10 +46,9 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
     // Function to update the popup template
     const updatePopupTemplate = useCallback(({ widget, xyPoint, scale }: updatePopupTemplateTypes) => {
         widget.graphic.popupTemplate = new PopupTemplate({
-            title: isMobile ? '' : "<b>Coordinates</b>",
             content: `Lat: ${xyPoint.y}, Lon: ${xyPoint.x}<br>Scale: 1:${addCommas(scale.toFixed(0))}`,
         });
-    }, [isMobile]);
+    }, []);
 
 
     // Function to handle zoom events

@@ -11,17 +11,12 @@ import { MapContext } from '../../contexts/MapProvider';
 const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
 
-    const initialLatLon = {
-        longitude: view?.center.longitude.toFixed(3),
-        latitude: view?.center.latitude.toFixed(3)
-    };
 
     const coordinateFeatureConfig = {
         id: 'coordinate-feature-widget',
         graphic: {
             popupTemplate: {
-                title: isMobile ? '' : '<b>Coordinates</b>',
-                content: `<>Lat: ${initialLatLon.latitude}, Lon: ${initialLatLon.longitude}<br>Scale: 1:${view?.scale}</>`
+                content: isMobile ? 'Pan around the map to update the coordinates.' : 'Mouse over the map to update the coordinates.'
             }
         },
         map: view?.map,

@@ -60,14 +60,6 @@ calcite-segmented-control-item[aria-checked="true"] {
   padding: 1em;
 }
 
-/* 
-  we remove the title when isMobile is true, 
-  so we need to remove the margin 
-  544px corresponds to the xsmall breakpoint for in arcgis
-  https://developers.arcgis.com/javascript/latest/api-reference/esri-views-MapView.html#breakpoints
-*/
-@media (max-width: 544px) {
-  h2.esri-widget__heading.esri-feature__title {
+h2.esri-widget__heading.esri-feature__title {
     margin: 0;
   }
-}
