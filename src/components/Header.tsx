@@ -7,7 +7,7 @@ function Header() {
         slot='logo'
         heading='Geologic Hazards Portal'
         description='Utah Geological Survey'
-        thumbnail='/logo_main.png'
+        thumbnail='/logo-main.png'
         target='_blank'
         href='https://geology.utah.gov/'
       />
