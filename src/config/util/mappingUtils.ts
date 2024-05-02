@@ -35,6 +35,9 @@ export const createView = (container: HTMLDivElement, map: Map, viewType: 'map' 
             haloColor: new Color("white"),
             haloOpacity: 0.9,
             fillOpacity: 0.2
+        },
+        ui: {
+            components: ['zoom', 'compass', 'attribution',]
         }
     }
 

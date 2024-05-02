@@ -6,6 +6,7 @@ import Expand from '@arcgis/core/widgets/Expand';
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery.js";
 import { useContext } from 'react';
 import { MapContext } from '../../contexts/MapProvider';
+import Legend from '@arcgis/core/widgets/Legend';
 
 // ArcGIS JS SDK Widgets that are overlaid on the map
 const MapWidgets: React.FC = () => {
@@ -45,7 +46,8 @@ const MapWidgets: React.FC = () => {
             WrappedWidget: Expand,
             position: isMobile ? 'top-left' : 'top-right',
             config: expandConfig
-        }
+        },
+        { WrappedWidget: Legend, position: 'top-left' }
     ]);
 
     return null;
