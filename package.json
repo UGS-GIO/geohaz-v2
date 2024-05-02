@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "tsc && eslint \"src/**/*.ts\"",
     "postinstall": "npm run util:copy-assets",
-    "util:copy-assets": "npx ncp ./node_modules/@esri/calcite-components/dist/calcite/assets/ ./public/assets/ && cp -r src/assets/* public/assets/"
+    "util:copy-assets": "npx ncp ./node_modules/@esri/calcite-components/dist/calcite/assets/ ./public/assets/ && cp -r src/assets/* public/"
   },
   "dependencies": {
     "@arcgis/core": "^4.29.10",
