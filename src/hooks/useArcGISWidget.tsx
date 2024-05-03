@@ -29,6 +29,8 @@ interface updatePopupTemplateTypes {
 function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
     const { view, isMobile } = useContext(MapContext);
     const widgetInstances = useRef(new Map());
+    const lastPointerPosition = useRef<{ x: string, y: string }>({ x: '', y: '' });
+
 
     // Function to create a new widget
     const createWidget = useCallback((WrappedWidget: any, position: UIPositionOptions, config: object) => {
@@ -50,19 +52,33 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
         });
     }, []);
 
+    // Function to handle zoom and center events for mobile
+    const handleMobileViewChange = useCallback(({ view, widget }: FeatureHandleTypes) => {
+        reactiveUtils.watch(() => [view.zoom, view.center],
+            () => {
+                console.log('zoom or center changed');
+                const xyPoint = {
+                    x: view.center.longitude.toFixed(3),
+                    y: view.center.latitude.toFixed(3)
+                }
+                updatePopupTemplate({ widget, xyPoint, scale: view.scale });
+            });
 
-    // Function to handle zoom events
-    const handleZoom = useCallback(({ view, widget }: FeatureHandleTypes) => {
-        return view.watch('zoom', () => {
-            updatePopupTemplate({
-                widget, xyPoint: { x: '', y: '' }, scale: view.scale
-            })
-        });
+        return () => {
+
+        }
+
     }, [updatePopupTemplate]);
 
-    // Function to handle pointer move events
-    const handlePointerMove = useCallback(({ view, widget }: FeatureHandleTypes) => {
-        return view.on("pointer-move", (event: __esri.ViewPointerMoveEvent) => {
+    // Function to handle zoom and pointer move events for non-mobile
+    const handleDesktopViewChange = useCallback(({ view, widget }: FeatureHandleTypes) => {
+        const zoomWatcher = view.watch('zoom', () => {
+            updatePopupTemplate({
+                widget, xyPoint: { x: lastPointerPosition.current.x, y: lastPointerPosition.current.y }, scale: view.scale
+            })
+        });
+
+        const pointerMoveHandler = view.on("pointer-move", (event: __esri.ViewPointerMoveEvent) => {
             const mapPoint = view.toMap({ x: event.x, y: event.y });
             const mp: Point = webMercatorUtils.webMercatorToGeographic(mapPoint) as Point;
 
@@ -71,8 +87,15 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
                 y: mp.y.toFixed(3)
             }
 
+            lastPointerPosition.current = xyPoint; // Store the last pointer position
+
             updatePopupTemplate({ widget, xyPoint: { x: xyPoint.x, y: xyPoint.y }, scale: view.scale });
         });
+
+        return () => {
+            zoomWatcher.remove();
+            pointerMoveHandler.remove();
+        };
     }, [updatePopupTemplate]);
 
     useEffect(() => {
@@ -81,35 +104,17 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
                 const widget = createWidget(WrappedWidget, position, config);
 
                 if (WrappedWidget.name === 'Feature') {
+                    let viewChangeHandler: () => void;
 
-                    let pointerMoveHandler: __esri.Handle | undefined;
-
-                    if (!isMobile) {
-                        pointerMoveHandler = handlePointerMove({ view, widget });
+                    if (isMobile) {
+                        viewChangeHandler = handleMobileViewChange({ view, widget });
+                    } else {
+                        viewChangeHandler = handleDesktopViewChange({ view, widget });
                     }
-
-                    // Watch for changes in zoom level and center of the view
-                    const handle = reactiveUtils.watch(() => [view.zoom, view.center],
-                        () => {
-                            if (isMobile) {
-                                const xyPoint = {
-                                    x: view.center.longitude.toFixed(3),
-                                    y: view.center.latitude.toFixed(3)
-                                }
-
-                                updatePopupTemplate({ widget, xyPoint, scale: view.scale });
-                            }
-                        });
 
                     // Clean up event listeners when the component is unmounted
                     return () => {
-                        if (pointerMoveHandler) {
-                            pointerMoveHandler.remove();
-                        }
-                        if (handle) {
-                            handle.remove();
-                        }
-                        handle.remove();
+                        viewChangeHandler();
                     };
                 }
             });
@@ -124,7 +129,7 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
                 currentWidgetInstances.delete(WrappedWidget);
             });
         }
-    }, [widgets, view, isMobile, createWidget, handleZoom, handlePointerMove, updatePopupTemplate]);
+    }, [widgets, view, isMobile, createWidget, handleMobileViewChange, handleDesktopViewChange, updatePopupTemplate]);
 
     return widgetInstances;
 }
