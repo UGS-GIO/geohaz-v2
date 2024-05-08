@@ -3,7 +3,7 @@ import '@esri/calcite-components/dist/calcite/calcite.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { App } from './App';
+import App from './App';
 import { defineCustomElements } from '@esri/calcite-components/dist/loader';
 import { ThemeProvider } from './contexts/ThemeProvider';
 import { MapProvider } from './contexts/MapProvider';

@@ -80,3 +80,4 @@ export type MapImageLayerType = {
 
 export type GetRenderer = (layerId: string, url: string | undefined) => Promise<RendererProps | undefined>;
 
+export type UIPositionOptions = "bottom-leading" | "bottom-left" | "bottom-right" | "bottom-trailing" | "top-leading" | "top-left" | "top-right" | "top-trailing" | "manual"

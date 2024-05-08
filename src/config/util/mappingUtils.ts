@@ -7,13 +7,18 @@ import Map from '@arcgis/core/Map'
 import MapView from "@arcgis/core/views/MapView";
 import SceneView from "@arcgis/core/views/SceneView";
 import { LayerProps, layerTypeMapping } from "../types/mappingTypes";
+import * as promiseUtils from "@arcgis/core/core/promiseUtils.js";
 import Color from "@arcgis/core/Color";
+import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
+import Expand from "@arcgis/core/widgets/Expand";
+
 
 // Create a new map
 export const createMap = () => {
-    return new Map({
+    const map = new Map({
         basemap: 'topo-vector',
-    })
+    });
+    return map;
 }
 
 // Create a new view
@@ -56,7 +61,6 @@ export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
 function createLayerFromUrl(layer: LayerProps, LayerType: any) {
     // Create a layer based on the layer props
     if ('url' in layer) {
-
         return new LayerType({
             url: layer.url,
             ...layer.options,
@@ -129,5 +133,47 @@ export function setPopupAlignment(view: SceneView | MapView) {
 
             return "top-center";
         };
+    });
+}
+
+export function expandClickHandlers(view: SceneView | MapView) {
+    view.when().then(() => {
+        const bgExpand = view.ui.find("basemap-gallery-expand") as Expand | undefined;
+
+        if (bgExpand) {
+            bgExpand.when().then(() => {
+                const basemapGallery = bgExpand?.content as BasemapGallery;
+                // Watch for changes on the active basemap and collapse the expand widget if the view is mobile size
+                reactiveUtils.watch(
+                    () => basemapGallery.activeBasemap,
+                    () => {
+                        const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
+                        if (mobileSize) {
+                            bgExpand.collapse();
+                        }
+                    }
+                );
+            });
+        }
+
+        // Debounce the update to prevent the expand widget from opening and closing rapidly
+        const debouncedUpdate = promiseUtils.debounce(async () => {
+            if (bgExpand) {
+                const typedExpand = bgExpand as Expand;
+                typedExpand.collapse();
+            }
+        });
+
+        const handleEvent = () => {
+            debouncedUpdate().catch((err) => {
+                if (!promiseUtils.isAbortError(err)) {
+                    console.error(err);
+                }
+            });
+        };
+
+        view.on("click", handleEvent);
+        view.on("double-click", handleEvent);
+        view.on("drag", handleEvent);
     });
 }

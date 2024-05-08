@@ -2,7 +2,7 @@ import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
 import layers from '../config/layers'
 import { MapApp, MapImageLayerRenderer, MapImageLayerType, RegularLayerRenderer } from './types/mappingTypes'
-import { addLayersToMap, createMap, createView, setPopupAlignment } from './util/mappingUtils'
+import { addLayersToMap, createMap, createView, setPopupAlignment, expandClickHandlers } from './util/mappingUtils'
 
 // Create a global app object to store the view
 const app: MapApp = {}
@@ -99,11 +99,11 @@ const handleFeatureLayer = async (layer: __esri.FeatureLayer, renderers: Regular
 
 export const findLayerById = (layers: __esri.Collection<__esri.ListItem>, id: string) => { const flatLayers = layers.flatten(layer => layer.children || []); return flatLayers.find(layer => String(layer.layer.id) === String(id)); };
 
-export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): SceneView | MapView {
+export function init(container: HTMLDivElement, initialView?: 'map' | 'scene'): SceneView | MapView {
     // // Destroy the view if it exists
-    // if (app.view) {
-    //     app.view.destroy()
-    // }
+    if (app.view) {
+        app.view.destroy()
+    }
 
     // Create a new map and view
     const map = createMap()
@@ -116,6 +116,9 @@ export function init(container: HTMLDivElement, initialView: 'map' | 'scene'): S
 
     // prevent collision with the edges of the view
     setPopupAlignment(view);
+
+    // // expand widget handler
+    expandClickHandlers(view);
 
     return view
 }

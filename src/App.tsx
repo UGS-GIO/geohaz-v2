@@ -22,12 +22,12 @@ export function App() {
   }, [theme])
 
   return (
-    <div style={{ colorScheme: theme }} className={`${theme}`}>
-      <CalciteShell className={`calcite-mode-${theme} bg-dotted`}>
-        <Toolbar />
-        <Header />
-        <FullScreenMap />
-      </CalciteShell>
-    </div>
+    <CalciteShell className={`calcite-mode-${theme} bg-dotted`}>
+      <Toolbar />
+      <Header />
+      <FullScreenMap />
+    </CalciteShell>
   )
 }
+
+export default App

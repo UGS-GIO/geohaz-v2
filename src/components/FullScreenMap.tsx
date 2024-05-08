@@ -1,21 +1,22 @@
-import { useRef, useEffect, useContext } from 'react'
 import { MapContext } from '../contexts/MapProvider'
-import MapWidgets from './widgets/MapWidgets'
 
-function FullScreenMap() {
-  const mapRef = useRef(null)
+
+import { useContext, useEffect, useRef } from "react";
+import MapWidgets from './widgets/MapWidgets';
+
+export default function ArcGISMap() {
+  const mapRef = useRef<HTMLDivElement>(null);
   const { loadMap } = useContext(MapContext)
 
   useEffect(() => {
     if (mapRef.current && loadMap) {
-      loadMap(mapRef.current as HTMLDivElement)
+      loadMap(mapRef.current);
     }
+  }, [mapRef, loadMap]);
 
-  }, [mapRef, loadMap])
-
-  return <div ref={mapRef} style={{ height: '100vh', width: '100%' }}>
-    <MapWidgets />
-  </div>
+  return (
+    <div className="w-full h-full" ref={mapRef}>
+      <MapWidgets />
+    </div>
+  );
 }
-
-export default FullScreenMap
