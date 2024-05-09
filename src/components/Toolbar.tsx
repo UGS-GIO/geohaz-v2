@@ -18,7 +18,7 @@ export function Toolbar() {
   const { setTheme, theme } = useTheme()
   return (
     <CalciteShellPanel
-      widthScale='l'
+      widthScale='m'
       slot='panel-start'
       position='start'
       collapsed={shellPanelCollapsed}
