@@ -31,7 +31,6 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
     const widgetInstances = useRef(new Map());
     const lastPointerPosition = useRef<{ x: string, y: string }>({ x: '', y: '' });
 
-
     // Function to create a new widget
     const createWidget = useCallback((WrappedWidget: any, position: UIPositionOptions, config: object) => {
         const widget = new WrappedWidget({
@@ -39,10 +38,11 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
             ...config
         });
 
-        widgetInstances.current.set(WrappedWidget, widget);
+        const widgetId = Symbol(WrappedWidget.name);
+        widgetInstances.current.set(widgetId, widget);
         view?.ui.add(widget, position);
 
-        return widget;
+        return { widget, widgetId };
     }, [view]);
 
     // Function to update the popup template
@@ -56,7 +56,6 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
     const handleMobileViewChange = useCallback(({ view, widget }: FeatureHandleTypes) => {
         reactiveUtils.watch(() => [view.zoom, view.center],
             () => {
-                console.log('zoom or center changed');
                 const xyPoint = {
                     x: view.center.longitude.toFixed(3),
                     y: view.center.latitude.toFixed(3)
@@ -99,9 +98,13 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
     }, [updatePopupTemplate]);
 
     useEffect(() => {
+        const widgetIds = new Set<symbol>();
+        let widgetRefValue: Map<symbol, any> | null = null;
         if (view) {
             widgets.forEach(({ WrappedWidget, position = "top-left", config = {} }) => {
-                const widget = createWidget(WrappedWidget, position, config);
+                const { widget, widgetId } = createWidget(WrappedWidget, position, config);
+                widgetRefValue = widgetInstances.current
+                widgetIds.add(widgetId);
 
                 if (WrappedWidget.name === 'Feature') {
                     let viewChangeHandler: () => void;
@@ -112,7 +115,6 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
                         viewChangeHandler = handleDesktopViewChange({ view, widget });
                     }
 
-                    // Clean up event listeners when the component is unmounted
                     return () => {
                         viewChangeHandler();
                     };
@@ -120,13 +122,13 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
             });
         }
 
-        // Capture the current value of widgetInstances.current in a closure
-        const currentWidgetInstances = widgetInstances.current;
-
+        // Cleanup
         return () => {
-            currentWidgetInstances.forEach((widget, WrappedWidget) => {
+            widgetIds.forEach((widgetId) => {
+                const widget = widgetRefValue?.get(widgetId); // Use widgetRefValue instead of widgetInstances.current
                 view?.ui.remove(widget);
-                currentWidgetInstances.delete(WrappedWidget);
+
+                widgetRefValue?.delete(widgetId); // Use widgetRefValue instead of widgetInstances.current
             });
         }
     }, [widgets, view, isMobile, createWidget, handleMobileViewChange, handleDesktopViewChange, updatePopupTemplate]);
