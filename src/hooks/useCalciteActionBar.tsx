@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { CalciteAction } from '@esri/calcite-components-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useNavigation } from '../contexts/NavigationContext';
 
 export type ActionItem = {
   name: string;
   icon: string;
-  code?: () => Promise<typeof import('*?raw')>;
   component: React.LazyExoticComponent<() => JSX.Element>;
 };
 
@@ -14,12 +15,11 @@ type UseCalciteActionBarProps = {
   shellPanelCollapsed: boolean;
 };
 
-// This hook is used to dynamically create the action bar buttons and handle the state of the action bar
 export function useCalciteActionBar(
   items: ActionItem[],
   defaultValue: ActionItem['name'] | undefined
 ): UseCalciteActionBarProps {
-  const [currentActionName, setCurrentActionName] = useState<string | undefined>(defaultValue);
+  const { currentActionName, setCurrentActionName } = useNavigation();
   const [shellPanelCollapsed, setShellPanelCollapsed] = useState<boolean>(true);
 
   // handle the click event for the action buttons
