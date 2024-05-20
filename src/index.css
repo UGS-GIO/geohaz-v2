@@ -38,19 +38,16 @@ calcite-button {
 }
 
 /* customize the data-disclaimer-button for light and dark mode */
-/* Inverted light mode colors */
 .calcite-mode-light #data-disclaimer-button {
-  --calcite-ui-brand: #dedede; /* Inverted brand color */
-  --calcite-ui-brand-hover: #d1d1d1; /* Inverted hover color */
-  --calcite-ui-brand-press: #d1d1d1; /* Inverted press color */
+  --calcite-ui-brand: #dedede;
+  --calcite-ui-brand-hover: #d1d1d1;
+  --calcite-ui-brand-press: #d1d1d1;
   --calcite-ui-text-inverse: #000000
 }
-
-/* Inverted dark mode colors */
 .calcite-mode-dark #data-disclaimer-button {
-  --calcite-ui-brand: #d1d1d1; /* Inverted brand color */
-  --calcite-ui-brand-hover: #bdbdbd; /* Inverted hover color */
-  --calcite-ui-brand-press: #bdbdbd; /* Inverted press color */
+  --calcite-ui-brand: #d1d1d1; 
+  --calcite-ui-brand-hover: #bdbdbd;
+  --calcite-ui-brand-press: #bdbdbd;
   --calcite-ui-text-inverse: #000000
 }
 
