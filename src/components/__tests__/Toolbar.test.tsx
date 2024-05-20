@@ -1,11 +1,12 @@
 import { test } from 'vitest'
 import { render, fireEvent } from '@testing-library/react'
 import Toolbar from '../Toolbar'
+import { NavigationProvider } from '../../contexts/NavigationContext'
 
 let container: HTMLElement
 
 beforeEach(() => {
-    const result = render(<Toolbar />)
+    const result = render(<NavigationProvider><Toolbar /></NavigationProvider>)
     container = result.container
 })
 
