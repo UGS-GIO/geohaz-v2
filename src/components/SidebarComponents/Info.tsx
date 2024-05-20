@@ -36,7 +36,7 @@ function Info() {
           Start Exploring
         </CalciteButton>
         <CalciteButton
-          className='white-orange-button'
+          id='data-disclaimer-button'
           alignment='center'
           onClick={() => setModalOpen(!modalOpen)}
         >
