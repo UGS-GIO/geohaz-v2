@@ -3,7 +3,7 @@ import {
 } from '@esri/calcite-components-react';
 import useCustomLayerList from '../../hooks/useCustomLayerList';
 
-const Layers: React.FC = () => {
+function Layers() {
   const layerList = useCustomLayerList();
 
   if (!layerList?.length) {

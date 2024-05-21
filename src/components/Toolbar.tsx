@@ -12,7 +12,7 @@ const actionItems: ActionItem[] = [
 ];
 
 export function Toolbar() {
-  const { currentAction, actions, shellPanelCollapsed } = useCalciteActionBar(actionItems, undefined);
+  const { currentAction, actions, shellPanelCollapsed } = useCalciteActionBar(actionItems, 'Info');
   const { setTheme, theme } = useTheme();
   return (
     <CalciteShellPanel widthScale='m' slot='panel-start' position='start' collapsed={shellPanelCollapsed}>
