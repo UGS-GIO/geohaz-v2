@@ -1,10 +1,10 @@
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { CalciteAction } from '@esri/calcite-components-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useNavigation } from '../contexts/NavigationContext';
 
 export type ActionItem = {
   name: string;
   icon: string;
-  code?: () => Promise<typeof import('*?raw')>;
   component: React.LazyExoticComponent<() => JSX.Element>;
 };
 
@@ -14,28 +14,35 @@ type UseCalciteActionBarProps = {
   shellPanelCollapsed: boolean;
 };
 
-// This hook is used to dynamically create the action bar buttons and handle the state of the action bar
 export function useCalciteActionBar(
   items: ActionItem[],
-  defaultValue: ActionItem['name'] | undefined
+  defaultValue: ActionItem['name']
 ): UseCalciteActionBarProps {
-  const [currentActionName, setCurrentActionName] = useState<string | undefined>(defaultValue);
+  const { currentActionName, setCurrentActionName } = useNavigation();
   const [shellPanelCollapsed, setShellPanelCollapsed] = useState<boolean>(true);
 
-  // handle the click event for the action buttons
+  // Initialize the current action name with the default value if not already set
+  useEffect(() => {
+    if (!currentActionName && defaultValue) {
+      setCurrentActionName(defaultValue);
+      setShellPanelCollapsed(false);
+    }
+  }, [currentActionName, defaultValue, setCurrentActionName]);
+
+  // Handle the click event for the action buttons
   const handleClick = useCallback((item: ActionItem) => {
     const isActive = currentActionName === item.name;
     setShellPanelCollapsed(isActive);
     setCurrentActionName(isActive ? undefined : item.name);
   }, [currentActionName, setShellPanelCollapsed, setCurrentActionName]);
 
-  // determine which action is currently active
+  // Determine which action is currently active
   const currentAction = useMemo(
     () => items.find((example) => example.name === currentActionName),
     [currentActionName, items]
   );
 
-  // dynamically create the action buttons
+  // Dynamically create the action buttons
   const actions = useMemo(
     () =>
       items.map((item) => (

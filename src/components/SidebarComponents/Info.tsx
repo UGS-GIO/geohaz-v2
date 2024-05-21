@@ -6,9 +6,11 @@ import {
   CalciteModal,
 } from '@esri/calcite-components-react'
 import { Link } from '../shared'
+import { useNavigation } from '../../contexts/NavigationContext';
 
 function Info() {
   const [modalOpen, setModalOpen] = useState(false)
+  const { setCurrentActionName } = useNavigation();
 
   return (
     <CalcitePanel>
@@ -26,8 +28,15 @@ function Info() {
       <CalciteBlock open heading='Data Sources'>
         <p className="mb-2">The data used in this map is from the following sources: lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
       </CalciteBlock>
-      <div className='text-start my-2 mx-2'>
+      <div className='flex justify-between my-2 mx-2'>
         <CalciteButton
+          alignment='center'
+          onClick={() => setCurrentActionName('Layers')}
+        >
+          Start Exploring
+        </CalciteButton>
+        <CalciteButton
+          id='data-disclaimer-button'
           alignment='center'
           onClick={() => setModalOpen(!modalOpen)}
         >

@@ -1,11 +1,12 @@
 import { test } from 'vitest'
 import { render, fireEvent } from '@testing-library/react'
 import Toolbar from '../Toolbar'
+import { NavigationProvider } from '../../contexts/NavigationContext'
 
 let container: HTMLElement
 
 beforeEach(() => {
-    const result = render(<Toolbar />)
+    const result = render(<NavigationProvider><Toolbar /></NavigationProvider>)
     container = result.container
 })
 
@@ -20,10 +21,10 @@ test('renders Info button', () => {
     expect(infoButton).toBeInTheDocument()
 })
 
-// test that the first button is not active by default
-test('Info button is not active by default', () => {
+// test that the Info panel is active by default
+test('Info button is active by default', () => {
     const infoButton = container.querySelector('calcite-action[text="Info"]')
-    expect(infoButton).not.toHaveAttribute('active', 'true')
+    expect(infoButton).toHaveAttribute('active', 'true')
 })
 
 // test that clicking first button triggers the correct action
@@ -58,10 +59,10 @@ test('clicking the Layers button triggers the correct action', () => {
     expect(infoButton).not.toHaveAttribute('active', 'true')
 })
 
-// test if shellPanelCollapsed is true, the panel is collapsed on page load
+// on page load, we should see shellPanelCollapsed as false since the default value is 'Info'
 test('if shellPanelCollapsed is true, the panel is collapsed', () => {
     const panel = container.querySelector('calcite-shell-panel')
-    expect(panel).toHaveAttribute('collapsed', 'true')
+    expect(panel).toHaveAttribute('collapsed', 'false')
 })
 
 // test if clicking the Info button toggles the panel

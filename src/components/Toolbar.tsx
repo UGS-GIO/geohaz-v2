@@ -1,4 +1,5 @@
-import React, { lazy } from 'react'
+// src/components/Toolbar.tsx
+import React, { lazy } from 'react';
 import { CalciteAction, CalciteActionBar, CalciteActionGroup, CalciteShellPanel } from '@esri/calcite-components-react';
 import { useCalciteActionBar, ActionItem } from '../hooks/useCalciteActionBar';
 import { useTheme } from '../contexts/ThemeProvider';
@@ -11,18 +12,10 @@ const actionItems: ActionItem[] = [
 ];
 
 export function Toolbar() {
-  const { currentAction, actions, shellPanelCollapsed } = useCalciteActionBar(
-    actionItems,
-    undefined
-  );
-  const { setTheme, theme } = useTheme()
+  const { currentAction, actions, shellPanelCollapsed } = useCalciteActionBar(actionItems, 'Info');
+  const { setTheme, theme } = useTheme();
   return (
-    <CalciteShellPanel
-      widthScale='m'
-      slot='panel-start'
-      position='start'
-      collapsed={shellPanelCollapsed}
-    >
+    <CalciteShellPanel widthScale='m' slot='panel-start' position='start' collapsed={shellPanelCollapsed}>
       <CalciteActionBar slot='action-bar'>
         <CalciteActionGroup>
           {actions}
@@ -40,4 +33,4 @@ export function Toolbar() {
   );
 }
 
-export default Toolbar
+export default Toolbar;

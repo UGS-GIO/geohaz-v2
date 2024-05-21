@@ -7,6 +7,7 @@ import App from './App';
 import { defineCustomElements } from '@esri/calcite-components/dist/loader';
 import { ThemeProvider } from './contexts/ThemeProvider';
 import { MapProvider } from './contexts/MapProvider';
+import { NavigationProvider } from './contexts/NavigationContext';
 
 
 // Create a root element for the application
@@ -22,11 +23,13 @@ defineCustomElements(window);
 root.render(
   <StrictMode>
     <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <MapProvider>
-          <App />
-        </MapProvider>
-      </QueryClientProvider>
+      <NavigationProvider>
+        <QueryClientProvider client={queryClient}>
+          <MapProvider>
+            <App />
+          </MapProvider>
+        </QueryClientProvider>
+      </NavigationProvider>
     </ThemeProvider>
   </StrictMode>
 );
