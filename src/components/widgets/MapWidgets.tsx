@@ -17,7 +17,6 @@ import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
 
 
-
 // ArcGIS JS SDK Widgets that are overlaid on the map
 const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
@@ -95,11 +94,11 @@ const MapWidgets: React.FC = () => {
 
                         // Check if a specific suggestion has been selected
                         // If a suggestion was selected (versus just pressing enter on the search box), a sourceIndex will be included in the params
-                        if (params.sourceIndex !== undefined) {
+                        if (params.suggestResult.sourceIndex) {
                             const searchTerm = params.suggestResult.key ? params.suggestResult.key : '';
                             url += `?search_key=${encodeURIComponent(searchTerm)}`;
                         } else {
-                            const searchTerm = params.suggestResult.text
+                            const searchTerm = params.suggestResult.text ? params.suggestResult.text : '';
                             url += `?search_term=${encodeURIComponent(searchTerm)}`;
                         }
 
