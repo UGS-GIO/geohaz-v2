@@ -8,14 +8,19 @@ import { useContext } from 'react';
 import { MapContext } from '../../contexts/MapProvider';
 import Legend from '@arcgis/core/widgets/Legend';
 import Search from '@arcgis/core/widgets/Search';
-import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
-import { poopTemplate } from '../../config/popups';
 import Extent from "@arcgis/core/geometry/Extent.js";
+import SearchSource from "@arcgis/core/widgets/Search/SearchSource.js";
+import Graphic from "@arcgis/core/Graphic.js";
+import Polyline from "@arcgis/core/geometry/Polyline.js";
+import Color from "@arcgis/core/Color.js";
+import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
+import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
+
+
 
 // ArcGIS JS SDK Widgets that are overlaid on the map
 const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
-
 
     const coordinateFeatureConfig = {
         id: 'coordinate-feature-widget',
@@ -67,27 +72,76 @@ const MapWidgets: React.FC = () => {
                         })
                     },
                 } as __esri.LocatorSearchSourceProperties,
-                {
-                    layer:
-                        new FeatureLayer({
-                            url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults_with_labels/MapServer/0",
-                        }),
-                    exactMatch: false,
-                    displayField: "FaultName",
-                    searchFields: ["FaultZone", "FaultName", "SectionName", "StrandName"],
-                    outFields: ["*"],
-                    name: "Fault Search",
-                    popupTemplate: {
-                        title: "Hazardous (Quaternary age) Faults",
-                        content: poopTemplate
-                    },
+                new SearchSource({
                     placeholder: "ex: Wasatch Fault Zone",
-                    searchTemplate: "{FaultZone}, {FaultName}, {SectionName}, {StrandName}",
-                    suggestionTemplate: "<b>Fault Zone:</b> {FaultZone}, <b>Fault Name:</b> {FaultName}, <b>Section Name:</b> {SectionName}, <b>Strand Name:</b> {StrandName}",
-                    maxSuggestions: 5000,
-                    minSuggestCharacters: 3,
+                    name: "Fault Search",
+                    // Function that executes when user types in the search box
+                    getSuggestions: async (params: { suggestTerm: string, sourceIndex: number }) => {
+                        const response = await fetch(`https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json?search_term=${encodeURIComponent(params.suggestTerm)}`);
+                        const data = await response.json();
 
-                } as __esri.LayerSearchSourceProperties,
+                        return data.features.map((item: any) => {
+                            return {
+                                text: '<b>' + item.properties.concatnames + '</b>',
+                                key: item.properties.concatnames,
+                                sourceIndex: params.sourceIndex,
+                            };
+                        });
+                    },
+                    // Function that executes when user selects a search suggestion or presses enter
+                    getResults: async (params) => {
+                        let url = `https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json`;
+                        console.log({ params });
+
+                        // Check if a specific suggestion has been selected
+                        // If a suggestion was selected (versus just pressing enter on the search box), a sourceIndex will be included in the params
+                        if (params.sourceIndex !== undefined) {
+                            const searchTerm = params.suggestResult.key ? params.suggestResult.key : '';
+                            url += `?search_key=${encodeURIComponent(searchTerm)}`;
+                        } else {
+                            const searchTerm = params.suggestResult.text
+                            url += `?search_term=${encodeURIComponent(searchTerm)}`;
+                        }
+
+
+                        const response = await fetch(url);
+                        const data = await response.json();
+
+                        return data.features.map((item: any) => {
+                            console.log({ 'resultsItem': item });
+
+                            const polyline = new Polyline({
+                                paths: item.geometry.coordinates,
+                                spatialReference: new SpatialReference({
+                                    wkid: 4326 // WGS84 projection
+                                }),
+                            });
+
+                            const simpleLineSymbol = new SimpleLineSymbol({
+                                cap: "round",
+                                color: new Color([0, 122, 194, 1]),
+                                join: "round",
+                                miterLimit: 1,
+                                style: "solid",
+                                width: 1
+                            });
+
+                            const target = new Graphic({
+                                geometry: polyline,
+                                attributes: item.attributes,
+                                symbol: simpleLineSymbol
+                            });
+
+                            return {
+                                // Include extent, feature, name, target
+                                extent: polyline.extent,
+                                name: item.properties.concatnames,
+                                feature: target,
+                                target: target
+                            };
+                        });
+                    },
+                } as __esri.LayerSearchSourceProperties)
             ]
         })
     }
