@@ -113,7 +113,7 @@ const MapWidgets: React.FC = () => {
                             const polyline = new Polyline({
                                 paths: item.geometry.coordinates,
                                 spatialReference: new SpatialReference({
-                                    wkid: 4326 // WGS84 projection
+                                    wkid: 4326
                                 }),
                             });
 
@@ -133,7 +133,6 @@ const MapWidgets: React.FC = () => {
                             });
 
                             return {
-                                // Include extent, feature, name, target
                                 extent: polyline.extent,
                                 name: item.properties.concatnames,
                                 feature: target,
@@ -167,91 +166,3 @@ const MapWidgets: React.FC = () => {
 };
 
 export default MapWidgets;
-
-
-// example of a custom search source below if use case arises
-
-// the default results from the UGRC parcel service are returned in all caps
-// so we need to implement our own custom search source in order to rewrite the
-// suggestions and results to be more user friendly
-
-// const UGRCParcelUrl = 'https://services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services/UtahStatewideParcels/FeatureServer/0/query';
-
-// new SearchSource({
-//     placeholder: "Search for a parcel",
-//     name: "Parcel Search",
-//     // function that executes when user types in the search box
-//     getSuggestions: (params) => {
-//         // Make a request to search for the parcel
-//         return esriRequest(UGRCParcelUrl, {
-//             query: {
-//                 f: "pjson",
-//                 resultRecordCount: 6,
-//                 where: `(PARCEL_ADD LIKE '${params.suggestTerm.replace(/ /g, " ")}%')`,
-//                 outFields: 'PARCEL_ADD,PARCEL_CITY,PARCEL_ZIP,PARCEL_ID,County,OBJECTID',
-//                 outSR: 102100,
-//                 returnGeometry: false,
-//                 spatialRel: "esriSpatialRelIntersects"
-//             },
-//         }).then((results) => {
-//             return results.data.features.map((feature: { attributes: { PARCEL_ADD: string, PARCEL_CITY: string, PARCEL_ZIP: string, County: string, PARCEL_ID: string } }) => {
-//                 const { PARCEL_ADD, PARCEL_CITY, PARCEL_ZIP, County } = feature.attributes;
-//                 const formattedAddress = `${toTitleCase(PARCEL_ADD)}, ${toTitleCase(PARCEL_CITY)}, ${PARCEL_ZIP} - ${toTitleCase(County)}`;
-//                 return {
-//                     key: "name",
-//                     text: `<span class="my-suggest">${formattedAddress}</span>`,
-//                     PARCEL_ID: feature.attributes.PARCEL_ID,
-//                     sourceIndex: params.sourceIndex,
-//                 };
-//             });
-//         });
-//     },
-//     // function that executes when user selects a search suggestion
-//     getResults: async (params) => {
-//         console.log({ params });
-
-//         // Make a request to search for the parcel
-//         const searchResults = await esriRequest(UGRCParcelUrl, {
-//             query: {
-//                 f: "pjson",
-//                 resultRecordCount: 6,
-//                 where: `(PARCEL_ID LIKE '${params.suggestResult.PARCEL_ID.replace(/ /g, " ")}%')`,
-//                 outFields: 'PARCEL_ADD,PARCEL_CITY,PARCEL_ZIP,PARCEL_ID,County,OBJECTID',
-//                 outSR: 102100,
-//                 returnGeometry: true,
-//                 returnZ: true,
-//                 spatialRel: "esriSpatialRelIntersects"
-//             },
-//         });
-//         return searchResults.data.features.map((feature: any) => {
-//             const { PARCEL_ADD, PARCEL_CITY, PARCEL_ZIP, County } = feature.attributes;
-//             const formattedAddress = `${toTitleCase(PARCEL_ADD)}, ${toTitleCase(PARCEL_CITY)}, ${PARCEL_ZIP} - ${toTitleCase(County)}`;
-
-//             const polygon = new Polygon({
-//                 rings: feature.geometry.rings,
-//                 spatialReference: view?.spatialReference
-//             });
-
-//             const graphic = new Graphic({
-//                 geometry: polygon,
-//                 attributes: feature.attributes,
-//             });
-
-//             // Open a popup with the parcel's information
-//             view?.openPopup({
-//                 title: "Parcel Information",
-//                 content: `This is ${formattedAddress}`,
-//                 location: graphic.geometry.extent.center
-
-//             });
-
-//             // Return a search result
-//             return {
-//                 extent: graphic.geometry.extent,
-//                 name: `Parcel: ${formattedAddress}`,
-//                 feature: graphic
-//             };
-//         });
-//     }
-
-// } as __esri.LayerSearchSourceProperties),
