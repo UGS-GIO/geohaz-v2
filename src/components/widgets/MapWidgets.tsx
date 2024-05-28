@@ -81,7 +81,7 @@ const MapWidgets: React.FC = () => {
 
                         return data.features.map((item: any) => {
                             return {
-                                text: '<b>' + item.properties.concatnames + '</b>',
+                                text: '<p>' + item.properties.concatnames + '</p>',
                                 key: item.properties.concatnames,
                                 sourceIndex: params.sourceIndex,
                             };
@@ -116,29 +116,23 @@ const MapWidgets: React.FC = () => {
                                 }),
                             });
 
-                            const simpleLineSymbol = new SimpleLineSymbol({
-                                cap: "round",
-                                color: new Color([0, 122, 194, 1]),
-                                join: "round",
-                                miterLimit: 1,
-                                style: "solid",
-                                width: 1
-                            });
-
                             const target = new Graphic({
-                                geometry: polyline,
-                                attributes: item.attributes,
-                                symbol: simpleLineSymbol
+                                geometry: polyline as unknown as Polyline,
+                                attributes: item.attributes
                             });
 
                             return {
-                                extent: polyline.extent,
                                 name: item.properties.concatnames,
                                 feature: target,
                                 target: target
                             };
                         });
                     },
+                    resultSymbol: {
+                        type: "simple-line",
+                        color: 'red',
+                        width: 2
+                    }
                 } as __esri.LayerSearchSourceProperties)
             ]
         })
