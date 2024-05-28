@@ -12,8 +12,6 @@ import Extent from "@arcgis/core/geometry/Extent.js";
 import SearchSource from "@arcgis/core/widgets/Search/SearchSource.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
-import Color from "@arcgis/core/Color.js";
-import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
 
 
