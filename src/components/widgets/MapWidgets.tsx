@@ -56,6 +56,7 @@ const MapWidgets: React.FC = () => {
                     outFields: ["RegionAbbr"],
                     name: "Utah Geocoding Service",
                     placeholder: "Address",
+                    maxResults: 1000,
                     filter: {
                         // bounding box of Utah
                         geometry: new Extent({
