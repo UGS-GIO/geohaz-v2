@@ -14,8 +14,6 @@ import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
 import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
-import Layer from '@arcgis/core/layers/Layer';
-
 
 const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
