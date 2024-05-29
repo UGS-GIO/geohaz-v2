@@ -1,10 +1,10 @@
+import React, { useContext } from 'react';
 import Home from '@arcgis/core/widgets/Home';
 import Locate from '@arcgis/core/widgets/Locate';
 import useArcGISWidget from '../../hooks/useArcGISWidget';
 import Feature from "@arcgis/core/widgets/Feature.js";
 import Expand from '@arcgis/core/widgets/Expand';
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery.js";
-import { useContext } from 'react';
 import { MapContext } from '../../contexts/MapProvider';
 import Legend from '@arcgis/core/widgets/Legend';
 import Search from '@arcgis/core/widgets/Search';
@@ -13,9 +13,10 @@ import SearchSource from "@arcgis/core/widgets/Search/SearchSource.js";
 import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
+import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
+import Layer from '@arcgis/core/layers/Layer';
 
 
-// ArcGIS JS SDK Widgets that are overlaid on the map
 const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
 
@@ -38,7 +39,7 @@ const MapWidgets: React.FC = () => {
             container: document.createElement("div"),
             id: 'basemap-gallery-widget',
         })
-    }
+    };
 
     const searchExpandConfig = {
         id: 'search-expand',
@@ -91,23 +92,23 @@ const MapWidgets: React.FC = () => {
                         let url = `https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json`;
                         console.log({ params });
 
-                        // Check if a specific suggestion has been selected
-                        // If a suggestion was selected (versus just pressing enter on the search box), a sourceIndex will be included in the params
-                        if (params.suggestResult.sourceIndex) {
-                            const searchTerm = params.suggestResult.key ? params.suggestResult.key : '';
+                        let searchTerm = '';
+                        if (params.suggestResult.sourceIndex !== null) {
+                            searchTerm = params.suggestResult.key ? params.suggestResult.key : '';
                             url += `?search_key=${encodeURIComponent(searchTerm)}`;
                         } else {
-                            const searchTerm = params.suggestResult.text ? params.suggestResult.text : '';
+                            searchTerm = params.suggestResult.text ? params.suggestResult.text : '';
                             url += `?search_term=${encodeURIComponent(searchTerm)}`;
                         }
-
 
                         const response = await fetch(url);
                         const data = await response.json();
 
-                        return data.features.map((item: any) => {
-                            console.log({ 'resultsItem': item });
+                        if (data.features.length === 0) {
+                            return [];
+                        }
 
+                        const graphics: __esri.Graphic[] = data.features.map((item: any) => {
                             const polyline = new Polyline({
                                 paths: item.geometry.coordinates,
                                 spatialReference: new SpatialReference({
@@ -115,27 +116,48 @@ const MapWidgets: React.FC = () => {
                                 }),
                             });
 
-                            const target = new Graphic({
-                                geometry: polyline as unknown as Polyline,
+                            return new Graphic({
+                                geometry: polyline,
                                 attributes: item.attributes
                             });
-
-                            return {
-                                name: item.properties.concatnames,
-                                feature: target,
-                                target: target
-                            };
                         });
+
+                        const mergedPolyline = new Polyline({
+                            spatialReference: new SpatialReference({ wkid: 4326 })
+                        });
+
+                        graphics.forEach((graphic: __esri.Graphic) => {
+                            const polyline = graphic.geometry as Polyline;
+                            const paths = polyline.paths;
+                            paths.forEach(path => {
+                                mergedPolyline.addPath(path);
+                            });
+                        });
+
+                        const attributes = params.suggestResult.sourceIndex !== null
+                            ? { name: data.features[0].properties.concatnames }
+                            : { name: `Search results for: ${params.suggestResult.text}` };
+
+                        const target = new Graphic({
+                            geometry: mergedPolyline,
+                            attributes: attributes
+                        });
+
+                        return [{
+                            extent: mergedPolyline.extent,
+                            name: target.attributes.name,
+                            feature: target,
+                            target: target
+                        }];
                     },
-                    resultSymbol: {
-                        type: "simple-line",
+                    resultSymbol: new SimpleLineSymbol({
                         color: 'red',
                         width: 2
-                    }
+                    })
                 } as __esri.LayerSearchSourceProperties)
             ]
         })
-    }
+    };
 
     useArcGISWidget([
         { WrappedWidget: Home, position: 'top-left' },
