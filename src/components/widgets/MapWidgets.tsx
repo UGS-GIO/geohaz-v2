@@ -10,13 +10,13 @@ import Legend from '@arcgis/core/widgets/Legend';
 import Search from '@arcgis/core/widgets/Search';
 import Extent from "@arcgis/core/geometry/Extent.js";
 import SearchSource from "@arcgis/core/widgets/Search/SearchSource.js";
-import Graphic from "@arcgis/core/Graphic.js";
-import Polyline from "@arcgis/core/geometry/Polyline.js";
-import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
 import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
+import { fetchQFaultSuggestions, fetchQFaultResults } from './util/utils';
+
 
 const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
+    const qFaultsUrl = 'https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json';
 
     const coordinateFeatureConfig = {
         id: 'coordinate-feature-widget',
@@ -74,81 +74,9 @@ const MapWidgets: React.FC = () => {
                     placeholder: "ex: Wasatch Fault Zone",
                     name: "Fault Search",
                     // Function that executes when user types in the search box
-                    getSuggestions: async (params: { suggestTerm: string, sourceIndex: number }) => {
-                        const response = await fetch(`https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json?search_term=${encodeURIComponent(params.suggestTerm)}`);
-                        const data = await response.json();
-
-                        return data.features.map((item: any) => {
-                            return {
-                                text: '<p>' + item.properties.concatnames + '</p>',
-                                key: item.properties.concatnames,
-                                sourceIndex: params.sourceIndex,
-                            };
-                        });
-                    },
+                    getSuggestions: (params) => fetchQFaultSuggestions(params, qFaultsUrl),
                     // Function that executes when user selects a search suggestion or presses enter
-                    getResults: async (params) => {
-                        let url = `https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json`;
-                        console.log({ params });
-
-                        let searchTerm = '';
-                        if (params.suggestResult.sourceIndex !== null) {
-                            searchTerm = params.suggestResult.key ? params.suggestResult.key : '';
-                            url += `?search_key=${encodeURIComponent(searchTerm)}`;
-                        } else {
-                            searchTerm = params.suggestResult.text ? params.suggestResult.text : '';
-                            url += `?search_term=${encodeURIComponent(searchTerm)}`;
-                        }
-
-                        const response = await fetch(url);
-                        const data = await response.json();
-
-                        if (data.features.length === 0) {
-                            return [];
-                        }
-
-                        const graphics: __esri.Graphic[] = data.features.map((item: any) => {
-                            const polyline = new Polyline({
-                                paths: item.geometry.coordinates,
-                                spatialReference: new SpatialReference({
-                                    wkid: 4326
-                                }),
-                            });
-
-                            return new Graphic({
-                                geometry: polyline,
-                                attributes: item.attributes
-                            });
-                        });
-
-                        const mergedPolyline = new Polyline({
-                            spatialReference: new SpatialReference({ wkid: 4326 })
-                        });
-
-                        graphics.forEach((graphic: __esri.Graphic) => {
-                            const polyline = graphic.geometry as Polyline;
-                            const paths = polyline.paths;
-                            paths.forEach(path => {
-                                mergedPolyline.addPath(path);
-                            });
-                        });
-
-                        const attributes = params.suggestResult.sourceIndex !== null
-                            ? { name: data.features[0].properties.concatnames }
-                            : { name: `Search results for: ${params.suggestResult.text}` };
-
-                        const target = new Graphic({
-                            geometry: mergedPolyline,
-                            attributes: attributes
-                        });
-
-                        return [{
-                            extent: mergedPolyline.extent,
-                            name: target.attributes.name,
-                            feature: target,
-                            target: target
-                        }];
-                    },
+                    getResults: async (params) => fetchQFaultResults(params, qFaultsUrl),
                     resultSymbol: new SimpleLineSymbol({
                         color: 'red',
                         width: 2
