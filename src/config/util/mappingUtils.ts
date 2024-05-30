@@ -11,6 +11,7 @@ import * as promiseUtils from "@arcgis/core/core/promiseUtils.js";
 import Color from "@arcgis/core/Color";
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
 import Expand from "@arcgis/core/widgets/Expand";
+import Popup from "@arcgis/core/widgets/Popup";
 
 
 // Create a new map
@@ -22,7 +23,7 @@ export const createMap = () => {
 }
 
 // Create a new view
-export const createView = (container: HTMLDivElement, map: Map, viewType: 'map' | 'scene' = 'scene') => {
+export const createView = (container: HTMLDivElement, map: Map, viewType: 'map' | 'scene' = 'scene', isMobile: boolean) => {
 
     // Common options for both MapView and SceneView
     const commonOptions = {
@@ -38,7 +39,22 @@ export const createView = (container: HTMLDivElement, map: Map, viewType: 'map' 
         },
         ui: {
             components: ['zoom', 'compass', 'attribution',]
-        }
+        },
+        ...(!isMobile && {
+            popup: new Popup({
+                dockEnabled: true,
+                dockOptions: {
+                    // Disables the dock button from the popup
+                    buttonEnabled: false,
+                    // Ignore the default sizes that trigger responsive docking
+                    breakpoint: false,
+                    position: 'bottom-left',
+                },
+                visibleElements: {
+                    closeButton: false
+                }
+            })
+        }),
     }
 
     return viewType === 'scene'

@@ -74,4 +74,13 @@ calcite-segmented-control-item[aria-checked="true"] {
 
 h2.esri-widget__heading.esri-feature__title {
     margin: 0;
-  }
+}
+
+/* .esri-view-height-less-than-medium .esri-popup__main-container {
+    max-height: 200px;
+    width: 1000px;
+} */
+
+.esri-view-width-xlarge .esri-popup__main-container {
+    width: 40% !important; 
+}
