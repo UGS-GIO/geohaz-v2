@@ -47,7 +47,7 @@ const MapWidgets: React.FC = () => {
             container: document.createElement("div"),
             id: 'search-widget',
             popupEnabled: false,
-            allPlaceholder: "Find address, place, or fault zone",
+            allPlaceholder: "Address, place, or fault",
             includeDefaultSources: false,
             sources: [
                 {
@@ -55,7 +55,7 @@ const MapWidgets: React.FC = () => {
                     singleLineFieldName: "SingleLine",
                     outFields: ["RegionAbbr"],
                     name: "Location Search",
-                    placeholder: "Find address or place",
+                    placeholder: "Address or place",
                     maxResults: 1000,
                     filter: {
                         // bounding box of Utah
