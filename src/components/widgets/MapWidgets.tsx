@@ -47,14 +47,15 @@ const MapWidgets: React.FC = () => {
             container: document.createElement("div"),
             id: 'search-widget',
             popupEnabled: false,
+            allPlaceholder: "Find address, place, or fault zone",
             includeDefaultSources: false,
             sources: [
                 {
                     url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
                     singleLineFieldName: "SingleLine",
                     outFields: ["RegionAbbr"],
-                    name: "Utah Geocoding Service",
-                    placeholder: "Address",
+                    name: "Location Search",
+                    placeholder: "Find address or place",
                     maxResults: 1000,
                     filter: {
                         // bounding box of Utah
