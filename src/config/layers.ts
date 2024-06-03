@@ -69,17 +69,17 @@ const landslideSusceptibilityConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'relationships/2/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'Hazard_Symbology_Text',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                         {
                             fieldName: 'LSSCriticalAngle',
-                            visible: true,
+                            visible: false,
                             label: 'Critical Angle',
                         },
                     ],
@@ -156,17 +156,17 @@ const liquefactionConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'Hazard_Symbology_Text',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                         {
                             fieldName: 'relationships/0/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'MappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                     ],
@@ -253,17 +253,17 @@ const faultRuptureConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'SFRMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/1/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/1/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -293,12 +293,12 @@ const eolianSusConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'Hazard_Symbology_Text',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                         {
                             fieldName: 'relationships/17/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                     ],
@@ -328,22 +328,22 @@ const tectonicDefConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'Hazard_Symbology_Text',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                         {
                             fieldName: 'SDHMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/14/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/14/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -374,22 +374,22 @@ const bedrockPotConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'Hazard_Symbology_Text',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                         {
                             fieldName: 'SBPMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/15/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/15/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -419,22 +419,22 @@ const rockfallHazConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'Hazard_Symbology_Text',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                         {
                             fieldName: 'RFHMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/13/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/13/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -464,17 +464,17 @@ const pipingSusConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'PESMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/11/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/11/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -504,17 +504,17 @@ const expansiveSoilConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'EXSMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/9/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/9/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -544,17 +544,17 @@ const groundwaterSusConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'FLHMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/1/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/1/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -584,17 +584,17 @@ const radonSusConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'GRSMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/12/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/12/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -624,17 +624,17 @@ const corrosiveSoilConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'CRSMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/6/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/6/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -664,17 +664,17 @@ const collapsibleSoilConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'CSSMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/5/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/5/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -704,17 +704,17 @@ const solubleSoilConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'SLSMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/16/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/16/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -744,17 +744,17 @@ const calicheConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'CASMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/4/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/4/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -784,17 +784,17 @@ const floodHazardConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'FLHMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/0/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/0/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -824,17 +824,17 @@ const earthFissureConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'EFHMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/7/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/7/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -864,17 +864,17 @@ const erosionZoneConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'ERZMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/8/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/8/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -904,17 +904,17 @@ const groundSubsidenceConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'CSSMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/5/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/5/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
@@ -944,17 +944,17 @@ const karstFeaturesConfig: LayerProps = {
                     fieldInfos: [
                         {
                             fieldName: 'GSPMappedScale',
-                            visible: true,
+                            visible: false,
                             label: 'Mapped Scale',
                         },
                         {
                             fieldName: 'relationships/10/Description',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard Description',
                         },
                         {
                             fieldName: 'relationships/10/HazardName',
-                            visible: true,
+                            visible: false,
                             label: 'Hazard',
                         },
                     ],
