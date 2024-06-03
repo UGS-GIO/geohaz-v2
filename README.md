@@ -16,3 +16,4 @@ This is a template for the Geohaz project.
 
 4. Install the dependencies: npm install
 5. Run the app: npm run dev
+
