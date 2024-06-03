@@ -49,9 +49,6 @@ export const createView = (container: HTMLDivElement, map: Map, viewType: 'map' 
                     // Ignore the default sizes that trigger responsive docking
                     breakpoint: false,
                     position: 'bottom-left',
-                },
-                visibleElements: {
-                    closeButton: false
                 }
             })
         }),
