@@ -14,8 +14,8 @@ function MapConfigurations() {
       <CalciteBlock open heading="Map Configurations" />
       <CalciteBlock open heading="Location Coordinate Format">
         <CalciteSegmentedControl width="full">
-          <CalciteSegmentedControlItem value="Decimal Degrees" />
-          <CalciteSegmentedControlItem checked value="Degrees, Minutes, Seconds" />
+          <CalciteSegmentedControlItem className='text-center' value="Decimal Degrees">Decimal Degrees</CalciteSegmentedControlItem>
+          <CalciteSegmentedControlItem className='text-center' checked value="Degrees, Minutes, Seconds">Degrees, Minutes, Seconds</CalciteSegmentedControlItem>
         </CalciteSegmentedControl>
       </CalciteBlock>
       <CalciteBlock className='pt-1' open heading="">

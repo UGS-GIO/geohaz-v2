@@ -31,30 +31,32 @@ calcite-action-group {
   border-block-end: 1px solid var(--calcite-ui-border-3);
 }
 
-calcite-button {
-  --calcite-ui-brand: #d26e03;
-  --calcite-ui-brand-hover: #e77c33;
-  --calcite-ui-brand-press: #b65c02;
+/* add classes here to modify the calcite dark theme  */
+.calcite-mode-dark {
+  --calcite-color-brand: #d26e03 !important;
+  --calcite-color-brand-hover: #e77c33 !important;
+  --calcite-color-brand-press: #b65c02 !important;
+}
+
+/* add classes here to modify the calcite light theme  */
+.calcite-mode-light {
+  --calcite-color-brand: #d26e03 !important;
+  --calcite-color-brand-hover: #e77c33 !important;
+  --calcite-color-brand-press: #b65c02 !important;
 }
 
 /* customize the data-disclaimer-button for light and dark mode */
 .calcite-mode-light #data-disclaimer-button {
-  --calcite-ui-brand: #dedede;
-  --calcite-ui-brand-hover: #d1d1d1;
-  --calcite-ui-brand-press: #d1d1d1;
-  --calcite-ui-text-inverse: #000000
+  --calcite-color-brand: #dedede;
+  --calcite-color-brand-hover: #d1d1d1;
+  --calcite-color-brand-press: #d1d1d1;
+  --calcite-color-text-inverse: #000000
 }
 .calcite-mode-dark #data-disclaimer-button {
-  --calcite-ui-brand: #d1d1d1; 
-  --calcite-ui-brand-hover: #bdbdbd;
-  --calcite-ui-brand-press: #bdbdbd;
-  --calcite-ui-text-inverse: #000000
-}
-
-calcite-segmented-control-item[aria-checked="true"] {
-  --calcite-ui-brand: #d26e03;
-  --calcite-ui-brand-hover: #e77c33;
-  --calcite-ui-brand-press: #b65c02;
+  --calcite-color-brand: #d1d1d1; 
+  --calcite-color-brand-hover: #bdbdbd;
+  --calcite-color-brand-press: #bdbdbd;
+  --calcite-color-text-inverse: #000000;
 }
 
 /* 
@@ -74,4 +76,13 @@ calcite-segmented-control-item[aria-checked="true"] {
 
 h2.esri-widget__heading.esri-feature__title {
     margin: 0;
-  }
+}
+
+/* .esri-view-height-less-than-medium .esri-popup__main-container {
+    max-height: 200px;
+    width: 1000px;
+} */
+
+.esri-view-width-xlarge .esri-popup__main-container {
+    width: 40% !important; 
+}

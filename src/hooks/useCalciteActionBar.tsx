@@ -20,14 +20,16 @@ export function useCalciteActionBar(
 ): UseCalciteActionBarProps {
   const { currentActionName, setCurrentActionName } = useNavigation();
   const [shellPanelCollapsed, setShellPanelCollapsed] = useState<boolean>(true);
+  const [isFirstRender, setIsFirstRender] = useState<boolean>(true);
 
   // Initialize the current action name with the default value if not already set
   useEffect(() => {
-    if (!currentActionName && defaultValue) {
+    if (isFirstRender && !currentActionName && defaultValue) {
       setCurrentActionName(defaultValue);
       setShellPanelCollapsed(false);
+      setIsFirstRender(false);
     }
-  }, [currentActionName, defaultValue, setCurrentActionName]);
+  }, [isFirstRender, currentActionName, defaultValue, setCurrentActionName]);
 
   // Handle the click event for the action buttons
   const handleClick = useCallback((item: ActionItem) => {
