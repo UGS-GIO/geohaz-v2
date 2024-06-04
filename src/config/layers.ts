@@ -279,7 +279,7 @@ const faultRuptureConfig: LayerProps = {
 
 const eolianSusConfig: LayerProps = {
     type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/19',
+    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/19',
     options: {
         title: 'Wind-Blown Sand Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
@@ -287,28 +287,31 @@ const eolianSusConfig: LayerProps = {
         outFields: ['*'],
         popupTemplate: {
             title: '<b>Wind-Blown Sand Susceptibility</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'Hazard_Symbology_Text',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                        {
-                            fieldName: 'relationships/17/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                    ],
+            content: [{
+                type: 'fields',
+                fieldInfos: [{
+                    fieldName: 'Hazard_Symbology_Text',
+                    visible: false,
+                    label: 'Hazard'
                 },
                 {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/17/Description}<br><b>Mapped Scale: </b>{WSSMappedScale}',
+                    fieldName: 'relationships/17/Description',
+                    visible: false,
+                    label: 'Hazard Description'
                 },
-            ],
-        },
+                {
+                    fieldName: 'relationships/17/HazardName',
+                    visible: false,
+                    label: 'Hazard'
+                }
+                ]
+            },
+            {
+                type: 'text',
+                text: '<b>{Hazard_Symbology_Text}: </b>{relationships/17/Description}<br><b>Mapped Scale: </b>{WSSMappedScale}'
+            }
+            ]
+        }
     },
 };
 
