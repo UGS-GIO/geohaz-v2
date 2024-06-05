@@ -11,17 +11,12 @@ interface LayerAccordionProps { layer: __esri.ListItem }
 
 const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer.layer;
-    const { activeLayers, getRenderer } = useContext(MapContext);
+    const { activeLayers, layerDescriptions } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
     const [layerVisibility, setLayerVisibility] = useState<boolean | undefined>();
     const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
     const [layerOpacity, setLayerOpacity] = useState(1);
     const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
-
-    // this gets around a typescript error because getRenderer can be undefined
-    const defaultGetRenderer: (id: string, url?: string | undefined) => Promise<RendererProps | undefined> = () => Promise.resolve(undefined);
-
-    const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer || defaultGetRenderer);
     useEffect(() => {
         if (activeLayers && layerId) {
             const foundLayer = findLayerById(activeLayers, layerId);
@@ -84,6 +79,8 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                                             handleVisibilityToggle={() => handleSublayerVisibilityToggle(sublayer)}
                                             layerOpacity={sublayer.opacity}
                                             handleOpacityChange={(e) => handleSublayerOpacityChange(e, sublayer)}
+                                            title={sublayer.title}
+                                            description={layerDescriptions ? layerDescriptions[sublayer.title] : ''}
                                         />
                                         {/* {preview && preview.map((previewItem, index) => {
                                             if (previewItem.title === sublayer.title) {
@@ -110,6 +107,8 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                             handleVisibilityToggle={handleVisibilityToggle}
                             layerOpacity={layerOpacity}
                             handleOpacityChange={handleOpacityChange}
+                            title={layerTitle}
+                            description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
                         />
                         {/* {preview && preview.map((preview, index) => (
                             <div key={index} className='flex items-end space-x-4 py-1'>
