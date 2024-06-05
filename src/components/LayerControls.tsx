@@ -37,7 +37,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({ layerVisibility, handleVi
                 />
             </div>
             <div className='ml-4 mt-2 items-center'>
-                <CalciteLink id={`tooltip-button-${title}`}><Info color={'#d26e03'} size={24} /></CalciteLink>
+                <CalciteLink id={`tooltip-button-${title}`}><Info weight='fill' color={'#9f9f9f'} size={24} /></CalciteLink>
                 <CalciteTooltip reference-element={`tooltip-button-${title}`}>
                     <div className='custom-tooltip' dangerouslySetInnerHTML={{ __html: cleanDescription }} />
                 </CalciteTooltip>

@@ -2,8 +2,6 @@ import { useContext, useEffect, useState } from 'react';
 import { CalciteAccordion, CalciteAccordionItem } from '@esri/calcite-components-react';
 import { CalciteSliderCustomEvent } from "@esri/calcite-components";
 import { MapContext } from '../../contexts/MapProvider';
-import useLegendPreview from '../../hooks/useLegendPreview';
-import { RendererProps } from '../../config/types/mappingTypes';
 import LayerControls from '../LayerControls';
 import { findLayerById } from '../../config/mapping';
 
