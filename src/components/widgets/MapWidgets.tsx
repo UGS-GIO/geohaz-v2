@@ -42,6 +42,7 @@ const MapWidgets: React.FC = () => {
     const legendExpandConfig = {
         id: 'legend-expand',
         view: view,
+        expanded: isMobile ? false : true,
         content: new Legend({
             view: view,
             container: document.createElement("div"),
