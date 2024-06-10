@@ -76,6 +76,25 @@ const miningepicentersPopup = function (feature: any) {
     return content;
 }
 
+// qfaultspopup template
+const qfaultsPopup = function () {
+    let content = ""
+
+    content += "<b>Fault Name: </b>{faultname}<br>";
+    content += "<b>Structure Number: </b>{faultnum}<br>";
+    content += "<b>Mapped Scale: </b>{mappedscale}<br>";
+    content += "<b>Dip Direction: </b>{dipdirection}<br>";
+    content += "<b>Slip Sense: </b>{slipsense}<br>";
+    content += "<b>Slip Rate: </b>{sliprate}<br>";
+    content += "<b>Structure Class: </b>{faultclass}<br>";
+    content += "<b>Structure Age: </b>{faultage}<br>";
+    content += "<b>Detailed Report: </b><a href={usgs_link} target='_blank'>Opens in new tab</a>";
+
+
+
+    return content;
+}
+
 //qfaults popup code
 const poopTemplate =
     (event: any) => {
@@ -482,4 +501,4 @@ const landslideCompPopup = function (feature: any) {
     return content;
 }
 
-export { studyAreasPopup, epicentersPopup, miningepicentersPopup, poopTemplate, fchPopup, lssPopup, landslideSourcePopup, landslideDepositPopup, landslideCompPopup };
+export { studyAreasPopup, epicentersPopup, miningepicentersPopup, poopTemplate, fchPopup, lssPopup, landslideSourcePopup, landslideDepositPopup, landslideCompPopup, qfaultsPopup };
