@@ -211,49 +211,6 @@ const shakingRasterConfig: LayerProps = {
     },
 };
 
-// const qFaultsConfig: LayerProps = {
-//     type: 'map-image',
-//     url: 'https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults_with_labels/MapServer',
-//     options: {
-//         sublayers: [
-//             {
-//                 title: 'Quaternary_Faults',
-//                 id: 0,
-//                 visible: true,
-//                 popupTemplate: {
-//                     outFields: ['*'],
-//                     title: '<b>Hazardous (Quaternary age) Faults</b>',
-//                     content: poopTemplate,
-//                 },
-//             },
-//             {
-//                 title: 'Labels',
-//                 id: 1,
-//                 visible: true,
-//             },
-//         ],
-//         title: 'Hazardous (Quaternary age) Faults',
-//         listMode: 'hide-children',
-//         visible: true,
-//     },
-// };
-
-// const qFaultsFeatureLayerConfig: LayerProps = {
-//     type: 'feature',
-//     url: 'https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults_with_labels/MapServer/0',
-//     options: {
-//         title: 'Quaternary Faults',
-//         elevationInfo: [{ mode: 'on-the-ground' }],
-//         visible: true,
-//         outFields: ['FaultName'],
-//         popupTemplate: {
-//             outFields: ['*'],
-//             title: '<b>Quaternary Faults</b>',
-//             content: poopTemplate,
-//         },
-//     },
-// };
-
 const qFaultsGeoJsonConfig: LayerProps = {
     type: 'geojson',
     url: 'https://pgfeatureserv-souochdo6a-wm.a.run.app/collections/hazards.quaternaryfaults/items.json',
