@@ -236,6 +236,22 @@ const qFaultsConfig: LayerProps = {
     },
 };
 
+const qFaultsFeatureLayerConfig: LayerProps = {
+    type: 'feature',
+    url: 'https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults_with_labels/MapServer/0',
+    options: {
+        title: 'Quaternary Faults',
+        elevationInfo: [{ mode: 'on-the-ground' }],
+        visible: true,
+        outFields: ['FaultName'],
+        popupTemplate: {
+            outFields: ['*'],
+            title: '<b>Quaternary Faults</b>',
+            content: poopTemplate,
+        },
+    },
+};
+
 const faultRuptureConfig: LayerProps = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/3',
@@ -1061,7 +1077,9 @@ const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
     visible: true,
-    layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsConfig],
+    // layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsConfig],
+    layers: [qFaultsFeatureLayerConfig],
+    // layers: [qFaultsConfig]
 };
 
 const landslidesConfig: LayerProps = {
@@ -1072,13 +1090,13 @@ const landslidesConfig: LayerProps = {
 };
 
 const layersConfig: LayerProps[] = [
-    quadBoundariesConfig,
-    notMappedConfig,
-    hazardStudyConfig,
-    soilHazardsConfig,
-    landslidesConfig,
+    // quadBoundariesConfig,
+    // notMappedConfig,
+    // hazardStudyConfig,
+    // soilHazardsConfig,
+    // landslidesConfig,
     earthquakesConfig,
-    floodHazardsConfig,
+    // floodHazardsConfig,
 ];
 
 export default layersConfig;
