@@ -14,7 +14,8 @@ import {
     rendererBedrockPot,
     surfaceFaultRuptureRenderer,
     quadRenderer,
-    colorize
+    colorize,
+    qFaultsRenderer
 } from "./renderers";
 import { LayerProps } from "./types/mappingTypes";
 
@@ -249,6 +250,22 @@ const qFaultsFeatureLayerConfig: LayerProps = {
             title: '<b>Quaternary Faults</b>',
             content: poopTemplate,
         },
+    },
+};
+
+const qFaultsGeoJsonConfig: LayerProps = {
+    type: 'geojson',
+    url: 'https://pgfeatureserv-souochdo6a-wm.a.run.app/collections/hazards.quaternaryfaults/items.json',
+    options: {
+        title: 'Quaternary Faults',
+        elevationInfo: [{ mode: 'on-the-ground' }],
+        visible: true,
+        popupTemplate: {
+            title: '<b>Quaternary Faults</b>',
+            content: poopTemplate,
+        },
+        renderer: qFaultsRenderer,
+
     },
 };
 
@@ -1078,7 +1095,7 @@ const earthquakesConfig: LayerProps = {
     title: 'Earthquake Hazards',
     visible: true,
     // layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsConfig],
-    layers: [qFaultsFeatureLayerConfig],
+    layers: [qFaultsGeoJsonConfig],
     // layers: [qFaultsConfig]
 };
 
