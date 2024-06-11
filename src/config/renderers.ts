@@ -340,7 +340,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<15,000;moderately constrained",
             symbol: new SimpleLineSymbol({
-                style: "solid",
+                style: "long-dash",
                 color: new Color([230, 152, 0, 255]),
                 width: 1
             }),
@@ -349,7 +349,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<15,000;inferred",
             symbol: new SimpleLineSymbol({
-                style: "dash",
+                style: "short-dash",
                 color: new Color([230, 152, 0, 255]),
                 width: 1
             }),
@@ -367,7 +367,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<130,000;moderately constrained",
             symbol: new SimpleLineSymbol({
-                style: "solid",
+                style: "long-dash",
                 color: new Color([76, 230, 0, 255]),
                 width: 1
             }),
@@ -376,7 +376,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<130,000;inferred",
             symbol: new SimpleLineSymbol({
-                style: "dash",
+                style: "short-dash",
                 color: new Color([76, 230, 0, 255]),
                 width: 1
             }),
@@ -394,7 +394,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<750,000;moderately constrained",
             symbol: new SimpleLineSymbol({
-                style: "solid",
+                style: "long-dash",
                 color: new Color([0, 92, 230, 255]),
                 width: 1
             }),
@@ -403,7 +403,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<750,000;inferred",
             symbol: new SimpleLineSymbol({
-                style: "dash",
+                style: "short-dash",
                 color: new Color([0, 92, 230, 255]),
                 width: 1
             }),
@@ -421,7 +421,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<2,600,000;moderately constrained",
             symbol: new SimpleLineSymbol({
-                style: "solid",
+                style: "long-dash",
                 color: new Color([0, 0, 0, 255]),
                 width: 1
             }),
@@ -439,7 +439,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "undetermined;well constrained",
             symbol: new SimpleLineSymbol({
-                style: "solid",
+                style: "short-dash",
                 color: new Color([169, 0, 230, 255]),
                 width: 1
             }),
@@ -448,7 +448,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "undetermined;moderately constrained",
             symbol: new SimpleLineSymbol({
-                style: "solid",
+                style: "long-dash",
                 color: new Color([169, 0, 230, 255]),
                 width: 1
             }),
@@ -457,7 +457,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "undetermined;inferred",
             symbol: new SimpleLineSymbol({
-                style: "dash",
+                style: "short-dash",
                 color: new Color([169, 0, 230, 255]),
                 width: 1
             }),
