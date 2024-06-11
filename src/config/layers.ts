@@ -966,7 +966,7 @@ const karstFeaturesConfig: LayerProps = {
 const soilHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Problem Soil and Rock Hazards',
-    visible: false,
+    visible: true,
     layers: [eolianSusConfig, solubleSoilConfig, bedrockPotConfig, tectonicDefConfig, radonSusConfig, pipingSusConfig, karstFeaturesConfig, erosionZoneConfig, expansiveSoilConfig, earthFissureConfig, corrosiveSoilConfig, collapsibleSoilConfig, calicheConfig],
 };
 
@@ -1046,7 +1046,7 @@ const notMappedConfig: LayerProps = {
 const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards',
-    visible: false,
+    visible: true,
     layers: [floodHazardConfig, groundwaterSusConfig],
 };
 
@@ -1060,7 +1060,7 @@ const earthquakesConfig: LayerProps = {
 const landslidesConfig: LayerProps = {
     type: 'group',
     title: 'Landslide Hazards',
-    visible: false,
+    visible: true,
     layers: [landslideCompConfig, landslideSusceptibilityConfig, landslideDepositConfig, rockfallHazConfig],
 };
 
