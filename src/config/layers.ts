@@ -218,7 +218,7 @@ const qFaultsGeoJsonConfig: LayerProps = {
         title: 'Quaternary Faults',
         outFields: ['faultname', 'faultzone', 'faultclass', 'faultage', 'sliprate', 'dipdirection', 'slipsense', 'mappedscale', 'citation', 'usgs_link', 'summary'],
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         popupTemplate: {
             title: '<b>Hazardous (Quaternary age) Faults</b>',
             content: qfaultsPopup,
@@ -1000,6 +1000,7 @@ const hazardStudyConfig: LayerProps = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/1',
     options: {
+        visible: true,
         title: 'Mapped Areas',
         elevationInfo: [{ mode: 'on-the-ground' }],
         outFields: ['*'],
@@ -1038,7 +1039,7 @@ const notMappedConfig: LayerProps = {
     options: {
         title: 'Areas Not Mapped within Project Areas',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
+        visible: true,
     },
 };
 
