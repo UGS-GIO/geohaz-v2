@@ -77,22 +77,59 @@ const miningepicentersPopup = function (feature: any) {
 }
 
 // qfaultspopup template
-const qfaultsPopup = function () {
-    let content = ""
+const qfaultsPopup = function (event: any) {
+    const div = document.createElement("div");
 
-    content += "<b>Fault Name: </b>{faultname}<br>";
-    content += "<b>Structure Number: </b>{faultnum}<br>";
-    content += "<b>Mapped Scale: </b>{mappedscale}<br>";
-    content += "<b>Dip Direction: </b>{dipdirection}<br>";
-    content += "<b>Slip Sense: </b>{slipsense}<br>";
-    content += "<b>Slip Rate: </b>{sliprate}<br>";
-    content += "<b>Structure Class: </b>{faultclass}<br>";
-    content += "<b>Structure Age: </b>{faultage}<br>";
-    content += "<b>Detailed Report: </b><a href={usgs_link} target='_blank'>Opens in new tab</a>";
+    if (event.graphic.attributes.faultzone) {
+        div.innerHTML += `
+            <span><b>Fault Zone: </b></span>
+            <calcite-link id="faultzone-tooltip">${event.graphic.attributes.faultzone}</calcite-link>
+            <calcite-tooltip label="Data disclaimer" reference-element="faultzone-tooltip">
+                <span>${event.graphic.attributes.summary}</span>
+            </calcite-tooltip>
+            <br>
+        `;
+    }
+    if (event.graphic.attributes.faultname) {
+        div.innerHTML += `<b>Fault Name: </b>${event.graphic.attributes.faultname}<br>`;
+    }
+    if (event.graphic.attributes.sectionname) {
+        div.innerHTML += `<b>Section Name: </b>${event.graphic.attributes.sectionname}<br>`;
+    }
+    if (event.graphic.attributes.strandname) {
+        div.innerHTML += `<b>Strand Name: </b>${event.graphic.attributes.strandname}<br>`;
+    }
+    if (event.graphic.attributes.faultnum) {
+        div.innerHTML += `<b>Structure Number: </b>${event.graphic.attributes.faultnum}<br>`;
+    }
+    if (event.graphic.attributes.mappedscale) {
+        div.innerHTML += `<b>Mapped Scale: </b>${event.graphic.attributes.mappedscale}<br>`;
+    }
+    if (event.graphic.attributes.dipdirection) {
+        div.innerHTML += `<b>Dip Direction: </b>${event.graphic.attributes.dipdirection}<br>`;
+    }
+    if (event.graphic.attributes.slipsense) {
+        div.innerHTML += `<b>Slip Sense: </b>${event.graphic.attributes.slipsense}<br>`;
+    }
+    if (event.graphic.attributes.sliprate) {
+        div.innerHTML += `<b>Slip Rate: </b>${event.graphic.attributes.sliprate}<br>`;
+    }
+    if (event.graphic.attributes.faultclass) {
+        div.innerHTML += `<b>Structure Class: </b>${event.graphic.attributes.faultclass}<br>`;
+    }
+    if (event.graphic.attributes.faultage) {
+        div.innerHTML += `<b>Structure Age: </b>${event.graphic.attributes.faultage}<br>`;
+    }
+    if (event.graphic.attributes.usgs_link) {
+        div.innerHTML += `
+            <span><b>Detailed Report: </b></span>
+            <calcite-link href=${event.graphic.attributes.usgs_link} icon-end="launch" target="_blank">
+                Opens in new tab
+            </calcite-link>
+        `;
+    }
 
-
-
-    return content;
+    return div;
 }
 
 //qfaults popup code

@@ -216,11 +216,12 @@ const qFaultsGeoJsonConfig: LayerProps = {
     url: 'https://pgfeatureserv-souochdo6a-wm.a.run.app/collections/hazards.quaternaryfaults/items.json',
     options: {
         title: 'Quaternary Faults',
+        outFields: ['faultname', 'faultzone', 'faultclass', 'faultage', 'sliprate', 'dipdirection', 'slipsense', 'mappedscale', 'citation', 'usgs_link', 'summary'],
         elevationInfo: [{ mode: 'on-the-ground' }],
         visible: true,
         popupTemplate: {
             title: '<b>Hazardous (Quaternary age) Faults</b>',
-            content: "<b>Fault Name: </b>{faultname}<br><b>Structure Number: </b>{faultnum}<br><b>Mapped Scale: </b>{mappedscale}<br><b>Dip Direction: </b>{dipdirection}<br><b>Slip Sense: </b>{slipsense}<br><b>Slip Rate: </b>{sliprate}<br><b>Structure Class: </b>{faultclass}<br><b>Structure Age: </b>{faultage}<br><b>Detailed Report: </b><a href={usgs_link} target='_blank'>Opens in new tab</a>",
+            content: qfaultsPopup,
         },
         renderer: qFaultsRenderer,
 
