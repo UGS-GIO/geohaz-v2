@@ -310,6 +310,19 @@ const quadRenderer = {
 }
 
 const qFaultsRenderer = new UniqueValueRenderer({
+    visualVariables: [
+        {
+            type: "size",
+            valueExpression: "$view.scale",
+            // target: "outline",
+            stops: [
+                { value: 10000, size: 10 },
+                { value: 250000, size: 6 },
+                { value: 1000000, size: 3 },
+                { value: 3000000, size: 1.5 },
+            ]
+        } as __esri.SizeVariable
+    ],
     field: "FaultAge",
     field2: "MappingConstraint",
     fieldDelimiter: ";",

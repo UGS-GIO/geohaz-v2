@@ -218,7 +218,7 @@ const qFaultsGeoJsonConfig: LayerProps = {
         title: 'Quaternary Faults',
         outFields: ['faultname', 'faultzone', 'faultclass', 'faultage', 'sliprate', 'dipdirection', 'slipsense', 'mappedscale', 'citation', 'usgs_link', 'summary'],
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
+        visible: true,
         popupTemplate: {
             title: '<b>Hazardous (Quaternary age) Faults</b>',
             content: qfaultsPopup,
