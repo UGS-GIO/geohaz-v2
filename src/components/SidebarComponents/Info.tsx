@@ -8,6 +8,7 @@ import {
 } from '@esri/calcite-components-react'
 import { Link } from '../shared'
 import { useNavigation } from '../../contexts/NavigationContext';
+import { ReadMore } from '../shared/ReadMore';
 
 function Info() {
   type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | ''
@@ -23,34 +24,20 @@ function Info() {
   return (
     <CalcitePanel>
       <CalciteBlock open heading='Map Details'>
-        <p className="mb-2">
-          This Portal is a compilation of data from the Utah Geologic Hazards Database,
-          and contains post-2008 UGS geologic hazard map data and data from other sources for parts of Utah.
-          These data address earthquake, flood, landslide, and problem soil and rock hazards. This web mapping
-          application is intended to provide planners, local government officials, property owners, developers,
-          engineers, geologists, design professionals, and the public with information on the type, location,
-          and relative susceptibility of geologic hazards that may impact existing and future infrastructure and development.
-          The data also provide information that may be used for emergency response and recovery planning
-          and community risk assessment for existing development and infrastructure.
-        </p>
-        <p className="mb-2">
-          Areas with comprehensive geologic hazard map data are shown with red polygons. Statewide data for hazardous
-          (Quaternary age) faults, and a legacy compilation of landslides are also available.
-          Limited, comprehensive geologic hazard map data are available for the remaining hazards listed in the Legend.
-          Hazard map layers can be enabled in the Legend by clicking on the eye symbol. Map layer units
-          describing the hazard relative susceptibility are also shown in the Legend. The absence of data does
-          not imply that no geologic hazard or hazards exist. Additional geologic hazard mapping is on-going and
-          will be added to the database as it is finalized.
-        </p>
-        <p className="mb-2">
-          <b>Database Updated May 2020</b>
-        </p>
-        <p className="mb-2">
-          <b>Related Information</b>
-        </p>
-        <p>
-          For more information, see  &nbsp;<CalciteLink href="https://geology.utah.gov/hazards/">https://geology.utah.gov/hazards/</CalciteLink> or contact the UGS.
-        </p>
+        <ReadMore
+          id="example"
+          paragraphs={[
+            {
+              text: "This Portal is a compilation of data from the Utah Geologic Hazards Database, and contains post-2008 UGS geologic hazard map data and data from other sources for parts of Utah. These data address earthquake, flood, landslide, and problem soil and rock hazards. This web mapping application is intended to provide planners, local government officials, property owners, developers, engineers, geologists, design professionals, and the public with information on the type, location, and relative susceptibility of geologic hazards that may impact existing and future infrastructure and development. The data also provide information that may be used for emergency response and recovery planning and community risk assessment for existing development and infrastructure.", bold: false
+            },
+
+            { text: "Areas with comprehensive geologic hazard map data are shown with red polygons. Statewide data for hazardous (Quaternary age) faults, and a legacy compilation of landslides are also available. Limited, comprehensive geologic hazard map data are available for the remaining hazards listed in the Legend. Hazard map layers can be enabled in the Legend by clicking on the eye symbol. Map layer units describing the hazard relative susceptibility are also shown in the Legend. The absence of data does not imply that no geologic hazard or hazards exist. Additional geologic hazard mapping is on-going and will be added to the database as it is finalized.", bold: false },
+            { text: "Database Updated May 2020", bold: true },
+            { text: "Related Information", bold: true },
+            { text: "For more information, see https://geology.utah.gov/hazards/ or contact the UGS.", bold: false },
+          ]}
+          amountOfWords={36}
+        />
       </CalciteBlock>
 
       <CalciteBlock open heading='Data Sources'>
