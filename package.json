@@ -15,8 +15,10 @@
   "dependencies": {
     "@arcgis/core": "^4.29.10",
     "@esri/calcite-components-react": "^2.9.0",
+    "@phosphor-icons/react": "^2.1.5",
     "@tanstack/react-query": "^5.18.1",
     "arcgis-react": "1.0.8",
+    "dompurify": "^3.1.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-syntax-highlighter": "^15.5.0"
@@ -27,6 +29,7 @@
     "@tailwindcss/typography": "^0.5.9",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^14.1.2",
+    "@types/dompurify": "^3.0.5",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
     "@types/react-syntax-highlighter": "^15.5.7",

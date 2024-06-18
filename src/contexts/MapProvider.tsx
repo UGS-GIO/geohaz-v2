@@ -5,6 +5,7 @@ import LayerList from "@arcgis/core/widgets/LayerList";
 import { getRenderers } from "../config/mapping";
 import { RendererProps } from "../config/types/mappingTypes";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
+import { useQuery } from "@tanstack/react-query";
 
 
 type MapContextProps = {
@@ -15,7 +16,22 @@ type MapContextProps = {
     getRenderer?: (id: string, url: string) => Promise<RendererProps | undefined>
     isMobile?: boolean
     setIsMobile?: (isMobile: boolean) => void
+    layerDescriptions?: Record<string, string>
+
 }
+
+type FeatureAttributes = {
+    title: string;
+    content: string;
+};
+
+type Feature = {
+    attributes: FeatureAttributes;
+};
+
+type LayerDescriptionResponse = {
+    features: Feature[];
+};
 
 export const MapContext = createContext<MapContextProps>({});
 
@@ -23,6 +39,24 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     const [view, setView] = useState<SceneView | MapView>();
     const [activeLayers, setActiveLayers] = useState<__esri.Collection<__esri.ListItem>>();
     const [isMobile, setIsMobile] = useState<boolean>(false);
+    const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
+
+    const fetchLayerDescriptions = async (): Promise<LayerDescriptionResponse> => {
+        const response = await fetch(`https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Hazard_Layer_Info_t1/FeatureServer/0/query?where=1%3D1&objectIds=&time=&resultType=none&outFields=*&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token=`);
+        const data: LayerDescriptionResponse = await response.json();
+        const descriptions: Record<string, string> = {};
+        data.features.forEach(feature => {
+            descriptions[feature.attributes.title] = feature.attributes.content;
+        });
+        setLayerDescriptions(descriptions);
+        return { features: data.features };
+    }
+
+    // fetch and return the layer descriptions only on the initial render using useQuery
+    const { data } = useQuery({
+        queryKey: ['layerDescriptions'],
+        queryFn: fetchLayerDescriptions,
+    });
 
     useEffect(() => {
         if (!view) return;
@@ -80,7 +114,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, getRenderer, isMobile, setIsMobile }}>
+        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, getRenderer, isMobile, setIsMobile, layerDescriptions }}>
             {children}
         </MapContext.Provider>
     )

@@ -11,7 +11,7 @@ interface LayerAccordionProps { layer: __esri.ListItem }
 
 const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer.layer;
-    const { activeLayers } = useContext(MapContext);
+    const { activeLayers, layerDescriptions } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
     const [layerVisibility, setLayerVisibility] = useState<boolean | undefined>();
     const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
@@ -84,6 +84,8 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                                             handleVisibilityToggle={() => handleSublayerVisibilityToggle(sublayer)}
                                             layerOpacity={sublayer.opacity}
                                             handleOpacityChange={(e) => handleSublayerOpacityChange(e, sublayer)}
+                                            title={sublayer.title}
+                                            description={layerDescriptions ? layerDescriptions[sublayer.title] : ''}
                                         />
                                         {/* {preview && preview.map((previewItem, index) => {
                                             if (previewItem.title === sublayer.title) {
@@ -110,6 +112,8 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                             handleVisibilityToggle={handleVisibilityToggle}
                             layerOpacity={layerOpacity}
                             handleOpacityChange={handleOpacityChange}
+                            title={layerTitle}
+                            description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
                         />
                         {/* {preview && preview.map((preview, index) => (
                             <div key={index} className='flex items-end space-x-4 py-1'>

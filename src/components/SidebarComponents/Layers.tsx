@@ -11,7 +11,7 @@ function Layers() {
   }
 
   return (
-    <div className='overflow-y-auto'>
+    <div>
       <CalciteBlock heading='Layer List and Controls' className='mb-1' />
       {layerList}
     </div>
