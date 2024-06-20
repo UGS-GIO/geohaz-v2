@@ -314,12 +314,17 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             type: "size",
             valueExpression: "$view.scale",
+            legendOptions: {
+                showLegend: false
+            },
             // target: "outline",
             stops: [
-                { value: 10000, size: 20 },
-                { value: 250000, size: 15 },
-                { value: 1000000, size: 5 },
-                { value: 3000000, size: 1.5 },
+                { value: 5000, size: 17 },
+                { value: 20000, size: 8 },
+                { value: 50000, size: 4 },
+                { value: 250000, size: 1.5 },
+                { value: 1000000, size: 1 },
+                { value: 3000000, size: .25 },
             ]
         } as __esri.SizeVariable
     ],
@@ -362,7 +367,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<15,000;inferred",
             symbol: new SimpleLineSymbol({
-                style: "short-dash",
+                style: "short-dot",
                 color: new Color([230, 152, 0, 255]),
                 width: 1
             }),
@@ -389,7 +394,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<130,000;inferred",
             symbol: new SimpleLineSymbol({
-                style: "short-dash",
+                style: "short-dot",
                 color: new Color([76, 230, 0, 255]),
                 width: 1
             }),
@@ -416,7 +421,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<750,000;inferred",
             symbol: new SimpleLineSymbol({
-                style: "short-dash",
+                style: "short-dot",
                 color: new Color([0, 92, 230, 255]),
                 width: 1
             }),
@@ -443,7 +448,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "<2,600,000;inferred",
             symbol: new SimpleLineSymbol({
-                style: "dash",
+                style: "short-dot",
                 color: new Color([0, 0, 0, 255]),
                 width: 1
             }),
@@ -470,7 +475,7 @@ const qFaultsRenderer = new UniqueValueRenderer({
         {
             value: "undetermined;inferred",
             symbol: new SimpleLineSymbol({
-                style: "short-dash",
+                style: "short-dot",
                 color: new Color([169, 0, 230, 255]),
                 width: 1
             }),
