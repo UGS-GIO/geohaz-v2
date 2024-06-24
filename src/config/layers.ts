@@ -4,7 +4,8 @@ import {
     epicentersPopup,
     miningepicentersPopup,
     poopTemplate,
-    studyAreasPopup
+    studyAreasPopup,
+    qfaultsPopup
 } from "./popups";
 
 import {
@@ -14,7 +15,8 @@ import {
     rendererBedrockPot,
     surfaceFaultRuptureRenderer,
     quadRenderer,
-    colorize
+    colorize,
+    qFaultsRenderer
 } from "./renderers";
 import { LayerProps } from "./types/mappingTypes";
 
@@ -25,7 +27,7 @@ const landslideCompConfig: LayerProps = {
     options: {
         title: 'Legacy Landslide Compilation',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>Legacy Landslide Compilation</b>',
@@ -42,7 +44,7 @@ const landslideDepositConfig: LayerProps = {
     options: {
         title: 'Landslides',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>Landslides</b>',
@@ -58,7 +60,7 @@ const landslideSusceptibilityConfig: LayerProps = {
     options: {
         title: 'Landslide Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>Landslide Susceptibility</b>',
@@ -100,7 +102,7 @@ const epicentersRecentConfig: LayerProps & { featureReduction: object } = {
     options: {
         title: 'Epicenters (1850 to 2016)',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>Earthquake Epicenter Information</b>',
@@ -126,7 +128,7 @@ const epicentersMiningConfig: LayerProps = {
     options: {
         title: 'Mining-Induced Epicenters',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: 'Mining-Induced Epicenters',
@@ -145,7 +147,7 @@ const liquefactionConfig: LayerProps = {
         title: 'Liquefaction Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
         renderer: rendererLiquefaction,
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>Liquefaction Susceptibility</b>',
@@ -188,7 +190,7 @@ const shakingVectorConfig: LayerProps = {
     options: {
         title: 'Earthquake Ground Shaking',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
     },
 };
 
@@ -196,7 +198,7 @@ const shakingRasterConfig: LayerProps = {
     type: 'imagery',
     url: 'https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/GroundshakingRaster/ImageServer',
     options: {
-        visible: true,
+        visible: false,
         legendEnabled: false,
         listMode: 'hide',
         title: 'Shaking Raster',
@@ -209,30 +211,20 @@ const shakingRasterConfig: LayerProps = {
     },
 };
 
-const qFaultsConfig: LayerProps = {
-    type: 'map-image',
-    url: 'https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults_with_labels/MapServer',
+const qFaultsGeoJsonConfig: LayerProps = {
+    type: 'geojson',
+    url: 'https://pgfeatureserv-souochdo6a-wm.a.run.app/collections/hazards.quaternaryfaults/items.json',
     options: {
-        sublayers: [
-            {
-                title: 'Quaternary_Faults',
-                id: 0,
-                visible: true,
-                popupTemplate: {
-                    outFields: ['*'],
-                    title: '<b>Hazardous (Quaternary age) Faults</b>',
-                    content: poopTemplate,
-                },
-            },
-            {
-                title: 'Labels',
-                id: 1,
-                visible: true,
-            },
-        ],
-        title: 'Hazardous (Quaternary age) Faults',
-        listMode: 'hide-children',
+        title: 'Quaternary Faults',
+        outFields: ['faultname', 'faultzone', 'faultclass', 'faultage', 'sliprate', 'dipdirection', 'slipsense', 'mappedscale', 'citation', 'usgs_link', 'summary'],
+        elevationInfo: [{ mode: 'on-the-ground' }],
         visible: true,
+        popupTemplate: {
+            title: '<b>Hazardous (Quaternary age) Faults</b>',
+            content: qfaultsPopup,
+        },
+        renderer: qFaultsRenderer,
+
     },
 };
 
@@ -243,7 +235,7 @@ const faultRuptureConfig: LayerProps = {
         title: 'Surface Fault Rupture Special Study Zones',
         renderer: surfaceFaultRuptureRenderer,
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/1/HazardName}</b>',
@@ -283,7 +275,7 @@ const eolianSusConfig: LayerProps = {
     options: {
         title: 'Wind-Blown Sand Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>Wind-Blown Sand Susceptibility</b>',
@@ -321,7 +313,7 @@ const tectonicDefConfig: LayerProps = {
     options: {
         title: 'Salt Tectonics-Related Ground Deformation',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/14/HazardName}</b>',
@@ -367,7 +359,7 @@ const bedrockPotConfig: LayerProps = {
         title: 'Shallow Bedrock Potential',
         elevationInfo: [{ mode: 'on-the-ground' }],
         renderer: rendererBedrockPot,
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/15/HazardName}</b>',
@@ -412,7 +404,7 @@ const rockfallHazConfig: LayerProps = {
     options: {
         title: 'Rockfall Hazard',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/13/HazardName}</b>',
@@ -457,7 +449,7 @@ const pipingSusConfig: LayerProps = {
     options: {
         title: 'Piping and Erosion Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/11/HazardName}</b>',
@@ -497,7 +489,7 @@ const expansiveSoilConfig: LayerProps = {
     options: {
         title: 'Expansive Soil and Rock Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/9/HazardName}</b>',
@@ -537,7 +529,7 @@ const groundwaterSusConfig: LayerProps = {
     options: {
         title: 'Shallow Groundwater Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/1/HazardName}</b>',
@@ -577,7 +569,7 @@ const radonSusConfig: LayerProps = {
     options: {
         title: 'Geologic Radon Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/12/HazardName}</b>',
@@ -617,7 +609,7 @@ const corrosiveSoilConfig: LayerProps = {
     options: {
         title: 'Corrosive Soil and Rock Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/6/HazardName}</b>',
@@ -657,7 +649,7 @@ const collapsibleSoilConfig: LayerProps = {
     options: {
         title: 'Collapsible Soil Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/5/HazardName}</b>',
@@ -697,7 +689,7 @@ const solubleSoilConfig: LayerProps = {
     options: {
         title: 'Soluble Soil and Rock Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/16/HazardName}</b>',
@@ -737,7 +729,7 @@ const calicheConfig: LayerProps = {
     options: {
         title: 'Caliche Susceptibility',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/4/HazardName}</b>',
@@ -777,7 +769,7 @@ const floodHazardConfig: LayerProps = {
     options: {
         title: 'Flood and Debris-Flow Hazard',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/0/HazardName}</b>',
@@ -817,7 +809,7 @@ const earthFissureConfig: LayerProps = {
     options: {
         title: 'Earth Fissure Hazard',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/7/HazardName}</b>',
@@ -857,7 +849,7 @@ const erosionZoneConfig: LayerProps = {
     options: {
         title: 'J.E. Fuller Flood Erosion Hazard Zones',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/8/HazardName}</b>',
@@ -897,7 +889,7 @@ const groundSubsidenceConfig: LayerProps = {
     options: {
         title: 'Ground Subsidence Potential',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/5/HazardName}</b>',
@@ -937,7 +929,7 @@ const karstFeaturesConfig: LayerProps = {
     options: {
         title: 'Karst Features',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         outFields: ['*'],
         popupTemplate: {
             title: '<b>{relationships/10/HazardName}</b>',
@@ -1000,7 +992,7 @@ const quadBoundariesConfig: LayerProps = {
             },
         },
         renderer: quadRenderer,
-        visible: true,
+        visible: false,
     },
 };
 
@@ -1008,6 +1000,7 @@ const hazardStudyConfig: LayerProps = {
     type: 'feature',
     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/1',
     options: {
+        visible: true,
         title: 'Mapped Areas',
         elevationInfo: [{ mode: 'on-the-ground' }],
         outFields: ['*'],
@@ -1025,7 +1018,7 @@ const lidarBoundsConfig: LayerProps = {
     options: {
         title: 'Lidar Extents',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
     },
 };
 
@@ -1035,7 +1028,7 @@ const airphotoPointsConfig: LayerProps = {
     options: {
         title: 'Aerial Imagery Centerpoints',
         elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
+        visible: false,
         minScale: 500000,
     },
 };
@@ -1061,7 +1054,7 @@ const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
     visible: true,
-    layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsConfig],
+    layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsGeoJsonConfig],
 };
 
 const landslidesConfig: LayerProps = {

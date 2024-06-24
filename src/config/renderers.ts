@@ -1,3 +1,7 @@
+import Color from "@arcgis/core/Color";
+import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol";
+import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
+
 const recentSym = {
     type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
     color: "red",
@@ -305,4 +309,179 @@ const quadRenderer = {
     }
 }
 
-export { rendererRecent, rendererMining, rendererLiquefaction, colorize, surfaceFaultRuptureRenderer, rendererBedrockPot, quadRenderer };
+const qFaultsRenderer = new UniqueValueRenderer({
+    visualVariables: [
+        {
+            type: "size",
+            valueExpression: "$view.scale",
+            legendOptions: {
+                showLegend: false
+            },
+            // target: "outline",
+            stops: [
+                { value: 5000, size: 17 },
+                { value: 20000, size: 8 },
+                { value: 50000, size: 4 },
+                { value: 250000, size: 1.5 },
+                { value: 1000000, size: 1 },
+                { value: 3000000, size: .25 },
+            ]
+        } as __esri.SizeVariable
+    ],
+    field: "FaultAge",
+    field2: "MappingConstraint",
+    fieldDelimiter: ";",
+    defaultSymbol: new SimpleLineSymbol({
+        style: "solid",
+        color: new Color([130, 130, 130, 255]),
+        width: 1
+    }),
+    uniqueValueInfos: [
+        {
+            value: "<150;well constrained",
+            symbol: new SimpleLineSymbol({
+                style: "solid",
+                color: new Color([230, 0, 0, 255]),
+                width: 1
+            }),
+            label: "<150 Years, Well Constrained"
+        },
+        {
+            value: "<15,000;well constrained",
+            symbol: new SimpleLineSymbol({
+                style: "solid",
+                color: new Color([230, 152, 0, 255]),
+                width: 1
+            }),
+            label: "<15,000 Years, Well Constrained"
+        },
+        {
+            value: "<15,000;moderately constrained",
+            symbol: new SimpleLineSymbol({
+                style: "long-dash",
+                color: new Color([230, 152, 0, 255]),
+                width: 1
+            }),
+            label: "<15,000 Years, Moderately Constrained"
+        },
+        {
+            value: "<15,000;inferred",
+            symbol: new SimpleLineSymbol({
+                style: "short-dot",
+                color: new Color([230, 152, 0, 255]),
+                width: 1
+            }),
+            label: "<15,000 Years, Inferred"
+        },
+        {
+            value: "<130,000;well constrained",
+            symbol: new SimpleLineSymbol({
+                style: "solid",
+                color: new Color([76, 230, 0, 255]),
+                width: 1
+            }),
+            label: "<130,000 Years, Well Constrained"
+        },
+        {
+            value: "<130,000;moderately constrained",
+            symbol: new SimpleLineSymbol({
+                style: "long-dash",
+                color: new Color([76, 230, 0, 255]),
+                width: 1
+            }),
+            label: "<130,000 Years, Moderately Constrained"
+        },
+        {
+            value: "<130,000;inferred",
+            symbol: new SimpleLineSymbol({
+                style: "short-dot",
+                color: new Color([76, 230, 0, 255]),
+                width: 1
+            }),
+            label: "<130,000 Years, Inferred"
+        },
+        {
+            value: "<750,000;well constrained",
+            symbol: new SimpleLineSymbol({
+                style: "solid",
+                color: new Color([0, 92, 230, 255]),
+                width: 1
+            }),
+            label: "<750,000 Years, Well Constrained"
+        },
+        {
+            value: "<750,000;moderately constrained",
+            symbol: new SimpleLineSymbol({
+                style: "long-dash",
+                color: new Color([0, 92, 230, 255]),
+                width: 1
+            }),
+            label: "<750,000 Years, Moderately Constrained"
+        },
+        {
+            value: "<750,000;inferred",
+            symbol: new SimpleLineSymbol({
+                style: "short-dot",
+                color: new Color([0, 92, 230, 255]),
+                width: 1
+            }),
+            label: "<750,000 Years, Inferred"
+        },
+        {
+            value: "<2,600,000;well constrained",
+            symbol: new SimpleLineSymbol({
+                style: "solid",
+                color: new Color([0, 0, 0, 255]),
+                width: 1
+            }),
+            label: "<2.6 Million Years, Well Constrained"
+        },
+        {
+            value: "<2,600,000;moderately constrained",
+            symbol: new SimpleLineSymbol({
+                style: "long-dash",
+                color: new Color([0, 0, 0, 255]),
+                width: 1
+            }),
+            label: "<2.6 Million Years, Moderately Constrained"
+        },
+        {
+            value: "<2,600,000;inferred",
+            symbol: new SimpleLineSymbol({
+                style: "short-dot",
+                color: new Color([0, 0, 0, 255]),
+                width: 1
+            }),
+            label: "<2.6 Million Years, Inferred"
+        },
+        {
+            value: "undetermined;well constrained",
+            symbol: new SimpleLineSymbol({
+                style: "short-dash",
+                color: new Color([169, 0, 230, 255]),
+                width: 1
+            }),
+            label: "Undetermined, Well Constrained"
+        },
+        {
+            value: "undetermined;moderately constrained",
+            symbol: new SimpleLineSymbol({
+                style: "long-dash",
+                color: new Color([169, 0, 230, 255]),
+                width: 1
+            }),
+            label: "Undetermined, Moderately Constrained"
+        },
+        {
+            value: "undetermined;inferred",
+            symbol: new SimpleLineSymbol({
+                style: "short-dot",
+                color: new Color([169, 0, 230, 255]),
+                width: 1
+            }),
+            label: "Undetermined, Inferred"
+        }
+    ]
+});
+
+export { rendererRecent, rendererMining, rendererLiquefaction, colorize, surfaceFaultRuptureRenderer, rendererBedrockPot, quadRenderer, qFaultsRenderer };

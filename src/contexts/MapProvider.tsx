@@ -98,7 +98,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     async function loadMap(container: HTMLDivElement) {
         if (view) return;
         const { init } = await import("../config/mapping")
-        setView(init(container, isMobile, 'scene'))
+        setView(init(container, isMobile, 'map'))
     }
 
     async function getRenderer(id: string, url: string): Promise<RendererProps | undefined> {
