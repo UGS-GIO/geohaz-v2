@@ -8,7 +8,9 @@ import { defineCustomElements } from '@esri/calcite-components/dist/loader';
 import { ThemeProvider } from './contexts/ThemeProvider';
 import { MapProvider } from './contexts/MapProvider';
 import { NavigationProvider } from './contexts/NavigationContext';
-
+import {
+  BrowserRouter
+} from "react-router-dom";
 
 // Create a root element for the application
 const root = createRoot(document.querySelector('#root') as HTMLElement);
@@ -22,14 +24,16 @@ defineCustomElements(window);
 // Render the application
 root.render(
   <StrictMode>
-    <ThemeProvider>
-      <NavigationProvider>
-        <QueryClientProvider client={queryClient}>
-          <MapProvider>
-            <App />
-          </MapProvider>
-        </QueryClientProvider>
-      </NavigationProvider>
-    </ThemeProvider>
+    <BrowserRouter>
+      <ThemeProvider>
+        <NavigationProvider>
+          <QueryClientProvider client={queryClient}>
+            <MapProvider>
+              <App />
+            </MapProvider>
+          </QueryClientProvider>
+        </NavigationProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   </StrictMode>
 );

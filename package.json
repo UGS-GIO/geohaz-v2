@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "tsc && eslint \"src/**/*.ts\"",
     "postinstall": "npm run util:copy-assets",
-    "util:copy-assets": "npx ncp ./node_modules/@esri/calcite-components/dist/calcite/assets/ ./public/assets/ && cp -r src/assets/* ./public/"
+    "util:copy-assets": "npx ncp ./node_modules/@esri/calcite-components/dist/calcite/assets/ ./public/assets/ && cp -r src/assets/* ./public/",
+    "build:css": "npx postcss ./index.scss -o dist/styles.css"
   },
   "dependencies": {
     "@arcgis/core": "^4.29.10",
@@ -18,9 +19,12 @@
     "@phosphor-icons/react": "^2.1.5",
     "@tanstack/react-query": "^5.18.1",
     "arcgis-react": "1.0.8",
+    "classnames": "^2.5.1",
     "dompurify": "^3.1.5",
+    "query-string": "^9.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.23.1",
     "react-syntax-highlighter": "^15.5.0"
   },
   "devDependencies": {
@@ -41,6 +45,7 @@
     "firebase-tools": "^13.0.2",
     "jsdom": "^23.0.1",
     "postcss": "^8.4.32",
+    "sass": "^1.77.6",
     "semantic-release": "^23.0.0",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.1.6",

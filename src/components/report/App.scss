@@ -1,0 +1,51 @@
+@import './variables';
+
+#root {
+  font-size: 11pt;
+  // display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  // display: flex;
+  justify-content: left;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+// .app__container {
+//   width: $mapScreenWidth;
+// }
+
+.page-break {
+  break-before: page;
+  border-top: 1px dashed gray;
+  @media print {
+    border-top: none;
+  }
+}
+
+.print-button {
+  display: flex;
+  // justify-content: center;
+  height: 2rem;
+  margin-top: 2rem;
+}
+
+@media print {
+  .print--hide {
+    display: none;
+  }
+}
+
+
+/* Extra small devices (phones, 600px and down) */
+@media screen and (max-width: 600px) {
+  .header {display: -webkit-inline-flex;}
+}
+
+.App {
+  height: 100%;
+}

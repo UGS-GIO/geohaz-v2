@@ -6,8 +6,10 @@ import { useTheme } from './contexts/ThemeProvider'
 import FullScreenMap from './components/FullScreenMap'
 import Header from './components/Header'
 import Toolbar from './components/Toolbar'
+import { Route, Routes } from 'react-router-dom'
+import ReportAppWrapper from './components/report/ReportAppWrapper'
 
-export function App() {
+function WebApp() {
   const { theme } = useTheme()
 
   // Set the ArcGIS theme on the document head
@@ -27,6 +29,41 @@ export function App() {
       <Header />
       <FullScreenMap />
     </CalciteShell>
+  )
+}
+
+const NoMatch = () => {
+  return (
+    <div>
+      <h1>404 - Not Found</h1>
+    </div>
+  )
+}
+
+const Report = () => {
+  return (
+    <div>
+      <h1>Report</h1>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <div>
+      <Routes>
+        <Route path="/" element={<WebApp />} />
+        {/* <Route index element={<Home />} /> */}
+        <Route path="report" element={<ReportAppWrapper />} />
+        {/* <Route path="report" element={<Report />} /> */}
+        {/* <Route path="dashboard" element={<Dashboard />} /> */}
+
+        {/* Using path="*"" means "match anything", so this route
+          acts like a catch-all for URLs that we don't have explicit
+          routes for. */}
+        <Route path="*" element={<NoMatch />} />
+      </Routes>
+    </div>
   )
 }
 
