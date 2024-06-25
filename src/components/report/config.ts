@@ -47,7 +47,7 @@ export default {
         ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/18', 'SLS'], // Soluble Soil and Rock Susceptibility
         ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/19', 'WSS'], // Wind-Blown Sand Susceptibility
         ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/24', 'AAF'], // Alluvial Fan Inventory
-        // ['https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults/MapServer/0', quaternaryFaultsHazardCode], // Quaternary Faults
+        ['https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/quaternary_faults/MapServer/0', quaternaryFaultsHazardCode], // Quaternary Faults
         // ['https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisf/tw.search_fault_data/items.json', quaternaryFaultsHazardCode], // Quaternary Faults
         ['Utah_Earthquake_Hazards/FeatureServer/2', 'LQS'], // Liquefaction Susceptibility
         ['Utah_Earthquake_Hazards/FeatureServer/3', 'SFR'], // Surface Fault Rupture Hazard Special Study Zone
