@@ -1,6 +1,3 @@
-import {
-  CalciteBlock,
-} from '@esri/calcite-components-react';
 import useCustomLayerList from '../../hooks/useCustomLayerList';
 
 function Layers() {
@@ -12,7 +9,6 @@ function Layers() {
 
   return (
     <div>
-      <CalciteBlock heading='Layer List and Controls' className='mb-1' />
       {layerList}
     </div>
   );
