@@ -4,7 +4,7 @@ import config from '../config';
 import './CoverPage.scss';
 import MapSurround from './MapSurround';
 
-interface CoverPageProps {
+export interface CoverPageProps {
   Introduction?: string;
   Disclaimer?: string;
 }

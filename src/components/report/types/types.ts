@@ -33,6 +33,16 @@ export interface SpatialReference {
     latestWkid?: number;
 }
 
+export interface HazardUnitProps {
+    HazardUnit: string;
+    Description: string;
+    HowToUse?: string;
+    UnitName?: string;
+    HazardName?: string;
+}
+
+export interface HazardText { Hazard: string, Text: string }
+
 interface UniqueIdField {
     name: string;
     isSystemMaintained: boolean;
@@ -48,7 +58,7 @@ interface Field {
     defaultValue: null;
 }
 
-interface Attributes extends Record<string, string> { }
+export interface Attributes extends Record<string, string> { }
 
 interface Feature {
     attributes: Attributes;
@@ -67,3 +77,4 @@ export interface JsonResponse {
         message: string;
     };
 }
+
