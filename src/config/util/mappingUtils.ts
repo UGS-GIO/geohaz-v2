@@ -190,3 +190,7 @@ export function expandClickHandlers(view: SceneView | MapView) {
         view.on("drag", handleEvent);
     });
 }
+
+export function sketchVMHandlers(view: SceneView | MapView) {
+
+}

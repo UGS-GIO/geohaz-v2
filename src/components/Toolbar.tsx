@@ -8,7 +8,7 @@ const actionItems: ActionItem[] = [
   { name: 'Info', icon: 'information-f', component: lazy(() => import('./SidebarComponents/Info')) },
   { name: 'Layers', icon: 'layers', component: lazy(() => import('./SidebarComponents/Layers')) },
   { name: 'Map Configurations', icon: 'sliders-horizontal', component: lazy(() => import('./SidebarComponents/MapConfigurations')) },
-  { name: 'Geological Unit Search', icon: 'data-magnifying-glass', component: lazy(() => import('./SidebarComponents/GeologicalUnitSearch')) },
+  { name: 'Report Generator', icon: 'file-report', component: lazy(() => import('./SidebarComponents/ReportGenerator')) },
 ];
 
 export function Toolbar() {
