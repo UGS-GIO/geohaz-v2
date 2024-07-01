@@ -60,7 +60,7 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
                     x: view.center.longitude.toFixed(3),
                     y: view.center.latitude.toFixed(3)
                 }
-                console.log('view.scale', view.scale);
+                // console.log('view.scale', view.scale);
 
                 updatePopupTemplate({ widget, xyPoint, scale: view.scale });
             });

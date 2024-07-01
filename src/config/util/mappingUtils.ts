@@ -13,7 +13,7 @@ import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
 import Expand from "@arcgis/core/widgets/Expand";
 import Popup from "@arcgis/core/widgets/Popup";
 import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
-
+import WFSLayer from "@arcgis/core/layers/WFSLayer";
 
 // Create a new map
 export const createMap = () => {
@@ -73,11 +73,17 @@ export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
 
 // Helper function to reduce code duplication in createLayer
 function createLayerFromUrl(layer: LayerProps, LayerType: any) {
+    console.log('layer', layer);
+    console.log('LayerType', LayerType);
+
     // Create a layer based on the layer props
     if ('url' in layer) {
+        console.log('options', layer);
+
         return new LayerType({
             url: layer.url,
-            ...layer.options,
+            activeLayer: layer.activeLayer || undefined,
+            // ...layer.options,
         });
     }
 
@@ -95,7 +101,7 @@ function createLayerFromUrl(layer: LayerProps, LayerType: any) {
 }
 
 // Create a layer based on the layer props
-export const createLayer = (layer: LayerProps): FeatureLayer | TileLayer | GroupLayer | MapImageLayer | GeoJSONLayer | undefined => {
+export const createLayer = (layer: LayerProps): FeatureLayer | TileLayer | GroupLayer | MapImageLayer | GeoJSONLayer | WFSLayer | undefined => {
     // Handle the special case for group layers
     if (layer.type === 'group' && layer.layers) {
         const groupLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer | GeoJSONLayer)[];

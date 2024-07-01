@@ -4,17 +4,21 @@ import GroupLayer from "@arcgis/core/layers/GroupLayer"
 import ImageryLayer from "@arcgis/core/layers/ImageryLayer"
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer"
 import TileLayer from "@arcgis/core/layers/TileLayer"
+import WFSLayer from "@arcgis/core/layers/WFSLayer"
+import WMSLayer from "@arcgis/core/layers/WMSLayer"
+import WMTSLayer from "@arcgis/core/layers/WMTSLayer"
 import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
 
-export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group' | 'geojson'
+export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group' | 'geojson' | 'wms' | 'wfs' | 'wmts'
 export interface LayerProps {
     type: LayerType
     url?: string
     options?: object
     title?: string
     visible?: boolean
-    layers?: LayerProps[]
+    layers?: LayerProps[],
+    activeLayer?: object // this is specific to the WMTSLayer
 }
 
 // Define a mapping of layer types to their corresponding classes
@@ -24,7 +28,10 @@ export const layerTypeMapping = {
     'map-image': MapImageLayer,
     'imagery': ImageryLayer,
     'group': GroupLayer,
-    'geojson': GeoJSONLayer
+    'geojson': GeoJSONLayer,
+    'wms': WMSLayer,
+    'wfs': WFSLayer,
+    'wmts': WMTSLayer
     // Add other layer types here
 };
 

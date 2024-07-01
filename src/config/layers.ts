@@ -212,8 +212,13 @@ const shakingRasterConfig: LayerProps = {
 };
 
 const qFaultsGeoJsonConfig: LayerProps = {
-    type: 'geojson',
-    url: 'https://pgfeatureserv-souochdo6a-wm.a.run.app/collections/hazards.quaternaryfaults/items.json',
+    type: 'wmts',
+    // url: 'https://pgfeatureserv-souochdo6a-wm.a.run.app/collections/hazards.quaternaryfaults/items.json',
+    // url: 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/wfs',
+    url: "https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/gwc/service/wmts",
+    activeLayer: { id: "public:seamlessgeolunits" },
+    // serviceMode: "KVP",    // url: 'https://services.geodataoverijssel.nl/geoserver/B73_Cultuur/wfs',
+    // name: "B73_Cultuur:B7_Landgoederen",
     options: {
         title: 'Quaternary Faults',
         outFields: ['faultname', 'faultzone', 'faultclass', 'faultage', 'sliprate', 'dipdirection', 'slipsense', 'mappedscale', 'citation', 'usgs_link', 'summary'],
@@ -1054,7 +1059,9 @@ const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
     visible: true,
-    layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsGeoJsonConfig],
+    // layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsGeoJsonConfig],
+
+    layers: [qFaultsGeoJsonConfig]
 };
 
 const landslidesConfig: LayerProps = {
@@ -1065,13 +1072,13 @@ const landslidesConfig: LayerProps = {
 };
 
 const layersConfig: LayerProps[] = [
-    quadBoundariesConfig,
-    notMappedConfig,
-    hazardStudyConfig,
-    soilHazardsConfig,
-    landslidesConfig,
+    // quadBoundariesConfig,
+    // notMappedConfig,
+    // hazardStudyConfig,
+    // soilHazardsConfig,
+    // landslidesConfig,
     earthquakesConfig,
-    floodHazardsConfig,
+    // floodHazardsConfig,
 ];
 
 export default layersConfig;
