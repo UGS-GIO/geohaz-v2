@@ -47,21 +47,39 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     };
 
     const handleVisibilityToggle = () => updateLayer(layer => {
+        console.log('regular layer', layer);
+
         layer.visible = !layer.visible;
         setLayerVisibility(layer.visible ? layer.visible : undefined);
     });
 
-    const handleOpacityChange = (event: CalciteSliderCustomEvent<void>) => updateLayer(layer => {
+    const handleOpacityChange1 = (event: CalciteSliderCustomEvent<void>) => updateLayer(layer => {
+        console.log('layer', layer)
+        console.log('event', event)
+
         layer.opacity = Number(event.target.value) / 100;
         setLayerOpacity(layer.opacity);
     });
 
+    const handleOpacityChange = (value: number) => updateLayer(layer => {
+        console.log('layer', layer);
+        console.log('value', value);
+
+        layer.opacity = value / 100;
+        console.log('layer again', layer);
+
+        setLayerOpacity(layer.opacity);
+    });
+
     const handleSublayerVisibilityToggle = (sublayer: __esri.Sublayer) => {
+        console.log('Aaaaaasublayer', sublayer);
         sublayer.visible = !sublayer.visible;
         setSublayerVisibility(prevState => ({ ...prevState, [sublayer.id]: sublayer.visible }));
     };
 
     const handleSublayerOpacityChange = (event: CalciteSliderCustomEvent<void>, sublayer: __esri.Sublayer) => {
+        console.log('aaaaevent', event);
+
         sublayer.opacity = Number(event.target.value) / 100;
         setLayerOpacity(sublayer.opacity);
     };
