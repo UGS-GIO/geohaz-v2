@@ -16,12 +16,20 @@
     "@arcgis/core": "^4.29.10",
     "@esri/calcite-components-react": "^2.9.0",
     "@phosphor-icons/react": "^2.1.5",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "@tanstack/react-query": "^5.18.1",
     "arcgis-react": "1.0.8",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "dompurify": "^3.1.5",
+    "lucide-react": "^0.400.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-syntax-highlighter": "^15.5.0"
+    "react-syntax-highlighter": "^15.5.0",
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@semantic-release/git": "^10.0.1",
