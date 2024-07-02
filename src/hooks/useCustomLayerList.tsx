@@ -38,29 +38,35 @@ const useCustomLayerList = () => {
             const list = activeLayers.map((layer, index) => {
                 if (layer.layer.type === 'group') {
                     return (
-                        <Accordion key={index} type="multiple">
-                            <AccordionItem value={`item-${index}`}>
-                                <AccordionTrigger>
-                                    <Switch
-                                        className='ml-2'
-                                        id={`${layer.title}-visibility`}
-                                        checked={groupLayerVisibility[layer.layer.id] || false}
-                                        onClick={(e) => e.stopPropagation()}
-                                        onCheckedChange={handleGroupLayerVisibilityToggle(layer.layer.id)}
-                                    />
-                                    {layer.title}
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    {layer.children.map((childLayer) => (
-                                        <LayerlistAccordion key={childLayer.layer.id} layer={childLayer} />
-                                    ))}
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
+                        <div className='mr-2'>
+                            <Accordion key={index} type="multiple">
+                                <AccordionItem value={`item-${index}`}>
+                                    <AccordionTrigger>
+                                        <Switch
+                                            className='ml-2'
+                                            id={`${layer.title}-visibility`}
+                                            checked={groupLayerVisibility[layer.layer.id] || false}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onCheckedChange={handleGroupLayerVisibilityToggle(layer.layer.id)}
+                                        />
+                                        {layer.title}
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        {layer.children.map((childLayer) => (
+                                            <LayerlistAccordion key={childLayer.layer.id} layer={childLayer} />
+                                        ))}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </div>
                     );
                 }
 
-                return <LayerlistAccordion key={layer.layer.id} layer={layer} />;
+                return (
+                    <div className='mr-2'>
+                        <LayerlistAccordion key={layer.layer.id} layer={layer} />
+                    </div>
+                )
             });
 
             setLayerList(list);

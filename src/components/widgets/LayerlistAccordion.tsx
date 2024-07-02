@@ -8,24 +8,24 @@ import LayerControls from '../LayerControls';
 import { findLayerById } from '../../config/mapping';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../@/components/ui/accordion';
 import { Switch } from '../@/components/ui/switch';
-import { RendererProps } from '../../config/types/mappingTypes';
-import useLegendPreview from '../../hooks/useLegendPreview';
+// import { RendererProps } from '../../config/types/mappingTypes';
+// import useLegendPreview from '../../hooks/useLegendPreview';
 
 interface LayerAccordionProps { layer: __esri.ListItem }
 
 const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer.layer;
-    const { activeLayers, layerDescriptions, getRenderer } = useContext(MapContext);
+    const { view, activeLayers, layerDescriptions, getRenderer } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
     const [layerVisibility, setLayerVisibility] = useState<boolean | undefined>();
-    const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
+    // const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
     const [layerOpacity, setLayerOpacity] = useState(1);
-    const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
+    // const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
 
     // this gets around a typescript error because getRenderer can be undefined
-    const defaultGetRenderer: (id: string, url?: string | undefined) => Promise<RendererProps | undefined> = () => Promise.resolve(undefined);
+    // const defaultGetRenderer: (id: string, url?: string | undefined) => Promise<RendererProps | undefined> = () => Promise.resolve(undefined);
 
-    const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer || defaultGetRenderer);
+    // const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer || defaultGetRenderer);
     useEffect(() => {
         if (activeLayers && layerId) {
             const foundLayer = findLayerById(activeLayers, layerId);
@@ -33,14 +33,14 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
             setLayerVisibility(foundLayer?.visible);
             setLayerOpacity(foundLayer?.layer.opacity || 1);
 
-            // Initialize sublayerVisibility
-            if (isMapImageLayer(foundLayer.layer) && foundLayer.layer.sublayers) {
-                const initialSublayerVisibility: Record<string, boolean> = {};
-                foundLayer.layer.sublayers.forEach(sublayer => {
-                    initialSublayerVisibility[String(sublayer.id)] = sublayer.visible;
-                });
-                setSublayerVisibility(initialSublayerVisibility);
-            }
+            // // Initialize sublayerVisibility
+            // if (isMapImageLayer(foundLayer.layer) && foundLayer.layer.sublayers) {
+            //     const initialSublayerVisibility: Record<string, boolean> = {};
+            //     foundLayer.layer.sublayers.forEach(sublayer => {
+            //         initialSublayerVisibility[String(sublayer.id)] = sublayer.visible;
+            //     });
+            //     setSublayerVisibility(initialSublayerVisibility);
+            // }
         }
     }, [activeLayers, layerId]);
 
@@ -61,33 +61,17 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
         setLayerOpacity(layer.opacity);
     });
 
-    function isMapImageLayer(layer: __esri.Layer): layer is __esri.MapImageLayer {
-        return layer.type === "map-image";
+    // function isMapImageLayer(layer: __esri.Layer): layer is __esri.MapImageLayer {
+    //     return layer.type === "map-image";
+    // }
+
+    const handleZoomToLayer = () => {
+        if (currentLayer && currentLayer.layer.fullExtent) {
+            console.log('zoom to layer', currentLayer.layer);
+            view?.goTo(currentLayer.layer.fullExtent);
+
+        }
     }
-
-
-    // return (
-    //     <CalciteAccordion className='mb-2'>
-    //         <CalciteAccordionItem expanded heading={layerTitle}>
-    //             <div className="flex flex-col items-start">
-    //                 <LayerControls
-    //                     layerVisibility={layerVisibility || undefined}
-    //                     handleVisibilityToggle={handleVisibilityToggle}
-    //                     layerOpacity={layerOpacity}
-    //                     handleOpacityChange={handleOpacityChange}
-    //                     title={layerTitle}
-    //                     description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
-    //                 />
-    //                 {/* {preview && preview.map((preview, index) => (
-    //                         <div key={index} className='flex items-end space-x-4 py-1'>
-    //                             <span dangerouslySetInnerHTML={{ __html: preview.html.outerHTML || '' }} />
-    //                             <span>{preview.label}</span>
-    //                         </div>
-    //                     ))} */}
-    //             </div>
-    //         </CalciteAccordionItem>
-    //     </CalciteAccordion>
-    // );
 
     return (
         <div className='ml-4'>
@@ -111,6 +95,7 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                             handleOpacityChange={handleOpacityChange}
                             title={layerTitle}
                             description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
+                            handleZoomToLayer={handleZoomToLayer}
                         />
                         {/* legend content */}
                         {/* <Accordion type='single' collapsible>

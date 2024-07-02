@@ -21,11 +21,12 @@ interface LayerControlsProps {
     handleVisibilityToggle: () => void | undefined;
     layerOpacity: number;
     handleOpacityChange: (e: number) => void;
+    handleZoomToLayer: () => void;
     title: string;
     description: string;
 }
 
-const LayerControls: React.FC<LayerControlsProps> = ({ layerVisibility, handleVisibilityToggle, layerOpacity, handleOpacityChange, description, title }) => {
+const LayerControls: React.FC<LayerControlsProps> = ({ layerVisibility, handleVisibilityToggle, handleZoomToLayer, layerOpacity, handleOpacityChange, description, title }) => {
 
     const [opacitySwitchChecked, setOpacitySwitchChecked] = useState(true);
     const [labelsVisible, setLabelsVisible] = useState(false);
@@ -54,7 +55,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({ layerVisibility, handleVi
                 </Dialog>
 
                 {/* TODO: implement zoom to layer */}
-                <Button variant="ghost" className="flex items-center">
+                <Button variant="ghost" className="flex items-center" onClick={handleZoomToLayer}>
                     <ArrowsIn className="h-5 w-5 mr-2" color="#d26e03" />
                     <span>Zoom to Layer</span>
                 </Button>
@@ -72,42 +73,6 @@ const LayerControls: React.FC<LayerControlsProps> = ({ layerVisibility, handleVi
                 </Label>
                 <Switch id={`${title}-label-visibility`} className='ml-auto' checked={labelsVisible} onCheckedChange={() => setLabelsVisible(!labelsVisible)} />
             </div>
-            {/* <div className="flex items-center justify-between space-x-2 w-full">
-                <Label htmlFor={`${title}-visibility`} className='mx-auto'>
-                    Layer Visibility: {layerVisibility ? 'On' : 'Off'}
-                </Label>
-                <Switch
-                    id={`${title}-visibility`}
-                    className='ml-auto'
-                    checked={layerVisibility}
-                    onCheckedChange={() => {
-                        handleVisibilityToggle();
-                        console.log('Layer visibility toggled');
-                    }}
-                />
-            </div> */}
-            {/* <div className="flex flex-col items-start mr-4">
-                <CalciteSwitch
-                    scale='l'
-                    className='mt-2'
-                    onCalciteSwitchChange={handleVisibilityToggle}
-                    checked={layerVisibility}
-                />
-            </div>
-
-            <div className="flex flex-col items-start flex-grow">
-                <CalciteSlider
-                    className="mt-2 w-full"
-                    onCalciteSliderChange={(e) => handleOpacityChange(e)}
-                    value={layerOpacity * 100}
-                />
-            </div>
-            <div className='ml-4 mt-2 items-center'>
-                <CalciteLink id={`tooltip-button-${title}`}><Info weight='fill' color={'#9f9f9f'} size={24} /></CalciteLink>
-                <CalciteTooltip reference-element={`tooltip-button-${title}`}>
-                    <div className='custom-tooltip' dangerouslySetInnerHTML={{ __html: cleanDescription }} />
-                </CalciteTooltip>
-            </div> */}
         </div>
     )
 };
