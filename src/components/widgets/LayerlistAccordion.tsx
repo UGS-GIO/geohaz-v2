@@ -6,6 +6,8 @@ import { MapContext } from '../../contexts/MapProvider';
 // import { RendererProps } from '../../config/types/mappingTypes';
 import LayerControls from '../LayerControls';
 import { findLayerById } from '../../config/mapping';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../@/components/ui/accordion';
+import { Switch } from '../@/components/ui/switch';
 
 interface LayerAccordionProps { layer: __esri.ListItem }
 
@@ -47,84 +49,49 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     };
 
     const handleVisibilityToggle = () => updateLayer(layer => {
-        console.log('regular layer', layer);
-
         layer.visible = !layer.visible;
         setLayerVisibility(layer.visible ? layer.visible : undefined);
     });
 
-    const handleOpacityChange1 = (event: CalciteSliderCustomEvent<void>) => updateLayer(layer => {
-        console.log('layer', layer)
-        console.log('event', event)
-
-        layer.opacity = Number(event.target.value) / 100;
-        setLayerOpacity(layer.opacity);
-    });
-
     const handleOpacityChange = (value: number) => updateLayer(layer => {
-        console.log('layer', layer);
-        console.log('value', value);
-
         layer.opacity = value / 100;
-        console.log('layer again', layer);
-
         setLayerOpacity(layer.opacity);
     });
 
-    const handleSublayerVisibilityToggle = (sublayer: __esri.Sublayer) => {
-        console.log('Aaaaaasublayer', sublayer);
-        sublayer.visible = !sublayer.visible;
-        setSublayerVisibility(prevState => ({ ...prevState, [sublayer.id]: sublayer.visible }));
-    };
-
-    const handleSublayerOpacityChange = (event: CalciteSliderCustomEvent<void>, sublayer: __esri.Sublayer) => {
-        console.log('aaaaevent', event);
-
-        sublayer.opacity = Number(event.target.value) / 100;
-        setLayerOpacity(sublayer.opacity);
-    };
     function isMapImageLayer(layer: __esri.Layer): layer is __esri.MapImageLayer {
         return layer.type === "map-image";
     }
 
 
+    // return (
+    //     <CalciteAccordion className='mb-2'>
+    //         <CalciteAccordionItem expanded heading={layerTitle}>
+    //             <div className="flex flex-col items-start">
+    //                 <LayerControls
+    //                     layerVisibility={layerVisibility || undefined}
+    //                     handleVisibilityToggle={handleVisibilityToggle}
+    //                     layerOpacity={layerOpacity}
+    //                     handleOpacityChange={handleOpacityChange}
+    //                     title={layerTitle}
+    //                     description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
+    //                 />
+    //                 {/* {preview && preview.map((preview, index) => (
+    //                         <div key={index} className='flex items-end space-x-4 py-1'>
+    //                             <span dangerouslySetInnerHTML={{ __html: preview.html.outerHTML || '' }} />
+    //                             <span>{preview.label}</span>
+    //                         </div>
+    //                     ))} */}
+    //             </div>
+    //         </CalciteAccordionItem>
+    //     </CalciteAccordion>
+    // );
+
     return (
-        <CalciteAccordion className='mb-2'>
-            {isMapImageLayer(typeNarrowedLayer) && typeNarrowedLayer.sublayers && typeNarrowedLayer.sublayers.length > 0 ? (
-                <CalciteAccordionItem expanded heading={layerTitle}>
-                    {
-                        typeNarrowedLayer.sublayers.map((sublayer: __esri.Sublayer, index: number) => {
-                            return (
-                                <CalciteAccordionItem heading={sublayer.title} key={index} expanded>
-                                    <div className="flex flex-col items-start" key={index}>
-                                        <LayerControls
-                                            layerVisibility={sublayerVisibility[sublayer.id] || undefined}
-                                            handleVisibilityToggle={() => handleSublayerVisibilityToggle(sublayer)}
-                                            layerOpacity={sublayer.opacity}
-                                            handleOpacityChange={(e) => handleSublayerOpacityChange(e, sublayer)}
-                                            title={sublayer.title}
-                                            description={layerDescriptions ? layerDescriptions[sublayer.title] : ''}
-                                        />
-                                        {/* {preview && preview.map((previewItem, index) => {
-                                            if (previewItem.title === sublayer.title) {
-                                                return (
-                                                    <div key={index} className='flex items-end space-x-4 py-1'>
-                                                        <span dangerouslySetInnerHTML={{ __html: previewItem.html.outerHTML || '' }} />
-                                                        <span>{previewItem.label}</span>
-                                                    </div>
-                                                );
-                                            }
-                                            return null;
-                                        })} */}
-                                    </div>
-                                </CalciteAccordionItem>
-                            )
-                        })
-                    }
-                </CalciteAccordionItem>
-            ) : (
-                <CalciteAccordionItem expanded heading={layerTitle}>
-                    <div className="flex flex-col items-start">
+        <div>
+            <Accordion type="single" collapsible>
+                <AccordionItem value="item-1">
+                    <AccordionTrigger><Switch className='ml-2' id={`${layerTitle}-visibility`} checked={layerVisibility} onClick={(e) => e.stopPropagation()} onCheckedChange={handleVisibilityToggle} />{layerTitle}</AccordionTrigger>
+                    <AccordionContent>
                         <LayerControls
                             layerVisibility={layerVisibility || undefined}
                             handleVisibilityToggle={handleVisibilityToggle}
@@ -133,17 +100,11 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                             title={layerTitle}
                             description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
                         />
-                        {/* {preview && preview.map((preview, index) => (
-                            <div key={index} className='flex items-end space-x-4 py-1'>
-                                <span dangerouslySetInnerHTML={{ __html: preview.html.outerHTML || '' }} />
-                                <span>{preview.label}</span>
-                            </div>
-                        ))} */}
-                    </div>
-                </CalciteAccordionItem>
-            )}
-        </CalciteAccordion>
-    );
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+        </div>
+    )
 }
 
 export default LayerAccordion;

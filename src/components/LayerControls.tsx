@@ -72,7 +72,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({ layerVisibility, handleVi
                 </Label>
                 <Switch id={`${title}-label-visibility`} className='ml-auto' checked={labelsVisible} onCheckedChange={() => setLabelsVisible(!labelsVisible)} />
             </div>
-            <div className="flex items-center justify-between space-x-2 w-full">
+            {/* <div className="flex items-center justify-between space-x-2 w-full">
                 <Label htmlFor={`${title}-visibility`} className='mx-auto'>
                     Layer Visibility: {layerVisibility ? 'On' : 'Off'}
                 </Label>
@@ -85,7 +85,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({ layerVisibility, handleVi
                         console.log('Layer visibility toggled');
                     }}
                 />
-            </div>
+            </div> */}
             {/* <div className="flex flex-col items-start mr-4">
                 <CalciteSwitch
                     scale='l'
