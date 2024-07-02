@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { CalciteBlock } from '@esri/calcite-components-react';
 import { MapContext } from '../contexts/MapProvider';
 import LayerlistAccordion from '../components/widgets/LayerlistAccordion';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/@/components/ui/accordion';
 
 const useCustomLayerList = () => {
     const { activeLayers } = useContext(MapContext);
@@ -12,16 +12,21 @@ const useCustomLayerList = () => {
             const list = activeLayers.map((layer, index) => {
                 if (layer.layer.type === 'group') {
                     return (
-                        <CalciteBlock collapsible key={index} heading={layer.title} >
-                            {layer.children.map((childLayer, childIndex) => {
-                                return <LayerlistAccordion key={childIndex} layer={childLayer} />
-                            })}
-                        </CalciteBlock>
+                        <Accordion key={index} type="multiple">
+                            <AccordionItem value={`item-${index}`}>
+                                <AccordionTrigger>{layer.title}</AccordionTrigger>
+                                <AccordionContent>
+                                    {layer.children.map((childLayer) => (
+                                        <LayerlistAccordion layer={childLayer} />
+
+                                    ))}
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
                     );
                 }
 
-                return <LayerlistAccordion key={index} layer={layer} />
-
+                return <LayerlistAccordion layer={layer} />;
             });
 
             setLayerList(list);
