@@ -8,7 +8,7 @@ function Layers() {
   }
 
   return (
-    <div className='mx-2'>
+    <div key='layer-list' className='mx-2'>
       {layerList}
     </div>
   );
