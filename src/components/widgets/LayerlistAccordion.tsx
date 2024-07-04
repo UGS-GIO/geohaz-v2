@@ -1,13 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
-import { CalciteAccordion, CalciteAccordionItem } from '@esri/calcite-components-react';
-import { CalciteSliderCustomEvent } from "@esri/calcite-components";
 import { MapContext } from '../../contexts/MapProvider';
 // import useLegendPreview from '../../hooks/useLegendPreview';
 // import { RendererProps } from '../../config/types/mappingTypes';
 import LayerControls from '../LayerControls';
 import { findLayerById } from '../../config/mapping';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../@/components/ui/accordion';
-import { Switch } from '../@/components/ui/switch';
+import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '../@/components/ui/accordion';
+import { Checkbox } from '../@/components/ui/checkbox';
 // import { RendererProps } from '../../config/types/mappingTypes';
 // import useLegendPreview from '../../hooks/useLegendPreview';
 
@@ -77,16 +75,16 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
         <div className='ml-4'>
             <Accordion type="single" collapsible>
                 <AccordionItem value="item-1">
-                    <AccordionTrigger>
-                        <Switch
-                            className='ml-2'
-                            id={`${layerTitle}-visibility`}
+                    <AccordionHeader>
+                        <Checkbox
                             checked={layerVisibility || false}
-                            onClick={(e) => e.stopPropagation()}
-                            onCheckedChange={handleVisibilityToggle}
+                            onClick={handleVisibilityToggle}
+                            className="mr-2"
                         />
-                        {layerTitle}
-                    </AccordionTrigger>
+                        <AccordionTrigger>
+                            <h3 className='text-md font-medium text-left'>{layerTitle}</h3>
+                        </AccordionTrigger>
+                    </AccordionHeader>
                     <AccordionContent>
                         <LayerControls
                             layerVisibility={layerVisibility || undefined}

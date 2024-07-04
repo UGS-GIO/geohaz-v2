@@ -1,15 +1,16 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 import { MapContext } from '../contexts/MapProvider';
 import LayerlistAccordion from '../components/widgets/LayerlistAccordion';
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/@/components/ui/accordion';
-import { Switch } from '../components/@/components/ui/switch';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '../components/@/components/ui/accordion';
+import { Checkbox } from '../components/@/components/ui/checkbox';
 
 const useCustomLayerList = () => {
     const { activeLayers } = useContext(MapContext);
     const [layerList, setLayerList] = useState<__esri.Collection<JSX.Element>>();
     const [groupLayerVisibility, setGroupLayerVisibility] = useState<Record<string, boolean>>({});
 
-    const handleGroupLayerVisibilityToggle = (layerId: string) => {
+    // Memoize the visibility toggle handler to avoid it changing on every render
+    const handleGroupLayerVisibilityToggle = useCallback((layerId: string) => {
         return (newVisibility: boolean) => {
             setGroupLayerVisibility(prevState => ({
                 ...prevState,
@@ -21,11 +22,11 @@ const useCustomLayerList = () => {
                 layer.visible = newVisibility;
             }
         };
-    };
+    }, [activeLayers]);
 
+    // Separate effect for initializing visibility state
     useEffect(() => {
         if (activeLayers) {
-            // Initialize the visibility state for each group layer
             const initialVisibility = activeLayers.reduce((acc, layer) => {
                 if (layer.layer.type === 'group') {
                     acc[layer.layer.id] = layer.visible;
@@ -34,23 +35,28 @@ const useCustomLayerList = () => {
             }, {} as Record<string, boolean>);
 
             setGroupLayerVisibility(initialVisibility);
+        }
+    }, [activeLayers]);
 
+    // Effect for updating the layer list
+    useEffect(() => {
+        if (activeLayers) {
             const list = activeLayers.map((layer, index) => {
                 if (layer.layer.type === 'group') {
                     return (
-                        <div className='mr-2'>
-                            <Accordion key={index} type="multiple">
+                        <div className='mr-2' key={`accordion-${index}`}>
+                            <Accordion type="multiple">
                                 <AccordionItem value={`item-${index}`}>
-                                    <AccordionTrigger>
-                                        <Switch
-                                            className='ml-2'
-                                            id={`${layer.title}-visibility`}
+                                    <AccordionHeader>
+                                        <Checkbox
                                             checked={groupLayerVisibility[layer.layer.id] || false}
-                                            onClick={(e) => e.stopPropagation()}
                                             onCheckedChange={handleGroupLayerVisibilityToggle(layer.layer.id)}
+                                            className="mr-2"
                                         />
-                                        {layer.title}
-                                    </AccordionTrigger>
+                                        <AccordionTrigger>
+                                            <h3 className='text-md font-medium text-left'>{layer.title}</h3>
+                                        </AccordionTrigger>
+                                    </AccordionHeader>
                                     <AccordionContent>
                                         {layer.children.map((childLayer) => (
                                             <LayerlistAccordion key={childLayer.layer.id} layer={childLayer} />
@@ -63,15 +69,15 @@ const useCustomLayerList = () => {
                 }
 
                 return (
-                    <div className='mr-2'>
-                        <LayerlistAccordion key={layer.layer.id} layer={layer} />
+                    <div className='mr-2' key={`layer-${layer.layer.id}`}>
+                        <LayerlistAccordion layer={layer} />
                     </div>
                 )
             });
 
             setLayerList(list);
         }
-    }, [activeLayers, groupLayerVisibility]);
+    }, [activeLayers, groupLayerVisibility, handleGroupLayerVisibilityToggle]);
 
     return layerList;
 };
