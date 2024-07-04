@@ -1,4 +1,5 @@
-import { ArrowsIn, Info } from '@phosphor-icons/react';
+import { ArrowsIn } from '@phosphor-icons/react';
+import { Info, Shrink } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { Button } from './@/components/ui/button';
 import {
@@ -37,7 +38,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button variant="ghost" className="flex items-center">
-                                <Info className="h-5 w-5 mr-2" color="#d26e03" />
+                                <Info className="h-5 w-5 mr-2" />
                                 <span>Layer Information</span>
                             </Button>
                         </DialogTrigger>
@@ -53,7 +54,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                     </Dialog>
 
                     <Button variant="ghost" className="flex items-center mt-2 sm:mt-0" onClick={handleZoomToLayer}>
-                        <ArrowsIn className="h-5 w-5 mr-2" color="#d26e03" />
+                        <Shrink className="h-5 w-5 mr-2" />
                         <span>Zoom to Layer</span>
                     </Button>
                 </div>
