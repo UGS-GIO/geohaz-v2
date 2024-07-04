@@ -44,8 +44,8 @@ const useCustomLayerList = () => {
             const list = activeLayers.map((layer, index) => {
                 if (layer.layer.type === 'group') {
                     return (
-                        <div className='mr-2' key={`accordion-${index}`}>
-                            <Accordion type="multiple">
+                        <div className='mr-2 border rounded my-2' key={`accordion-${index}`}>
+                            <Accordion type="multiple" >
                                 <AccordionItem value={`item-${index}`}>
                                     <AccordionHeader>
                                         <Checkbox
@@ -59,7 +59,7 @@ const useCustomLayerList = () => {
                                     </AccordionHeader>
                                     <AccordionContent>
                                         {layer.children.map((childLayer) => (
-                                            <div className='ml-4'>
+                                            <div className='ml-4' key={childLayer.layer.id}>
                                                 <LayerlistAccordion key={childLayer.layer.id} layer={childLayer} />
                                             </div>
                                         ))}
@@ -71,7 +71,7 @@ const useCustomLayerList = () => {
                 }
 
                 return (
-                    <div className='mr-2' key={`layer-${layer.layer.id}`}>
+                    <div className='mr-2 my-2 border rounded' key={`layer-${layer.layer.id}`}>
                         <LayerlistAccordion layer={layer} />
                     </div>
                 )

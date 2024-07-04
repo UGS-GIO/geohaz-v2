@@ -72,7 +72,7 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     }
 
     return (
-        <div>
+        <div key={layerId}>
             <Accordion type="single" collapsible>
                 <AccordionItem value="item-1">
                     <AccordionHeader>

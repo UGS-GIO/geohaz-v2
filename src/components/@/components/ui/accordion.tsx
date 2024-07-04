@@ -12,7 +12,7 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b", className)}
+    className={cn("", className)}
     {...props}
   />
 ))
@@ -40,7 +40,7 @@ const AccordionHeader = React.forwardRef<
   <AccordionPrimitive.Header ref={ref} className={cn("flex items-center justify-between", className)} {...props}>
     {children}
     <AccordionPrimitive.Trigger>
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 mr-2" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ))
