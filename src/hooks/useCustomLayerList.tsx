@@ -54,13 +54,14 @@ const useCustomLayerList = () => {
                                             className="mx-2"
                                         />
                                         <AccordionTrigger>
-                                            <h3 className='text-md font-medium text-left'>{layer.title}</h3>
+                                            <h3 className='font-medium text-left text-lg'>{layer.title}</h3>
+
                                         </AccordionTrigger>
                                     </AccordionHeader>
                                     <AccordionContent>
                                         {layer.children.map((childLayer) => (
                                             <div className='ml-4' key={childLayer.layer.id}>
-                                                <LayerlistAccordion key={childLayer.layer.id} layer={childLayer} />
+                                                <LayerlistAccordion key={childLayer.layer.id} layer={childLayer} isTopLevel={false} />
                                             </div>
                                         ))}
                                     </AccordionContent>
@@ -72,7 +73,7 @@ const useCustomLayerList = () => {
 
                 return (
                     <div className='mr-2 my-2 border rounded' key={`layer-${layer.layer.id}`}>
-                        <LayerlistAccordion layer={layer} />
+                        <LayerlistAccordion layer={layer} isTopLevel={true} />
                     </div>
                 )
             });

@@ -32,7 +32,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
 
     return (
         <div className="flex flex-col justify-between items-center w-full space-y-4">
-            <div className="flex flex-col sm:flex-row justify-around items-center w-full space-y-4 sm:space-y-0">
+            <div className="flex flex-row sm:flex-row justify-around items-center w-full space-y-4 sm:space-y-0">
                 <div className="flex flex-col sm:flex-row justify-center sm:justify-start items-center space-y-2 sm:space-y-0 sm:space-x-4">
                     <Dialog>
                         <DialogTrigger asChild>
@@ -58,8 +58,8 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                     </Button>
                 </div>
             </div>
-            <div className="flex items-center justify-between space-x-2 w-full">
-                <Label htmlFor={`${title}-opacity`} className="mx-auto">
+            <div className="flex flex-row items-center justify-around space-x-2 w-4/5 mx-auto">
+                <Label htmlFor={`${title}-opacity`}>
                     Opacity
                 </Label>
                 <Slider

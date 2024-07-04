@@ -9,9 +9,12 @@ import { Checkbox } from '../@/components/ui/checkbox';
 // import { RendererProps } from '../../config/types/mappingTypes';
 // import useLegendPreview from '../../hooks/useLegendPreview';
 
-interface LayerAccordionProps { layer: __esri.ListItem }
+interface LayerAccordionProps {
+    layer: __esri.ListItem,
+    isTopLevel: boolean
+}
 
-const LayerAccordion = ({ layer }: LayerAccordionProps) => {
+const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer.layer;
     const { view, activeLayers, layerDescriptions, getRenderer } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
@@ -82,7 +85,7 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                             className="mx-2"
                         />
                         <AccordionTrigger>
-                            <h3 className='text-md font-medium text-left'>{layerTitle}</h3>
+                            <h3 className={`text-md font-medium text-left ${isTopLevel ? 'text-lg' : ''}`}>{layerTitle}</h3>
                         </AccordionTrigger>
                     </AccordionHeader>
                     <AccordionContent>
