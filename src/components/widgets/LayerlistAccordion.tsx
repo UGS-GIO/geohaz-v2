@@ -72,14 +72,14 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
     }
 
     return (
-        <div className='ml-4'>
+        <div>
             <Accordion type="single" collapsible>
                 <AccordionItem value="item-1">
                     <AccordionHeader>
                         <Checkbox
                             checked={layerVisibility || false}
                             onClick={handleVisibilityToggle}
-                            className="mr-2"
+                            className="mx-2"
                         />
                         <AccordionTrigger>
                             <h3 className='text-md font-medium text-left'>{layerTitle}</h3>
@@ -87,8 +87,6 @@ const LayerAccordion = ({ layer }: LayerAccordionProps) => {
                     </AccordionHeader>
                     <AccordionContent>
                         <LayerControls
-                            layerVisibility={layerVisibility || undefined}
-                            handleVisibilityToggle={handleVisibilityToggle}
                             layerOpacity={layerOpacity}
                             handleOpacityChange={handleOpacityChange}
                             title={layerTitle}

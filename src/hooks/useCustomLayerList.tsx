@@ -51,7 +51,7 @@ const useCustomLayerList = () => {
                                         <Checkbox
                                             checked={groupLayerVisibility[layer.layer.id] || false}
                                             onCheckedChange={handleGroupLayerVisibilityToggle(layer.layer.id)}
-                                            className="mr-2"
+                                            className="mx-2"
                                         />
                                         <AccordionTrigger>
                                             <h3 className='text-md font-medium text-left'>{layer.title}</h3>
@@ -59,7 +59,9 @@ const useCustomLayerList = () => {
                                     </AccordionHeader>
                                     <AccordionContent>
                                         {layer.children.map((childLayer) => (
-                                            <LayerlistAccordion key={childLayer.layer.id} layer={childLayer} />
+                                            <div className='ml-4'>
+                                                <LayerlistAccordion key={childLayer.layer.id} layer={childLayer} />
+                                            </div>
                                         ))}
                                     </AccordionContent>
                                 </AccordionItem>
