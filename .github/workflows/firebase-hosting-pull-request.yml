@@ -22,4 +22,4 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
           projectId: '${{ env.PROJECT_ID }}'
-          expires: 2d
+          expires: 6d
