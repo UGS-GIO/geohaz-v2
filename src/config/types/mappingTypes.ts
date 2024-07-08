@@ -1,4 +1,5 @@
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer"
+import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer"
 import GroupLayer from "@arcgis/core/layers/GroupLayer"
 import ImageryLayer from "@arcgis/core/layers/ImageryLayer"
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer"
@@ -6,7 +7,7 @@ import TileLayer from "@arcgis/core/layers/TileLayer"
 import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
 
-export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group'
+export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group' | 'geojson'
 export interface LayerProps {
     type: LayerType
     url?: string
@@ -23,6 +24,7 @@ export const layerTypeMapping = {
     'map-image': MapImageLayer,
     'imagery': ImageryLayer,
     'group': GroupLayer,
+    'geojson': GeoJSONLayer
     // Add other layer types here
 };
 

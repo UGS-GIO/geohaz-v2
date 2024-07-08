@@ -16,7 +16,8 @@ import { fetchQFaultSuggestions, fetchQFaultResults } from './util/utils';
 
 const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
-    const qFaultsUrl = 'https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json';
+    // const qFaultsUrl = 'https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json';
+    const qFaultsUrl = 'https://utahdnr.maps.arcgis.com/apps/mapviewer/index.html?webmap=ba6c07a7de014d3b9d077c600c38e9c5';
 
     const coordinateFeatureConfig = {
         id: 'coordinate-feature-widget',

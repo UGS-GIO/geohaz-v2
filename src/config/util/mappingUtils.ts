@@ -12,6 +12,7 @@ import Color from "@arcgis/core/Color";
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
 import Expand from "@arcgis/core/widgets/Expand";
 import Popup from "@arcgis/core/widgets/Popup";
+import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 
 
 // Create a new map
@@ -83,7 +84,7 @@ function createLayerFromUrl(layer: LayerProps, LayerType: any) {
     if (layer.type === 'group') {
         if (layer.layers) {
             // Create an array of group layers by mapping the layers and filtering out any undefined elements
-            const groupedLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer)[];
+            const groupedLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer | GeoJSONLayer)[];
             return groupedLayers;
         }
     }
@@ -94,10 +95,10 @@ function createLayerFromUrl(layer: LayerProps, LayerType: any) {
 }
 
 // Create a layer based on the layer props
-export const createLayer = (layer: LayerProps): FeatureLayer | TileLayer | GroupLayer | MapImageLayer | undefined => {
+export const createLayer = (layer: LayerProps): FeatureLayer | TileLayer | GroupLayer | MapImageLayer | GeoJSONLayer | undefined => {
     // Handle the special case for group layers
     if (layer.type === 'group' && layer.layers) {
-        const groupLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer)[];
+        const groupLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer | GeoJSONLayer)[];
         return new GroupLayer({
             title: layer.title,
             visible: layer.visible,

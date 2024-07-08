@@ -7,37 +7,31 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Layer from "@arcgis/core/layers/Layer";
 
 function addGraphic(event: __esri.SketchViewModelCreateEvent, sketchVM: __esri.SketchViewModel | undefined, tempGraphicsLayer: __esri.GraphicsLayer | undefined) {
-  console.log(event);
   if (event.state === "complete" && event.graphic) {
     tempGraphicsLayer?.remove(event.graphic)
     const drawAOIHeight = event.graphic.geometry.extent.height;
     const drawAOIWidth = event.graphic.geometry.extent.width;
     const aoi = event.graphic.geometry.toJSON();
 
-    console.log("complete");
     if (drawAOIHeight < 12000 && drawAOIWidth < 18000) {
       const params = {
         description: "Test",
         polygon: aoi,
       };
-      console.log(params);
 
       localStorage.setItem('aoi', JSON.stringify(params));
-      console.log(localStorage);
       window.open('./report');
     } else {
       console.log("Area of interest is too large, try again");
       alert("Area of interest is too large, try a smaller area.");
     }
   } else if (event.state !== "complete" && event.graphic) {
-    console.log("not complete");
 
     const graphic = new Graphic({
       geometry: event.graphic.geometry,
       symbol: sketchVM?.polygonSymbol,
     });
     tempGraphicsLayer?.add(graphic);
-    console.log(event.graphic);
   }
 }
 
@@ -75,7 +69,6 @@ function GeologicalUnitSearch() {
     handleActiveButton('currentMapExtent');
 
     const extent = view?.extent;
-    console.log('Current Map Extent:', extent);
     const areaHeight = extent?.height;
     const areaWidth = extent?.width;
 
@@ -101,16 +94,12 @@ function GeologicalUnitSearch() {
         rings: [newRings]
       };
 
-      console.log(aoi);
-
       const params = {
         description: "Test",
         polygon: aoi,
       };
-      console.log(params);
 
       localStorage.setItem('aoi', JSON.stringify(params));
-      console.log(localStorage);
       window.open('./report');
     } else {
       console.log("Area of interest is too large, try again");
@@ -154,8 +143,6 @@ function GeologicalUnitSearch() {
   };
 
   const buttonText = (buttonName: activeButtonOptions, defaultText: string) => {
-    console.log('activebutton, buttonname', activeButton, buttonName);
-
     return (
       activeButton === buttonName ? `✓ ${defaultText}` : defaultText
     );
