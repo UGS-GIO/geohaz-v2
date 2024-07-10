@@ -22,7 +22,7 @@ export function App() {
   }, [theme])
 
   return (
-    <CalciteShell className={`calcite-mode-${theme} bg-dotted`}>
+    <CalciteShell className={`calcite-mode-${theme} bg-dotted h-screen relative`}>
       <Toolbar />
       <Header />
       <FullScreenMap />

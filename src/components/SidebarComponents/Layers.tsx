@@ -8,7 +8,7 @@ function Layers() {
   }
 
   return (
-    <div>
+    <div key='layer-list' className='ml-2 overflow-y-auto max-h-[calc(100vh)]    '>
       {layerList}
     </div>
   );

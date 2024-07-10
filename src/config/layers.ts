@@ -1046,7 +1046,7 @@ const notMappedConfig: LayerProps = {
 const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards',
-    visible: true,
+    visible: false,
     layers: [floodHazardConfig, groundwaterSusConfig],
 };
 
