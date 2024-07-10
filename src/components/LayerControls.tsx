@@ -1,4 +1,3 @@
-import { ArrowsIn } from '@phosphor-icons/react';
 import { Info, Shrink } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { Button } from './@/components/ui/button';
@@ -33,8 +32,8 @@ const LayerControls: React.FC<LayerControlsProps> = ({
 
     return (
         <div className="flex flex-col justify-between items-center w-full space-y-4">
-            <div className="flex flex-row sm:flex-row justify-around items-center w-full space-y-4 sm:space-y-0">
-                <div className="flex flex-col sm:flex-row justify-center sm:justify-start items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row justify-around items-center w-full space-y-4 sm:space-y-0">
+                <div className="flex flex-wrap justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button variant="ghost" className="flex items-center">
@@ -53,7 +52,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                         </DialogContent>
                     </Dialog>
 
-                    <Button variant="ghost" className="flex items-center mt-2 sm:mt-0" onClick={handleZoomToLayer}>
+                    <Button variant="ghost" className="flex items-center" onClick={handleZoomToLayer}>
                         <Shrink className="h-5 w-5 mr-2" />
                         <span>Zoom to Layer</span>
                     </Button>
@@ -71,18 +70,19 @@ const LayerControls: React.FC<LayerControlsProps> = ({
             </div>
             {/* TODO: Implement label visibility */}
             {/* <div className="flex items-center justify-between space-x-2 w-full">
-                <Label htmlFor={`${title}-label-visibility`} className="mx-auto">
-                    Turn Labels {labelsVisible ? 'Off' : 'On'} (in progress)
-                </Label>
-                <Switch
-                    id={`${title}-label-visibility`}
-                    className="ml-auto"
-                    checked={labelsVisible}
-                    onCheckedChange={() => setLabelsVisible(!labelsVisible)}
-                />
-            </div> */}
+                 <Label htmlFor={`${title}-label-visibility`} className="mx-auto">
+                     Turn Labels {labelsVisible ? 'Off' : 'On'} (in progress)
+                 </Label>
+                 <Switch
+                     id={`${title}-label-visibility`}
+                     className="ml-auto"
+                     checked={labelsVisible}
+                     onCheckedChange={() => setLabelsVisible(!labelsVisible)}
+                 />
+             </div> */}
         </div>
     );
 };
 
 export default LayerControls;
+
