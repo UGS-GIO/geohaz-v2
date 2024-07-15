@@ -59,16 +59,18 @@ function Info() {
               Additionally, users can access full data reports for individual hazards by clicking on the report link in the pop-up window. These reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. These investigations provide valuable information on the site geologic conditions that may affect or be affected by development, as well as the type and relative susceptibility of geologic hazards at a site and recommend solutions to mitigate the effects and costs of the hazards, both at the time of construction and over the life of the development. See your local city or county building department for details on these investigations and &nbsp;<a href='https://ugspub.nr.utah.gov/publications/circular/c-122.pdf' className="text-blue-600 underline">UGS Circular 122</a> for more information.
             </p>
           </div>
+          <div>
+            <Link text='Contact Webmaster' href='https://geology.utah.gov/about-us/contact-webmaster/' />
+          </div>
+
           <div className="flex justify-between my-4 mx-2">
             <Button onClick={() => handleOpenModal('references')}>
               References
             </Button>
-            <Button variant="secondary" onClick={() => handleOpenModal('acknowledgements')}>
+            <Button onClick={() => handleOpenModal('acknowledgements')}>
               Acknowledgements
             </Button>
           </div>
-
-          <Link text='Contact Webmaster' href='https://geology.utah.gov/about-us/contact-webmaster/' />
 
           <Dialog open={modalOpen} onOpenChange={handleCloseModal}>
             <DialogTrigger asChild>
