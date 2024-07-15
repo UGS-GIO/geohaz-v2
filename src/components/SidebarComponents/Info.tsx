@@ -63,7 +63,7 @@ function Info() {
             <Button onClick={() => handleOpenModal('references')}>
               References
             </Button>
-            <Button variant="outline" onClick={() => handleOpenModal('acknowledgements')}>
+            <Button variant="secondary" onClick={() => handleOpenModal('acknowledgements')}>
               Acknowledgements
             </Button>
           </div>
