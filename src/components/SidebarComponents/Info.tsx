@@ -151,14 +151,13 @@ function Info() {
       <div className="flex flex-wrap justify-between my-4 mx-2 gap-4 md:gap-8">
         <Button
           onClick={() => setCurrentActionName('Layers')}
-          className="mb-2 md:mb-0 text-foreground"
+          className="mb-2 md:mb-0"
         >
           Start Exploring
         </Button>
         <Button
           variant="secondary"
           onClick={() => handleOpenModal('disclaimer')}
-          className="text-foreground"
         >
           Open Data Disclaimer
         </Button>
