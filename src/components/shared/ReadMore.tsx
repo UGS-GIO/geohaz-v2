@@ -3,22 +3,30 @@ import { Button } from '../@/components/ui/button';
 
 const ReadMore = ({ children }: { children: React.ReactNode }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [height, setHeight] = useState('255px');
+    const [maxHeight, setMaxHeight] = useState('255px');
     const contentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const updateHeight = () => {
+        const updateMaxHeight = () => {
             if (contentRef.current) {
-                setHeight(isExpanded ? `${contentRef.current.scrollHeight}px` : '255px');
+                if (isExpanded) {
+                    // Temporarily set maxHeight to 'none' to get the full scrollHeight
+                    contentRef.current.style.maxHeight = 'none';
+                    const updatedMaxHeight = contentRef.current.scrollHeight + 'px';
+                    // Set the maxHeight to the new value
+                    setMaxHeight(updatedMaxHeight);
+                } else {
+                    setMaxHeight('255px');
+                }
             }
         };
-        updateHeight();
+        updateMaxHeight();
     }, [isExpanded]);
 
     useEffect(() => {
         const handleResize = () => {
             if (isExpanded && contentRef.current) {
-                setHeight(`${contentRef.current.scrollHeight}px`);
+                setMaxHeight(`${contentRef.current.scrollHeight}px`);
             }
         };
         window.addEventListener('resize', handleResize);
@@ -26,11 +34,11 @@ const ReadMore = ({ children }: { children: React.ReactNode }) => {
     }, [isExpanded]);
 
     return (
-        <div>
+        <div className="overflow-hidden">
             <div
                 ref={contentRef}
-                className="transition-max-height duration-500 ease-in-out overflow-hidden"
-                style={{ maxHeight: height }}
+                className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
+                style={{ maxHeight, boxSizing: 'border-box' }}
             >
                 {children}
             </div>
