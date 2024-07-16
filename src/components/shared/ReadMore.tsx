@@ -42,9 +42,11 @@ const ReadMore = ({ children }: { children: React.ReactNode }) => {
             >
                 {children}
             </div>
-            <Button variant="link" className="flex items-center mt-4" onClick={() => setIsExpanded(!isExpanded)}>
-                <span>{isExpanded ? 'Read less' : 'Read more'}</span>
-            </Button>
+            <div className="flex justify-center mt-4">
+                <Button variant="link" onClick={() => setIsExpanded(!isExpanded)}>
+                    <span>{isExpanded ? 'Read less' : 'Read more'}</span>
+                </Button>
+            </div>
         </div>
     );
 };
