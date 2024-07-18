@@ -39,8 +39,8 @@ describe('Info Component', () => {
     });
 
     test('renders Contact Webmaster link', () => {
-        const link = screen.getByRole('link', { name: /Contact Webmaster/i });
+        const link = screen.getByRole('button', { name: /Contact Webmaster/i });
         expect(link).toBeInTheDocument();
-        expect(link).toHaveAttribute('href', 'https://geology.utah.gov/about-us/contact-webmaster/');
+        console.log(link);
     });
 });

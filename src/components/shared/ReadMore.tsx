@@ -43,7 +43,7 @@ const ReadMore = ({ children }: { children: React.ReactNode }) => {
                 {children}
             </div>
             <div className="flex justify-center mt-4">
-                <Button variant="ghost" onClick={() => setIsExpanded(!isExpanded)} className="w-full border-2 border-input">
+                <Button variant="ghost" onClick={() => setIsExpanded(!isExpanded)} className="w-full border-2 border-secondary">
                     <span>{isExpanded ? 'Read less' : 'Read more'}</span>
                 </Button>
             </div>
