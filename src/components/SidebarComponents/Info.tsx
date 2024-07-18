@@ -66,7 +66,7 @@ function Info() {
               <Button variant={'link'} onClick={() => handleOpenModal('acknowledgements')}>
                 Acknowledgements
               </Button>
-              <Button variant={'link'} onClick={() => window.location.href = 'https://geology.utah.gov/about-us/contact-webmaster/'}>
+              <Button variant={'link'} onClick={() => window.open('https://geology.utah.gov/about-us/contact-webmaster/', '_blank')}>
                 Contact Webmaster
               </Button>
             </div>
@@ -144,7 +144,7 @@ function Info() {
           </>
         </ReadMore>
       </div>
-      <div className="flex flex-wrap justify-between my-4 mx-2 gap-4 md:gap-8 mb-8 border-t border-secondary pt-4"> {/* Add mb-8 or adjust as needed */}
+      <div className="flex flex-wrap justify-center my-4 mx-2 gap-4 md:gap-8 mb-8 border-t border-secondary pt-4"> {/* Add mb-8 or adjust as needed */}
         <Button
           onClick={() => setCurrentActionName('Layers')}
           className="mb-2 md:mb-0"
