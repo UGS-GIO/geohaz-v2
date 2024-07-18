@@ -58,20 +58,18 @@ function Info() {
                 Additionally, users can access full data reports for individual hazards by clicking on the report link in the pop-up window. These reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. These investigations provide valuable information on the site geologic conditions that may affect or be affected by development, as well as the type and relative susceptibility of geologic hazards at a site and recommend solutions to mitigate the effects and costs of the hazards, both at the time of construction and over the life of the development. See your local city or county building department for details on these investigations and &nbsp;<a href='https://ugspub.nr.utah.gov/publications/circular/c-122.pdf' className="text-blue-600 underline">UGS Circular 122</a> for more information.
               </p>
             </div>
-            <div>
-              <Link text='Contact Webmaster' href='https://geology.utah.gov/about-us/contact-webmaster/' />
-            </div>
 
-            <div className="flex flex-wrap justify-between my-4 mx-2 gap-4 md:gap-8 mb-8">
-              <Button onClick={() => handleOpenModal('references')}>
+            <div className="flex flex-wrap justify-center my-2 mx-2 mb-8">
+              <Button variant={'link'} onClick={() => handleOpenModal('references')}>
                 References
               </Button>
-              <Button onClick={() => handleOpenModal('acknowledgements')}>
+              <Button variant={'link'} onClick={() => handleOpenModal('acknowledgements')}>
                 Acknowledgements
               </Button>
+              <Button variant={'link'} onClick={() => window.location.href = 'https://geology.utah.gov/about-us/contact-webmaster/'}>
+                Contact Webmaster
+              </Button>
             </div>
-
-
 
             <Dialog open={modalOpen} onOpenChange={handleCloseModal}>
               <DialogTrigger asChild>
@@ -154,7 +152,8 @@ function Info() {
           Start Exploring
         </Button>
         <Button
-          variant="secondary"
+          className='text-foreground'
+          variant="link"
           onClick={() => handleOpenModal('disclaimer')}
         >
           Open Data Disclaimer
