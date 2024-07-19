@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../@/components/ui/dialog';
 import { Button } from '../@/components/ui/button';
-import { Link } from '../shared';
 import { useNavigation } from '../../contexts/NavigationContext';
 import { ReadMore } from '../shared/ReadMore';
 
@@ -10,20 +9,28 @@ function Info() {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalType, setModalType] = useState<ModalType | ''>('')
   const { setCurrentActionName } = useNavigation();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleOpenModal = (type: ModalType) => {
-    setModalType(type)
-    setModalOpen(true)
-  }
+    setModalType(type);
+    setModalOpen(true);
+  };
 
   const handleCloseModal = () => {
-    setModalOpen(false)
-    setModalType('')
-  }
+    setModalOpen(false);
+    setModalType('');
+  };
+
+  useEffect(() => {
+    if (!isExpanded && contentRef.current) {
+      contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [isExpanded]);
 
   return (
-    <div className="relative h-full flex flex-col">
-      <div className="p-4 overflow-y-auto flex-grow max-h-[calc(100vh-120px)]"> {/* Adjust max height as needed */}
+    <div className="relative h-full flex flex-col scroll-smooth">
+      <div className={`p-4 ${isExpanded ? 'overflow-y-auto' : 'overflow-hidden'} flex-grow`} ref={contentRef}>
         <ReadMore>
           <>
             <div className="mb-4">
@@ -108,13 +115,19 @@ function Info() {
                     </DialogHeader>
                     <DialogDescription>
                       <p className="mb-2">
-                        Beukelman, G.S., Erickson, B.E., and Giraud, R.E., 2015, Landslide inventory map of the Sixmile Canyon and North Hollow area, Sanpete County, Utah: Utah Geological Survey Map 273DM, scale 1:24,000, &nbsp;<a href="https://doi.org/10.34191/M-273DM" target='_blank' rel='noopener noreferrer' className="text-blue-600 underline">M-273DM</a>.
+                        Beukelman, G.S., Erickson, B.E., and Giraud, R.E., 2010, Geologic hazards of the Fillmore quadrangle, Millard County, Utah: Utah Geological Survey Special Study 131, 31 p., 2 plates, scale 1:24,000, CD.
                       </p>
                       <p className="mb-2">
-                        Castleton, J.J., Elliott, A.H., and McDonald, G.N., 2011, Geologic hazards of the Magna quadrangle, Salt Lake County, Utah: Utah Geological Survey Special Study 137, 73 p., 10 plates, scale 1:24,000, &nbsp;<a href="https://doi.org/10.34191/SS-137" target='_blank' rel='noopener noreferrer' className="text-blue-600 underline">SS-137</a>.
+                        Christensen, E.J., and Clark, D.L., 2009, Geologic hazards and adverse construction conditions, Wasatch Range frontal fault zone, Weber and Davis Counties, Utah: Utah Geological Survey Open-File Report 547, 75 p., CD.
                       </p>
                       <p className="mb-2">
-                        Castleton, J.J., Elliott, A.H., and McDonald, G.N., 2014, Geologic hazards of the Copperton quadrangle, Salt Lake County, Utah: Utah Geological Survey Special Study 152, 24 p., 3 plates, scale 1:24,000, &nbsp;<a href="https://doi.org/10.34191/SS-152" target='_blank' rel='noopener noreferrer' className="text-blue-600 underline">SS-152</a>.
+                        Clark, D.L., and Giraud, R.E., 2007, Geologic hazards of the Ogden 7.5′ quadrangle, Weber and Davis Counties, Utah: Utah Geological Survey Special Study 122, 103 p., 1 plate, scale 1:24,000, CD.
+                      </p>
+                      <p className="mb-2">
+                        Giraud, R.E., 2005, Reconnaissance of geologic hazards in the South Weber and Kaysville quadrangles, Davis and Weber Counties, Utah: Utah Geological Survey Special Study 115, 53 p., 1 plate, scale 1:24,000, CD.
+                      </p>
+                      <p className="mb-2">
+                        Giraud, R.E., and Shaw, L.M., 2007, Geologic hazards and adverse construction conditions, western Mapleton, Utah County, Utah: Utah Geological Survey Open-File Report 512, 26 p., 1 plate, scale 1:14,000.
                       </p>
                       <Button onClick={handleCloseModal}>Close</Button>
                     </DialogDescription>
@@ -127,14 +140,8 @@ function Info() {
                     </DialogHeader>
                     <DialogDescription>
                       <p className="mb-2">
-                        The Utah Geological Survey acknowledges the following individuals and organizations for their contributions to the Utah Geologic Hazards Database and Portal:
+                        This web application was created in collaboration with the Utah Geological Survey (UGS) and Utah Automated Geographic Reference Center (AGRC). AGRC provided GIS data and web services support. UGS provided geologic hazard mapping and analysis. Additional data and support were provided by the Utah Division of Emergency Management, FEMA, and local governments.
                       </p>
-                      <ul className="mb-2 list-disc list-inside">
-                        <li>John Doe - Utah Geological Survey</li>
-                        <li>Jane Smith - Utah Geological Survey</li>
-                        <li>Utah Department of Natural Resources</li>
-                        <li>U.S. Geological Survey</li>
-                      </ul>
                       <Button onClick={handleCloseModal}>Close</Button>
                     </DialogDescription>
                   </>
@@ -144,20 +151,26 @@ function Info() {
           </>
         </ReadMore>
       </div>
-      <div className="flex flex-wrap justify-center my-4 mx-2 gap-4 md:gap-8 mb-8 border-t border-secondary pt-4"> {/* Add mb-8 or adjust as needed */}
-        <Button
-          onClick={() => setCurrentActionName('Layers')}
-          className="mb-2 md:mb-0"
-        >
-          Start Exploring
-        </Button>
-        <Button
-          className='text-foreground'
-          variant="link"
-          onClick={() => handleOpenModal('disclaimer')}
-        >
-          Open Data Disclaimer
-        </Button>
+      <div className="p-2">
+        {/* <Button variant="ghost" onClick={() => setIsExpanded(!isExpanded)} className="w-full border-2 border-secondary">
+          <span>{isExpanded ? 'Read less' : 'Read more'}</span>
+        </Button> */}
+
+        <div className="flex flex-wrap justify-center my-2 mx-2 gap-4 md:gap-8 border-t border-secondary pt-4"> {/* Add mb-8 or adjust as needed */}
+          <Button
+            onClick={() => setCurrentActionName('Layers')}
+            className="mb-2 md:mb-0"
+          >
+            Start Exploring
+          </Button>
+          <Button
+            className='text-foreground'
+            variant="link"
+            onClick={() => handleOpenModal('disclaimer')}
+          >
+            Open Data Disclaimer
+          </Button>
+        </div>
       </div>
     </div>
   );
