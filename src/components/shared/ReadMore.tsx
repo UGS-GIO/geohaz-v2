@@ -11,8 +11,7 @@ const ReadMore = ({ children }: ReadMoreProps) => {
     useEffect(() => {
         // Scroll to top when collapsing
         if (!isExpanded && contentRef.current) {
-            console.log('Scrolling to top');
-            contentRef.current.scrollTo({ top: 0 });
+            contentRef.current.scrollTop = 0;
         }
     }, [isExpanded]);
 

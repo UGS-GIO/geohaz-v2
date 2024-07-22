@@ -10,8 +10,7 @@ function Info() {
   const [modalType, setModalType] = useState<ModalType | ''>('')
   const { setCurrentActionName } = useNavigation();
   const contentRef = useRef<HTMLDivElement>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
-
+  0.
   const handleOpenModal = (type: ModalType) => {
     setModalType(type);
     setModalOpen(true);
@@ -22,15 +21,9 @@ function Info() {
     setModalType('');
   };
 
-  useEffect(() => {
-    if (!isExpanded && contentRef.current) {
-      contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [isExpanded]);
-
   return (
     <div className="relative h-full flex flex-col scroll-smooth">
-      <div className={`p-4 ${isExpanded ? 'overflow-y-auto' : 'overflow-hidden'} flex-grow`} ref={contentRef}>
+      <div className={`p-4 overflow-y-auto flex-grow`} ref={contentRef}>
         <ReadMore>
           <>
             <div className="mb-4">

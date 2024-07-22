@@ -41,6 +41,5 @@ describe('Info Component', () => {
     test('renders Contact Webmaster link', () => {
         const link = screen.getByRole('button', { name: /Contact Webmaster/i });
         expect(link).toBeInTheDocument();
-        console.log(link);
     });
 });
