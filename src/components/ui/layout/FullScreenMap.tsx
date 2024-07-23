@@ -1,8 +1,8 @@
-import { MapContext } from '../contexts/MapProvider'
+import { MapContext } from '@/contexts/MapProvider'
 
 
 import { useContext, useEffect, useRef } from "react";
-import MapWidgets from './widgets/MapWidgets';
+import MapWidgets from '@/components-legacy/widgets/MapWidgets';
 
 export default function ArcGISMap() {
   const mapRef = useRef<HTMLDivElement>(null);

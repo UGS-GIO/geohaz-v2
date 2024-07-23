@@ -1,7 +1,7 @@
 import { test } from 'vitest'
 import { render, fireEvent } from '@testing-library/react'
-import Toolbar from '../Toolbar'
-import { NavigationProvider } from '../../contexts/NavigationContext'
+import Toolbar from '@/components/ui/layout/Toolbar'
+import { NavigationProvider } from '@/contexts/NavigationContext'
 
 let container: HTMLElement
 

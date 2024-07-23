@@ -1,14 +1,14 @@
 // src/components/Toolbar.tsx
 import React, { lazy } from 'react';
 import { CalciteAction, CalciteActionBar, CalciteActionGroup, CalciteShellPanel } from '@esri/calcite-components-react';
-import { useCalciteActionBar, ActionItem } from '../hooks/useCalciteActionBar';
-import { useTheme } from '../contexts/ThemeProvider';
+import { useCalciteActionBar, ActionItem } from '@/hooks/useCalciteActionBar';
+import { useTheme } from '@/contexts/ThemeProvider';
 
 const actionItems: ActionItem[] = [
-  { name: 'Info', icon: 'information-f', component: lazy(() => import('./SidebarComponents/Info')) },
-  { name: 'Layers', icon: 'layers', component: lazy(() => import('./SidebarComponents/Layers')) },
-  { name: 'Map Configurations', icon: 'sliders-horizontal', component: lazy(() => import('./SidebarComponents/MapConfigurations')) },
-  { name: 'Geological Unit Search', icon: 'data-magnifying-glass', component: lazy(() => import('./SidebarComponents/GeologicalUnitSearch')) },
+  { name: 'Info', icon: 'information-f', component: lazy(() => import('@/components/ui/layout/sidebar/Info')) },
+  { name: 'Layers', icon: 'layers', component: lazy(() => import('@/components/ui/layout/sidebar/Layers')) },
+  { name: 'Map Configurations', icon: 'sliders-horizontal', component: lazy(() => import('@/components/ui/layout/sidebar/MapConfigurations')) },
+  { name: 'Geological Unit Search', icon: 'data-magnifying-glass', component: lazy(() => import('@/components/ui/layout/sidebar/GeologicalUnitSearch')) },
 ];
 
 export function Toolbar() {

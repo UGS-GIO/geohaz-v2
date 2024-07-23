@@ -1,11 +1,11 @@
 import { useEffect, useRef, useContext, useCallback } from 'react';
 import { MapContext } from '../contexts/MapProvider';
-import { addCommas } from '../config/util/utils';
+import { addCommas } from '@/config/util/utils';
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
 import Point from '@arcgis/core/geometry/Point';
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import PopupTemplate from "@arcgis/core/PopupTemplate.js";
-import { UIPositionOptions } from '../config/types/mappingTypes';
+import { UIPositionOptions } from '@/config/types/mappingTypes';
 
 
 

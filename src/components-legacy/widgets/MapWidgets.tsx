@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
 import Home from '@arcgis/core/widgets/Home';
 import Locate from '@arcgis/core/widgets/Locate';
-import useArcGISWidget from '../../hooks/useArcGISWidget';
+import useArcGISWidget from '@/hooks/useArcGISWidget';
 import Feature from "@arcgis/core/widgets/Feature.js";
 import Expand from '@arcgis/core/widgets/Expand';
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery.js";
-import { MapContext } from '../../contexts/MapProvider';
+import { MapContext } from '@/contexts/MapProvider';
 import Legend from '@arcgis/core/widgets/Legend';
 import Search from '@arcgis/core/widgets/Search';
 import Extent from "@arcgis/core/geometry/Extent.js";

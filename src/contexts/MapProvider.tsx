@@ -2,8 +2,8 @@ import { createContext, useEffect, useState } from "react";
 import type SceneView from "@arcgis/core/views/SceneView";
 import type MapView from "@arcgis/core/views/MapView";
 import LayerList from "@arcgis/core/widgets/LayerList";
-import { getRenderers } from "../config/mapping";
-import { RendererProps } from "../config/types/mappingTypes";
+import { getRenderers } from "@/config/mapping";
+import { RendererProps } from "@/config/types/mappingTypes";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import { useQuery } from "@tanstack/react-query";
 
@@ -97,7 +97,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
     async function loadMap(container: HTMLDivElement) {
         if (view) return;
-        const { init } = await import("../config/mapping")
+        const { init } = await import("@/config/mapping")
         setView(init(container, isMobile, 'map'))
     }
 

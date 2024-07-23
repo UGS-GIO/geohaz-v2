@@ -1,47 +1,71 @@
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'dark'
+type Theme = 'dark' | 'light' | 'system';
 
-type ThemeContextType = {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-}
+type ThemeProviderProps = {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+  storageKey?: string;
+};
 
-const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
-  setTheme: () => {},
-})
+type ThemeProviderState = {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+};
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(
-    (window.localStorage.getItem('arcgis-react-theme') as Theme) ?? 'dark'
-  )
+const initialState: ThemeProviderState = {
+  theme: 'system',
+  setTheme: () => null,
+};
+
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+
+export function ThemeProvider({
+  children,
+  defaultTheme = 'system',
+  storageKey = 'theme',
+  ...props
+}: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const savedTheme = localStorage.getItem(storageKey) as Theme;
+    return savedTheme || defaultTheme;
+  });
 
   useEffect(() => {
-    window.localStorage.setItem('arcgis-react-theme', theme)
-  }, [theme])
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
 
-  // update prefers-color-scheme media query
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const listener = () => {
-      setTheme(mediaQuery.matches ? 'dark' : 'light')
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(theme);
     }
-    mediaQuery.addEventListener('change', listener)
-    return () => mediaQuery.removeEventListener('change', listener)
-  }, [])
+
+    localStorage.setItem(storageKey, theme);
+  }, [theme]);
+
+  const value = {
+    theme,
+    setTheme: (newTheme: Theme) => {
+      localStorage.setItem(storageKey, newTheme);
+      setTheme(newTheme);
+    },
+  };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeProviderContext.Provider value={value} {...props}>
       {children}
-    </ThemeContext.Provider>
-  )
+    </ThemeProviderContext.Provider>
+  );
 }
 
-export const useTheme = () => useContext(ThemeContext)
+export const useTheme = () => {
+  const context = useContext(ThemeProviderContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+};

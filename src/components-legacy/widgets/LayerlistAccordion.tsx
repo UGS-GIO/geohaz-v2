@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
-import { MapContext } from '../../contexts/MapProvider';
-// import useLegendPreview from '../../hooks/useLegendPreview';
-// import { RendererProps } from '../../config/types/mappingTypes';
-import LayerControls from '../LayerControls';
-import { findLayerById } from '../../config/mapping';
-import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '../@/components/ui/accordion';
-import { Checkbox } from '../@/components/ui/checkbox';
-// import { RendererProps } from '../../config/types/mappingTypes';
-// import useLegendPreview from '../../hooks/useLegendPreview';
+import { MapContext } from '@/contexts/MapProvider';
+// import useLegendPreview from '@/hooks/useLegendPreview';
+// import { RendererProps } from '@/config/types/mappingTypes';
+import LayerControls from '@/components/ui/layout/LayerControls';
+import { findLayerById } from '@/config/mapping';
+import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Checkbox } from '@/components/ui/checkbox';
+// import { RendererProps } from '@/config/types/mappingTypes';
+// import useLegendPreview from '@/hooks/useLegendPreview';
 
 interface LayerAccordionProps {
     layer: __esri.ListItem,

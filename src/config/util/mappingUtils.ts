@@ -6,7 +6,7 @@ import TileLayer from "@arcgis/core/layers/TileLayer";
 import Map from '@arcgis/core/Map'
 import MapView from "@arcgis/core/views/MapView";
 import SceneView from "@arcgis/core/views/SceneView";
-import { LayerProps, layerTypeMapping } from "../types/mappingTypes";
+import { LayerProps, layerTypeMapping } from "@/config/types/mappingTypes";
 import * as promiseUtils from "@arcgis/core/core/promiseUtils.js";
 import Color from "@arcgis/core/Color";
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";

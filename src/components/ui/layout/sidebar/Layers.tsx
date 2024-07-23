@@ -1,4 +1,4 @@
-import useCustomLayerList from '../../hooks/useCustomLayerList';
+import useCustomLayerList from '@/hooks/useCustomLayerList';
 
 function Layers() {
   const layerList = useCustomLayerList();

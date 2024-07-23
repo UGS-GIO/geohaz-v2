@@ -3,9 +3,9 @@ import arcgisLightCss from '@arcgis/core/assets/esri/themes/light/main.css?inlin
 import { CalciteShell } from '@esri/calcite-components-react'
 import { useEffect } from 'react'
 import { useTheme } from './contexts/ThemeProvider'
-import FullScreenMap from './components/FullScreenMap'
-import Header from './components/Header'
-import Toolbar from './components/Toolbar'
+import FullScreenMap from './components/ui/layout/FullScreenMap'
+import Header from './components/ui/layout/Header'
+import Toolbar from './components/ui/layout/Toolbar'
 
 export function App() {
   const { theme } = useTheme()
