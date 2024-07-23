@@ -59,7 +59,7 @@ function Info() {
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center my-2 mx-2">
+        <div className="flex flex-wrap justify-center mx-2">
           <Button variant={'link'} onClick={() => handleOpenModal('references')}>
             References
           </Button>
@@ -142,8 +142,8 @@ function Info() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="p-2">
-        <div className="flex flex-wrap justify-center my-2 mx-2 gap-4 md:gap-8 border-t border-secondary pt-4">
+      <div>
+        <div className="flex flex-wrap justify-center mx-2 gap-4 md:gap-4 border-t border-secondary py-4">
           <Button
             onClick={() => setCurrentActionName('Layers')}
             className="mb-2 md:mb-0"
