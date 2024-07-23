@@ -1,8 +1,8 @@
 import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
-import layers from '../config/layers'
-import { MapApp, MapImageLayerRenderer, MapImageLayerType, RegularLayerRenderer } from './types/mappingTypes'
-import { addLayersToMap, createMap, createView, setPopupAlignment, expandClickHandlers } from './util/mappingUtils'
+import layers from '@/config/layers'
+import { MapApp, MapImageLayerRenderer, MapImageLayerType, RegularLayerRenderer } from '@/config/types/mappingTypes'
+import { addLayersToMap, createMap, createView, setPopupAlignment, expandClickHandlers } from '@/config/util/mappingUtils'
 
 // Create a global app object to store the view
 const app: MapApp = {}

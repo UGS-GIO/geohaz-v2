@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as symbolUtils from "@arcgis/core/symbols/support/symbolUtils.js";
 import { useQuery } from '@tanstack/react-query';
-import { MapImageLayerRenderer, RegularLayerRenderer, RendererProps } from '../config/types/mappingTypes';
+import { MapImageLayerRenderer, RegularLayerRenderer, RendererProps } from '@/config/types/mappingTypes';
 
 const useLegendPreview = (layerId: string, url: string, getRenderer: (id: string, url: string) => Promise<RendererProps | undefined>) => {
     const [preview, setPreview] = useState<{ html: HTMLElement, label: string, title: string }[]>();

@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState, useCallback } from 'react';
 import { MapContext } from '../contexts/MapProvider';
-import LayerlistAccordion from '../components/widgets/LayerlistAccordion';
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '../components/@/components/ui/accordion';
-import { Checkbox } from '../components/@/components/ui/checkbox';
+import LayerlistAccordion from '../components-legacy/widgets/LayerlistAccordion';
+import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const useCustomLayerList = () => {
     const { activeLayers } = useContext(MapContext);
