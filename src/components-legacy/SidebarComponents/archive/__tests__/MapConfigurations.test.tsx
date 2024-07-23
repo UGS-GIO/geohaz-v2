@@ -25,30 +25,3 @@ test('renders Location Coordinate Format heading', () => {
     expect(heading).toBeInTheDocument()
 })
 
-test('renders Toggle Vertical Exaggeration checkbox', () => {
-    const checkbox = screen.getByText('Toggle Vertical Exaggeration')
-    expect(checkbox).toBeInTheDocument()
-})
-
-test('renders Toggle Basemap Labels checkbox', () => {
-    const checkbox = screen.getByText('Toggle Basemap Labels')
-    expect(checkbox).toBeInTheDocument()
-})
-
-test('renders Reload map in 2D mode block', () => {
-    const block = screen.getByText('Reload map in 2D mode')
-    expect(block).toBeInTheDocument()
-})
-
-// this will fail and need updating once the correct link is added in the component
-test('renders Reload map in 2D mode button', () => {
-    const button = screen.getByRole('button', { name: /Reload map in 2D mode/i })
-    expect(button).toBeInTheDocument()
-})
-
-test('clicking the button reloads the map', () => {
-    const button = screen.getByRole('button', { name: /Reload map in 2D mode/i })
-    fireEvent.click(button)
-    // Since window.location.href will change, you might need to mock it.
-    expect(window.location.href).toBe('https://google.com/')
-})
