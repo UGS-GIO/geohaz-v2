@@ -25,8 +25,8 @@ function Info() {
 
   return (
     <div className="relative h-full flex flex-col scroll-smooth">
-      <div className={`p-4 overflow-y-auto flex-grow`} ref={contentRef}>
-        <div className='mr-2 my-2' key={`map-details-accordion`}>
+      <div className={`ml-2 overflow-y-auto flex-grow`} ref={contentRef}>
+        <div className='mr-2' key={`map-details-accordion`}>
           <Accordion type="single" collapsible>
             <AccordionItem value="map-details-accordion-item">
               <AccordionHeader >
