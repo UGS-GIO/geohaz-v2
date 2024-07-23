@@ -29,15 +29,11 @@ function Info() {
         <div className='mr-2 my-2' key={`map-details-accordion`}>
           <Accordion type="single" collapsible>
             <AccordionItem value="map-details-accordion-item">
-              <AccordionHeader onClick={() => setExpandedItem(expandedItem === 'map-details-accordion-item-1' ? null : 'map-details-accordion-item-1')}>
-                <AccordionTrigger>
+              <AccordionHeader >
+                <AccordionTrigger onChange={() => setExpandedItem(expandedItem === 'map-details-accordion-item-1' ? null : 'map-details-accordion-item-1')}>
                   <div className="flex flex-col mx-2 items-start">
-                    <h3 className="font-medium text-left text-lg hover:underline">Map Details</h3>
-                    {expandedItem !== 'map-details-accordion-item-1' && (
-                      <p className='text-left text-sm my-4 font-normal'>
-                        This Portal is a compilation of data from the Utah Geologic Hazards Database, and contains post-2008 UGS geologic hazard map data and data from other sources for parts of Utah...
-                      </p>
-                    )}
+                    <h3 className="font-medium text-left text-lg">Map Details</h3>
+
                   </div>
                 </AccordionTrigger>
               </AccordionHeader>
@@ -63,6 +59,11 @@ function Info() {
             </AccordionItem>
 
           </Accordion>
+          {expandedItem !== 'map-details-accordion-item-1' && (
+            <p className='text-left text-sm mx-2 font-normal'>
+              This Portal is a compilation of data from the Utah Geologic Hazards Database, and contains post-2008 UGS geologic hazard map data and data from other sources for parts of Utah...
+            </p>
+          )}
         </div>
 
         <div className='mr-2 my-2 ' key={`data-sources-accordion`}>
@@ -71,12 +72,7 @@ function Info() {
               <AccordionHeader onClick={() => setExpandedItem(expandedItem === 'data-sources-accordion-item-1' ? null : 'data-sources-accordion-item-1')}>
                 <AccordionTrigger >
                   <div className="flex flex-col mx-2 items-start">
-                    <h3 className="font-medium text-left text-lg hover:underline">Data Sources</h3>
-                    {expandedItem !== 'data-sources-accordion-item-1' && (
-                      <p className='text-left text-sm my-4 font-normal'>
-                        The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources....
-                      </p>
-                    )}
+                    <h3 className="font-medium text-left text-lg">Data Sources</h3>
                   </div>
                 </AccordionTrigger>
               </AccordionHeader>
@@ -95,8 +91,12 @@ function Info() {
                 </div>
               </AccordionContent>
             </AccordionItem>
-
           </Accordion>
+          {expandedItem !== 'data-sources-accordion-item-1' && (
+            <p className='text-left text-sm mx-2 font-normal'>
+              The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources....
+            </p>
+          )}
         </div>
 
         <div className="flex flex-wrap justify-center mx-2">
