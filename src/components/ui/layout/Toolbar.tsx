@@ -5,10 +5,10 @@ import { useCalciteActionBar, ActionItem } from '@/hooks/useCalciteActionBar';
 import { useTheme } from '@/contexts/ThemeProvider';
 
 const actionItems: ActionItem[] = [
-  { name: 'Info', icon: 'information-f', component: lazy(() => import('@/components-legacy/SidebarComponents/archive/Info')) },
-  { name: 'Layers', icon: 'layers', component: lazy(() => import('@/components-legacy/SidebarComponents/archive/Layers')) },
-  { name: 'Map Configurations', icon: 'sliders-horizontal', component: lazy(() => import('@/components-legacy/SidebarComponents/archive/MapConfigurations')) },
-  { name: 'Geological Unit Search', icon: 'data-magnifying-glass', component: lazy(() => import('@/components-legacy/SidebarComponents/archive/GeologicalUnitSearch')) },
+  { name: 'Info', icon: 'information-f', component: lazy(() => import('@/components/ui/layout/sidebar/Info')) },
+  { name: 'Layers', icon: 'layers', component: lazy(() => import('@/components/ui/layout/sidebar/Layers')) },
+  { name: 'Map Configurations', icon: 'sliders-horizontal', component: lazy(() => import('@/components/ui/layout/sidebar/MapConfigurations')) },
+  { name: 'Geological Unit Search', icon: 'data-magnifying-glass', component: lazy(() => import('@/components/ui/layout/sidebar/GeologicalUnitSearch')) },
 ];
 
 export function Toolbar() {
