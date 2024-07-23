@@ -56,6 +56,7 @@
         --chart-3: ;
         --chart-4: ;
         --chart-5: ;
+        color-scheme: dark; /* changing the scrollbar color */
       }
     }
 
