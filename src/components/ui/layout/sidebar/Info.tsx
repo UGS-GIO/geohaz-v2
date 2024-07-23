@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { ExternalLink } from 'lucide-react';
@@ -11,7 +12,7 @@ function Info() {
   const [modalType, setModalType] = useState<ModalType | ''>('')
   const { setCurrentActionName } = useNavigation();
   const contentRef = useRef<HTMLDivElement>(null);
-  0.
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const handleOpenModal = (type: ModalType) => {
     setModalType(type);
     setModalOpen(true);
@@ -25,38 +26,77 @@ function Info() {
   return (
     <div className="relative h-full flex flex-col scroll-smooth">
       <div className={`p-4 overflow-y-auto flex-grow`} ref={contentRef}>
+        <div className='mr-2 my-2' key={`map-details-accordion`}>
+          <Accordion type="single" collapsible>
+            <AccordionItem value="map-details-accordion-item">
+              <AccordionHeader onClick={() => setExpandedItem(expandedItem === 'map-details-accordion-item-1' ? null : 'map-details-accordion-item-1')}>
+                <AccordionTrigger>
+                  <div className="flex flex-col mx-2 items-start">
+                    <h3 className="font-medium text-left text-lg hover:underline">Map Details</h3>
+                    {expandedItem !== 'map-details-accordion-item-1' && (
+                      <p className='text-left text-sm my-4 font-normal'>
+                        This Portal is a compilation of data from the Utah Geologic Hazards Database, and contains post-2008 UGS geologic hazard map data and data from other sources for parts of Utah...
+                      </p>
+                    )}
+                  </div>
+                </AccordionTrigger>
+              </AccordionHeader>
+              <AccordionContent>
+                <div className='mx-2'>
+                  <p className="mb-2">
+                    This Portal is a compilation of data from the Utah Geologic Hazards Database, and contains post-2008 UGS geologic hazard map data and data from other sources for parts of Utah. These data address earthquake, flood, landslide, and problem soil and rock hazards. This web mapping application is intended to provide planners, local government officials, property owners, developers, engineers, geologists, design professionals, and the public with information on the type, location, and relative susceptibility of geologic hazards that may impact existing and future infrastructure and development. The data also provide information that may be used for emergency response and recovery planning and community risk assessment for existing development and infrastructure.
+                  </p>
+                  <p className="mb-2">
+                    Areas with comprehensive geologic hazard map data are shown with red polygons. Statewide data for hazardous (Quaternary age) faults, and a legacy compilation of landslides are also available. Limited, comprehensive geologic hazard map data are available for the remaining hazards listed in the Legend. Hazard map layers can be enabled in the Legend by clicking on the eye symbol. Map layer units describing the hazard relative susceptibility are also shown in the Legend. The absence of data does not imply that no geologic hazard or hazards exist. Additional geologic hazard mapping is on-going and will be added to the database as it is finalized.
+                  </p>
+                  <p className="mb-2">
+                    Database Updated May 2020
+                  </p>
+                  <p className="mb-2 font-bold">
+                    Related Information
+                  </p>
+                  <p className="mb-2">
+                    For more information, see <a href="https://geology.utah.gov/hazards/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">https://geology.utah.gov/hazards/</a> or contact the UGS.
+                  </p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-        <div className="mb-4">
-          <div className="text-lg font-semibold">Map Details</div>
-          <p className="mb-2">
-            This Portal is a compilation of data from the Utah Geologic Hazards Database, and contains post-2008 UGS geologic hazard map data and data from other sources for parts of Utah. These data address earthquake, flood, landslide, and problem soil and rock hazards. This web mapping application is intended to provide planners, local government officials, property owners, developers, engineers, geologists, design professionals, and the public with information on the type, location, and relative susceptibility of geologic hazards that may impact existing and future infrastructure and development. The data also provide information that may be used for emergency response and recovery planning and community risk assessment for existing development and infrastructure.
-          </p>
-          <p className="mb-2">
-            Areas with comprehensive geologic hazard map data are shown with red polygons. Statewide data for hazardous (Quaternary age) faults, and a legacy compilation of landslides are also available. Limited, comprehensive geologic hazard map data are available for the remaining hazards listed in the Legend. Hazard map layers can be enabled in the Legend by clicking on the eye symbol. Map layer units describing the hazard relative susceptibility are also shown in the Legend. The absence of data does not imply that no geologic hazard or hazards exist. Additional geologic hazard mapping is on-going and will be added to the database as it is finalized.
-          </p>
-          <p className="mb-2">
-            Database Updated May 2020
-          </p>
-          <p className="mb-2 font-bold">
-            Related Information
-          </p>
-          <p className="mb-2">
-            For more information, see <a href="https://geology.utah.gov/hazards/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">https://geology.utah.gov/hazards/</a> or contact the UGS.
-          </p>
+          </Accordion>
         </div>
 
-        <div className="mb-4">
-          <div className="text-lg font-semibold">Data Sources</div>
-          <p className="mb-2">
-            The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources. The database is periodically updated to incorporate the results of new mapping. Detailed geologic hazard mapping is available for limited areas and for specific hazards in Utah and additional mapping is ongoing.
-          </p>
-          <p className="mb-2">
-            The data exists as an attributed geographic information system (GIS) feature class available for download:
-            &nbsp;<a href="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip" className="text-blue-600 underline">GIS Data</a>
-          </p>
-          <p className="mb-2">
-            Additionally, users can access full data reports for individual hazards by clicking on the report link in the pop-up window. These reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. These investigations provide valuable information on the site geologic conditions that may affect or be affected by development, as well as the type and relative susceptibility of geologic hazards at a site and recommend solutions to mitigate the effects and costs of the hazards, both at the time of construction and over the life of the development. See your local city or county building department for details on these investigations and &nbsp;<a href='https://ugspub.nr.utah.gov/publications/circular/c-122.pdf' className="text-blue-600 underline">UGS Circular 122</a> for more information.
-          </p>
+        <div className='mr-2 my-2 ' key={`data-sources-accordion`}>
+          <Accordion type="single" collapsible>
+            <AccordionItem value="data-sources-accordion-item-1">
+              <AccordionHeader onClick={() => setExpandedItem(expandedItem === 'data-sources-accordion-item-1' ? null : 'data-sources-accordion-item-1')}>
+                <AccordionTrigger >
+                  <div className="flex flex-col mx-2 items-start">
+                    <h3 className="font-medium text-left text-lg hover:underline">Data Sources</h3>
+                    {expandedItem !== 'data-sources-accordion-item-1' && (
+                      <p className='text-left text-sm my-4 font-normal'>
+                        The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources....
+                      </p>
+                    )}
+                  </div>
+                </AccordionTrigger>
+              </AccordionHeader>
+              <AccordionContent>
+                <div className='mx-2'>
+                  <p className="mb-2">
+                    The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources. The database is periodically updated to incorporate the results of new mapping. Detailed geologic hazard mapping is available for limited areas and for specific hazards in Utah and additional mapping is ongoing.
+                  </p>
+                  <p className="mb-2">
+                    The data exists as an attributed geographic information system (GIS) feature class available for download:
+                    &nbsp;<a href="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip" className="text-blue-600 underline">GIS Data</a>
+                  </p>
+                  <p className="mb-2">
+                    Additionally, users can access full data reports for individual hazards by clicking on the report link in the pop-up window. These reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. These investigations provide valuable information on the site geologic conditions that may affect or be affected by development, as well as the type and relative susceptibility of geologic hazards at a site and recommend solutions to mitigate the effects and costs of the hazards, both at the time of construction and over the life of the development. See your local city or county building department for details on these investigations and &nbsp;<a href='https://ugspub.nr.utah.gov/publications/circular/c-122.pdf' className="text-blue-600 underline">UGS Circular 122</a> for more information.
+                  </p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+          </Accordion>
         </div>
 
         <div className="flex flex-wrap justify-center mx-2">
@@ -159,7 +199,7 @@ function Info() {
           </Button>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

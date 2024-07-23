@@ -84,7 +84,7 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
                             onClick={handleVisibilityToggle}
                             className="mx-2"
                         />
-                        <AccordionTrigger>
+                        <AccordionTrigger className='hover:underline'>
                             <h3 className={`text-md font-medium text-left ${isTopLevel ? 'text-lg' : ''}`}>{layerTitle}</h3>
                         </AccordionTrigger>
                     </AccordionHeader>
