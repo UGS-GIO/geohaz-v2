@@ -1,8 +1,7 @@
 import * as React from "react"
 import * as AccordionPrimitive from "@radix-ui/react-accordion"
-import { ChevronDown } from "lucide-react"
-import { cn } from "@/lib/utils"
-
+import { ChevronDownIcon } from "@radix-ui/react-icons"
+import { cn } from "../../lib/utils"
 
 const Accordion = AccordionPrimitive.Root
 
@@ -40,7 +39,7 @@ const AccordionHeader = React.forwardRef<
   <AccordionPrimitive.Header ref={ref} className={cn("flex items-center justify-between", className)} {...props}>
     {children}
     <AccordionPrimitive.Trigger>
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 mr-2" />
+      <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform duration-200 mr-2" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ))
