@@ -2,9 +2,10 @@ import React, { useState, useRef } from 'react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 // import { useNavigation } from '@/contexts/NavigationContext';
-import { ExternalLink, Layers } from 'lucide-react';
+import { ExternalLink, Layers as LayersIcon } from 'lucide-react';
 import { Button } from '../custom/button';
 import { useSidebar } from '@/context/sidebar-provider';
+import Layers from '@/components/sidebar/layers';
 
 
 function Info() {
@@ -189,8 +190,9 @@ function Info() {
             onClick={() => setCurrentContent({
               title: 'Layers',
               label: '',
-              icon: <Layers />,
+              icon: <LayersIcon />,
               componentPath: '/src/components/sidebar/layers',
+              component: Layers
             })}
             className="mb-2 md:mb-0"
           >
