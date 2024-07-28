@@ -67,13 +67,13 @@ function handleMapImageLayerRendererType(layerArr: MapImageLayerType, renderers:
 }
 
 export const getRenderers = async function (view: SceneView | MapView, map: __esri.Map) {
-    let renderers: RegularLayerRenderer[] = [];
-    let mapImageRenderers: MapImageLayerRenderer[] = [];
+    const renderers: RegularLayerRenderer[] = [];
+    const mapImageRenderers: MapImageLayerRenderer[] = [];
 
     await view.when();
 
     for (let index = 0; index < map.layers.length; index++) {
-        let layer = map.layers.getItemAt(index);
+        const layer = map.layers.getItemAt(index);
 
         if (layer.type === 'group') {
             await handleGroupLayer(layer as __esri.GroupLayer, renderers, mapImageRenderers);

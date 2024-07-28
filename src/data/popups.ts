@@ -1,37 +1,37 @@
-const studyAreasPopup = function (feature: any) {
-    console.log(feature);
-    var contentS = "";
-
-
+const studyAreasPopup = function (feature: __esri.Feature) {
+    let contentS = "";
     contentS += "<span class='bold' title='Name'><b>Name: </b></span>{Name}<br/>";
 
+    function reportIdArraySort(item: string) {
+        console.log(item);
 
+        const regexSring = /^\d+$/gm;
+        if (regexSring.exec(item)) {
+            contentS += "<a href='https://geodata.geology.utah.gov/pages/view.php?ref=" + item + "' target='_blank'>" + item + "</a><br/>";
+        } else
+            contentS += "<a href='https://doi.org/10.34191/" + item + "' target='_blank'>" + item + "</a><br/>";
+    }
 
-
-    var reportIdString = feature.graphic.attributes.Repor_ID;
+    const reportIdString: string = feature.graphic.attributes.Repor_ID;
     if (reportIdString) {
-        var idArray = reportIdString.split(',');
-        const idArrayTrimmed = idArray.map((el: any) => el.trim());
+        const idArray = reportIdString.split(',');
+        console.log(idArray);
+
+        const idArrayTrimmed = idArray.map((el: string) => el.trim());
         contentS += "<span class='bold' title='Report ID'><b>Report ID: </b></span>";
         idArrayTrimmed.forEach(reportIdArraySort);
-        function reportIdArraySort(item: any, index: number) {
-            var regexSring = /^\d+$/gm;
-            if (regexSring.exec(item)) {
-                contentS += "<a href='https://geodata.geology.utah.gov/pages/view.php?ref=" + item + "' target='_blank'>" + item + "</a><br/>";
-            } else
-                contentS += "<a href='https://doi.org/10.34191/" + item + "' target='_blank'>" + item + "</a><br/>";
-        }
+
     }
 
     // contentS += "<span class='bold' title='Report ID'><b>Report ID: </b></span>" + "<a href='https://doi.org/10.34191/{Repor_ID}' target='_blank'>{Repor_ID}</a>" + "<br/>";
 
 
-    var hazardsString = feature.graphic.attributes.Hazard_Name;
-    var hazArray = hazardsString.split(',');
+    const hazardsString = feature.graphic.attributes.Hazard_Name;
+    const hazArray = hazardsString.split(',');
     contentS += "<span class='bold' title='Mapped Hazards'><b>Mapped Hazards: </b></span><br/>";
     hazArray.forEach(studyPopupContent);
 
-    function studyPopupContent(item: any, index: number) {
+    function studyPopupContent(item: any, _index: number) {
         contentS += "&nbsp;&nbsp;• " + item + "<br/>";
 
     }
@@ -42,7 +42,7 @@ const studyAreasPopup = function (feature: any) {
 
 const epicentersPopup = function (feature: any) {
     console.log(feature);
-    var content = "";
+    let content = "";
 
 
     content += "<span class='bold' title='Magnitude'><b>Magnitude: </b></span>{Mag}<br/>";
@@ -60,21 +60,21 @@ const epicentersPopup = function (feature: any) {
     return content;
 }
 
-const miningepicentersPopup = function (feature: any) {
-    var content = "";
+// const miningepicentersPopup = function (feature: any) {
+//     var content = "";
 
-    content += "<span class='bold' title='Magnitude'><b>Magnitude: </b></span>{Mag}<br/>";
+//     content += "<span class='bold' title='Magnitude'><b>Magnitude: </b></span>{Mag}<br/>";
 
-    content += "<span class='bold' title='Longitude'><b>Longitude: </b></span>{Long}<br/>";
+//     content += "<span class='bold' title='Longitude'><b>Longitude: </b></span>{Long}<br/>";
 
-    content += "<span class='bold' title='Latitude'><b>Latitude: </b></span>{Lat}<br/>";
+//     content += "<span class='bold' title='Latitude'><b>Latitude: </b></span>{Lat}<br/>";
 
-    content += "<span class='bold' title='Depth'><b>Depth: </b></span>{Depth} Km <br/>";
+//     content += "<span class='bold' title='Depth'><b>Depth: </b></span>{Depth} Km <br/>";
 
-    content += "<span class='bold' title='Date'><b>Date: </b></span>{Date}<br/>";
+//     content += "<span class='bold' title='Date'><b>Date: </b></span>{Date}<br/>";
 
-    return content;
-}
+//     return content;
+// }
 
 // qfaultspopup template
 const qfaultsPopup = function (event: any) {
@@ -538,4 +538,4 @@ const landslideCompPopup = function (feature: any) {
     return content;
 }
 
-export { studyAreasPopup, epicentersPopup, miningepicentersPopup, poopTemplate, fchPopup, lssPopup, landslideSourcePopup, landslideDepositPopup, landslideCompPopup, qfaultsPopup };
+export { studyAreasPopup, epicentersPopup, poopTemplate, fchPopup, lssPopup, landslideSourcePopup, landslideDepositPopup, landslideCompPopup, qfaultsPopup };

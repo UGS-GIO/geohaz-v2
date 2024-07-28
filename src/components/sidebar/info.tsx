@@ -4,7 +4,7 @@ import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionT
 // import { useNavigation } from '@/contexts/NavigationContext';
 import { ExternalLink, Layers as LayersIcon } from 'lucide-react';
 import { Button } from '../custom/button';
-import { useSidebar } from '@/context/sidebar-provider';
+import { useSidebar } from '@/hooks/use-sidebar';
 import Layers from '@/components/sidebar/layers';
 
 

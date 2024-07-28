@@ -16,7 +16,7 @@ interface LayerAccordionProps {
 
 const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer.layer;
-    const { view, activeLayers, layerDescriptions, getRenderer } = useContext(MapContext);
+    const { view, activeLayers, layerDescriptions /*, getRenderer*/ } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
     const [layerVisibility, setLayerVisibility] = useState<boolean | undefined>();
     // const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});

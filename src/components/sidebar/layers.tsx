@@ -11,7 +11,7 @@ function Layers() {
     <div key='layer-list' className='ml-2 overflow-y-visible max-h-[calc(100vh)]    '>
       {layerList}
     </div>
-  );
-};
+  )
+}
 
-export default Layers;
+export default Layers

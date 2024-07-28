@@ -2,21 +2,21 @@ import { LayerProps } from "@/lib/types/mapping-types";
 import {
     landslideCompPopup,
     landslideSourcePopup,
-    epicentersPopup,
-    miningepicentersPopup,
-    poopTemplate,
+    // epicentersPopup,
+    // miningepicentersPopup,
+    // poopTemplate,
     studyAreasPopup,
     qfaultsPopup
 } from "./popups";
 
 import {
-    rendererRecent,
-    rendererMining,
+    // rendererRecent,
+    // rendererMining,
     rendererLiquefaction,
     rendererBedrockPot,
     surfaceFaultRuptureRenderer,
     quadRenderer,
-    colorize,
+    // colorize,
     qFaultsRenderer
 } from "./renderers";
 
@@ -96,25 +96,25 @@ const landslideSusceptibilityConfig: LayerProps = {
     },
 };
 
-const epicentersRecentConfig: LayerProps & { featureReduction: object } = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/0',
-    options: {
-        title: 'Epicenters (1850 to 2016)',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>Earthquake Epicenter Information</b>',
-            outFields: ['*'],
-            content: epicentersPopup,
-        },
-        renderer: rendererRecent,
-    },
-    featureReduction: {
-        type: 'selection',
-    },
-};
+// const epicentersRecentConfig: LayerProps & { featureReduction: object } = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/0',
+//     options: {
+//         title: 'Epicenters (1850 to 2016)',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>Earthquake Epicenter Information</b>',
+//             outFields: ['*'],
+//             content: epicentersPopup,
+//         },
+//         renderer: rendererRecent,
+//     },
+//     featureReduction: {
+//         type: 'selection',
+//     },
+// };
 
 // Setting feature reduction for the layer
 // epicentersRecentConfig.featureReduction = {
@@ -122,23 +122,23 @@ const epicentersRecentConfig: LayerProps & { featureReduction: object } = {
 // };
 
 
-const epicentersMiningConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/1',
-    options: {
-        title: 'Mining-Induced Epicenters',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: 'Mining-Induced Epicenters',
-            outFields: ['*'],
-            content: miningepicentersPopup,
-            // content: "{Mag:miningepicentersPopup}{Depth:miningepicentersPopup}{Long:miningepicentersPopup}{Lat:miningepicentersPopup}{Date:miningepicentersPopup}"
-        },
-        renderer: rendererMining,
-    },
-};
+// const epicentersMiningConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/1',
+//     options: {
+//         title: 'Mining-Induced Epicenters',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: 'Mining-Induced Epicenters',
+//             outFields: ['*'],
+//             content: miningepicentersPopup,
+//             // content: "{Mag:miningepicentersPopup}{Depth:miningepicentersPopup}{Long:miningepicentersPopup}{Lat:miningepicentersPopup}{Date:miningepicentersPopup}"
+//         },
+//         renderer: rendererMining,
+//     },
+// };
 
 const liquefactionConfig: LayerProps = {
     type: 'feature',
@@ -194,22 +194,22 @@ const shakingVectorConfig: LayerProps = {
     },
 };
 
-const shakingRasterConfig: LayerProps = {
-    type: 'imagery',
-    url: 'https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/GroundshakingRaster/ImageServer',
-    options: {
-        visible: false,
-        legendEnabled: false,
-        listMode: 'hide',
-        title: 'Shaking Raster',
-        pixelFilter: colorize,
-        opacity: 0,
-        popupTemplate: {
-            title: '<b>Earthquake Ground Shaking</b>',
-            content: '<b>Peak Ground Acceleration: </b>{Raster.ServicePixelValue.Raw}  G\'s',
-        },
-    },
-};
+// const shakingRasterConfig: LayerProps = {
+//     type: 'imagery',
+//     url: 'https://webmaps.geology.utah.gov/arcgis/rest/services/Hazards/GroundshakingRaster/ImageServer',
+//     options: {
+//         visible: false,
+//         legendEnabled: false,
+//         listMode: 'hide',
+//         title: 'Shaking Raster',
+//         pixelFilter: colorize,
+//         opacity: 0,
+//         popupTemplate: {
+//             title: '<b>Earthquake Ground Shaking</b>',
+//             content: '<b>Peak Ground Acceleration: </b>{Raster.ServicePixelValue.Raw}  G\'s',
+//         },
+//     },
+// };
 
 const qFaultsGeoJsonConfig: LayerProps = {
     type: 'geojson',
@@ -883,45 +883,45 @@ const erosionZoneConfig: LayerProps = {
     },
 };
 
-const groundSubsidenceConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/11',
-    options: {
-        title: 'Ground Subsidence Potential',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/5/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'CSSMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/5/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/5/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const groundSubsidenceConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/11',
+//     options: {
+//         title: 'Ground Subsidence Potential',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/5/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'CSSMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/5/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/5/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
 const karstFeaturesConfig: LayerProps = {
     type: 'feature',
@@ -1012,26 +1012,26 @@ const hazardStudyConfig: LayerProps = {
     },
 };
 
-const lidarBoundsConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/2',
-    options: {
-        title: 'Lidar Extents',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-    },
-};
+// const lidarBoundsConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/2',
+//     options: {
+//         title: 'Lidar Extents',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//     },
+// };
 
-const airphotoPointsConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/3',
-    options: {
-        title: 'Aerial Imagery Centerpoints',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        minScale: 500000,
-    },
-};
+// const airphotoPointsConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/3',
+//     options: {
+//         title: 'Aerial Imagery Centerpoints',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         minScale: 500000,
+//     },
+// };
 
 const notMappedConfig: LayerProps = {
     type: 'feature',

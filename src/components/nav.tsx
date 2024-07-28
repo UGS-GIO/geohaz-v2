@@ -6,25 +6,19 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from './ui/collapsible'
+
+// todo add tooltip functionality back
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu'
-import {
-  Tooltip,
-  TooltipContent,
+  // Tooltip,
+  // TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
+  // TooltipTrigger,
 } from './ui/tooltip'
 import { cn } from '@/lib/utils'
 import useCheckActiveNav from '@/hooks/use-check-active-nav'
 import { SideLink } from '@/data/sidelinks'
-import { Suspense, lazy, useEffect } from 'react'
-import { useSidebar } from '@/context/sidebar-provider'
+import { Suspense, useEffect } from 'react'
+import { useSidebar } from '@/hooks/use-sidebar'
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean
@@ -44,10 +38,12 @@ export default function Nav({
   const { currentContent, setCurrentContent } = useSidebar()
 
   useEffect(() => {
+    console.log('running useEffect', isCollapsed);
+
     if (isCollapsed) {
       setCurrentContent(null)
     }
-  }, [isCollapsed])
+  }, [isCollapsed, setCurrentContent])
 
   const renderLink = (link: SideLink) => {
     const key = `${link.title}`
@@ -153,7 +149,7 @@ function NavLink({
   component,
   componentPath,
   href,
-  closeNav,
+  // closeNav,
   subLink = false,
   setCurrentContent,
 }: NavLinkProps) {
@@ -266,7 +262,7 @@ function NavLinkIcon({
   componentPath,
   closeNav,
   setCurrentContent,
-  isCollapsed,
+  // isCollapsed,
   setIsCollapsed,
 }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav()
