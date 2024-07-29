@@ -12,6 +12,7 @@ import Extent from "@arcgis/core/geometry/Extent.js";
 import SearchSource from "@arcgis/core/widgets/Search/SearchSource.js";
 import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
 import { fetchQFaultResults, fetchQFaultSuggestions } from '@/lib/mapping-utils';
+import { GetResultsHandlerType } from '@/lib/types/mapping-types';
 
 
 const MapWidgets: React.FC = () => {
@@ -87,7 +88,7 @@ const MapWidgets: React.FC = () => {
                     // Function that executes when user types in the search box
                     getSuggestions: (params) => fetchQFaultSuggestions(params, qFaultsUrl),
                     // Function that executes when user selects a search suggestion or presses enter
-                    getResults: async (params) => fetchQFaultResults(params, qFaultsUrl),
+                    getResults: async (params: GetResultsHandlerType) => fetchQFaultResults(params, qFaultsUrl),
                     resultSymbol: new SimpleLineSymbol({
                         color: 'red',
                         width: 2

@@ -1,7 +1,7 @@
 import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
 import layers from '@/data/layers'
-import { MapApp, MapImageLayerRenderer, MapImageLayerType, RegularLayerRenderer } from '@/lib/types/mapping-types'
+import { GetResultsHandlerType, LayerConstructor, MapApp, MapImageLayerRenderer, MapImageLayerType, RegularLayerRenderer } from '@/lib/types/mapping-types'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
@@ -18,8 +18,7 @@ import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
-
-
+import { Feature, FeatureCollection } from 'geojson';
 
 
 // Create a global app object to store the view
@@ -192,7 +191,7 @@ export const createView = (container: HTMLDivElement, map: Map, viewType: 'map' 
 export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
     // Add layers to the map
     layers.forEach((layer: LayerProps) => {
-        const createdLayer = createLayer(layer)
+        const createdLayer = createLayer(layer) as __esri.Layer;
         if (createdLayer) {
             map.add(createdLayer)
         }
@@ -200,9 +199,9 @@ export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
 }
 
 // Helper function to reduce code duplication in createLayer
-function createLayerFromUrl(layer: LayerProps, LayerType: any) {
+function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
     // Create a layer based on the layer props
-    if ('url' in layer) {
+    if ('url' in layer && LayerType) {
         return new LayerType({
             url: layer.url,
             ...layer.options,
@@ -223,10 +222,10 @@ function createLayerFromUrl(layer: LayerProps, LayerType: any) {
 }
 
 // Create a layer based on the layer props
-export const createLayer = (layer: LayerProps): FeatureLayer | TileLayer | GroupLayer | MapImageLayer | GeoJSONLayer | undefined => {
+export const createLayer = (layer: LayerProps) => {
     // Handle the special case for group layers
     if (layer.type === 'group' && layer.layers) {
-        const groupLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer | GeoJSONLayer)[];
+        const groupLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as __esri.CollectionProperties<__esri.LayerProperties> | undefined;
         return new GroupLayer({
             title: layer.title,
             visible: layer.visible,
@@ -324,19 +323,21 @@ export function expandClickHandlers(view: SceneView | MapView) {
 // Function to fetch suggestions from the search box
 export const fetchQFaultSuggestions = async (params: { suggestTerm: string, sourceIndex: number }, url: string): Promise<__esri.SuggestResult[]> => {
     const response = await fetch(`${url}?search_term=${encodeURIComponent(params.suggestTerm)}`);
-    const data = await response.json();
+    const data: FeatureCollection = await response.json();
 
-    return data.features.map((item: any) => {
+    return data.features.map((item: Feature) => {
         return {
-            text: '<p>' + item.properties.concatnames + '</p>',
-            key: item.properties.concatnames,
+            text: '<p>' + item.properties?.concatnames + '</p>',
+            key: item.properties?.concatnames,
             sourceIndex: params.sourceIndex,
         };
     });
 };
 
 // Function to fetch results from the search box
-export const fetchQFaultResults = async (params: any, url: string): Promise<__esri.SearchResult[]> => {
+export const fetchQFaultResults = async (params: GetResultsHandlerType, url: string): Promise<__esri.SearchResult[]> => {
+    console.log(params);
+
     let searchUrl = url;
     let searchTerm = '';
 
@@ -358,9 +359,14 @@ export const fetchQFaultResults = async (params: any, url: string): Promise<__es
     }
 
     // Create graphics for each feature returned from the search
-    const graphics: __esri.Graphic[] = data.features.map((item: any) => {
+    const graphics: __esri.Graphic[] = data.features.map((item: GeoJSON.Feature) => {
+        console.log(item);
+
+        const typedGeometry = item.geometry as GeoJSON.MultiPoint;
+        const coordinates = typedGeometry.coordinates as unknown as number[][][]
+
         const polyline = new Polyline({
-            paths: item.geometry.coordinates,
+            paths: coordinates,
             spatialReference: new SpatialReference({
                 wkid: 4326
             }),
@@ -368,7 +374,7 @@ export const fetchQFaultResults = async (params: any, url: string): Promise<__es
 
         return new Graphic({
             geometry: polyline,
-            attributes: item.attributes
+            attributes: item.properties
         });
     });
 
@@ -389,7 +395,7 @@ export const fetchQFaultResults = async (params: any, url: string): Promise<__es
     // Create attributes for the target graphic
     const attributes = params.sourceIndex !== null
         ? { name: data.features[0].properties.concatnames }
-        : { name: `Search results for: ${params.text}` };
+        : { name: `Search results for: ${searchTerm}` };
 
     // Create a target graphic to return
     const target = new Graphic({

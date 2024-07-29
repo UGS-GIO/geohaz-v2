@@ -175,60 +175,60 @@ const rendererLiquefaction = {
 };
 
 //symbolize shakingRaster
-function colorize(pixelData: any) {
-    let pixelBlock, factor, minValue, maxValue;
+// function colorize(pixelData: any) {
+//     console.log('colorize', pixelData);
 
-    if (
-        pixelData === null ||
-        pixelData.pixelBlock === null ||
-        pixelData.pixelBlock.pixels === null
-    ) {
-        return;
-    }
 
-    // The pixelBlock stores the values of all pixels visible in the view
-    pixelBlock = pixelData.pixelBlock;
-    console.log(pixelBlock);
 
-    // Get the min and max values of the data in the current view
-    minValue = pixelBlock.statistics[0].minValue;
-    maxValue = pixelBlock.statistics[0].maxValue;
+//     if (
+//         pixelData === null ||
+//         pixelData.pixelBlock === null ||
+//         pixelData.pixelBlock.pixels === null
+//     ) {
+//         return;
+//     }
 
-    // The pixels visible in the view
-    const pixels = pixelBlock.pixels;
+//     // The pixelBlock stores the values of all pixels visible in the view
+//     const pixelBlock = pixelData.pixelBlock;
+//     // Get the min and max values of the data in the current view
+//     const minValue = pixelBlock.statistics[0].minValue;
+//     const maxValue = pixelBlock.statistics[0].maxValue;
 
-    // The number of pixels in the pixelBlock
-    const numPixels = pixelBlock.width * pixelBlock.height;
+//     // The pixels visible in the view
+//     const pixels = pixelBlock.pixels;
 
-    // Calculate the factor by which to determine the red and blue
-    // values in the colorized version of the layer
-    factor = 255.0 / (maxValue - minValue);
+//     // The number of pixels in the pixelBlock
+//     const numPixels = pixelBlock.width * pixelBlock.height;
 
-    // Get the pixels containing temperature values in the only band of the data
-    const tempBand = pixels[0];
+//     // Calculate the factor by which to determine the red and blue
+//     // values in the colorized version of the layer
+//     const factor = 255.0 / (maxValue - minValue);
 
-    // Create empty arrays for each of the RGB bands to set on the pixelBlock
-    const rBand = [];
-    const gBand = [];
-    const bBand = [];
+//     // Get the pixels containing temperature values in the only band of the data
+//     const tempBand = pixels[0];
 
-    // Loop through all the pixels in the view
-    for (let i = 0; i < numPixels; i++) {
-        // Get the pixel value (the temperature) recorded at the pixel location
-        const tempValue = tempBand[i];
-        // Calculate the red value based on the factor
-        const red = (tempValue - minValue) * factor;
+//     // Create empty arrays for each of the RGB bands to set on the pixelBlock
+//     const rBand = [];
+//     const gBand = [];
+//     const bBand = [];
 
-        // Sets a color between blue (coldest) and red (warmest) in each band
-        rBand[i] = red;
-        gBand[i] = 0;
-        bBand[i] = 255 - red;
-    }
+//     // Loop through all the pixels in the view
+//     for (let i = 0; i < numPixels; i++) {
+//         // Get the pixel value (the temperature) recorded at the pixel location
+//         const tempValue = tempBand[i];
+//         // Calculate the red value based on the factor
+//         const red = (tempValue - minValue) * factor;
 
-    // Set the new pixel values on the pixelBlock
-    pixelData.pixelBlock.pixels = [rBand, gBand, bBand];
-    pixelData.pixelBlock.pixelType = "U8"; // U8 is used for color
-}
+//         // Sets a color between blue (coldest) and red (warmest) in each band
+//         rBand[i] = red;
+//         gBand[i] = 0;
+//         bBand[i] = 255 - red;
+//     }
+
+//     // Set the new pixel values on the pixelBlock
+//     pixelData.pixelBlock.pixels = [rBand, gBand, bBand];
+//     pixelData.pixelBlock.pixelType = "U8"; // U8 is used for color
+// }
 
 const surfaceFaultRuptureRenderer = {
     type: "simple",
@@ -484,4 +484,4 @@ const qFaultsRenderer = new UniqueValueRenderer({
     ]
 });
 
-export { rendererRecent, rendererMining, rendererLiquefaction, colorize, surfaceFaultRuptureRenderer, rendererBedrockPot, quadRenderer, qFaultsRenderer };
+export { rendererRecent, rendererMining, rendererLiquefaction, surfaceFaultRuptureRenderer, rendererBedrockPot, quadRenderer, qFaultsRenderer };

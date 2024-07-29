@@ -31,37 +31,35 @@ const studyAreasPopup = function (feature: __esri.Feature) {
     contentS += "<span class='bold' title='Mapped Hazards'><b>Mapped Hazards: </b></span><br/>";
     hazArray.forEach(studyPopupContent);
 
-    function studyPopupContent(item: any, _index: number) {
+    function studyPopupContent(item: string) {
         contentS += "&nbsp;&nbsp;• " + item + "<br/>";
-
     }
     return contentS;
 }
 
 
 
-const epicentersPopup = function (feature: any) {
-    console.log(feature);
-    let content = "";
+// const epicentersPopup = function () {
+//     let content = "";
 
 
-    content += "<span class='bold' title='Magnitude'><b>Magnitude: </b></span>{Mag}<br/>";
+//     content += "<span class='bold' title='Magnitude'><b>Magnitude: </b></span>{Mag}<br/>";
 
 
-    content += "<span class='bold' title='Longitude'><b>Longitude: </b></span>{Long}<br/>";
+//     content += "<span class='bold' title='Longitude'><b>Longitude: </b></span>{Long}<br/>";
 
-    content += "<span class='bold' title='Latitude'><b>Latitude: </b></span>{Lat}<br/>";
+//     content += "<span class='bold' title='Latitude'><b>Latitude: </b></span>{Lat}<br/>";
 
 
-    content += "<span class='bold' title='Depth'><b>Depth: </b></span>{Depth} Km <br/>";
+//     content += "<span class='bold' title='Depth'><b>Depth: </b></span>{Depth} Km <br/>";
 
-    content += "<span class='bold' title='Date'><b>Date: </b></span>{Date}<br/>";
+//     content += "<span class='bold' title='Date'><b>Date: </b></span>{Date}<br/>";
 
-    return content;
-}
+//     return content;
+// }
 
-// const miningepicentersPopup = function (feature: any) {
-//     var content = "";
+// const miningepicentersPopup = function (feature: __esri.Feature) {
+//     let content = "";
 
 //     content += "<span class='bold' title='Magnitude'><b>Magnitude: </b></span>{Mag}<br/>";
 
@@ -77,53 +75,53 @@ const epicentersPopup = function (feature: any) {
 // }
 
 // qfaultspopup template
-const qfaultsPopup = function (event: any) {
+const qfaultsPopup = function (feature: __esri.Feature) {
     const div = document.createElement("div");
 
-    if (event.graphic.attributes.faultzone) {
+    if (feature.graphic.attributes.faultzone) {
         div.innerHTML += `
             <span><b>Fault Zone: </b></span>
-            <calcite-link id="faultzone-tooltip">${event.graphic.attributes.faultzone}</calcite-link>
+            <calcite-link id="faultzone-tooltip">${feature.graphic.attributes.faultzone}</calcite-link>
             <calcite-tooltip label="Data disclaimer" reference-element="faultzone-tooltip">
-                <span>${event.graphic.attributes.summary}</span>
+                <span>${feature.graphic.attributes.summary}</span>
             </calcite-tooltip>
             <br>
         `;
     }
-    if (event.graphic.attributes.faultname) {
-        div.innerHTML += `<b>Fault Name: </b>${event.graphic.attributes.faultname}<br>`;
+    if (feature.graphic.attributes.faultname) {
+        div.innerHTML += `<b>Fault Name: </b>${feature.graphic.attributes.faultname}<br>`;
     }
-    if (event.graphic.attributes.sectionname) {
-        div.innerHTML += `<b>Section Name: </b>${event.graphic.attributes.sectionname}<br>`;
+    if (feature.graphic.attributes.sectionname) {
+        div.innerHTML += `<b>Section Name: </b>${feature.graphic.attributes.sectionname}<br>`;
     }
-    if (event.graphic.attributes.strandname) {
-        div.innerHTML += `<b>Strand Name: </b>${event.graphic.attributes.strandname}<br>`;
+    if (feature.graphic.attributes.strandname) {
+        div.innerHTML += `<b>Strand Name: </b>${feature.graphic.attributes.strandname}<br>`;
     }
-    if (event.graphic.attributes.faultnum) {
-        div.innerHTML += `<b>Structure Number: </b>${event.graphic.attributes.faultnum}<br>`;
+    if (feature.graphic.attributes.faultnum) {
+        div.innerHTML += `<b>Structure Number: </b>${feature.graphic.attributes.faultnum}<br>`;
     }
-    if (event.graphic.attributes.mappedscale) {
-        div.innerHTML += `<b>Mapped Scale: </b>${event.graphic.attributes.mappedscale}<br>`;
+    if (feature.graphic.attributes.mappedscale) {
+        div.innerHTML += `<b>Mapped Scale: </b>${feature.graphic.attributes.mappedscale}<br>`;
     }
-    if (event.graphic.attributes.dipdirection) {
-        div.innerHTML += `<b>Dip Direction: </b>${event.graphic.attributes.dipdirection}<br>`;
+    if (feature.graphic.attributes.dipdirection) {
+        div.innerHTML += `<b>Dip Direction: </b>${feature.graphic.attributes.dipdirection}<br>`;
     }
-    if (event.graphic.attributes.slipsense) {
-        div.innerHTML += `<b>Slip Sense: </b>${event.graphic.attributes.slipsense}<br>`;
+    if (feature.graphic.attributes.slipsense) {
+        div.innerHTML += `<b>Slip Sense: </b>${feature.graphic.attributes.slipsense}<br>`;
     }
-    if (event.graphic.attributes.sliprate) {
-        div.innerHTML += `<b>Slip Rate: </b>${event.graphic.attributes.sliprate}<br>`;
+    if (feature.graphic.attributes.sliprate) {
+        div.innerHTML += `<b>Slip Rate: </b>${feature.graphic.attributes.sliprate}<br>`;
     }
-    if (event.graphic.attributes.faultclass) {
-        div.innerHTML += `<b>Structure Class: </b>${event.graphic.attributes.faultclass}<br>`;
+    if (feature.graphic.attributes.faultclass) {
+        div.innerHTML += `<b>Structure Class: </b>${feature.graphic.attributes.faultclass}<br>`;
     }
-    if (event.graphic.attributes.faultage) {
-        div.innerHTML += `<b>Structure Age: </b>${event.graphic.attributes.faultage}<br>`;
+    if (feature.graphic.attributes.faultage) {
+        div.innerHTML += `<b>Structure Age: </b>${feature.graphic.attributes.faultage}<br>`;
     }
-    if (event.graphic.attributes.usgs_link) {
+    if (feature.graphic.attributes.usgs_link) {
         div.innerHTML += `
             <span><b>Detailed Report: </b></span>
-            <calcite-link href=${event.graphic.attributes.usgs_link} icon-end="launch" target="_blank">
+            <calcite-link href=${feature.graphic.attributes.usgs_link} icon-end="launch" target="_blank">
                 Opens in new tab
             </calcite-link>
         `;
@@ -134,7 +132,7 @@ const qfaultsPopup = function (event: any) {
 
 //qfaults popup code
 const poopTemplate =
-    (event: any) => {
+    (event: __esri.Feature) => {
 
         const { graphic } = event;
         const containerFaultZone = document.createElement("div");
@@ -144,7 +142,7 @@ const poopTemplate =
             faultZoneDiv.textContent = "Fault Zone Name: ";
             containerFaultZone.appendChild(faultZoneDiv);
 
-            const faultZoneSum = graphic.attributes.Summary;
+            // const faultZoneSum = graphic.attributes.Summary;
             const faultZone = graphic.attributes.FaultZone;
             const faultTip = document.createElement("span");
             faultTip.textContent = faultZone;
@@ -158,7 +156,7 @@ const poopTemplate =
         }
 
         if (graphic.attributes.FaultName) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const faultNameDiv = document.createElement('strong');
             faultNameDiv.textContent = "Fault Name: ";
             containerFaultZone.appendChild(br);
@@ -171,7 +169,7 @@ const poopTemplate =
         }
 
         if (graphic.attributes.SectionName) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const sectionNameDiv = document.createElement('strong');
             sectionNameDiv.textContent = "Section Name: ";
             containerFaultZone.appendChild(br);
@@ -184,7 +182,7 @@ const poopTemplate =
         }
 
         if (graphic.attributes.StrandName) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const strandNameDiv = document.createElement('strong');
             strandNameDiv.textContent = "Strand Name: ";
             containerFaultZone.appendChild(br);
@@ -197,7 +195,7 @@ const poopTemplate =
         }
 
         if (graphic.attributes.FaultNum) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const faultNumDiv = document.createElement('strong');
             faultNumDiv.textContent = "Structure Number: ";
             containerFaultZone.appendChild(br);
@@ -210,7 +208,7 @@ const poopTemplate =
         }
 
         if (graphic.attributes.MappedScale) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const mapScaleDiv = document.createElement('strong');
             mapScaleDiv.textContent = "Mapped Scale: ";
             containerFaultZone.appendChild(br);
@@ -224,7 +222,7 @@ const poopTemplate =
 
 
         if (graphic.attributes.DipDirection) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const dipDirDiv = document.createElement('strong');
             dipDirDiv.textContent = "Dip Direction: ";
             containerFaultZone.appendChild(br);
@@ -237,7 +235,7 @@ const poopTemplate =
         }
 
         if (graphic.attributes.SlipSense) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const slipSenseDiv = document.createElement('strong');
             slipSenseDiv.textContent = "Slip Sense: ";
             containerFaultZone.appendChild(br);
@@ -250,7 +248,7 @@ const poopTemplate =
         }
 
         if (graphic.attributes.SlipRate) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const slipRateDiv = document.createElement('strong');
             slipRateDiv.textContent = "Slip Rate: ";
             containerFaultZone.appendChild(br);
@@ -265,7 +263,7 @@ const poopTemplate =
 
 
         if (graphic.attributes.FaultClass) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const faultClassDiv = document.createElement('strong');
             faultClassDiv.textContent = "Structure Class: ";
             containerFaultZone.appendChild(br);
@@ -278,7 +276,7 @@ const poopTemplate =
         }
 
         if (graphic.attributes.FaultAge) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const faultAgeDiv = document.createElement('strong');
             faultAgeDiv.textContent = "Structure Age: ";
             containerFaultZone.appendChild(br);
@@ -291,15 +289,15 @@ const poopTemplate =
         }
 
         if (graphic.attributes.USGS_Link) {
-            var br = document.createElement("br");
+            const br = document.createElement("br");
             const linkDiv = document.createElement('strong');
             linkDiv.textContent = "Detailed Report: ";
             containerFaultZone.appendChild(br);
             containerFaultZone.appendChild(linkDiv);
             const linkvalue = graphic.attributes.USGS_Link;
 
-            var a = document.createElement('a');
-            var linkText = document.createTextNode("Opens in new tab");
+            const a = document.createElement('a');
+            const linkText = document.createTextNode("Opens in new tab");
             a.appendChild(linkText);
             a.title = "Detailed Report";
             a.href = linkvalue;
@@ -316,8 +314,8 @@ const poopTemplate =
 
 
 
-const fchPopup = function (feature: any) {
-    var content = "";
+const fchPopup = function (feature: __esri.Feature) {
+    let content = "";
 
 
     if (feature.graphic.attributes.FCHMappedScale) {
@@ -327,9 +325,9 @@ const fchPopup = function (feature: any) {
     return content;
 }
 
-const lssPopup = function (feature: any) {
+const lssPopup = function (feature: __esri.Feature) {
     console.log(feature);
-    var content = "";
+    let content = "";
 
     content += "<span class='bold' title='Longitude'><b>Description: </b></span>{relationships/3/Description}<br/>";
 
@@ -340,9 +338,9 @@ const lssPopup = function (feature: any) {
     return content;
 }
 
-const landslideSourcePopup = function (feature: any) {
+const landslideSourcePopup = function (feature: __esri.Feature) {
     console.log(feature);
-    var content = "";
+    let content = "";
 
     if (feature.graphic.attributes.s_name) {
         content += "<span class='bold' title='Longitude'><b>Name: </b></span>{s_name}<br/>";
@@ -390,8 +388,8 @@ const landslideSourcePopup = function (feature: any) {
     return content;
 }
 
-const landslideDepositPopup = function (feature: any) {
-    var content = "";
+const landslideDepositPopup = function (feature: __esri.Feature) {
+    let content = "";
 
     if (feature.graphic.attributes.d_material) {
         content += "<span class='bold' title='Longitude'><b>Deposit Material: </b></span>{d_material}<br/>";
@@ -466,9 +464,9 @@ const landslideDepositPopup = function (feature: any) {
     return content;
 }
 
-const landslideCompPopup = function (feature: any) {
+const landslideCompPopup = function (feature: __esri.Feature) {
     console.log(feature);
-    var content = "";
+    let content = "";
 
 
     if (feature.graphic.attributes.StateLSID) {
@@ -538,4 +536,4 @@ const landslideCompPopup = function (feature: any) {
     return content;
 }
 
-export { studyAreasPopup, epicentersPopup, poopTemplate, fchPopup, lssPopup, landslideSourcePopup, landslideDepositPopup, landslideCompPopup, qfaultsPopup };
+export { studyAreasPopup, poopTemplate, fchPopup, lssPopup, landslideSourcePopup, landslideDepositPopup, landslideCompPopup, qfaultsPopup };
