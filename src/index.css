@@ -148,3 +148,9 @@
 h2.esri-widget__heading.esri-feature__title {
     margin: 0;
 }
+
+/* adding color to a custom-cooltip */
+.custom-tooltip a {
+  color: #0079c1;
+  text-decoration: underline;
+}
