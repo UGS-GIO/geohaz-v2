@@ -7,7 +7,6 @@ import { Button } from '../custom/button';
 import { useSidebar } from '@/hooks/use-sidebar';
 import Layers from '@/components/sidebar/layers';
 
-
 function Info() {
   type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | ''
   const [modalOpen, setModalOpen] = useState(false)
@@ -28,7 +27,7 @@ function Info() {
   return (
     <div className="flex flex-col h-full">
       <div
-        className="flex-grow ml-2"
+        className="flex-grow ml-2 overflow-y-auto"
         ref={contentRef}
       >
         <div className='mr-2' key={`map-details-accordion`}>
@@ -134,15 +133,8 @@ function Info() {
                     The Utah Geologic Hazards Database contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources for the area of interest shown on the interactive map and can be used to identify mapped geologic hazards in an area, understand what the hazards are, and some potential ways to mitigate them.
                   </p>
                   <p className="mb-2">
-                    The database is periodically updated to incorporate the results of new mapping and/or updated mapping due to updated data and/or methodology; however, more-detailed fault traces and paleoseismic information may be available in recently published geologic maps and reports, so the database should not be considered exhaustive.
+                    The database is periodically updated to incorporate the results of new mapping. Detailed geologic hazard mapping is available for limited areas and for specific hazards in Utah and additional mapping is ongoing.
                   </p>
-                  <p className="mb-2">
-                    Locations of mapped geologic hazards should always be considered approximate.
-                  </p>
-                  <p className="mb-2">
-                    The locational accuracy of hazards on the maps vary, and spatial error can be substantial when viewing structures at high zoom levels that were originally mapped at small scales. Therefore, the locations of hazards on the map should be considered approximate. Depending on the ultimate needs of the user, a site-specific investigation by a qualified Utah-licensed Professional Geologist may be required to accurately characterize the hazards at a particular site.
-                  </p>
-                  <Button onClick={handleCloseModal}>Close</Button>
                 </DialogDescription>
               </>
             )}
@@ -153,21 +145,22 @@ function Info() {
                 </DialogHeader>
                 <DialogDescription>
                   <p className="mb-2">
-                    Beukelman, G.S., Erickson, B.E., and Giraud, R.E., 2010, Geologic hazards of the Fillmore quadrangle, Millard County, Utah: Utah Geological Survey Special Study 131, 31 p., 2 plates, scale 1:24,000, CD.
+                    The Utah Geological Survey has published numerous geologic hazard maps and reports for parts of Utah. These publications are available through the UGS website.
                   </p>
-                  <p className="mb-2">
-                    Christensen, E.J., and Clark, D.L., 2009, Geologic hazards and adverse construction conditions, Wasatch Range frontal fault zone, Weber and Davis Counties, Utah: Utah Geological Survey Open-File Report 547, 75 p., CD.
-                  </p>
-                  <p className="mb-2">
-                    Clark, D.L., and Giraud, R.E., 2007, Geologic hazards of the Ogden 7.5′ quadrangle, Weber and Davis Counties, Utah: Utah Geological Survey Special Study 122, 103 p., 1 plate, scale 1:24,000, CD.
-                  </p>
-                  <p className="mb-2">
-                    Giraud, R.E., 2005, Reconnaissance of geologic hazards in the South Weber and Kaysville quadrangles, Davis and Weber Counties, Utah: Utah Geological Survey Special Study 115, 53 p., 1 plate, scale 1:24,000, CD.
-                  </p>
-                  <p className="mb-2">
-                    Giraud, R.E., and Shaw, L.M., 2007, Geologic hazards and adverse construction conditions, western Mapleton, Utah County, Utah: Utah Geological Survey Open-File Report 512, 26 p., 1 plate, scale 1:14,000.
-                  </p>
-                  <Button onClick={handleCloseModal}>Close</Button>
+                  <ul className="list-disc ml-5 mb-2">
+                    <li>
+                      UGS Geologic Hazard Maps and Reports:&nbsp;
+                      <a href="https://geology.utah.gov/maps/geohazmap/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                        https://geology.utah.gov/maps/geohazmap/
+                      </a>
+                    </li>
+                    <li>
+                      UGS Publications:&nbsp;
+                      <a href="https://geology.utah.gov/publications/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                        https://geology.utah.gov/publications/
+                      </a>
+                    </li>
+                  </ul>
                 </DialogDescription>
               </>
             )}
@@ -178,16 +171,16 @@ function Info() {
                 </DialogHeader>
                 <DialogDescription>
                   <p className="mb-2">
-                    This web application was created in collaboration with the Utah Geological Survey (UGS) and Utah Automated Geographic Reference Center (AGRC). AGRC provided GIS data and web services support. UGS provided geologic hazard mapping and analysis. Additional data and support were provided by the Utah Division of Emergency Management, FEMA, and local governments.
+                    We acknowledge the contribution of geologic hazard information and data from the Utah Geological Survey (UGS) and other sources. We also thank the Utah Department of Natural Resources for their support in making this data publicly available.
                   </p>
-                  <Button onClick={handleCloseModal}>Close</Button>
                 </DialogDescription>
               </>
             )}
           </DialogContent>
         </Dialog>
       </div>
-      <div className="flex flex-wrap justify-center mx-2 gap-4 md:gap-4 border-t border-secondary py-4">
+
+      <div className="flex-none flex justify-center space-x-4 p-4 border-t border-gray-200">
         <Button
           onClick={() => setCurrentContent({
             title: 'Layers',
@@ -208,8 +201,23 @@ function Info() {
           Open Data Disclaimer
         </Button>
       </div>
-    </div >
+    </div>
   );
 }
 
 export default Info;
+
+
+
+{/* <Button
+onClick={() => setCurrentContent({
+  title: 'Layers',
+  label: '',
+  icon: <LayersIcon />,
+  componentPath: '/src/components/sidebar/layers',
+  component: Layers
+})}
+className="mb-2 md:mb-0"
+>
+Start Exploring
+</Button> */}
