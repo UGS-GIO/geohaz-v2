@@ -1,7 +1,6 @@
 import { Database, Info as InfoIcon, Layers as LayersIcon, Route, Settings } from 'lucide-react'
 import Info from '../components/sidebar/info'
 import Layers from '../components/sidebar/layers'
-import React from 'react'
 import MapConfigurations from '@/components/sidebar/map-configurations'
 import GeologicalUnitSearch from '@/components/sidebar/geological-unit-search'
 
