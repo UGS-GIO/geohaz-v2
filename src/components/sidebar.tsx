@@ -65,7 +65,7 @@ export default function Sidebar({
         >
           <div className={`flex items-center ${!isCollapsed ? 'gap-2' : ''}`}>
             <img
-              src='/src/assets/logo_main.png'
+              src='/logo_main.png'
               alt='Utah Geological Survey Logo'
               className={`transition-all ${isCollapsed ? 'h-6 w-6' : 'h-8 w-8'
                 }`}
