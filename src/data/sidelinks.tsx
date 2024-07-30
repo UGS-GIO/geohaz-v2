@@ -33,7 +33,7 @@ export const sidelinks: SideLink[] = [
   },
   {
     title: 'Map Configurations',
-    label: '9',
+    label: '',
     icon: <Settings />,
     component: MapConfigurations, // Direct component reference
   },
