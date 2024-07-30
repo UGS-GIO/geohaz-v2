@@ -129,3 +129,22 @@
 .esri-view-width-xlarge .esri-popup__main-container {
   width: 40% !important; 
 }
+
+/* 
+  basic styling for the text inside of a feature widget, 
+  possibly consider using tailwind classes directly in the component, 
+  but i cannot find a way to do that yet
+*/
+.esri-feature {
+  letter-spacing: 0em;
+  line-height: 1.55rem;
+  font-feature-settings:
+    "liga" 1,
+    "calt" 0;
+  background: #fff;
+  padding: 1em;
+}
+
+h2.esri-widget__heading.esri-feature__title {
+    margin: 0;
+}
