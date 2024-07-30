@@ -261,16 +261,17 @@ function NavLinkIcon({
   icon,
   title,
   componentPath,
+  component,
   closeNav,
   setCurrentContent,
-  // isCollapsed,
+  isCollapsed,
   setIsCollapsed,
 }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav()
 
   const handleClick = () => {
-    setIsCollapsed && setIsCollapsed(true)
-    setCurrentContent({ title, icon, componentPath })
+    setIsCollapsed && setIsCollapsed(!isCollapsed)
+    setCurrentContent({ title, icon, componentPath, component })
     closeNav()
   }
 
