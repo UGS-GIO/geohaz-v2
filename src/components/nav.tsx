@@ -19,6 +19,7 @@ import useCheckActiveNav from '@/hooks/use-check-active-nav'
 import { SideLink } from '@/data/sidelinks'
 import { Suspense, useEffect } from 'react'
 import { useSidebar } from '@/hooks/use-sidebar'
+import { ArrowLeft } from 'lucide-react'
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean
@@ -109,11 +110,11 @@ export default function Nav({
     >
       <TooltipProvider delayDuration={0}>
         {currentContent ? (
-          <div className="p-4">
-            <Button onClick={handleBackToMenu} variant="outline" className="mb-4">
-              Back to Menu
+          <div className="pl-4">
+            <Button onClick={handleBackToMenu} variant="ghost" className="mb-4">
+              <ArrowLeft />&nbsp;Back to menu
             </Button>
-            <div>
+            <div className='overflow-y-auto max-h-[calc(100vh-10rem)]'>
               <Suspense fallback={<div>Loading...</div>}>
                 {DynamicComponent ? (
                   <DynamicComponent />

@@ -26,8 +26,11 @@ function Info() {
   };
 
   return (
-    <div className="relative h-full flex flex-col scroll-smooth">
-      <div className={`ml-2 overflow-y-auto flex-grow`} ref={contentRef}>
+    <div className="flex flex-col h-full">
+      <div
+        className="flex-grow ml-2"
+        ref={contentRef}
+      >
         <div className='mr-2' key={`map-details-accordion`}>
           <Accordion type="single" collapsible>
             <AccordionItem value="map-details-accordion-item">
@@ -184,28 +187,26 @@ function Info() {
           </DialogContent>
         </Dialog>
       </div>
-      <div>
-        <div className="flex flex-wrap justify-center mx-2 gap-4 md:gap-4 border-t border-secondary py-4">
-          <Button
-            onClick={() => setCurrentContent({
-              title: 'Layers',
-              label: '',
-              icon: <LayersIcon />,
-              componentPath: '/src/components/sidebar/layers',
-              component: Layers
-            })}
-            className="mb-2 md:mb-0"
-          >
-            Start Exploring
-          </Button>
-          <Button
-            className='text-foreground'
-            variant="link"
-            onClick={() => handleOpenModal('disclaimer')}
-          >
-            Open Data Disclaimer
-          </Button>
-        </div>
+      <div className="flex flex-wrap justify-center mx-2 gap-4 md:gap-4 border-t border-secondary py-4">
+        <Button
+          onClick={() => setCurrentContent({
+            title: 'Layers',
+            label: '',
+            icon: <LayersIcon />,
+            componentPath: '/src/components/sidebar/layers',
+            component: Layers
+          })}
+          className="mb-2 md:mb-0"
+        >
+          Start Exploring
+        </Button>
+        <Button
+          className='text-foreground'
+          variant="link"
+          onClick={() => handleOpenModal('disclaimer')}
+        >
+          Open Data Disclaimer
+        </Button>
       </div>
     </div >
   );
