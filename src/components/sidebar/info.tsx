@@ -36,7 +36,7 @@ function Info() {
               <AccordionHeader >
                 <AccordionTrigger onChange={() => setExpandedItem(expandedItem === 'map-details-accordion-item-1' ? null : 'map-details-accordion-item-1')}>
                   <div className="flex flex-col mx-2 items-start">
-                    <h3 className="font-medium text-left text-lg">Map Details</h3>
+                    <h3 className="font-large text-left text-lg">Map Details</h3>
 
                   </div>
                 </AccordionTrigger>
@@ -76,7 +76,7 @@ function Info() {
               <AccordionHeader onClick={() => setExpandedItem(expandedItem === 'data-sources-accordion-item-1' ? null : 'data-sources-accordion-item-1')}>
                 <AccordionTrigger >
                   <div className="flex flex-col mx-2 items-start">
-                    <h3 className="font-medium text-left text-lg">Data Sources</h3>
+                    <h3 className="font-large text-left text-lg">Data Sources</h3>
                   </div>
                 </AccordionTrigger>
               </AccordionHeader>
@@ -180,26 +180,28 @@ function Info() {
         </Dialog>
       </div>
 
-      <div className="flex-none flex justify-center space-x-4 p-4 border-t border-gray-200">
-        <Button
-          onClick={() => setCurrentContent({
-            title: 'Layers',
-            label: '',
-            icon: <LayersIcon />,
-            componentPath: '/src/components/sidebar/layers',
-            component: Layers
-          })}
-          className="mb-2 md:mb-0"
-        >
-          Start Exploring
-        </Button>
-        <Button
-          className='text-foreground'
-          variant="link"
-          onClick={() => handleOpenModal('disclaimer')}
-        >
-          Open Data Disclaimer
-        </Button>
+      <div className="flex-none flex justify-center space-x-4 m-4 border-t border-secondary">
+        <div className='p-4'>
+          <Button
+            onClick={() => setCurrentContent({
+              title: 'Layers',
+              label: '',
+              icon: <LayersIcon />,
+              componentPath: '/src/components/sidebar/layers',
+              component: Layers
+            })}
+            className="mb-2 md:mb-0"
+          >
+            Start Exploring
+          </Button>
+          <Button
+            className='text-foreground'
+            variant="link"
+            onClick={() => handleOpenModal('disclaimer')}
+          >
+            Open Data Disclaimer
+          </Button>
+        </div>
       </div>
     </div>
   );

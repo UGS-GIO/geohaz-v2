@@ -19,7 +19,7 @@ function MapConfigurations() {
 
       <div className="mb-4">
         <h4 className="text-md font-medium mb-2">Location Coordinate Format</h4>
-        <div className="border border-gray-300 rounded-md p-2">
+        <div className="border border-secondary rounded-md p-2">
           <RadioGroup
             value={coordFormat}
             onValueChange={handleCoordFormatChange}
