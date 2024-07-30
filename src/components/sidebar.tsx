@@ -67,15 +67,14 @@ export default function Sidebar({
             <img
               src='/logo_main.png'
               alt='Utah Geological Survey Logo'
-              className={`transition-all ${isCollapsed ? 'h-6 w-6' : 'h-8 w-8'
-                }`}
+              className={`transition-all ${isCollapsed ? 'h-6 w-6' : 'h-8 w-[1.75rem]'}`}
             />
             <div
               className={`flex flex-col justify-end truncate ${isCollapsed ? 'invisible w-0' : 'visible w-auto'
                 }`}
             >
               <span className='font-medium'>Geological Hazards Portal</span>
-              <span className='text-xs'>Utah Geological Survey</span>
+              <span className='text-sm'>Utah Geological Survey</span>
             </div>
           </div>
 

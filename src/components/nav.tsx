@@ -167,7 +167,7 @@ function NavLink({
       <div className='mr-2'>{icon}</div>
       {title}
       {label && (
-        <div className='ml-2 rounded-lg bg-primary px-1 text-[0.625rem] text-primary-foreground'>
+        <div className='ml-2 rounded-lg bg-primary px-1 text-[0.75rem] text-primary-foreground'>
           {label}
         </div>
       )}
