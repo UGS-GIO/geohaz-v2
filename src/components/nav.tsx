@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { IconChevronDown } from '@tabler/icons-react'
 import { Button, buttonVariants } from './custom/button'
 import {
   Collapsible,
@@ -19,7 +18,7 @@ import useCheckActiveNav from '@/hooks/use-check-active-nav'
 import { SideLink } from '@/data/sidelinks'
 import { Suspense, useEffect } from 'react'
 import { useSidebar } from '@/hooks/use-sidebar'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ChevronLeft } from 'lucide-react'
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean
@@ -110,7 +109,7 @@ export default function Nav({
     >
       <TooltipProvider delayDuration={0}>
         {currentContent ? (
-          <div className="pl-4">
+          <div className="p-4">
             <Button onClick={handleBackToMenu} variant="ghost" className="mb-4">
               <ArrowLeft />&nbsp;Back to menu
             </Button>
@@ -239,7 +238,7 @@ function NavLinkDropdown({
             'ml-auto transition-all group-data-[state="open"]:-rotate-180'
           )}
         >
-          <IconChevronDown stroke={1} />
+          <ChevronLeft />
         </span>
       </CollapsibleTrigger>
       <CollapsibleContent>
