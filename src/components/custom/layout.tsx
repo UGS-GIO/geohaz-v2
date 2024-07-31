@@ -32,7 +32,7 @@ const Layout = ({ className, fixed = false, ...props }: LayoutProps) => {
         ref={divRef}
         data-layout="layout"
         className={cn(
-          'flex flex-col h-screen', // Ensure Layout fills the screen and uses flex layout
+          "h-full overflow-auto flex flex-col",
           className
         )}
         {...props}
