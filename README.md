@@ -1,8 +1,12 @@
-# Shadcn Admin Dashboard
+# Geological Hazards Portal v2
 
-Admin Dashboard UI crafted with Shadcn and Vite. Built with responsiveness and accessibility in mind.
+<p align="center">
+  <img src="dist/logo_main.png" alt="Utah Geological Survey Logo" width="200"/>
+</p>
 
-![alt text](public/images/shadcn-admin.png)
+The UGS Geological Hazards Portal v2 crafted with @arcgis/core, Shadcn and Vite. Built with responsiveness and accessibility in mind.
+
+
 
 I've been creating dashboard UIs at work and for my personal projects. I always wanted to make a reusable collection of dashboard UI for future projects; and here it is now. While I've created a few custom components, some of the code is directly adapted from ShadcnUI examples.
 
@@ -14,8 +18,7 @@ I've been creating dashboard UIs at work and for my personal projects. I always 
 - Responsive
 - Accessible
 - Sidebar and header layouts
-- 10+ pages
-- Extra custom components
+- Dynamic Layerlist
 
 ## Tech Stack
 
@@ -29,37 +32,37 @@ I've been creating dashboard UIs at work and for my personal projects. I always 
 
 **Linting/Formatting:** [Eslint](https://eslint.org/) & [Prettier](https://prettier.io/)
 
-**Icons:** [Tabler Icons](https://tabler.io/icons)
+**Icons:** [Lucide React Icons](https://lucide.dev/icons/)
 
 ## Run Locally
 
 Clone the project
 
 ```bash
-  git clone https://github.com/satnaing/shadcn-admin.git
+  git clone https://github.com/UGS-GIO/geohaz-v2.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd shadcn-admin
+  cd geohaz-v2
 ```
 
 Install dependencies
 
 ```bash
-  pnpm install
+  npm install
 ```
 
 Start the server
 
 ```bash
-  pnpm run dev
+  npm run dev
 ```
 
 ## Author
 
-Crafted with 🤍 by [@satnaing](https://github.com/satnaing)
+Crafted with 🤍 by the [Utah Geological Survey](https://github.com/UGS-GIO/)
 
 ## License
 
