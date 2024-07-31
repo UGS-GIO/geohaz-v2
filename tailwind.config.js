@@ -17,6 +17,9 @@ module.exports = {
       },
     },
     extend: {
+      zIndex: {
+        tooltip: 'var(--calcite-tooltip-z-index, 9999)', // this z index will float on top of the map and map widgets (i.e. popup)
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

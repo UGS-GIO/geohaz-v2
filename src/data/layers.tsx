@@ -1,14 +1,5 @@
 import { LayerProps } from "@/lib/types/mapping-types";
-import {
-    landslideCompPopup,
-    landslideSourcePopup,
-    // epicentersPopup,
-    // miningepicentersPopup,
-    // poopTemplate,
-    studyAreasPopup,
-    qfaultsPopup
-} from "./popups";
-
+import CustomContent from "@arcgis/core/popup/content/CustomContent.js";
 import {
     // rendererRecent,
     // rendererMining,
@@ -19,7 +10,11 @@ import {
     // colorize,
     qFaultsRenderer
 } from "./renderers";
-
+import { createRoot } from "react-dom/client";
+import QFaultsPopup from "@/components/custom/popups/qfaults-popup";
+import StudyAreasPopup from "@/components/custom/popups/study-areas-popup";
+import LandslideSourcePopup from "@/components/custom/popups/landslide-source-popup";
+import LandslideCompPopup from "@/components/custom/popups/landslide-comp-popup";
 
 const landslideCompConfig: LayerProps = {
     type: 'feature',
@@ -32,7 +27,22 @@ const landslideCompConfig: LayerProps = {
         popupTemplate: {
             title: '<b>Legacy Landslide Compilation</b>',
             outFields: ['*'],
-            content: landslideCompPopup,
+            content: [
+                new CustomContent({
+                    outFields: ['*'],
+                    creator: (event) => {
+                        const div = document.createElement('div');
+                        if (event) {
+                            const { graphic } = event
+                            const root = createRoot(div);
+                            root.render(
+                                <LandslideCompPopup graphic={graphic} />
+                            );
+                        }
+                        return div;
+                    },
+                }),
+            ],
         },
         minScale: 300000,
     },
@@ -49,7 +59,22 @@ const landslideDepositConfig: LayerProps = {
         popupTemplate: {
             title: '<b>Landslides</b>',
             outFields: ['*'],
-            content: landslideSourcePopup,
+            content: [
+                new CustomContent({
+                    outFields: ['*'],
+                    creator: (event) => {
+                        const div = document.createElement('div');
+                        if (event) {
+                            const { graphic } = event
+                            const root = createRoot(div);
+                            root.render(
+                                <LandslideSourcePopup graphic={graphic} />
+                            );
+                        }
+                        return div;
+                    },
+                }),
+            ],
         },
     },
 };
@@ -221,7 +246,22 @@ const qFaultsGeoJsonConfig: LayerProps = {
         visible: true,
         popupTemplate: {
             title: '<b>Hazardous (Quaternary age) Faults</b>',
-            content: qfaultsPopup,
+            content: [
+                new CustomContent({
+                    outFields: ['*'],
+                    creator: (event) => {
+                        const div = document.createElement('div');
+                        if (event) {
+                            const { graphic } = event
+                            const root = createRoot(div);
+                            root.render(
+                                <QFaultsPopup graphic={graphic} />
+                            );
+                        }
+                        return div;
+                    },
+                }),
+            ],
         },
         renderer: qFaultsRenderer,
 
@@ -1007,7 +1047,22 @@ const hazardStudyConfig: LayerProps = {
         popupTemplate: {
             outFields: ['*'],
             title: '<b>Mapped Areas</b>',
-            content: studyAreasPopup,
+            content: [
+                new CustomContent({
+                    outFields: ['*'],
+                    creator: (event) => {
+                        const div = document.createElement('div');
+                        if (event) {
+                            const { graphic } = event;
+                            const root = createRoot(div);
+                            root.render(
+                                <StudyAreasPopup graphic={graphic} />
+                            );
+                        }
+                        return div;
+                    },
+                }),
+            ],
         },
     },
 };
