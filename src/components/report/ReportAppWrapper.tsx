@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense, lazy } from 'react';
+import { useEffect, useState, Suspense, lazy } from 'react';
 import { Aoi } from '@/components/report/types/types';
 
 const ReportApp = lazy(() => import('@/components/report/ReportApp'));

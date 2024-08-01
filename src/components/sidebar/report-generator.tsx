@@ -1,5 +1,5 @@
 import { CalciteBlock, CalciteButton, CalcitePanel } from "@esri/calcite-components-react";
-import React, { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { MapContext } from '@/context/map-provider';
 import Graphic from "@arcgis/core/Graphic";
 import SketchViewModel from "@arcgis/core/widgets/Sketch/SketchViewModel";

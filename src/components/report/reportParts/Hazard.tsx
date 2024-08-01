@@ -1,9 +1,10 @@
 import { FC, ReactNode } from 'react';
 import config from '../config';
-import { kebabCase } from 'lodash';
+// import { kebabCase } from 'lodash';
 import './Hazard.scss';
 import MapSurround from './MapSurround';
 import qffLegend from '../images/qff-legend.jpg';
+import { kebabCase } from '@/components/report/util/util'
 
 interface HazardProps {
   name: string;
