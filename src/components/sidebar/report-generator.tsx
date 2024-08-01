@@ -146,32 +146,30 @@ function GeologicalUnitSearch() {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Report Generator</h3>
-        <p>
-          The Report Generator is designed to provide a summary of information for small areas. If your area of interest is larger than that, you will see a notification prompting you to select a smaller area.
-        </p>
-      </div>
+    <div>
+      <div className="p-4 space-y-4">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Report Generator</h3>
+          <p>
+            The Report Generator is designed to provide a summary of information for small areas. If your area of interest is larger than that, you will see a notification prompting you to select a smaller area.
+          </p>
+        </div>
 
-      <div>
-        <h4 className="text-md font-medium mb-2">Generate a Report of the Current Map Extent:</h4>
-        <Button onClick={handleCurrentMapExtentButton} variant="secondary">
-          {buttonText('currentMapExtent', 'Current Map Extent')}
-        </Button>
-      </div>
-
-      <div>
-        <h4 className="text-md font-medium mb-2">Generate a Report of a Custom Area:</h4>
-        <Button onClick={handleCustomAreaButton} variant="secondary">
-          {buttonText('customArea', 'Draw Custom Area')}
-        </Button>
-      </div>
-
-      <div>
-        <Button onClick={handleResetButton} variant="destructive">
-          {buttonText('reset', 'Reset')}
-        </Button>
+        <div className="flex flex-wrap justify-start items-center space-y-2 sm:space-y-0 sm:space-x-12 sm:justify-start">
+          <div className="flex space-x-2">
+            <Button onClick={handleCurrentMapExtentButton} variant="default" className="mb-2 md:mb-0">
+              {buttonText('currentMapExtent', 'Current Map Extent')}
+            </Button>
+          </div>
+          <div className="flex-none space-x-2">
+            <Button onClick={handleCustomAreaButton} variant="default">
+              {buttonText('customArea', 'Draw Custom Area')}
+            </Button>
+            <Button onClick={handleResetButton} variant="secondary">
+              {buttonText('reset', 'Reset')}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
