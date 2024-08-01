@@ -46,7 +46,7 @@ const fetchWithRetry = async <T>(url: string, outputFormatter: (response: JsonRe
 
             // if (!response.ok) {
 
-            console.log('fetchWithRetry response', response.status);
+            // console.log('fetchWithRetry response', response.status);
             // }
 
             if (!response.ok) {

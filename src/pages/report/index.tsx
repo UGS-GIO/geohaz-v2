@@ -1,11 +1,12 @@
 import { Suspense, useEffect, useState } from 'react'
 import ReportApp from '@/components/report/ReportApp'
 import { Aoi } from '@/components/report/types/types';
+import { useTheme } from '@/context/theme-provider';
 
 export default function Report() {
 
     const [aoi, setAoi] = useState<Aoi | null>(null);
-    console.log('ReportAppWrapper');
+    const { setOverrideTheme } = useTheme()
 
     useEffect(() => {
         const aoiData = localStorage.getItem('aoi');
@@ -17,6 +18,13 @@ export default function Report() {
             setAoi(JSON.parse(aoiData));
         }
     }, []);
+
+    // always override the theme to light for this page
+    useEffect(() => {
+        setOverrideTheme('light');
+        // Cleanup function to remove the override when the component is unmounted
+        return () => setOverrideTheme(null);
+    }, [setOverrideTheme]);
 
     if (!aoi) {
         return <div>Loading...</div>;

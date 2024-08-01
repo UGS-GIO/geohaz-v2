@@ -19,8 +19,8 @@ const SummaryPage: FC<SummaryPageProps> = (props) => {
   let hazardUnits: HazardUnitProps[] = [];
   Object.values(props.groupToHazardMap).forEach(hazardCodes => {
     hazardCodes.forEach(code => {
-      console.log('code', code);
-      console.log('props.hazardToUnitMap[code]', props.hazardToUnitMap[code]);
+      // console.log('code', code);
+      // console.log('props.hazardToUnitMap[code]', props.hazardToUnitMap[code]);
       hazardUnits = hazardUnits.concat(props.hazardToUnitMap[code]);
     })
   });
