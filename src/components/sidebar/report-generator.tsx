@@ -1,13 +1,12 @@
 import { useContext, useState, useEffect, useRef } from "react";
 import { MapContext } from '@/context/map-provider';
-import Graphic from "@arcgis/core/Graphic";
 import SketchViewModel from "@arcgis/core/widgets/Sketch/SketchViewModel";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Layer from "@arcgis/core/layers/Layer";
 import { Button } from '@/components/custom/button';
 function addGraphic(
   event: __esri.SketchViewModelCreateEvent,
-  sketchVM: __esri.SketchViewModel | undefined,
+  // sketchVM: __esri.SketchViewModel | undefined,
   tempGraphicsLayer: __esri.GraphicsLayer | undefined
 ) {
   if (event.state === "complete" && event.graphic) {
@@ -124,7 +123,7 @@ function GeologicalUnitSearch() {
       }
     });
 
-    sketchVM.current.on('create', (event) => addGraphic(event, sketchVM.current, tempGraphicsLayer.current));
+    sketchVM.current.on('create', (event) => addGraphic(event, tempGraphicsLayer.current));
 
     sketchVM.current.create("polygon", {
       mode: "click"
