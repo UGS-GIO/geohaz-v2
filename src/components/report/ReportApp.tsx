@@ -209,7 +209,7 @@ function ReportApp(props: Aoi) {
   }, [props.polygon, registerProgressItem, setProgressItemAsComplete]);
 
   return (!pageError ? (
-    <div className='m-4'>
+    <div className='m-4 overflow-y-auto'>
       <ProgressContext.Provider value={{ registerProgressItem, setProgressItemAsComplete }}>
         <ProgressBar className="print--hide" tasks={tasks}>
           <div className="print-button">

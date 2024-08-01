@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense, lazy } from 'react';
-import { Aoi } from './types/types';
+import { Aoi } from '@/components/report/types/types';
 
-const ReportApp = lazy(() => import('./ReportApp'));
+const ReportApp = lazy(() => import('@/components/report/ReportApp'));
 
 const ReportAppWrapper = () => {
     const [aoi, setAoi] = useState<Aoi | null>(null);
@@ -10,7 +10,7 @@ const ReportAppWrapper = () => {
     useEffect(() => {
         const aoiData = localStorage.getItem('aoi');
         if (!aoiData) {
-            import('./testData.json').then((data) => {
+            import('@/components/report/testData.json').then((data) => {
                 setAoi(data.default);
             });
         } else {
