@@ -28,7 +28,6 @@ import { getHazardCodeFromUnitCode } from '../util/util';
 //     });
 // }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 export interface AreaOfInterest {
     rings: number[][][];
@@ -93,7 +92,8 @@ const retryPolicy = <T>(url: string, outputFormatter: (response: JsonResponse) =
 
 export const queryUnitsAsync = async (meta: string[], aoi: AreaOfInterest) => {
 
-    let [url, hazard] = meta
+    let [url] = meta
+    const [, hazard] = meta;
 
     if (!url.startsWith('https')) {
         url = `${config.urls.baseUrl}/${url}`;

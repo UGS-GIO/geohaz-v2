@@ -1,4 +1,7 @@
-import React, { createContext, useCallback, useState, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+import { useCallback, useState, useEffect } from 'react';
 import './App.scss';
 import './index.scss'
 import config from './config';
@@ -52,7 +55,7 @@ function ReportApp(props: Aoi) {
     Disclaimer: "",
     OtherGeologicHazardResources: ""
   });
-  const [otherDataMap, setOtherDataMap] = useState({});
+  // const [otherDataMap, setOtherDataMap] = useState({});
   // const [lidarFeatures, setLidarFeatures] = useState([]);
   // const [aerialFeatures, setAerialFeatures] = useState([]);
   const [tasks, setTasks] = useState<Record<string, boolean>>({});
@@ -138,7 +141,7 @@ function ReportApp(props: Aoi) {
       otherDataRows.forEach(row => {
         otherDataMapBuilder[row.Data] = row;
       });
-      setOtherDataMap(otherDataMapBuilder);
+      // setOtherDataMap(otherDataMapBuilder);
 
       // const reportTextMapBuilder: { [key: string]: any } = {};
       // reportTextRows.forEach(({ Section, Text }) => {
@@ -259,6 +262,6 @@ function ReportApp(props: Aoi) {
       </ProgressContext.Provider>
     </div>
   ) : <ErrorPage error={pageError} />);
-};
+}
 
 export default ReportApp;

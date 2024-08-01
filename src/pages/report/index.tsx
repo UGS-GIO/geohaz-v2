@@ -1,5 +1,4 @@
-import React, { Suspense, useEffect, useState } from 'react'
-import { Layout } from '@/components/custom/layout'
+import { Suspense, useEffect, useState } from 'react'
 import ReportApp from '@/components/report/ReportApp'
 import { Aoi } from '@/components/report/types/types';
 

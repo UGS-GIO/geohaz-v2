@@ -7,8 +7,8 @@ type ProgressContextType = {
 
 // Provide initial values for the context
 const initialContext: ProgressContextType = {
-    registerProgressItem: (itemId: string) => { },
-    setProgressItemAsComplete: (itemId: string) => { },
+    registerProgressItem: () => { },
+    setProgressItemAsComplete: () => { },
 };
 
 export const ProgressContext = createContext<ProgressContextType>(initialContext);

@@ -16,7 +16,7 @@ export interface VisualAssets {
 }
 
 // export type VisualAssetsMap = Record<string, VisualAssets>;
-export interface VisualAssetsMap { [key: string]: VisualAssets };
+export interface VisualAssetsMap { [key: string]: VisualAssets }
 
 export interface Aoi {
     description: string;

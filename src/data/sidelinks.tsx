@@ -1,9 +1,8 @@
-import { Database, FileText, Info as InfoIcon, Layers as LayersIcon, Route, Settings } from 'lucide-react'
+import { FileText, Info as InfoIcon, Layers as LayersIcon, Route, Settings } from 'lucide-react'
 import Info from '../components/sidebar/info'
 import Layers from '../components/sidebar/layers'
 import MapConfigurations from '@/components/sidebar/map-configurations'
 import ReportGenerator from '@/components/sidebar/report-generator'
-import React from 'react'
 
 export interface NavLink {
   title: string
