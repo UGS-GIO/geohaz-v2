@@ -1,6 +1,6 @@
 import { Button } from '@/components/custom/button';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
-import { InfoIcon } from 'lucide-react';
+import { ExternalLink, InfoIcon } from 'lucide-react';
 
 const QFaultsPopup = ({ graphic }: { graphic: __esri.Graphic }) => {
     return (
@@ -82,7 +82,7 @@ const QFaultsPopup = ({ graphic }: { graphic: __esri.Graphic }) => {
                 <div>
                     <b>Detailed Report: </b>
                     <a href={graphic.attributes.usgs_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                        Opens in new tab
+                        Opens in new tab <ExternalLink size={16} className="inline-block ml-1" />
                     </a>
                 </div>
             )}
