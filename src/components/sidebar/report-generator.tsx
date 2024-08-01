@@ -4,10 +4,12 @@ import SketchViewModel from "@arcgis/core/widgets/Sketch/SketchViewModel";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Layer from "@arcgis/core/layers/Layer";
 import { Button } from '@/components/custom/button';
+
 function addGraphic(
   event: __esri.SketchViewModelCreateEvent,
   // sketchVM: __esri.SketchViewModel | undefined,
-  tempGraphicsLayer: __esri.GraphicsLayer | undefined
+  tempGraphicsLayer: __esri.GraphicsLayer | undefined,
+  setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>
 ) {
   if (event.state === "complete" && event.graphic) {
     console.log("addGraphic: Drawing complete");
@@ -24,9 +26,11 @@ function addGraphic(
 
       localStorage.setItem("aoi", JSON.stringify(params));
       window.open("./report");
+      setActiveButton(undefined);
     } else {
       console.log("Area of interest is too large, try again");
       alert("Area of interest is too large, try a smaller area.");
+      setActiveButton(undefined);
     }
   } else if (event.state === "start" && event.graphic) {
     console.log("addGraphic: Drawing started");
@@ -102,6 +106,7 @@ function GeologicalUnitSearch() {
     } else {
       console.log("Area of interest is too large, try again");
       alert("Area of interest is too large, try a smaller extent.");
+      setActiveButton(undefined);
     }
   };
 
@@ -123,7 +128,7 @@ function GeologicalUnitSearch() {
       }
     });
 
-    sketchVM.current.on('create', (event) => addGraphic(event, tempGraphicsLayer.current));
+    sketchVM.current.on('create', (event) => addGraphic(event, tempGraphicsLayer.current, setActiveButton));
 
     sketchVM.current.create("polygon", {
       mode: "click"
