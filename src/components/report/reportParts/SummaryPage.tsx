@@ -43,7 +43,7 @@ const SummaryPage: FC<SummaryPageProps> = (props) => {
         <tbody>
           {hazardUnits.map((unit, index) =>
             <tr key={index}>
-              <td><a href={`#${kebabCase(unit.HazardName || '')}`}>{unit.HazardName}</a></td>
+              <td><a className='text-blue-600 underline' href={`#${kebabCase(unit.HazardName || '')}`}>{unit.HazardName}</a></td>
               <td>{unit.UnitName}</td>
             </tr>
           )}

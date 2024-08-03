@@ -6,6 +6,7 @@ import { ExternalLink, Layers as LayersIcon } from 'lucide-react';
 import { Button } from '../custom/button';
 import { useSidebar } from '@/hooks/use-sidebar';
 import Layers from '@/components/sidebar/layers';
+import { Link } from 'react-router-dom';
 
 function Info() {
   type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | ''
@@ -56,7 +57,7 @@ function Info() {
                     Related Information
                   </p>
                   <p className="mb-2">
-                    For more information, see <a href="https://geology.utah.gov/hazards/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">https://geology.utah.gov/hazards/</a> or contact the UGS.
+                    For more information, see <Link to="https://geology.utah.gov/hazards/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">https://geology.utah.gov/hazards/</Link> or contact the UGS.
                   </p>
                 </div>
               </AccordionContent>
