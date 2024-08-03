@@ -31,7 +31,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
     const cleanDescription = DOMPurify.sanitize(description, { USE_PROFILES: { html: true } });
 
     return (
-        <div className="flex flex-col justify-between items-center w-full space-y-4">
+        <div className="flex flex-col justify-between items-center w-full space-y-4 mb-2">
             <div className="flex flex-col sm:flex-row justify-around items-center w-full space-y-4 sm:space-y-0">
                 <div className="flex flex-wrap justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
                     <Dialog>
@@ -58,7 +58,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                     </Button>
                 </div>
             </div>
-            <div className="flex flex-row items-center justify-around space-x-2 w-4/5 mx-auto">
+            <div className="flex flex-row justify-around space-x-2 w-4/5 mx-auto">
                 <Label htmlFor={`${title}-opacity`}>
                     Opacity
                 </Label>
