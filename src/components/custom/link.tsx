@@ -1,17 +1,14 @@
-import { Link as RouterLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 type LinkProps = {
     to: string;
     children: React.ReactNode;
 };
 
-const Link = ({ children, ...props }: LinkProps) => {
-
+export const BlueLink = ({ children, ...props }: LinkProps) => {
     return (
-        <RouterLink className='p-0 text-primary hover:underline' target="_blank" rel="noopener noreferrer" {...props}>
-            {children}
-        </RouterLink>
+        <Link {...props}>
+            <button className="text-blue-600 underline">{children}</button>
+        </Link>
     );
 };
-
-export { Link };
