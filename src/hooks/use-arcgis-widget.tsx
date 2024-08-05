@@ -1,4 +1,4 @@
-/* eslint-disable  no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useRef, useContext, useCallback } from "react";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
