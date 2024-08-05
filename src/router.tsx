@@ -29,6 +29,13 @@ const router = createBrowserRouter([
       // },
     ],
   },
+  {
+    path: '/report',
+    lazy: async () => ({
+      Component: (await import('./pages/report')).default
+
+    })
+  },
 
   // Error routes
   { path: '/500', Component: GeneralError },

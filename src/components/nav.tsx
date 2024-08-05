@@ -19,6 +19,7 @@ import { SideLink } from '@/data/sidelinks'
 import { Suspense, useEffect } from 'react'
 import { useSidebar } from '@/hooks/use-sidebar'
 import { ArrowLeft, ChevronLeft } from 'lucide-react'
+import { LoadingSpinner } from './custom/loading-spinner'
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean
@@ -113,15 +114,17 @@ export default function Nav({
             <Button onClick={handleBackToMenu} variant="ghost" className="mb-4">
               <ArrowLeft />&nbsp;Back to menu
             </Button>
-            <div className='overflow-y-auto max-h-[calc(100vh-10rem)]'>
-              <Suspense fallback={<div>Loading...</div>}>
-                {DynamicComponent ? (
+            <Suspense fallback={<div><LoadingSpinner /></div>}>
+              {DynamicComponent ? (
+                <div className='overflow-y-auto max-h-[calc(100vh-10rem)]'>
                   <DynamicComponent />
-                ) : (
-                  <div>No component to load</div>
-                )}
-              </Suspense>
-            </div>
+                </div>
+              ) : (
+                <div className='w-full flex justify-center mb-4'>
+                  <LoadingSpinner />
+                </div>
+              )}
+            </Suspense>
           </div>
         ) : (
           <nav className='grid gap-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>

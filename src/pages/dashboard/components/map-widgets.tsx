@@ -59,6 +59,8 @@ export type WidgetConfig = CoordinateFeatureConfig | BasemapExpandConfig | Legen
 const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
     const qFaultsUrl = 'https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json';
+    // const qFaultsUrl = 'https://utahdnr.maps.arcgis.com/apps/mapviewer/index.html?webmap=ba6c07a7de014d3b9d077c600c38e9c5'; alternate to test with report generator
+
 
     const coordinateFeatureConfig: CoordinateFeatureConfig = {
         id: 'coordinate-feature-widget',
