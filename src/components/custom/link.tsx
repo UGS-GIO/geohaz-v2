@@ -6,8 +6,12 @@ type LinkProps = {
 };
 
 const Link = ({ children, ...props }: LinkProps) => {
+    const { to } = props;
+
+    const handleOnClick = () => window.open(`${to}`, '_blank')
+
     return (
-        <Button className='p-0 text-primary' variant={'link'} {...props}>
+        <Button className='p-0 text-primary' variant={'link'} onClick={handleOnClick} {...props}>
             {children}
         </Button>
     );
