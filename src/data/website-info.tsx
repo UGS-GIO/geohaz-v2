@@ -1,8 +1,5 @@
 const references = (
     <div>
-        <p className="mb-2">
-            The Utah Geological Survey has published numerous geologic hazard maps and reports for parts of Utah. These publications are available through the UGS website.
-        </p>
         <ul className="list-disc ml-5 mb-2">
             <li>
                 Beukelman, G.S., Erickson, B.E., and Giraud, R.E., 2015, Landslide inventory map of the Sixmile Canyon and North Hollow area, Sanpete County, Utah: Utah Geological Survey Map 273DM, scale 1:24,000,&nbsp;
@@ -106,29 +103,19 @@ const acknowledgements = (
 const dataDisclaimer = (
     <>
         <p className="mb-2">
-            Although this product represents the work of professional scientists, the Utah Department of Natural Resources, Utah Geological Survey, makes no warranty, expressed or implied, regarding its suitability for a particular use.
-            <br />
-            The Utah Department of Natural Resources, Utah Geological Survey, shall not be liable under any circumstances for any direct, indirect, special, incidental, or consequential damages with respect to claims by users of this product.
-            <br />
-            The Utah Geological Survey does not guarantee accuracy or completeness of the data.
+            Although this product represents the work of professional scientists, the Utah Department of Natural Resources, Utah Geological Survey, makes no warranty, expressed or implied, regarding its suitability for a particular use.      The Utah Department of Natural Resources, Utah Geological Survey, shall not be liable under any circumstances for any direct, indirect, special, incidental, or consequential damages with respect to claims by users of this product. The Utah Geological Survey does not guarantee accuracy or completeness of the data.
         </p>
         <p className="mb-2">
             The Utah Geologic Hazards Database contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources for the area of interest shown on the interactive map and can be used to identify mapped geologic hazards in an area, understand what the hazards are, and some potential ways to mitigate them.
         </p>
         <p className="mb-2">
-            The database is periodically updated to incorporate the results of new mapping and/or updated mapping due to updated data and/or methodology;
-            <br />
-            however, more-detailed fault traces and paleoseismic information may be available in recently published geologic maps and reports, so the database should not be considered exhaustive.
+            The database is periodically updated to incorporate the results of new mapping and/or updated mapping due to updated data and/or methodology; however, more-detailed fault traces and paleoseismic information may be available in recently published geologic maps and reports, so the database should not be considered exhaustive.
         </p>
         <p className="mb-2">
             Locations of mapped geologic hazards should always be considered approximate.
         </p>
         <p className="mb-2">
-            The locational accuracy of hazards on the maps varies, and spatial error can be substantial when viewing structures at high zoom levels that were originally mapped at small scales.
-            <br />
-            Therefore, the locations of hazards on the map should be considered approximate.
-            <br />
-            Depending on the ultimate needs of the user, a site-specific investigation by a qualified Utah-licensed Professional Geologist may be required to accurately characterize the hazards at a particular site.
+            The locational accuracy of hazards on the maps varies, and spatial error can be substantial when viewing structures at high zoom levels that were originally mapped at small scales. Therefore, the locations of hazards on the map should be considered approximate. Depending on the ultimate needs of the user, a site-specific investigation by a qualified Utah-licensed Professional Geologist may be required to accurately characterize the hazards at a particular site.
         </p>
     </>
 );
