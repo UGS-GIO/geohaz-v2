@@ -1,4 +1,4 @@
-import { Button } from "@/components/custom/button";
+import { Link as RouterLink } from "react-router-dom";
 
 type LinkProps = {
     to: string;
@@ -6,14 +6,11 @@ type LinkProps = {
 };
 
 const Link = ({ children, ...props }: LinkProps) => {
-    const { to } = props;
-
-    const handleOnClick = () => window.open(`${to}`, '_blank')
 
     return (
-        <Button className='p-0 text-primary' variant={'link'} onClick={handleOnClick} {...props}>
+        <RouterLink className='p-0 text-primary hover:underline' target="_blank" rel="noopener noreferrer" {...props}>
             {children}
-        </Button>
+        </RouterLink>
     );
 };
 

@@ -154,8 +154,7 @@ const dataSources = (
             The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources. The database is periodically updated to incorporate the results of new mapping. Detailed geologic hazard mapping is available for limited areas and for specific hazards in Utah and additional mapping is ongoing.
         </p>
         <p className="mb-2">
-            The data exists as an attributed geographic information system (GIS) feature class available for download:
-            &nbsp;<Link to="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip">GIS Data</Link>
+            The data exists as an attributed geographic information system (GIS) feature class available for download: <Link to="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip">GIS Data</Link>
         </p>
         <p className="mb-2"><Link to="https://ugspub.nr.utah.gov/publications/circular/c-122.pdf">UGS Circular 122</Link> Additionally, users can access full data reports for individual hazards by clicking on the report link in the pop-up window. These reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. These investigations provide valuable information on the site geologic conditions that may affect or be affected by development, as well as the type and relative susceptibility of geologic hazards at a site and recommend solutions to mitigate the effects and costs of the hazards, both at the time of construction and over the life of the development. See your local city or county building department for details on these investigations and &nbsp; for more information.
         </p>
