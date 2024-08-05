@@ -1,89 +1,91 @@
+import { Link } from "@/components/custom/link";
+
 const references = (
     <div>
-        <ul className="list-disc ml-5 mb-2">
+        <ul className="list-disc ml-5 mb-2 space-y-4">
             <li>
                 Beukelman, G.S., Erickson, B.E., and Giraud, R.E., 2015, Landslide inventory map of the Sixmile Canyon and North Hollow area, Sanpete County, Utah: Utah Geological Survey Map 273DM, scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/M-273DM" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/M-273DM">
                     M-273DM
-                </a>
+                </Link>.
             </li>
             <li>
                 Castleton, J.J., Elliott, A.H., and McDonald, G.N., 2011, Geologic hazards of the Magna quadrangle, Salt Lake County, Utah: Utah Geological Survey Special Study 137, 73 p., 10 plates, scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/SS-137" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-137">
                     SS-137
-                </a>
+                </Link>.
             </li>
             <li>
                 Castleton, J.J., Elliott, A.H., and McDonald, G.N., 2014, Geologic hazards of the Copperton quadrangle, Salt Lake County, Utah: Utah Geological Survey Special Study 152, 24 p., 10 plates, scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/SS-152" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-152">
                     SS-152
-                </a>
+                </Link>.
             </li>
             <li>
                 Castleton, J.J., Erickson, B.A., and Kleber, E.J., 2018, Radon hazard potential of Davis County, Utah: Utah Geological Survey Open-file Report 655, 1 plate, scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/OFR-655" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/OFR-655">
                     OFR-655
-                </a>
+                </Link>.
             </li>
             <li>
                 Castleton, J.J., Erickson, B.A., and Kleber, E.J., 2018, Geologic hazards of the Moab quadrangle, Grand County, Utah: Utah Geological Survey Special Study 162, 33 p., 13 plates, scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/SS-162" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-162">
                     SS-162
-                </a>
+                </Link>.
             </li>
             <li>
                 Castleton, J.J., Erickson, B.A., McDonald, G.N., and Beukelman, G.S., 2018, Geologic Hazards of the Tickville Spring quadrangle, Salt Lake and Utah Counties, Utah: Utah Geological Survey Special Study 163, 25 p., 10 pl., scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/SS-163" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-163">
                     SS-163
-                </a>
+                </Link>.
             </li>
             <li>
                 Giraud, R.E., and McDonald, G.N., 2017, Landslide inventory map of the Ferron Creek area, Sanpete and Emery Counties, Utah: Utah Geological Survey Special Study 161, scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/SS-161" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-161">
                     SS-161
-                </a>
+                </Link>.
             </li>
             <li>
                 Knudsen, T.R., and Lund, W.R., 2014, Geologic hazards of the State Route 9 Corridor, La Verkin City to Town of Springdale, Washington County, Utah: Utah Geological Survey Special Study 148, 13 p., 9 plates, GIS data,&nbsp;
-                <a href="https://doi.org/10.34191/SS-148" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-148">
                     SS-148
-                </a>
+                </Link>.
             </li>
             <li>
                 Lund, W.R., Knudsen, T.R., Shaw, L.M., 2008, Geologic hazards and adverse construction conditions, St. George metropolitan area, Washington County, Utah, Utah Geological Survey Special Study 127, 105 p,&nbsp;
-                <a href="https://doi.org/10.34191/SS-127" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-127">
                     SS-127
-                </a>
+                </Link>.
             </li>
             <li>
                 Lund, W.R., Knudsen, T.R., and Sharrow, D.L., 2010, Geologic hazards of the Zion National Park geologic-hazard study area, Washington and Kane Counties, Utah: Utah Geological Survey Special Study 133, 95 p., 9 plates, GIS data,&nbsp;
-                <a href="https://doi.org/10.34191/SS-133" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-133">
                     SS-133
-                </a>
+                </Link>.
             </li>
             <li>
                 McDonald, G.N., and Giraud, R.E., 2011, Landslide inventory map of Twelvemile Canyon, Sanpete County, Utah: Utah Geological Survey Map 247DM, scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/M-247DM" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/M-247DM">
                     M-247DM
-                </a>
+                </Link>.
             </li>
             <li>
                 McDonald, G.N., and Giraud, R.E., 2014, Landslide inventory map of the 2012 Seeley fire area, Carbon and Emery Counties, Utah: Utah Geological Survey Special Study 153, scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/SS-153" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-153">
                     SS-153
-                </a>
+                </Link>.
             </li>
             <li>
                 McDonald, G.N., and Giraud, R.E., 2015, Landslide inventory map for the Upper Muddy Creek area, Sanpete and Sevier Counties, Utah: Utah Geological Survey Special Study 155, scale 1:24,000,&nbsp;
-                <a href="https://doi.org/10.34191/SS-155" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/SS-155">
                     SS-155
-                </a>
+                </Link>.
             </li>
             <li>
                 McDonald, G.N., Kleber, E.J., Hiscock, A.I., Bennett, S.E.K., Bowman, S.D., 2020, Fault trace mapping and surface-fault-rupture special study zone, Utah and Idaho: Utah Geological Survey Report of Investigation 280, 23 p.,&nbsp;
-                <a href="https://doi.org/10.34191/RI-280" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                <Link to="https://doi.org/10.34191/RI-280">
                     RI-280
-                </a>
+                </Link>.
             </li>
         </ul>
     </div>
@@ -128,14 +130,14 @@ const mapDetails = (
         <p className="mb-2">
             Areas with comprehensive geologic hazard map data are shown with red polygons. Statewide data for hazardous (Quaternary age) faults, and a legacy compilation of landslides are also available. Limited, comprehensive geologic hazard map data are available for the remaining hazards listed in the Legend. Hazard map layers can be enabled in the Legend by clicking on the eye symbol. Map layer units describing the hazard relative susceptibility are also shown in the Legend. The absence of data does not imply that no geologic hazard or hazards exist. Additional geologic hazard mapping is on-going and will be added to the database as it is finalized.
         </p>
-        <p className="mb-2">
+        <p className="mb-2 font-bold">
             Database Updated May 2020
         </p>
         <p className="mb-2 font-bold">
             Related Information
         </p>
         <p className="mb-2">
-            For more information, see <a href="https://geology.utah.gov/hazards/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">https://geology.utah.gov/hazards/</a> or contact the UGS.
+            For more information, see <Link to="https://geology.utah.gov/hazards/">https://geology.utah.gov/hazards/</Link> or contact the UGS.
         </p>
     </div>
 )
@@ -153,10 +155,9 @@ const dataSources = (
         </p>
         <p className="mb-2">
             The data exists as an attributed geographic information system (GIS) feature class available for download:
-            &nbsp;<a href="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip" className="text-blue-600 underline">GIS Data</a>
+            &nbsp;<Link to="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip">GIS Data</Link>
         </p>
-        <p className="mb-2">
-            Additionally, users can access full data reports for individual hazards by clicking on the report link in the pop-up window. These reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. These investigations provide valuable information on the site geologic conditions that may affect or be affected by development, as well as the type and relative susceptibility of geologic hazards at a site and recommend solutions to mitigate the effects and costs of the hazards, both at the time of construction and over the life of the development. See your local city or county building department for details on these investigations and &nbsp;<a href='https://ugspub.nr.utah.gov/publications/circular/c-122.pdf' className="text-blue-600 underline">UGS Circular 122</a> for more information.
+        <p className="mb-2"><Link to="https://ugspub.nr.utah.gov/publications/circular/c-122.pdf">UGS Circular 122</Link> Additionally, users can access full data reports for individual hazards by clicking on the report link in the pop-up window. These reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. These investigations provide valuable information on the site geologic conditions that may affect or be affected by development, as well as the type and relative susceptibility of geologic hazards at a site and recommend solutions to mitigate the effects and costs of the hazards, both at the time of construction and over the life of the development. See your local city or county building department for details on these investigations and &nbsp; for more information.
         </p>
     </div>
 )
