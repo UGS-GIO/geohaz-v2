@@ -1,5 +1,7 @@
 {
   "chooseTimeZone": "选择时区。",
+  "offsetPlaceholder": "按城市、地区或偏移搜索",
+  "namePlaceholder": "按时区搜索",
   "timeZoneLabel": "({offset}) {cities}",
   "Africa/Abidjan": "阿比让",
   "Africa/Accra": "阿克拉",
@@ -205,7 +207,7 @@
   "America/Yellowknife": "耶洛奈夫",
   "Antarctica/Casey": "凯西站",
   "Antarctica/Davis": "戴维斯站",
-  "Antarctica/DumontDUrville": "迪蒙·迪尔维尔站",
+  "Antarctica/DumontDUrville": "迪蒙迪维尔站",
   "Antarctica/Macquarie": "麦夸里岛",
   "Antarctica/Mawson": "莫森站",
   "Antarctica/McMurdo": "麦克默多站",

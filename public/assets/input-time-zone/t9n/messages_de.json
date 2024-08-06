@@ -1,5 +1,7 @@
 {
   "chooseTimeZone": "Zeitzone auswählen.",
+  "offsetPlaceholder": "Nach Ort, Region oder Versatz suchen",
+  "namePlaceholder": "Nach Zeitzone suchen",
   "timeZoneLabel": "({offset}) {cities}",
   "Africa/Abidjan": "Abidjan",
   "Africa/Accra": "Accra",
@@ -68,7 +70,7 @@
   "America/Aruba": "Aruba",
   "America/Asuncion": "Asunción",
   "America/Bahia": "Bahia",
-  "America/Bahia_Banderas": "Bahía de Banderas",
+  "America/Bahia_Banderas": "Bahia de Banderas",
   "America/Barbados": "Barbados",
   "America/Belem": "Belém",
   "America/Belize": "Belize",
