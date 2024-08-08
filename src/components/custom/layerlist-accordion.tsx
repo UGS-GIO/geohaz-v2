@@ -1,13 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
-// import useLegendPreview from '../../hooks/useLegendPreview';
-// import { RendererProps } from '../../config/types/mappingTypes';
+import useLegendPreview from '@/hooks/use-legend-preview';
 import LayerControls from '@/components/custom/layer-controls';
 import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapContext } from '@/context/map-provider';
 import { findLayerById } from '@/lib/mapping-utils';
-// import { RendererProps } from '../../config/types/mappingTypes';
-// import useLegendPreview from '../../hooks/useLegendPreview';
+import { RendererProps } from '@/lib/types/mapping-types';
+import { ChevronDownIcon } from 'lucide-react';
 
 interface LayerAccordionProps {
     layer: __esri.ListItem,
@@ -16,17 +15,17 @@ interface LayerAccordionProps {
 
 const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer.layer;
-    const { view, activeLayers, layerDescriptions /*, getRenderer*/ } = useContext(MapContext);
+    const { view, activeLayers, layerDescriptions, getRenderer } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
     const [layerVisibility, setLayerVisibility] = useState<boolean | undefined>();
     // const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
     const [layerOpacity, setLayerOpacity] = useState(1);
-    // const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
+    const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
 
     // this gets around a typescript error because getRenderer can be undefined
-    // const defaultGetRenderer: (id: string, url?: string | undefined) => Promise<RendererProps | undefined> = () => Promise.resolve(undefined);
+    const defaultGetRenderer: (id: string, url?: string | undefined) => Promise<RendererProps | undefined> = () => Promise.resolve(undefined);
 
-    // const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer || defaultGetRenderer);
+    const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer || defaultGetRenderer);
     useEffect(() => {
         if (activeLayers && layerId) {
             const foundLayer = findLayerById(activeLayers, layerId);
@@ -97,11 +96,13 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
                             handleZoomToLayer={handleZoomToLayer}
                         />
                         {/* legend content */}
-                        {/* <Accordion type='single' collapsible>
+                        <Accordion type='single' collapsible className='mx-4'>
                             <AccordionItem value="item-2">
-                                <AccordionTrigger>Legend</AccordionTrigger>
+                                <AccordionTrigger>
+                                    Legend <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform duration-200 mr-2" />
+                                </AccordionTrigger>
                                 <AccordionContent>
-                                    {preview && preview.map((preview, index) => (
+                                    {preview.preview && preview.preview.map((preview, index) => (
                                         <div key={index} className='flex items-end space-x-4 py-1'>
                                             <span dangerouslySetInnerHTML={{ __html: preview.html.outerHTML || '' }} />
                                             <span>{preview.label}</span>
@@ -111,7 +112,7 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
 
                             </AccordionItem>
 
-                        </Accordion> */}
+                        </Accordion>
                     </AccordionContent>
                 </AccordionItem>
 

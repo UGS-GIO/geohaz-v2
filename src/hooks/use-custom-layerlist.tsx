@@ -44,7 +44,7 @@ const useCustomLayerList = () => {
             const list = activeLayers.map((layer, index) => {
                 if (layer.layer.type === 'group') {
                     return (
-                        <div className='mr-2 border rounded my-2' key={`accordion-${index}`}>
+                        <div className='mr-2 border border-secondary rounded my-2' key={`accordion-${index}`}>
                             <Accordion type="multiple" >
                                 <AccordionItem value={`item-${index}`}>
                                     <AccordionHeader>
@@ -72,7 +72,7 @@ const useCustomLayerList = () => {
                 }
 
                 return (
-                    <div className='mr-2 my-2 border rounded' key={`layer-${layer.layer.id}`}>
+                    <div className='mr-2 my-2 border border-secondary rounded' key={`layer-${layer.layer.id}`}>
                         <LayerAccordion layer={layer} isTopLevel={true} />
                     </div>
                 )
