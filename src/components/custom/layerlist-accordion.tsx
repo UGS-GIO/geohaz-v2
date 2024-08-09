@@ -5,50 +5,43 @@ import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionT
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapContext } from '@/context/map-provider';
 import { findLayerById } from '@/lib/mapping-utils';
-import { RendererProps } from '@/lib/types/mapping-types';
+// import { RendererProps } from '@/lib/types/mapping-types';
 import { ChevronDownIcon } from 'lucide-react';
 
 interface LayerAccordionProps {
-    layer: __esri.ListItem,
-    isTopLevel: boolean
+    layer: __esri.ListItem;
+    isTopLevel: boolean;
 }
 
 const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer.layer;
     const { view, activeLayers, layerDescriptions, getRenderer } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
-    const [layerVisibility, setLayerVisibility] = useState<boolean | undefined>();
-    // const [sublayerVisibility, setSublayerVisibility] = useState<Record<string, boolean>>({});
-    const [layerOpacity, setLayerOpacity] = useState(1);
+    const [layerVisibility, setLayerVisibility] = useState<boolean>(layer.layer.visible);
+    const [layerOpacity, setLayerOpacity] = useState<number>(layer.layer.opacity || 1);
     const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer;
 
-    // this gets around a typescript error because getRenderer can be undefined
-    const defaultGetRenderer: (id: string, url?: string | undefined) => Promise<RendererProps | undefined> = () => Promise.resolve(undefined);
+    // Fallback for getRenderer if it can be undefined
+    const defaultGetRenderer = async () => undefined;
 
-    const preview = useLegendPreview(layer.layer.id, typeNarrowedLayer.url, getRenderer || defaultGetRenderer);
+    const { preview, isLoading, error } = useLegendPreview(layerId, typeNarrowedLayer.url, getRenderer || defaultGetRenderer);
+
     useEffect(() => {
         if (activeLayers && layerId) {
             const foundLayer = findLayerById(activeLayers, layerId);
-            setCurrentLayer(foundLayer);
-            setLayerVisibility(foundLayer?.visible);
-            setLayerOpacity(foundLayer?.layer.opacity || 1);
-
-            // // Initialize sublayerVisibility
-            // if (isMapImageLayer(foundLayer.layer) && foundLayer.layer.sublayers) {
-            //     const initialSublayerVisibility: Record<string, boolean> = {};
-            //     foundLayer.layer.sublayers.forEach(sublayer => {
-            //         initialSublayerVisibility[String(sublayer.id)] = sublayer.visible;
-            //     });
-            //     setSublayerVisibility(initialSublayerVisibility);
-            // }
+            if (foundLayer) {
+                setCurrentLayer(foundLayer);
+                setLayerVisibility(foundLayer.visible);
+                setLayerOpacity(foundLayer.layer.opacity || 1);
+            }
         }
     }, [activeLayers, layerId]);
 
-    const updateLayer = (updateFn: (layer: __esri.Layer | __esri.Sublayer) => void) => {
+    const updateLayer = (updateFn: (layer: __esri.Layer) => void) => {
         if (currentLayer) {
             updateFn(currentLayer.layer);
-            // Ensure the state is in sync with the actual layer visibility
             setLayerVisibility(currentLayer.layer.visible);
+            setLayerOpacity(currentLayer.layer.opacity || 1);
         }
     };
 
@@ -58,20 +51,13 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
 
     const handleOpacityChange = (value: number) => updateLayer(layer => {
         layer.opacity = value / 100;
-        setLayerOpacity(layer.opacity);
     });
-
-    // function isMapImageLayer(layer: __esri.Layer): layer is __esri.MapImageLayer {
-    //     return layer.type === "map-image";
-    // }
 
     const handleZoomToLayer = () => {
         if (currentLayer && currentLayer.layer.fullExtent) {
-            console.log('zoom to layer', currentLayer.layer);
             view?.goTo(currentLayer.layer.fullExtent);
-
         }
-    }
+    };
 
     return (
         <div key={layerId}>
@@ -79,7 +65,7 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
                 <AccordionItem value="item-1">
                     <AccordionHeader>
                         <Checkbox
-                            checked={layerVisibility || false}
+                            checked={layerVisibility}
                             onClick={handleVisibilityToggle}
                             className="mx-2"
                         />
@@ -95,30 +81,30 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
                             description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
                             handleZoomToLayer={handleZoomToLayer}
                         />
-                        {/* legend content */}
                         <Accordion type='single' collapsible className='mx-4'>
                             <AccordionItem value="item-2">
                                 <AccordionTrigger>
                                     Legend <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform duration-200 mr-2" />
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    {preview.preview && preview.preview.map((preview, index) => (
-                                        <div key={index} className='flex items-end space-x-4 py-1'>
-                                            <span dangerouslySetInnerHTML={{ __html: preview.html.outerHTML || '' }} />
-                                            <span>{preview.label}</span>
-                                        </div>
-                                    ))}
+                                    <>
+                                        {isLoading && <div>Loading legend...</div>}
+                                        {error && <div>Error loading legend: {error.message}</div>}
+                                        {preview?.map((previewItem, index) => (
+                                            <div key={index} className='flex items-end space-x-4 py-1'>
+                                                <span dangerouslySetInnerHTML={{ __html: previewItem.html.outerHTML || '' }} />
+                                                <span>{previewItem.label}</span>
+                                            </div>
+                                        ))}
+                                    </>
                                 </AccordionContent>
-
                             </AccordionItem>
-
                         </Accordion>
                     </AccordionContent>
                 </AccordionItem>
-
             </Accordion>
         </div>
-    )
-}
+    );
+};
 
 export { LayerAccordion };

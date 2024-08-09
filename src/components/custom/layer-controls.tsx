@@ -58,7 +58,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                     </Button>
                 </div>
             </div>
-            <div className="flex flex-row justify-around space-x-2 w-4/5 mx-auto">
+            <div className="flex flex-row items-center items-center justify-around space-x-2 w-4/5 mx-auto">
                 <Label htmlFor={`${title}-opacity`}>
                     Opacity
                 </Label>
