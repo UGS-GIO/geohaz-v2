@@ -101,11 +101,31 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         setView(init(container, isMobile, 'map'))
     }
 
-    async function getRenderer(id: string, url: string): Promise<RendererProps | undefined> {
-        if (!view || !view.map) return;
+    async function fetchRenderers(view: SceneView | MapView | undefined) {
+        if (!view || !view.map) return { renderers: [], mapImageRenderers: [] };
+
         const { renderers, mapImageRenderers } = await getRenderers(view, view.map as __esri.Map);
-        const RegularLayerRenderer = renderers.filter(renderer => renderer.id === id);
-        const MapImageLayerRenderer = mapImageRenderers.filter(renderer => renderer.url === url);
+        return { renderers, mapImageRenderers };
+    }
+
+    function filterRegularLayerRenderer(renderers: any[], id: string) {
+        return renderers.filter(renderer => renderer.id === id);
+    }
+
+    function filterMapImageLayerRenderer(mapImageRenderers: any[], url: string) {
+        return mapImageRenderers.filter(renderer => renderer.url === url);
+    }
+
+    async function getRenderer(id: string, url: string): Promise<RendererProps | undefined> {
+        const { renderers, mapImageRenderers } = await fetchRenderers(view);
+
+        if (!renderers || !mapImageRenderers) return;
+
+        const RegularLayerRenderer = filterRegularLayerRenderer(renderers, id);
+        const MapImageLayerRenderer = filterMapImageLayerRenderer(mapImageRenderers, url);
+
+        console.log('RegularLayerRenderer', RegularLayerRenderer);
+        console.log('MapImageLayerRenderer', MapImageLayerRenderer);
 
         return {
             MapImageLayerRenderer,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import * as symbolUtils from "@arcgis/core/symbols/support/symbolUtils.js";
-import { MapImageLayerRenderer, RegularLayerRenderer, RendererProps } from '@/lib/types/mapping-types';
+import { RendererProps } from '@/lib/types/mapping-types';
+import { RendererFactory } from '@/lib/legend/renderer-factory';
 
 const useLegendPreview = (
     layerId: string,
@@ -35,33 +35,12 @@ const useLegendPreview = (
         const generatePreviews = async (rendererData: RendererProps) => {
             const previews = [];
             for (const renderer of [...rendererData.MapImageLayerRenderer, ...rendererData.RegularLayerRenderer]) {
-                const preview = await generatePreview(renderer);
+                const preview = await RendererFactory.createPreview(renderer);
                 if (preview) {
                     previews.push(preview);
                 }
             }
             return previews;
-        };
-
-        const generatePreview = async (rendererData: MapImageLayerRenderer | RegularLayerRenderer) => {
-            let html: HTMLElement | null = null;
-            let title = '';
-            const label = rendererData.label;
-
-            if ('renderer' in rendererData) {
-                html = await symbolUtils.renderPreviewHTML(rendererData.renderer);
-            } else if ('imageData' in rendererData) {
-                title = rendererData.title;
-                const imgHTML = `<img src="data:image/png;base64,${rendererData.imageData}" alt="${label}" />`;
-                const range = document.createRange();
-                const fragment = range.createContextualFragment(imgHTML);
-                html = fragment.firstChild as HTMLElement;
-            }
-
-            if (html) {
-                return { html, label, title };
-            }
-            return null;
         };
 
         fetchLegendData();
