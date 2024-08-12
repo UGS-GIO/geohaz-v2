@@ -6,8 +6,9 @@ import MapImageLayer from "@arcgis/core/layers/MapImageLayer"
 import TileLayer from "@arcgis/core/layers/TileLayer"
 import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
+import WMSLayer from "@arcgis/core/layers/WMSLayer";
 
-export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group' | 'geojson'
+export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group' | 'geojson' | 'wms'
 export interface LayerProps {
     type: LayerType
     url?: string
@@ -24,7 +25,8 @@ export const layerTypeMapping = {
     'map-image': MapImageLayer,
     'imagery': ImageryLayer,
     'group': GroupLayer,
-    'geojson': GeoJSONLayer
+    'geojson': GeoJSONLayer,
+    'wms': WMSLayer
     // Add other layer types here
 };
 
@@ -82,7 +84,7 @@ export type MapImageLayerType = {
 
 export type GetRenderer = (layerId: string, url: string | undefined) => Promise<RendererProps | undefined>;
 
-export type LayerConstructor = typeof FeatureLayer | typeof TileLayer | typeof GroupLayer | typeof MapImageLayer | typeof GeoJSONLayer | typeof ImageryLayer | undefined;
+export type LayerConstructor = typeof FeatureLayer | typeof TileLayer | typeof GroupLayer | typeof MapImageLayer | typeof GeoJSONLayer | typeof ImageryLayer | typeof WMSLayer | undefined;
 
 export type UIPositionOptions = "bottom-leading" | "bottom-left" | "bottom-right" | "bottom-trailing" | "top-leading" | "top-left" | "top-right" | "top-trailing" | "manual"
 

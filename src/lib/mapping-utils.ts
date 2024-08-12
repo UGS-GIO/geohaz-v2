@@ -19,12 +19,16 @@ import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
 import { Feature, FeatureCollection } from 'geojson';
+import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
+import WMSLayer from '@arcgis/core/layers/WMSLayer';
 
 
 // Create a global app object to store the view
 const app: MapApp = {}
 
 function handleRendererType(layer: __esri.FeatureLayer | __esri.Sublayer, renderers: { renderer: __esri.Symbol, id: string | number, label: string, url: string }[]) {
+    console.log('handling renderer type', layer);
+
     if (layer.renderer.type === 'unique-value') {
         const renderer = layer.renderer as __esri.UniqueValueRenderer;
         const uniqueValueInfosRenderers = renderer.uniqueValueInfos.map((info) => {
@@ -71,19 +75,32 @@ export const getRenderers = async function (view: SceneView | MapView, map: __es
 
     await view.when();
 
-    for (let index = 0; index < map.layers.length; index++) {
-        const layer = map.layers.getItemAt(index);
+    const handleRenders = async (map: __esri.Map) => {
+        for (let index = 0; index < map.layers.length; index++) {
+            const layer = map.layers.getItemAt(index);
 
-        if (layer.type === 'group') {
-            await handleGroupLayer(layer as __esri.GroupLayer, renderers, mapImageRenderers);
-        } else if (layer.type === 'map-image') {
-            await handleMapImageLayer(layer as __esri.MapImageLayer, mapImageRenderers);
-        } else if (layer.type === 'feature') {
-            await handleFeatureLayer(layer as __esri.FeatureLayer, renderers);
-        } else {
-            console.error('Layertype not supported, please add it to the getRenderers function', layer.type);
+            switch (layer.type) {
+                case 'group':
+                    await handleGroupLayer(layer as __esri.GroupLayer, renderers, mapImageRenderers);
+                    break;
+                case 'map-image':
+                    await handleMapImageLayer(layer as __esri.MapImageLayer, mapImageRenderers);
+                    break;
+                case 'feature':
+                    await handleFeatureLayer(layer as __esri.FeatureLayer, renderers);
+                    break;
+                case 'wms':
+                    await handleWMSLayer(layer as __esri.WMSLayer, renderers);
+                    break;
+                default:
+                    console.error('Layer type not supported:', layer.type);
+            }
         }
     }
+    await handleRenders(map);
+
+    console.log('i finished getting renderers');
+
 
     return { renderers, mapImageRenderers };
 };
@@ -91,9 +108,11 @@ export const getRenderers = async function (view: SceneView | MapView, map: __es
 const handleGroupLayer = async (layer: __esri.GroupLayer, renderers: RegularLayerRenderer[], mapImageRenderers: MapImageLayerRenderer[]) => {
     layer.allLayers.forEach(async (sublayer) => {
         if (sublayer.type === 'feature') {
-            handleFeatureLayer(sublayer as __esri.FeatureLayer, renderers);
+            await handleFeatureLayer(sublayer as __esri.FeatureLayer, renderers);
         } else if (sublayer.type === 'map-image') {
-            handleMapImageLayer(sublayer as __esri.MapImageLayer, mapImageRenderers);
+            await handleMapImageLayer(sublayer as __esri.MapImageLayer, mapImageRenderers);
+        } else if (sublayer.type === 'wms') {
+            await handleWMSLayer(sublayer as __esri.WMSLayer, renderers);
         } else {
             console.error('grouplayer type not supported, please add it to the getRenderers function', sublayer.type);
         }
@@ -113,6 +132,144 @@ const handleMapImageLayer = async (layer: __esri.MapImageLayer, renderers: MapIm
 const handleFeatureLayer = async (layer: __esri.FeatureLayer, renderers: RegularLayerRenderer[]) => {
     handleRendererType(layer, renderers);
 };
+
+// const handleWMSLayer = async (
+//     layer: __esri.WMSLayer,
+//     renderers: RegularLayerRenderer[]
+// ) => {
+//     console.log("WMS LAYER", layer);
+
+//     // Prepare an array of promises for each sublayer's fetch request
+//     const fetchPromises = layer.sublayers.map(async (sublayer) => {
+//         // Construct the URL for the GetLegendGraphic request for the current sublayer
+//         const legendUrl = `${layer.url}&service=WMS&request=GetLegendGraphic&format=application/json&layer=${sublayer.name}`;
+
+//         console.log("Legend URL", legendUrl);
+
+//         const options = {
+//             method: "GET",
+//             headers: {
+//                 Accept: "application/json",
+//             },
+//         };
+
+//         try {
+//             const response = await fetch(legendUrl, options);
+
+//             if (!response.ok) {
+//                 throw new Error(`HTTP error! Status: ${response.status}`);
+//             }
+
+//             const data = await response.json();
+
+//             // Process the legend data for the current sublayer
+//             if (data && data.Legend) {
+//                 const matchingLegend = data.Legend.find(
+//                     (legend: any) => legend.layerName === sublayer.name
+//                 );
+//                 if (matchingLegend) {
+//                     matchingLegend.rules.forEach((rule: any) => {
+//                         renderers.push({
+//                             renderer: createEsriSymbol(rule.symbolizers[0]),
+//                             id: sublayer.id.toString(), // Updated to use sublayer ID
+//                             label: sublayer.name,
+//                             url: layer.url,
+//                         });
+//                     });
+//                 }
+//             } else {
+//                 console.error("Invalid legend data format");
+//             }
+//         } catch (error) {
+//             console.error("Error fetching legend data:", error);
+//         }
+//     });
+
+//     // Await all fetch requests to complete before proceeding
+//     console.log("Starting fetch for WMS sublayers...");
+//     await Promise.all(fetchPromises);
+//     console.log("Completed all fetches for WMS sublayers...");
+// };
+
+
+const handleWMSLayer = async (
+    layer: __esri.WMSLayer,
+    renderers: RegularLayerRenderer[]
+) => {
+
+    // Prepare an array of promises for each sublayer's fetch request
+    const fetchPromises = layer.sublayers.map(async (sublayer) => {
+        // Construct the URL for the GetLegendGraphic request for the current sublayer
+        const legendUrl = `${layer.url}&service=WMS&request=GetLegendGraphic&format=application/json&layer=${sublayer.name}`;
+
+        const options = {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+            },
+        };
+
+        console.log('handling wms layer', sublayer);
+
+
+        try {
+            const response = await fetch(legendUrl, options);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status} for sublayer ${sublayer.name}`);
+            }
+
+            const data = await response.json();
+
+            // Process the legend data for the current sublayer
+            if (data && data.Legend) {
+                const matchingLegend = data.Legend.find(
+                    (legend: any) => legend.layerName === sublayer.name
+                );
+                if (matchingLegend) {
+                    matchingLegend.rules.forEach((rule: any) => {
+                        console.log('rule', rule);
+
+                        renderers.push({
+                            renderer: createEsriSymbol(rule.symbolizers[0]),
+                            id: layer.id.toString(),
+                            label: rule.title,
+                            url: layer.url,
+                        });
+                        console.log('renderers', renderers);
+
+                    });
+                }
+            } else {
+                console.error("Invalid legend data format for sublayer", sublayer.name);
+            }
+        } catch (error) {
+            console.error("Error fetching legend data for sublayer", sublayer.name, ":", error);
+        }
+    });
+
+    // Await all fetch requests to complete before proceeding
+    await Promise.all(fetchPromises);
+};
+
+
+
+function createEsriSymbol(symbolizer: any): __esri.Symbol {
+    const { stroke, "stroke-width": strokeWidth, "stroke-opacity": strokeOpacity, "stroke-linecap": strokeLinecap, "stroke-linejoin": strokeLinejoin, "stroke-dasharray": strokeDasharray } = symbolizer.Line;
+
+    return new SimpleLineSymbol({
+        color: stroke,
+        width: strokeWidth,
+        cap: strokeLinecap,
+        join: strokeLinejoin,
+        style: strokeDasharray ? "dash" : "solid",
+        miterLimit: 2,  // Optional, based on your needs
+        // outline: {
+        //     color: [stroke, strokeOpacity],
+        //     width: strokeWidth,
+        // },
+    });
+}
 
 export const findLayerById = (layers: __esri.Collection<__esri.ListItem>, id: string) => { const flatLayers = layers.flatten(layer => layer.children || []); return flatLayers.find(layer => String(layer.layer.id) === String(id)); };
 

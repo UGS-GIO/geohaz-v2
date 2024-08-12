@@ -101,40 +101,10 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         setView(init(container, isMobile, 'map'))
     }
 
-    async function fetchRenderers(view: SceneView | MapView | undefined) {
-        if (!view || !view.map) return { renderers: [], mapImageRenderers: [] };
 
-        const { renderers, mapImageRenderers } = await getRenderers(view, view.map as __esri.Map);
-        return { renderers, mapImageRenderers };
-    }
-
-    function filterRegularLayerRenderer(renderers: any[], id: string) {
-        return renderers.filter(renderer => renderer.id === id);
-    }
-
-    function filterMapImageLayerRenderer(mapImageRenderers: any[], url: string) {
-        return mapImageRenderers.filter(renderer => renderer.url === url);
-    }
-
-    async function getRenderer(id: string, url: string): Promise<RendererProps | undefined> {
-        const { renderers, mapImageRenderers } = await fetchRenderers(view);
-
-        if (!renderers || !mapImageRenderers) return;
-
-        const RegularLayerRenderer = filterRegularLayerRenderer(renderers, id);
-        const MapImageLayerRenderer = filterMapImageLayerRenderer(mapImageRenderers, url);
-
-        console.log('RegularLayerRenderer', RegularLayerRenderer);
-        console.log('MapImageLayerRenderer', MapImageLayerRenderer);
-
-        return {
-            MapImageLayerRenderer,
-            RegularLayerRenderer,
-        };
-    }
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, getRenderer, isMobile, setIsMobile /* , layerDescriptions */ }}>
+        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile /* , layerDescriptions */ }}>
             {children}
         </MapContext.Provider>
     )
