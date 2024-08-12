@@ -8,14 +8,12 @@ import {
     surfaceFaultRuptureRenderer,
     quadRenderer,
     // colorize,
-    qFaultsRenderer
 } from "./renderers";
 import { createRoot } from "react-dom/client";
-import QFaultsPopup from "@/components/custom/popups/qfaults-popup";
+// import QFaultsPopup from "@/components/custom/popups/qfaults-popup";
 import StudyAreasPopup from "@/components/custom/popups/study-areas-popup";
 import LandslideSourcePopup from "@/components/custom/popups/landslide-source-popup";
 import LandslideCompPopup from "@/components/custom/popups/landslide-comp-popup";
-import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 
 const landslideCompConfig: LayerProps = {
     type: 'feature',
@@ -253,9 +251,10 @@ const legendOptions = 'fontColor:0x00000;' +
     'forceRule:True;' +
     'fontName:SansSerif';
 
+const qFaultsBaseUrl = 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/quaternaryfaults/ows?';
 const qFaultsWMSConfig: LayerProps = {
     type: 'wms',
-    url: 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/quaternaryfaults/ows?service=WMS&version=1.3.0&request=GetCapabilities',
+    url: `${qFaultsBaseUrl}?service=WMS&version=1.3.0&request=GetCapabilities`,
     options: {
         title: 'Quaternary Faults',
         visible: true,
