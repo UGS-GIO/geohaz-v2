@@ -20,8 +20,6 @@ import Polyline from "@arcgis/core/geometry/Polyline.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
 import { Feature, FeatureCollection } from 'geojson';
 import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
-import WMSLayer from '@arcgis/core/layers/WMSLayer';
-
 
 // Create a global app object to store the view
 const app: MapApp = {}
@@ -255,7 +253,7 @@ const handleWMSLayer = async (
 
 
 function createEsriSymbol(symbolizer: any): __esri.Symbol {
-    const { stroke, "stroke-width": strokeWidth, "stroke-opacity": strokeOpacity, "stroke-linecap": strokeLinecap, "stroke-linejoin": strokeLinejoin, "stroke-dasharray": strokeDasharray } = symbolizer.Line;
+    const { stroke, "stroke-width": strokeWidth, "stroke-linecap": strokeLinecap, "stroke-linejoin": strokeLinejoin, "stroke-dasharray": strokeDasharray } = symbolizer.Line;
 
     return new SimpleLineSymbol({
         color: stroke,

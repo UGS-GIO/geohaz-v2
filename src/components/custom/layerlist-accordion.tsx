@@ -15,7 +15,7 @@ interface LayerAccordionProps {
 
 const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer.layer;
-    const { view, activeLayers, layerDescriptions, getRenderer } = useContext(MapContext);
+    const { view, activeLayers, layerDescriptions } = useContext(MapContext);
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
     const [layerVisibility, setLayerVisibility] = useState<boolean>(layer.layer.visible);
     const [layerOpacity, setLayerOpacity] = useState<number>(layer.layer.opacity || 1);

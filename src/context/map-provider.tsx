@@ -4,7 +4,6 @@ import type MapView from "@arcgis/core/views/MapView";
 import LayerList from "@arcgis/core/widgets/LayerList";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 // import { useQuery } from "@tanstack/react-query";
-import { getRenderers } from "@/lib/mapping-utils";
 import { RendererProps } from "@/lib/types/mapping-types";
 
 
