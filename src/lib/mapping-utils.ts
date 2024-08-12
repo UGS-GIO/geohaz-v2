@@ -25,8 +25,6 @@ import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
 const app: MapApp = {}
 
 function handleRendererType(layer: __esri.FeatureLayer | __esri.Sublayer, renderers: { renderer: __esri.Symbol, id: string | number, label: string, url: string }[]) {
-    console.log('handling renderer type', layer);
-
     if (layer.renderer.type === 'unique-value') {
         const renderer = layer.renderer as __esri.UniqueValueRenderer;
         const uniqueValueInfosRenderers = renderer.uniqueValueInfos.map((info) => {
@@ -97,25 +95,35 @@ export const getRenderers = async function (view: SceneView | MapView, map: __es
     }
     await handleRenders(map);
 
-    console.log('i finished getting renderers');
-
-
     return { renderers, mapImageRenderers };
 };
 
-const handleGroupLayer = async (layer: __esri.GroupLayer, renderers: RegularLayerRenderer[], mapImageRenderers: MapImageLayerRenderer[]) => {
-    layer.allLayers.forEach(async (sublayer) => {
-        if (sublayer.type === 'feature') {
-            await handleFeatureLayer(sublayer as __esri.FeatureLayer, renderers);
-        } else if (sublayer.type === 'map-image') {
-            await handleMapImageLayer(sublayer as __esri.MapImageLayer, mapImageRenderers);
-        } else if (sublayer.type === 'wms') {
-            await handleWMSLayer(sublayer as __esri.WMSLayer, renderers);
-        } else {
-            console.error('grouplayer type not supported, please add it to the getRenderers function', sublayer.type);
+const handleGroupLayer = async (
+    layer: __esri.GroupLayer,
+    renderers: RegularLayerRenderer[],
+    mapImageRenderers: MapImageLayerRenderer[]
+) => {
+    for (const sublayer of layer.allLayers) {
+        try {
+            switch (sublayer.type) {
+                case 'feature':
+                    await handleFeatureLayer(sublayer as __esri.FeatureLayer, renderers);
+                    break;
+                case 'map-image':
+                    await handleMapImageLayer(sublayer as __esri.MapImageLayer, mapImageRenderers);
+                    break;
+                case 'wms':
+                    await handleWMSLayer(sublayer as __esri.WMSLayer, renderers);
+                    break;
+                default:
+                    console.error('GroupLayer type not supported, please add it to the getRenderers function:', sublayer.type);
+            }
+        } catch (error) {
+            console.error('Error processing sublayer:', sublayer.type, error);
         }
-    });
+    }
 };
+
 
 const handleMapImageLayer = async (layer: __esri.MapImageLayer, renderers: MapImageLayerRenderer[]) => {
     // call the legend endpoint to get the legend
@@ -131,113 +139,39 @@ const handleFeatureLayer = async (layer: __esri.FeatureLayer, renderers: Regular
     handleRendererType(layer, renderers);
 };
 
-// const handleWMSLayer = async (
-//     layer: __esri.WMSLayer,
-//     renderers: RegularLayerRenderer[]
-// ) => {
-//     console.log("WMS LAYER", layer);
-
-//     // Prepare an array of promises for each sublayer's fetch request
-//     const fetchPromises = layer.sublayers.map(async (sublayer) => {
-//         // Construct the URL for the GetLegendGraphic request for the current sublayer
-//         const legendUrl = `${layer.url}&service=WMS&request=GetLegendGraphic&format=application/json&layer=${sublayer.name}`;
-
-//         console.log("Legend URL", legendUrl);
-
-//         const options = {
-//             method: "GET",
-//             headers: {
-//                 Accept: "application/json",
-//             },
-//         };
-
-//         try {
-//             const response = await fetch(legendUrl, options);
-
-//             if (!response.ok) {
-//                 throw new Error(`HTTP error! Status: ${response.status}`);
-//             }
-
-//             const data = await response.json();
-
-//             // Process the legend data for the current sublayer
-//             if (data && data.Legend) {
-//                 const matchingLegend = data.Legend.find(
-//                     (legend: any) => legend.layerName === sublayer.name
-//                 );
-//                 if (matchingLegend) {
-//                     matchingLegend.rules.forEach((rule: any) => {
-//                         renderers.push({
-//                             renderer: createEsriSymbol(rule.symbolizers[0]),
-//                             id: sublayer.id.toString(), // Updated to use sublayer ID
-//                             label: sublayer.name,
-//                             url: layer.url,
-//                         });
-//                     });
-//                 }
-//             } else {
-//                 console.error("Invalid legend data format");
-//             }
-//         } catch (error) {
-//             console.error("Error fetching legend data:", error);
-//         }
-//     });
-
-//     // Await all fetch requests to complete before proceeding
-//     console.log("Starting fetch for WMS sublayers...");
-//     await Promise.all(fetchPromises);
-//     console.log("Completed all fetches for WMS sublayers...");
-// };
-
-
-const handleWMSLayer = async (
+export const handleWMSLayer = async (
     layer: __esri.WMSLayer,
     renderers: RegularLayerRenderer[]
 ) => {
-
-    // Prepare an array of promises for each sublayer's fetch request
     const fetchPromises = layer.sublayers.map(async (sublayer) => {
-        // Construct the URL for the GetLegendGraphic request for the current sublayer
         const legendUrl = `${layer.url}&service=WMS&request=GetLegendGraphic&format=application/json&layer=${sublayer.name}`;
 
-        const options = {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-            },
-        };
-
-        console.log('handling wms layer', sublayer);
-
-
         try {
-            const response = await fetch(legendUrl, options);
+            const response = await fetch(legendUrl, {
+                method: "GET",
+                headers: {
+                    Accept: "application/json",
+                },
+            });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status} for sublayer ${sublayer.name}`);
             }
 
-            const data = await response.json();
+            const legendData = await response.json();
 
-            // Process the legend data for the current sublayer
-            if (data && data.Legend) {
-                const matchingLegend = data.Legend.find(
-                    (legend: any) => legend.layerName === sublayer.name
-                );
-                if (matchingLegend) {
-                    matchingLegend.rules.forEach((rule: any) => {
-                        console.log('rule', rule);
-
-                        renderers.push({
+            if (legendData && legendData.Legend) {
+                legendData.Legend.forEach((legend: any) => {
+                    legend.rules.forEach((rule: any) => {
+                        const renderer = {
+                            label: rule.title,
                             renderer: createEsriSymbol(rule.symbolizers[0]),
                             id: layer.id.toString(),
-                            label: rule.title,
                             url: layer.url,
-                        });
-                        console.log('renderers', renderers);
-
+                        };
+                        renderers.push(renderer);
                     });
-                }
+                });
             } else {
                 console.error("Invalid legend data format for sublayer", sublayer.name);
             }
@@ -246,11 +180,12 @@ const handleWMSLayer = async (
         }
     });
 
-    // Await all fetch requests to complete before proceeding
-    await Promise.all(fetchPromises);
+    try {
+        await Promise.all(fetchPromises);
+    } catch (error) {
+        console.error("Error in one or more fetches:", error);
+    }
 };
-
-
 
 function createEsriSymbol(symbolizer: any): __esri.Symbol {
     const { stroke, "stroke-width": strokeWidth, "stroke-linecap": strokeLinecap, "stroke-linejoin": strokeLinejoin, "stroke-dasharray": strokeDasharray } = symbolizer.Line;
@@ -261,11 +196,7 @@ function createEsriSymbol(symbolizer: any): __esri.Symbol {
         cap: strokeLinecap,
         join: strokeLinejoin,
         style: strokeDasharray ? "dash" : "solid",
-        miterLimit: 2,  // Optional, based on your needs
-        // outline: {
-        //     color: [stroke, strokeOpacity],
-        //     width: strokeWidth,
-        // },
+        miterLimit: 2
     });
 }
 

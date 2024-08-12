@@ -1,12 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import useLegendPreview from '@/hooks/use-legend-preview';
 import LayerControls from '@/components/custom/layer-controls';
 import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapContext } from '@/context/map-provider';
 import { findLayerById } from '@/lib/mapping-utils';
-// import { RendererProps } from '@/lib/types/mapping-types';
-import { ChevronDownIcon } from 'lucide-react';
+import { LegendAccordion } from './legend-accordion';
 
 interface LayerAccordionProps {
     layer: __esri.ListItem;
@@ -24,10 +22,7 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     // Fallback for getRenderer if it can be undefined
     // const defaultGetRenderer = async () => undefined;
 
-    const { preview, isLoading, error } = useLegendPreview(layerId, typeNarrowedLayer.url);
-
-    console.log('preview', preview);
-
+    // const { preview, isLoading, error } = useLegendPreview(layerId, typeNarrowedLayer.url);
 
     useEffect(() => {
         if (activeLayers && layerId) {
@@ -77,32 +72,16 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
                         </AccordionTrigger>
                     </AccordionHeader>
                     <AccordionContent>
-                        <LayerControls
-                            layerOpacity={layerOpacity}
-                            handleOpacityChange={handleOpacityChange}
-                            title={layerTitle}
-                            description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
-                            handleZoomToLayer={handleZoomToLayer}
-                        />
-                        <Accordion type='single' collapsible className='mx-4'>
-                            <AccordionItem value="item-2">
-                                <AccordionTrigger>
-                                    Legend <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform duration-200 mr-2" />
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <>
-                                        {isLoading && <div>Loading legend...</div>}
-                                        {error && <div>Error loading legend: {error.message}</div>}
-                                        {preview?.map((previewItem, index) => (
-                                            <div key={index} className='flex items-end space-x-4 py-1'>
-                                                <span dangerouslySetInnerHTML={{ __html: previewItem.html.outerHTML || '' }} />
-                                                <span>{previewItem.label}</span>
-                                            </div>
-                                        ))}
-                                    </>
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
+                        <div>
+                            <LayerControls
+                                layerOpacity={layerOpacity}
+                                handleOpacityChange={handleOpacityChange}
+                                title={layerTitle}
+                                description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
+                                handleZoomToLayer={handleZoomToLayer}
+                            />
+                            <LegendAccordion layerId={layerId} url={typeNarrowedLayer.url} />
+                        </div>
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
