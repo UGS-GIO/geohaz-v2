@@ -50,7 +50,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
         <div className="flex flex-col space-y-4 mx-8">
             <div className="flex flex-col justify-between items-center w-full space-y-4">
                 <div className="flex flex-col sm:flex-row justify-around items-center w-full space-y-4 sm:space-y-0">
-                    <div className="flex flex-wrap justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                    <div className="flex flex-wrap justify-start sm:justify-start items-center sm:space-y-0 sm:space-x-4">
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button variant="ghost" className="flex items-center">
