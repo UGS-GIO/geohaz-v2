@@ -13,10 +13,16 @@ function Info() {
   const [modalType, setModalType] = useState<ModalType | ''>('');
   const { setCurrentContent } = useSidebar();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [isMapDetailsExpanded, setIsMapDetailsExpanded] = useState(false);
+  const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
 
-  // Separate states for each accordion
-  const [mapDetailsExpanded, setMapDetailsExpanded] = useState(false);
-  const [dataSourcesExpanded, setDataSourcesExpanded] = useState(false);
+  const toggleMapDetails = () => {
+    setIsMapDetailsExpanded(!isMapDetailsExpanded);
+  };
+
+  const toggleDataSources = () => {
+    setIsDataSourcesExpanded(!isDataSourcesExpanded);
+  };
 
   const handleOpenModal = (type: ModalType) => {
     setModalType(type);
@@ -34,10 +40,10 @@ function Info() {
         className="flex-grow ml-2 overflow-y-auto"
         ref={contentRef}
       >
-        <div className='mr-2' key={`map-details-accordion`}>
-          <Accordion type="single" collapsible>
+        <div className="mr-2" key="map-details-accordion">
+          <Accordion type="multiple">
             <AccordionItem value="map-details-accordion-item-1">
-              <AccordionHeader onClick={() => setMapDetailsExpanded(!mapDetailsExpanded)}>
+              <AccordionHeader onClick={toggleMapDetails}>
                 <AccordionTrigger>
                   <div className="flex flex-col mx-2 items-start">
                     <h3 className="font-large text-left text-lg">Map Details</h3>
@@ -49,13 +55,17 @@ function Info() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          {!mapDetailsExpanded && mapDetailsShortened}
+          {!isMapDetailsExpanded && (
+            <div className="mx-2 my-2">
+              {mapDetailsShortened}
+            </div>
+          )}
         </div>
 
-        <div className='mr-2 my-2' key={`data-sources-accordion`}>
-          <Accordion type="single" collapsible>
+        <div className="mr-2 my-2" key="data-sources-accordion">
+          <Accordion type="multiple">
             <AccordionItem value="data-sources-accordion-item-1">
-              <AccordionHeader onClick={() => setDataSourcesExpanded(!dataSourcesExpanded)}>
+              <AccordionHeader onClick={toggleDataSources}>
                 <AccordionTrigger>
                   <div className="flex flex-col mx-2 items-start">
                     <h3 className="font-large text-left text-lg">Data Sources</h3>
@@ -67,7 +77,11 @@ function Info() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          {!dataSourcesExpanded && dataSourcesShortened}
+          {!isDataSourcesExpanded && (
+            <div className="mx-2 my-2">
+              {dataSourcesShortened}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap justify-center mx-2">
