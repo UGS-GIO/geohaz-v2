@@ -17,12 +17,7 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const [currentLayer, setCurrentLayer] = useState<__esri.ListItem>();
     const [layerVisibility, setLayerVisibility] = useState<boolean>(layer.layer.visible);
     const [layerOpacity, setLayerOpacity] = useState<number>(layer.layer.opacity || 1);
-    const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.TileLayer | __esri.MapImageLayer | __esri.ImageryLayer | __esri.WMSLayer;
-
-    // Fallback for getRenderer if it can be undefined
-    // const defaultGetRenderer = async () => undefined;
-
-    // const { preview, isLoading, error } = useLegendPreview(layerId, typeNarrowedLayer.url);
+    const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.MapImageLayer | __esri.WMSLayer;
 
     useEffect(() => {
         if (activeLayers && layerId) {
