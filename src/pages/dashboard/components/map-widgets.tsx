@@ -84,16 +84,6 @@ const MapWidgets: React.FC = () => {
         }),
     };
 
-    const legendExpandConfig: LegendExpandConfig = {
-        id: 'legend-expand',
-        view: view!,
-        expanded: !isMobile,
-        content: new Legend({
-            view: view!,
-            container: document.createElement('div'),
-            id: 'legend-widget',
-        }),
-    };
 
     const searchExpandConfig: SearchExpandConfig = {
         id: 'search-expand',
@@ -152,7 +142,6 @@ const MapWidgets: React.FC = () => {
             position: isMobile ? 'top-left' : 'top-right',
             config: basemapExpandConfig,
         },
-        { WrappedWidget: Expand, position: 'top-left', config: legendExpandConfig },
         { WrappedWidget: Expand, position: 'top-right', config: searchExpandConfig },
     ]);
 
