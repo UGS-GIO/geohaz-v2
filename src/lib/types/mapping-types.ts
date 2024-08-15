@@ -8,15 +8,30 @@ import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
 
-export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group' | 'geojson' | 'wms'
-export interface LayerProps {
-    type: LayerType
-    url?: string
-    options?: object
-    title?: string
-    visible?: boolean
-    layers?: LayerProps[]
+
+interface BaseLayerProps {
+    type: 'feature' | 'tile' | 'map-image' | 'geojson' | 'imagery' | 'wms' | 'group';
+    url?: string;
+    title?: string;
+    visible?: boolean;
+    options?: any;
 }
+
+export interface WMSLayerProps extends BaseLayerProps {
+    type: 'wms';
+    fetchFeatureInfoFunction: __esri.FetchFeatureInfoFunction;
+    sublayers?: (__esri.CollectionProperties<__esri.SublayerProperties> & __esri.CollectionProperties<__esri.WMSSublayerProperties>) | undefined
+}
+
+export interface GroupLayerProps extends BaseLayerProps {
+    type: 'group';
+    layers?: LayerProps[];
+}
+
+
+export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group' | 'geojson' | 'wms'
+
+export type LayerProps = WMSLayerProps | GroupLayerProps | BaseLayerProps;
 
 // Define a mapping of layer types to their corresponding classes
 export const layerTypeMapping = {

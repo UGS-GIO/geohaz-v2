@@ -54,4 +54,4 @@ const LandslideSourcePopup: React.FC<{ graphic: __esri.Graphic }> = ({ graphic }
     );
 };
 
-export default LandslideSourcePopup;
+export { LandslideSourcePopup };

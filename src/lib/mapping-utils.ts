@@ -1,12 +1,9 @@
 import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
 import layers from '@/data/layers'
-import { GetResultsHandlerType, LayerConstructor, MapApp, MapImageLayerRenderer, MapImageLayerType, RegularLayerRenderer } from '@/lib/types/mapping-types'
+import { GetResultsHandlerType, GroupLayerProps, LayerConstructor, MapApp, MapImageLayerRenderer, MapImageLayerType, RegularLayerRenderer, WMSLayerProps } from '@/lib/types/mapping-types'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
-import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
-import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
-import TileLayer from "@arcgis/core/layers/TileLayer";
 import Map from '@arcgis/core/Map'
 import { LayerProps, layerTypeMapping } from "@/lib/types/mapping-types";
 import * as promiseUtils from "@arcgis/core/core/promiseUtils.js";
@@ -14,12 +11,12 @@ import Color from "@arcgis/core/Color";
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
 import Expand from "@arcgis/core/widgets/Expand";
 import Popup from "@arcgis/core/widgets/Popup";
-import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
 import { Feature, FeatureCollection } from 'geojson';
-import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
+import { createEsriSymbol } from '@/lib/legend/symbol-generator';
+import { LegendProps, LegendRule } from '@/lib/types/geoserver-types';
 
 // Create a global app object to store the view
 const app: MapApp = {}
@@ -144,7 +141,7 @@ export const handleWMSLayer = async (
     renderers: RegularLayerRenderer[]
 ) => {
     const fetchPromises = layer.sublayers.map(async (sublayer) => {
-        const legendUrl = `${layer.url}&service=WMS&request=GetLegendGraphic&format=application/json&layer=${sublayer.name}`;
+        const legendUrl = `${layer.url}?&service=WMS&request=GetLegendGraphic&format=application/json&layer=${sublayer.name}`;
 
         try {
             const response = await fetch(legendUrl, {
@@ -161,8 +158,8 @@ export const handleWMSLayer = async (
             const legendData = await response.json();
 
             if (legendData && legendData.Legend) {
-                legendData.Legend.forEach((legend: any) => {
-                    legend.rules.forEach((rule: any) => {
+                legendData.Legend.forEach((legend: LegendProps) => {
+                    legend.rules.forEach((rule: LegendRule) => {
                         const renderer = {
                             label: rule.title,
                             renderer: createEsriSymbol(rule.symbolizers[0]),
@@ -186,19 +183,6 @@ export const handleWMSLayer = async (
         console.error("Error in one or more fetches:", error);
     }
 };
-
-function createEsriSymbol(symbolizer: any): __esri.Symbol {
-    const { stroke, "stroke-width": strokeWidth, "stroke-linecap": strokeLinecap, "stroke-linejoin": strokeLinejoin, "stroke-dasharray": strokeDasharray } = symbolizer.Line;
-
-    return new SimpleLineSymbol({
-        color: stroke,
-        width: strokeWidth,
-        cap: strokeLinecap,
-        join: strokeLinejoin,
-        style: strokeDasharray ? "dash" : "solid",
-        miterLimit: 2
-    });
-}
 
 export const findLayerById = (layers: __esri.Collection<__esri.ListItem>, id: string) => { const flatLayers = layers.flatten(layer => layer.children || []); return flatLayers.find(layer => String(layer.layer.id) === String(id)); };
 
@@ -284,34 +268,40 @@ export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
     })
 }
 
-// Helper function to reduce code duplication in createLayer
 function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
-    // Create a layer based on the layer props
-    if ('url' in layer && LayerType) {
+    if (!LayerType) {
+        console.warn(`Unsupported layer type: ${layer.type}`);
+        return undefined;
+    }
+
+    if (layer.type === 'wms') {
+        const typedLayer = layer as WMSLayerProps;
+        return new LayerType({
+            url: typedLayer.url,
+            title: typedLayer.title,
+            visible: typedLayer.visible,
+            sublayers: typedLayer.sublayers,
+            fetchFeatureInfoFunction: typedLayer.fetchFeatureInfoFunction,
+        });
+    }
+
+    if (layer.url) {
         return new LayerType({
             url: layer.url,
+            title: layer.title,
+            visible: layer.visible,
             ...layer.options,
         });
     }
 
-    if (layer.type === 'group') {
-        if (layer.layers) {
-            // Create an array of group layers by mapping the layers and filtering out any undefined elements
-            const groupedLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as (FeatureLayer | TileLayer | GroupLayer | MapImageLayer | GeoJSONLayer)[];
-            return groupedLayers;
-        }
-    }
-
     console.warn(`Missing URL in layer props: ${JSON.stringify(layer)}`);
     return undefined;
-
 }
 
-// Create a layer based on the layer props
 export const createLayer = (layer: LayerProps) => {
-    // Handle the special case for group layers
-    if (layer.type === 'group' && layer.layers) {
-        const groupLayers = layer.layers.map(createLayer).filter(layer => layer !== undefined) as __esri.CollectionProperties<__esri.LayerProperties> | undefined;
+    if (layer.type === 'group') {
+        const typedLayer = layer as GroupLayerProps;
+        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined) as __esri.CollectionProperties<__esri.LayerProperties> | undefined;
         return new GroupLayer({
             title: layer.title,
             visible: layer.visible,
@@ -319,10 +309,8 @@ export const createLayer = (layer: LayerProps) => {
         });
     }
 
-    // Get the LayerType from the mapping
     const LayerType = layerTypeMapping[layer.type];
 
-    // If the LayerType exists, create a new layer
     if (LayerType) {
         return createLayerFromUrl(layer, LayerType);
     }
@@ -422,8 +410,6 @@ export const fetchQFaultSuggestions = async (params: { suggestTerm: string, sour
 
 // Function to fetch results from the search box
 export const fetchQFaultResults = async (params: GetResultsHandlerType, url: string): Promise<__esri.SearchResult[]> => {
-    console.log(params);
-
     let searchUrl = url;
     let searchTerm = '';
 
@@ -446,8 +432,6 @@ export const fetchQFaultResults = async (params: GetResultsHandlerType, url: str
 
     // Create graphics for each feature returned from the search
     const graphics: __esri.Graphic[] = data.features.map((item: GeoJSON.Feature) => {
-        console.log(item);
-
         const typedGeometry = item.geometry as GeoJSON.MultiPoint;
         const coordinates = typedGeometry.coordinates as unknown as number[][][]
 

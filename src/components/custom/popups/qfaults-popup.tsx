@@ -90,4 +90,4 @@ const QFaultsPopup = ({ graphic }: { graphic: __esri.Graphic }) => {
     );
 };
 
-export default QFaultsPopup;
+export { QFaultsPopup };

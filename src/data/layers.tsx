@@ -1,19 +1,21 @@
-import { LayerProps } from "@/lib/types/mapping-types";
+
 import CustomContent from "@arcgis/core/popup/content/CustomContent.js";
 import {
-    // rendererRecent,
-    // rendererMining,
     rendererLiquefaction,
     rendererBedrockPot,
     surfaceFaultRuptureRenderer,
     quadRenderer,
-    // colorize,
 } from "./renderers";
 import { createRoot } from "react-dom/client";
-// import QFaultsPopup from "@/components/custom/popups/qfaults-popup";
-import StudyAreasPopup from "@/components/custom/popups/study-areas-popup";
-import LandslideSourcePopup from "@/components/custom/popups/landslide-source-popup";
-import LandslideCompPopup from "@/components/custom/popups/landslide-comp-popup";
+import { StudyAreasPopup } from "@/components/custom/popups/study-areas-popup";
+import { LandslideSourcePopup } from "@/components/custom/popups/landslide-source-popup";
+import { LandslideCompPopup } from "@/components/custom/popups/landslide-comp-popup";
+import { QFaultsPopup } from "@/components/custom/popups/qfaults-popup";
+import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
+import Graphic from "@arcgis/core/Graphic";
+import { Feature } from "geojson";
+
+const publicWorkspaceUrl = 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/ows';
 
 const landslideCompConfig: LayerProps = {
     type: 'feature',
@@ -235,48 +237,85 @@ const shakingVectorConfig: LayerProps = {
 //     },
 // };
 
-
-
 // Detect if the user is in dark mode
-const isDarkMode = document.getElementById("root")?.classList.contains("dark");
+// const isDarkMode = document.getElementById("root")?.classList.contains("dark");
 
 // Define the legend options based on the theme
-const fontColor = isDarkMode ? '0xFFFFFF' : '0x000000'; // White for dark mode, black for light mode
-const legendOptions = 'fontColor:0x00000;' +
-    'dpi:120;' +
-    'format:image/png;' +
-    'fontStyle:bold;' +
-    'fontAntiAliasing:true;' +
-    'forceLabels:on;' +
-    'forceRule:True;' +
-    'fontName:SansSerif';
+// const fontColor = isDarkMode ? '0xFFFFFF' : '0x000000'; // White for dark mode, black for light mode
+// const legendOptions = 'fontColor:0x00000;' +
+//     'dpi:120;' +
+//     'format:image/png;' +
+//     'fontStyle:bold;' +
+//     'fontAntiAliasing:true;' +
+//     'forceLabels:on;' +
+//     'forceRule:True;' +
+//     'fontName:SansSerif';
 
-const qFaultsBaseUrl = 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/quaternaryfaults/ows?';
-const qFaultsWMSConfig: LayerProps = {
+const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
-    url: `${qFaultsBaseUrl}?service=WMS&version=1.3.0&request=GetCapabilities`,
-    options: {
-        title: 'Quaternary Faults',
-        visible: true,
-        customParameters: {
-            legend_format: 'application/json',
+    url: publicWorkspaceUrl,
+    title: 'Quaternary Faults',
+    visible: true,
+    sublayers: [
+        {
+            name: 'quaternaryfaults',
+            popupEnabled: true,
+            queryable: true,
         },
-        transparent: true,
-        LEGEND_OPTIONS: legendOptions,
-        // width: 40,
-        // height: 40
-        // }
-        // layers: [
-        //     {
-        //         id: 'qfaults',
-        //         label: 'Quaternary Faults',
-        //         url: 'https://geology.utah.gov/wms?SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true&LAYERS=Hazardous_Faults',
-        //         title: 'Quaternary Faults',
-        //         imageData: 'https://geology.utah.gov/wms?SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true&LAYERS=Hazardous_Faults',
-        //     },
-        // ],
-    },
+    ],
+    fetchFeatureInfoFunction: async (query) => {
+        // Assuming this function is defined within the WMSLayer scope
+        query.info_format = "application/json";
+
+        // Ensure featureInfoUrl is properly defined
+        const featureInfoUrl = `${qFaultsWMSConfig.url}?${new URLSearchParams(query).toString()}`;
+
+        try {
+            const response = await fetch(featureInfoUrl);
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+
+            console.log(data.features);
+
+
+            return data.features.map(
+                (feature: Feature) => new Graphic({
+                    attributes: feature.properties,
+                    popupTemplate: {
+                        outFields: ['*'],
+                        title: '<b>Quaternary Faults</b>',
+                        content: [
+                            new CustomContent({
+                                outFields: ['*'],
+                                creator: (event) => {
+                                    const div = document.createElement('div');
+                                    if (event) {
+                                        const { graphic } = event;
+                                        const root = createRoot(div);
+                                        root.render(
+                                            <QFaultsPopup graphic={graphic} />
+                                        );
+                                    }
+                                    return div;
+                                },
+                            }),
+                        ],
+                    },
+                })
+            );
+        } catch (error) {
+            console.error("Failed to fetch feature info:", error);
+            return [];
+        }
+    }
 };
+
+
+
 
 
 const faultRuptureConfig: LayerProps = {
@@ -934,45 +973,45 @@ const erosionZoneConfig: LayerProps = {
     },
 };
 
-// const groundSubsidenceConfig: LayerProps = {
-//     type: 'feature',
-//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/11',
-//     options: {
-//         title: 'Ground Subsidence Potential',
-//         elevationInfo: [{ mode: 'on-the-ground' }],
-//         visible: false,
-//         outFields: ['*'],
-//         popupTemplate: {
-//             title: '<b>{relationships/5/HazardName}</b>',
-//             content: [
-//                 {
-//                     type: 'fields',
-//                     fieldInfos: [
-//                         {
-//                             fieldName: 'CSSMappedScale',
-//                             visible: false,
-//                             label: 'Mapped Scale',
-//                         },
-//                         {
-//                             fieldName: 'relationships/5/Description',
-//                             visible: false,
-//                             label: 'Hazard Description',
-//                         },
-//                         {
-//                             fieldName: 'relationships/5/HazardName',
-//                             visible: false,
-//                             label: 'Hazard',
-//                         },
-//                     ],
-//                 },
-//                 {
-//                     type: 'text',
-//                     text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
-//                 },
-//             ],
-//         },
-//     },
-// };
+const groundSubsidenceConfig: LayerProps = {
+    type: 'feature',
+    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/11',
+    options: {
+        title: 'Ground Subsidence Potential',
+        elevationInfo: [{ mode: 'on-the-ground' }],
+        visible: false,
+        outFields: ['*'],
+        popupTemplate: {
+            title: '<b>{relationships/5/HazardName}</b>',
+            content: [
+                {
+                    type: 'fields',
+                    fieldInfos: [
+                        {
+                            fieldName: 'CSSMappedScale',
+                            visible: false,
+                            label: 'Mapped Scale',
+                        },
+                        {
+                            fieldName: 'relationships/5/Description',
+                            visible: false,
+                            label: 'Hazard Description',
+                        },
+                        {
+                            fieldName: 'relationships/5/HazardName',
+                            visible: false,
+                            label: 'Hazard',
+                        },
+                    ],
+                },
+                {
+                    type: 'text',
+                    text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
+                },
+            ],
+        },
+    },
+};
 
 const karstFeaturesConfig: LayerProps = {
     type: 'feature',
