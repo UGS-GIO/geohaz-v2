@@ -9,6 +9,7 @@ import SceneView from "@arcgis/core/views/SceneView"
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
 
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface BaseLayerProps {
     type: 'feature' | 'tile' | 'map-image' | 'geojson' | 'imagery' | 'wms' | 'group';
     url?: string;
