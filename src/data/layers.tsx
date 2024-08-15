@@ -261,6 +261,7 @@ const qFaultsWMSConfig: WMSLayerProps = {
             name: 'quaternaryfaults',
             popupEnabled: true,
             queryable: true,
+            legendUrl: 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/wms?REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=public:quaternaryfaults',
         },
     ],
     fetchFeatureInfoFunction: async (query) => {
