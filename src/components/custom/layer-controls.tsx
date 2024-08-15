@@ -38,9 +38,6 @@ const LayerControls: React.FC<LayerControlsProps> = ({
     const triggerButtonRef = useRef<HTMLButtonElement>(null)
 
     const handleToggleLegend = () => {
-        console.log('toggle legend');
-        console.log(triggerButtonRef.current);
-
         if (triggerButtonRef.current != null) {
             triggerButtonRef.current.click()
         }
