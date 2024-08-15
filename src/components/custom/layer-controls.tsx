@@ -31,7 +31,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
     const cleanDescription = DOMPurify.sanitize(description, { USE_PROFILES: { html: true } });
 
     return (
-        <div className="flex flex-col justify-between items-center w-full space-y-4 mb-2">
+        <div className="flex flex-col justify-between items-center w-full space-y-4">
             <div className="flex flex-col sm:flex-row justify-around items-center w-full space-y-4 sm:space-y-0">
                 <div className="flex flex-wrap justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
                     <Dialog>
@@ -45,10 +45,10 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                             <DialogHeader>
                                 <DialogTitle>{title}</DialogTitle>
                             </DialogHeader>
-                            <DialogDescription className="text-sm text-muted-foreground">This is a placeholder to show that a muted description can be added to the dialog.</DialogDescription>
-                            <div className="grid gap-4 py-4">
-                                <div className="custom-tooltip" dangerouslySetInnerHTML={{ __html: cleanDescription }} />
-                            </div>
+                            <DialogDescription className="text-sm text-muted-foreground">
+                                This is a placeholder to show that a muted description can be added to the dialog.
+                            </DialogDescription>
+                            <div className="custom-tooltip" dangerouslySetInnerHTML={{ __html: cleanDescription }} />
                         </DialogContent>
                     </Dialog>
 
@@ -58,7 +58,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                     </Button>
                 </div>
             </div>
-            <div className="flex flex-row items-center items-center justify-around space-x-2 w-4/5 mx-auto">
+            <div className="flex flex-row items-center justify-around space-x-2 w-full mx-auto">
                 <Label htmlFor={`${title}-opacity`}>
                     Opacity
                 </Label>
@@ -70,16 +70,16 @@ const LayerControls: React.FC<LayerControlsProps> = ({
             </div>
             {/* TODO: Implement label visibility */}
             {/* <div className="flex items-center justify-between space-x-2 w-full">
-                 <Label htmlFor={`${title}-label-visibility`} className="mx-auto">
-                     Turn Labels {labelsVisible ? 'Off' : 'On'} (in progress)
-                 </Label>
-                 <Switch
-                     id={`${title}-label-visibility`}
-                     className="ml-auto"
-                     checked={labelsVisible}
-                     onCheckedChange={() => setLabelsVisible(!labelsVisible)}
-                 />
-             </div> */}
+                <Label htmlFor={`${title}-label-visibility`} className="mx-auto">
+                    Turn Labels {labelsVisible ? 'Off' : 'On'} (in progress)
+                </Label>
+                <Switch
+                    id={`${title}-label-visibility`}
+                    className="ml-auto"
+                    checked={labelsVisible}
+                    onCheckedChange={() => setLabelsVisible(!labelsVisible)}
+                />
+            </div> */}
         </div>
     );
 };

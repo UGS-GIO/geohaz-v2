@@ -72,7 +72,7 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
                         </AccordionTrigger>
                     </AccordionHeader>
                     <AccordionContent>
-                        <div>
+                        <div className="flex flex-col space-y-4 mx-8">
                             <LayerControls
                                 layerOpacity={layerOpacity}
                                 handleOpacityChange={handleOpacityChange}

@@ -11,7 +11,7 @@ const LegendAccordion = ({ layerId, url }: LegendAcordionProps) => {
     const { preview, isLoading, error } = useLegendPreview(layerId, url);
 
     return (
-        <Accordion type='single' collapsible className='mx-8'>
+        <Accordion type='single' collapsible>
             <AccordionItem value="item-2">
                 <AccordionTrigger>
                     Legend <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform duration-200 mr-2" />
