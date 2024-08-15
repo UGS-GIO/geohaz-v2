@@ -1,4 +1,4 @@
-import { Info, Shrink, TableOfContents } from 'lucide-react';
+import { ChevronDown, Info, Shrink, TableOfContents } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { Button } from '@/components/custom/button';
 import {
@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { LegendAccordion } from '@/components/custom/legend-accordion';
 import { useRef } from 'react';
+import { Toggle } from '@/components/ui/toggle';
 
 interface LayerControlsProps {
     handleZoomToLayer: () => void;
@@ -80,10 +81,14 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                             <Shrink className="h-5 w-5 mr-2" />
                             <span>Zoom to</span>
                         </Button>
-                        <Button ref={triggerButtonRef} variant="ghost" className="flex items-center" onClick={handleToggleLegend}>
+                        {/* <Button ref={triggerButtonRef} variant="ghost" className="flex items-center" onClick={handleToggleLegend}>
                             <TableOfContents className="h-5 w-5 mr-2" />
                             <span>Legend</span>
-                        </Button>
+                        </Button> */}
+                        <Toggle ref={triggerButtonRef} aria-label="Toggle italic" className="flex items-center" onClick={handleToggleLegend}>
+                            <TableOfContents className="h-5 w-5 mr-2" />
+                            <span>Legend</span>
+                        </Toggle>
                     </div>
                 </div>
 
