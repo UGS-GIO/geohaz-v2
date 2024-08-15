@@ -4,7 +4,6 @@ import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionT
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapContext } from '@/context/map-provider';
 import { findLayerById } from '@/lib/mapping-utils';
-import { LegendAccordion } from './legend-accordion';
 
 interface LayerAccordionProps {
     layer: __esri.ListItem;
@@ -67,16 +66,15 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
                         </AccordionTrigger>
                     </AccordionHeader>
                     <AccordionContent>
-                        <div className="flex flex-col space-y-4 mx-8">
-                            <LayerControls
-                                layerOpacity={layerOpacity}
-                                handleOpacityChange={handleOpacityChange}
-                                title={layerTitle}
-                                description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
-                                handleZoomToLayer={handleZoomToLayer}
-                            />
-                            <LegendAccordion layerId={layerId} url={typeNarrowedLayer.url} />
-                        </div>
+                        <LayerControls
+                            layerOpacity={layerOpacity}
+                            handleOpacityChange={handleOpacityChange}
+                            title={layerTitle}
+                            description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
+                            handleZoomToLayer={handleZoomToLayer}
+                            layerId={layerId}
+                            url={typeNarrowedLayer.url}
+                        />
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
