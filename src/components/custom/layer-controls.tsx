@@ -46,6 +46,16 @@ const LayerControls: React.FC<LayerControlsProps> = ({
     return (
         <div className="flex flex-col space-y-4 mx-8">
             <div className="flex flex-col justify-between items-center w-full space-y-4">
+                <div className="flex flex-row items-center justify-around space-x-2 mt-2 w-full mx-auto">
+                    <Label htmlFor={`${title}-opacity`}>
+                        Opacity
+                    </Label>
+                    <Slider
+                        className="flex-grow"
+                        defaultValue={[layerOpacity * 100]}
+                        onValueChange={(e) => handleOpacityChange(e[0])}
+                    />
+                </div>
                 <div className="flex flex-col sm:flex-row justify-around items-center w-full space-y-4 sm:space-y-0">
                     <div className="flex flex-wrap justify-start sm:justify-start items-center sm:space-y-0 sm:space-x-4">
                         <Dialog>
@@ -76,16 +86,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                         </Button>
                     </div>
                 </div>
-                <div className="flex flex-row items-center justify-around space-x-2 w-full mx-auto">
-                    <Label htmlFor={`${title}-opacity`}>
-                        Opacity
-                    </Label>
-                    <Slider
-                        className="flex-grow"
-                        defaultValue={[layerOpacity * 100]}
-                        onValueChange={(e) => handleOpacityChange(e[0])}
-                    />
-                </div>
+
                 {/* TODO: Implement label visibility */}
                 {/* <div className="flex items-center justify-between space-x-2 w-full">
                 <Label htmlFor={`${title}-label-visibility`} className="mx-auto">
