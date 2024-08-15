@@ -4,7 +4,6 @@ import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionT
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapContext } from '@/context/map-provider';
 import { findLayerById } from '@/lib/mapping-utils';
-import { LegendAccordion } from './legend-accordion';
 
 interface LayerAccordionProps {
     layer: __esri.ListItem;
