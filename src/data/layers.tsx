@@ -973,45 +973,45 @@ const erosionZoneConfig: LayerProps = {
     },
 };
 
-const groundSubsidenceConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/11',
-    options: {
-        title: 'Ground Subsidence Potential',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/5/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'CSSMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/5/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/5/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const groundSubsidenceConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/11',
+//     options: {
+//         title: 'Ground Subsidence Potential',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/5/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'CSSMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/5/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/5/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
 const karstFeaturesConfig: LayerProps = {
     type: 'feature',
