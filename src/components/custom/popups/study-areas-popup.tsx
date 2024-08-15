@@ -64,4 +64,4 @@ const StudyAreasPopup: React.FC<{ graphic: __esri.Graphic }> = ({ graphic }) => 
     );
 };
 
-export default StudyAreasPopup;
+export { StudyAreasPopup };

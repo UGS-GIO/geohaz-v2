@@ -39,8 +39,6 @@ export default function Nav({
   const { currentContent, setCurrentContent } = useSidebar()
 
   useEffect(() => {
-    console.log('running useEffect', isCollapsed);
-
     if (isCollapsed) {
       setCurrentContent(null)
     }
