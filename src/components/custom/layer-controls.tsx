@@ -45,9 +45,9 @@ const LayerControls: React.FC<LayerControlsProps> = ({
     }
 
     return (
-        <div className="flex flex-col space-y-4 mx-8">
-            <div className="flex flex-col justify-between items-center w-full space-y-4">
-                <div className="flex flex-row items-center justify-around space-x-2 mt-2 w-full mx-auto">
+        <div className="flex flex-col gap-y-4 mx-8">
+            <div className="flex flex-col justify-between items-center w-full gap-y-4">
+                <div className="flex flex-row items-center justify-around gap-x-2 mt-2 w-full mx-auto">
                     <Label htmlFor={`${title}-opacity`}>
                         Opacity
                     </Label>
@@ -57,8 +57,8 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                         onValueChange={(e) => handleOpacityChange(e[0])}
                     />
                 </div>
-                <div className="flex flex-col sm:flex-row justify-around items-center w-full space-y-4 sm:space-y-0">
-                    <div className="flex flex-wrap justify-start sm:justify-start items-center sm:space-y-0 sm:space-x-4">
+                <div className="flex flex-col sm:flex-row justify-around items-center w-full gap-y-4 sm:gap-y-0">
+                    <div className="flex flex-wrap justify-start items-center gap-y-2 sm:gap-y-0 sm:gap-x-4">
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button variant="ghost" className="flex items-center">
@@ -81,10 +81,6 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                             <Shrink className="h-5 w-5 mr-2" />
                             <span>Zoom to</span>
                         </Button>
-                        {/* <Button ref={triggerButtonRef} variant="ghost" className="flex items-center" onClick={handleToggleLegend}>
-                            <TableOfContents className="h-5 w-5 mr-2" />
-                            <span>Legend</span>
-                        </Button> */}
                         <Toggle ref={triggerButtonRef} aria-label="Toggle italic" className="flex items-center" onClick={handleToggleLegend}>
                             <TableOfContents className="h-5 w-5 mr-2" />
                             <span>Legend</span>
@@ -93,7 +89,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                 </div>
 
                 {/* TODO: Implement label visibility */}
-                {/* <div className="flex items-center justify-between space-x-2 w-full">
+                {/* <div className="flex items-center justify-between gap-x-2 w-full">
                 <Label htmlFor={`${title}-label-visibility`} className="mx-auto">
                     Turn Labels {labelsVisible ? 'Off' : 'On'} (in progress)
                 </Label>
