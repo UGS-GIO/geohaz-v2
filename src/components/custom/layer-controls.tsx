@@ -1,4 +1,4 @@
-import { ChevronDown, Info, Shrink, TableOfContents } from 'lucide-react';
+import { Info, Shrink, TableOfContents } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { Button } from '@/components/custom/button';
 import {
