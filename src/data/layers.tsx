@@ -1,20 +1,21 @@
-import { LayerProps } from "@/lib/types/mapping-types";
+
 import CustomContent from "@arcgis/core/popup/content/CustomContent.js";
 import {
-    // rendererRecent,
-    // rendererMining,
     rendererLiquefaction,
     rendererBedrockPot,
     surfaceFaultRuptureRenderer,
     quadRenderer,
-    // colorize,
-    qFaultsRenderer
 } from "./renderers";
 import { createRoot } from "react-dom/client";
-import QFaultsPopup from "@/components/custom/popups/qfaults-popup";
-import StudyAreasPopup from "@/components/custom/popups/study-areas-popup";
-import LandslideSourcePopup from "@/components/custom/popups/landslide-source-popup";
-import LandslideCompPopup from "@/components/custom/popups/landslide-comp-popup";
+import { StudyAreasPopup } from "@/components/custom/popups/study-areas-popup";
+import { LandslideSourcePopup } from "@/components/custom/popups/landslide-source-popup";
+import { LandslideCompPopup } from "@/components/custom/popups/landslide-comp-popup";
+import { QFaultsPopup } from "@/components/custom/popups/qfaults-popup";
+import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
+import Graphic from "@arcgis/core/Graphic";
+import { Feature } from "geojson";
+
+const publicWorkspaceUrl = 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/ows';
 
 const landslideCompConfig: LayerProps = {
     type: 'feature',
@@ -236,37 +237,87 @@ const shakingVectorConfig: LayerProps = {
 //     },
 // };
 
-const qFaultsGeoJsonConfig: LayerProps = {
-    type: 'geojson',
-    url: 'https://pgfeatureserv-souochdo6a-wm.a.run.app/collections/hazards.quaternaryfaults/items.json',
-    options: {
-        title: 'Quaternary Faults',
-        outFields: ['faultname', 'faultzone', 'faultclass', 'faultage', 'sliprate', 'dipdirection', 'slipsense', 'mappedscale', 'citation', 'usgs_link', 'summary'],
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
-        popupTemplate: {
-            title: '<b>Hazardous (Quaternary age) Faults</b>',
-            content: [
-                new CustomContent({
-                    outFields: ['*'],
-                    creator: (event) => {
-                        const div = document.createElement('div');
-                        if (event) {
-                            const { graphic } = event
-                            const root = createRoot(div);
-                            root.render(
-                                <QFaultsPopup graphic={graphic} />
-                            );
-                        }
-                        return div;
-                    },
-                }),
-            ],
-        },
-        renderer: qFaultsRenderer,
+// Detect if the user is in dark mode
+// const isDarkMode = document.getElementById("root")?.classList.contains("dark");
 
-    },
+// Define the legend options based on the theme
+// const fontColor = isDarkMode ? '0xFFFFFF' : '0x000000'; // White for dark mode, black for light mode
+// const legendOptions = 'fontColor:0x00000;' +
+//     'dpi:120;' +
+//     'format:image/png;' +
+//     'fontStyle:bold;' +
+//     'fontAntiAliasing:true;' +
+//     'forceLabels:on;' +
+//     'forceRule:True;' +
+//     'fontName:SansSerif';
+
+const qFaultsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: publicWorkspaceUrl,
+    title: 'Quaternary Faults',
+    visible: true,
+    sublayers: [
+        {
+            name: 'quaternaryfaults',
+            popupEnabled: true,
+            queryable: true,
+            legendUrl: 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/wms?REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=public:quaternaryfaults',
+        },
+    ],
+    fetchFeatureInfoFunction: async (query) => {
+        // Assuming this function is defined within the WMSLayer scope
+        query.info_format = "application/json";
+
+        // Ensure featureInfoUrl is properly defined
+        const featureInfoUrl = `${qFaultsWMSConfig.url}?${new URLSearchParams(query).toString()}`;
+
+        try {
+            const response = await fetch(featureInfoUrl);
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+
+            console.log(data.features);
+
+
+            return data.features.map(
+                (feature: Feature) => new Graphic({
+                    attributes: feature.properties,
+                    popupTemplate: {
+                        outFields: ['*'],
+                        title: '<b>Quaternary Faults</b>',
+                        content: [
+                            new CustomContent({
+                                outFields: ['*'],
+                                creator: (event) => {
+                                    const div = document.createElement('div');
+                                    if (event) {
+                                        const { graphic } = event;
+                                        const root = createRoot(div);
+                                        root.render(
+                                            <QFaultsPopup graphic={graphic} />
+                                        );
+                                    }
+                                    return div;
+                                },
+                            }),
+                        ],
+                    },
+                })
+            );
+        } catch (error) {
+            console.error("Failed to fetch feature info:", error);
+            return [];
+        }
+    }
 };
+
+
+
+
 
 const faultRuptureConfig: LayerProps = {
     type: 'feature',
@@ -1109,7 +1160,7 @@ const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
     visible: true,
-    layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsGeoJsonConfig],
+    layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsWMSConfig],
 };
 
 const landslidesConfig: LayerProps = {

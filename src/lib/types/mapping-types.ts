@@ -6,16 +6,33 @@ import MapImageLayer from "@arcgis/core/layers/MapImageLayer"
 import TileLayer from "@arcgis/core/layers/TileLayer"
 import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
+import WMSLayer from "@arcgis/core/layers/WMSLayer";
 
-export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group' | 'geojson'
-export interface LayerProps {
-    type: LayerType
-    url?: string
-    options?: object
-    title?: string
-    visible?: boolean
-    layers?: LayerProps[]
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+interface BaseLayerProps {
+    type: 'feature' | 'tile' | 'map-image' | 'geojson' | 'imagery' | 'wms' | 'group';
+    url?: string;
+    title?: string;
+    visible?: boolean;
+    options?: any;
 }
+
+export interface WMSLayerProps extends BaseLayerProps {
+    type: 'wms';
+    fetchFeatureInfoFunction: __esri.FetchFeatureInfoFunction;
+    sublayers?: (__esri.CollectionProperties<__esri.SublayerProperties> & __esri.CollectionProperties<__esri.WMSSublayerProperties>) | undefined
+}
+
+export interface GroupLayerProps extends BaseLayerProps {
+    type: 'group';
+    layers?: LayerProps[];
+}
+
+
+export type LayerType = 'feature' | 'tile' | 'map-image' | 'imagery' | 'group' | 'geojson' | 'wms'
+
+export type LayerProps = WMSLayerProps | GroupLayerProps | BaseLayerProps;
 
 // Define a mapping of layer types to their corresponding classes
 export const layerTypeMapping = {
@@ -24,7 +41,8 @@ export const layerTypeMapping = {
     'map-image': MapImageLayer,
     'imagery': ImageryLayer,
     'group': GroupLayer,
-    'geojson': GeoJSONLayer
+    'geojson': GeoJSONLayer,
+    'wms': WMSLayer
     // Add other layer types here
 };
 
@@ -82,10 +100,11 @@ export type MapImageLayerType = {
 
 export type GetRenderer = (layerId: string, url: string | undefined) => Promise<RendererProps | undefined>;
 
+export type LayerConstructor = typeof FeatureLayer | typeof TileLayer | typeof GroupLayer | typeof MapImageLayer | typeof GeoJSONLayer | typeof ImageryLayer | typeof WMSLayer | undefined;
+
 export type UIPositionOptions = "bottom-leading" | "bottom-left" | "bottom-right" | "bottom-trailing" | "top-leading" | "top-left" | "top-right" | "top-trailing" | "manual"
 
 export type GetResultsHandlerType = { exactMatch: boolean, location: __esri.Point, maxResults: number, sourceIndex: number, spatialReference: __esri.SpatialReference, suggestResult: __esri.SuggestResult, view: __esri.MapView | __esri.SceneView }
 
 export type GetSuggestionsHandlerType = { exactMatch: boolean, location: __esri.Point, maxResults: number, sourceIndex: number, spatialReference: __esri.SpatialReference, suggestResult: __esri.SuggestResult, view: __esri.MapView | __esri.SceneView }
 
-export type LayerConstructor = typeof FeatureLayer | typeof TileLayer | typeof GroupLayer | typeof MapImageLayer | typeof GeoJSONLayer | typeof ImageryLayer | undefined;

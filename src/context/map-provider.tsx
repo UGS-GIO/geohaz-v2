@@ -4,7 +4,6 @@ import type MapView from "@arcgis/core/views/MapView";
 import LayerList from "@arcgis/core/widgets/LayerList";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 // import { useQuery } from "@tanstack/react-query";
-import { getRenderers } from "@/lib/mapping-utils";
 import { RendererProps } from "@/lib/types/mapping-types";
 
 
@@ -101,20 +100,10 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         setView(init(container, isMobile, 'map'))
     }
 
-    async function getRenderer(id: string, url: string): Promise<RendererProps | undefined> {
-        if (!view || !view.map) return;
-        const { renderers, mapImageRenderers } = await getRenderers(view, view.map as __esri.Map);
-        const RegularLayerRenderer = renderers.filter(renderer => renderer.id === id);
-        const MapImageLayerRenderer = mapImageRenderers.filter(renderer => renderer.url === url);
 
-        return {
-            MapImageLayerRenderer,
-            RegularLayerRenderer,
-        };
-    }
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, getRenderer, isMobile, setIsMobile /* , layerDescriptions */ }}>
+        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile /* , layerDescriptions */ }}>
             {children}
         </MapContext.Provider>
     )
