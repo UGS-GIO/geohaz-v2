@@ -30,6 +30,8 @@ const layers = [
 
 // Mock function to simulate fetching suggestions
 const fetchSuggestions = async (term: string, selectedLayer: string | null) => {
+  console.log(`Fetching suggestions for "${term}" in ${selectedLayer || "all layers"}`);
+
   // Implement logic to fetch suggestions based on term and layer
   return [
     `${term} Suggestion 1`,
@@ -58,6 +60,7 @@ export function SearchBar() {
   const handleSearch = async (term: string) => {
     const fetchedResults = await fetchResults(term, selectedLayer);
     setResults(fetchedResults);
+    console.log("Results:", results);
   };
 
   const handleSuggestions = async (term: string) => {
