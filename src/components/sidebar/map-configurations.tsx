@@ -29,7 +29,7 @@ function MapConfigurations() {
               <RadioGroupItem value="Decimal Degrees" id="decimal-degrees" className="peer sr-only" />
               <Label
                 htmlFor="decimal-degrees"
-                className="flex flex-1 items-center justify-center rounded-sm bg-popover p-2 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-primary-foreground"
+                className="flex flex-1 items-center justify-center rounded-sm bg-popover p-3 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-primary-foreground"
               >
                 Decimal Degrees
               </Label>
@@ -38,7 +38,7 @@ function MapConfigurations() {
               <RadioGroupItem value="Degrees, Minutes, Seconds" id="dms" className="peer sr-only" />
               <Label
                 htmlFor="dms"
-                className="flex flex-1 items-center justify-center rounded-sm bg-popover p-2 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-primary-foreground"
+                className="flex flex-1 items-center justify-center rounded-sm bg-popover p-3 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-primary-foreground"
               >
                 Degrees, Minutes, Seconds
               </Label>
