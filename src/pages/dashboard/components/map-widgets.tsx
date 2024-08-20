@@ -8,11 +8,11 @@ import BasemapGallery from "@arcgis/core/widgets/BasemapGallery.js";
 import { MapContext } from '@/context/map-provider';
 import Legend from '@arcgis/core/widgets/Legend';
 import Search from '@arcgis/core/widgets/Search';
-import Extent from "@arcgis/core/geometry/Extent.js";
-import SearchSource from "@arcgis/core/widgets/Search/SearchSource.js";
-import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
-import { fetchQFaultResults, fetchQFaultSuggestions } from '@/lib/mapping-utils';
-import { GetResultsHandlerType } from '@/lib/types/mapping-types';
+// import Extent from "@arcgis/core/geometry/Extent.js";
+// import SearchSource from "@arcgis/core/widgets/Search/SearchSource.js";
+// import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
+// import { fetchQFaultResults, fetchQFaultSuggestions } from '@/lib/mapping-utils';
+// import { GetResultsHandlerType } from '@/lib/types/mapping-types';
 
 // Base type for common widget configuration properties
 interface BaseWidgetConfig {
@@ -58,8 +58,7 @@ export type WidgetConfig = CoordinateFeatureConfig | BasemapExpandConfig | Legen
 
 const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
-    const qFaultsUrl = 'https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json';
-    // const qFaultsUrl = 'https://utahdnr.maps.arcgis.com/apps/mapviewer/index.html?webmap=ba6c07a7de014d3b9d077c600c38e9c5'; alternate to test with report generator
+    // const qFaultsUrl = 'https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json';
 
 
     const coordinateFeatureConfig: CoordinateFeatureConfig = {
@@ -85,49 +84,49 @@ const MapWidgets: React.FC = () => {
     };
 
 
-    const searchExpandConfig: SearchExpandConfig = {
-        id: 'search-expand',
-        view: view!,
-        content: new Search({
-            view: view!,
-            container: document.createElement('div'),
-            id: 'search-widget',
-            popupEnabled: false,
-            allPlaceholder: 'Address, place, or fault',
-            includeDefaultSources: false,
-            sources: [
-                {
-                    url: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
-                    singleLineFieldName: 'SingleLine',
-                    outFields: ['RegionAbbr'],
-                    name: 'Location Search',
-                    placeholder: 'Address or place',
-                    maxResults: 1000,
-                    filter: {
-                        geometry: new Extent({
-                            xmin: -114.05015918679902,
-                            ymin: 37.00019802842964,
-                            xmax: -109.07096511303821,
-                            ymax: 42.00611147170977,
-                            spatialReference: {
-                                wkid: 4326,
-                            },
-                        }),
-                    },
-                } as __esri.LocatorSearchSourceProperties,
-                new SearchSource({
-                    placeholder: 'ex: Wasatch Fault Zone',
-                    name: 'Fault Search',
-                    getSuggestions: (params) => fetchQFaultSuggestions(params, qFaultsUrl),
-                    getResults: async (params: GetResultsHandlerType) => fetchQFaultResults(params, qFaultsUrl),
-                    resultSymbol: new SimpleLineSymbol({
-                        color: 'red',
-                        width: 2,
-                    }),
-                } as __esri.LayerSearchSourceProperties),
-            ],
-        }),
-    };
+    // const searchExpandConfig: SearchExpandConfig = {
+    //     id: 'search-expand',
+    //     view: view!,
+    //     content: new Search({
+    //         view: view!,
+    //         container: document.createElement('div'),
+    //         id: 'search-widget',
+    //         popupEnabled: false,
+    //         allPlaceholder: 'Address, place, or fault',
+    //         includeDefaultSources: false,
+    //         sources: [
+    //             {
+    //                 url: 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer',
+    //                 singleLineFieldName: 'SingleLine',
+    //                 outFields: ['RegionAbbr'],
+    //                 name: 'Location Search',
+    //                 placeholder: 'Address or place',
+    //                 maxResults: 1000,
+    //                 filter: {
+    //                     geometry: new Extent({
+    //                         xmin: -114.05015918679902,
+    //                         ymin: 37.00019802842964,
+    //                         xmax: -109.07096511303821,
+    //                         ymax: 42.00611147170977,
+    //                         spatialReference: {
+    //                             wkid: 4326,
+    //                         },
+    //                     }),
+    //                 },
+    //             } as __esri.LocatorSearchSourceProperties,
+    //             new SearchSource({
+    //                 placeholder: 'ex: Wasatch Fault Zone',
+    //                 name: 'Fault Search',
+    //                 getSuggestions: (params) => fetchQFaultSuggestions(params, qFaultsUrl),
+    //                 getResults: async (params: GetResultsHandlerType) => fetchQFaultResults(params, qFaultsUrl),
+    //                 resultSymbol: new SimpleLineSymbol({
+    //                     color: 'red',
+    //                     width: 2,
+    //                 }),
+    //             } as __esri.LayerSearchSourceProperties),
+    //         ],
+    //     }),
+    // };
 
     useArcGISWidget([
         { WrappedWidget: Home, position: 'top-left' },
@@ -142,7 +141,7 @@ const MapWidgets: React.FC = () => {
             position: isMobile ? 'top-left' : 'top-right',
             config: basemapExpandConfig,
         },
-        { WrappedWidget: Expand, position: 'top-right', config: searchExpandConfig },
+        // { WrappedWidget: Expand, position: 'top-right', config: searchExpandConfig },
     ]);
 
     return null;
