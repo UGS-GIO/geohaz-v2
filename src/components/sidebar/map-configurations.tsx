@@ -19,7 +19,7 @@ function MapConfigurations() {
 
       <div className="mb-4">
         <h4 className="text-md font-medium mb-2">Location Coordinate Format</h4>
-        <div className="border border-secondary rounded-md p-2">
+        <div className="border border-secondary rounded-sm p-2">
           <RadioGroup
             value={coordFormat}
             onValueChange={handleCoordFormatChange}
@@ -29,7 +29,7 @@ function MapConfigurations() {
               <RadioGroupItem value="Decimal Degrees" id="decimal-degrees" className="peer sr-only" />
               <Label
                 htmlFor="decimal-degrees"
-                className="flex flex-1 items-center justify-center rounded-md border-2 border-muted bg-popover p-4 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-white"
+                className="flex flex-1 items-center justify-center rounded-sm bg-popover p-3 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-primary-foreground"
               >
                 Decimal Degrees
               </Label>
@@ -38,7 +38,7 @@ function MapConfigurations() {
               <RadioGroupItem value="Degrees, Minutes, Seconds" id="dms" className="peer sr-only" />
               <Label
                 htmlFor="dms"
-                className="flex flex-1 items-center justify-center rounded-md border-2 border-muted bg-popover p-4 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-white"
+                className="flex flex-1 items-center justify-center rounded-sm bg-popover p-3 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-primary-foreground"
               >
                 Degrees, Minutes, Seconds
               </Label>
