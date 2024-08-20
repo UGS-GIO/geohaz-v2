@@ -75,7 +75,9 @@ function SearchBar() {
     }
   }, [view]);
 
-  return <div ref={searchDivRef}></div>;
+  // add a dark grey border around the searchwidget
+  return <div className='border
+  ' ref={searchDivRef}></div>;
 
 }
 
