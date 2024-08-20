@@ -108,17 +108,17 @@ export default function Nav({
     >
       <TooltipProvider delayDuration={0}>
         {currentContent ? (
-          <div className="p-4">
-            <Button onClick={handleBackToMenu} variant="ghost" className="mb-4">
-              <ArrowLeft />&nbsp;Back to menu
-            </Button>
+          <div className="p-4 h-full">
             <Suspense fallback={<div><LoadingSpinner /></div>}>
+              <Button onClick={handleBackToMenu} variant="ghost">
+                <ArrowLeft />&nbsp;Back to menu
+              </Button>
               {DynamicComponent ? (
-                <div className='overflow-y-auto max-h-[calc(100vh-10rem)]'>
+                <div className='overflow-y-auto h-full'>
                   <DynamicComponent />
                 </div>
               ) : (
-                <div className='w-full flex justify-center mb-4'>
+                <div className='w-full flex justify-center'>
                   <LoadingSpinner />
                 </div>
               )}

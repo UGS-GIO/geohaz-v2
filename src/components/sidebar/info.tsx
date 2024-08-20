@@ -35,11 +35,8 @@ function Info() {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div
-        className="flex-grow ml-2 overflow-y-auto"
-        ref={contentRef}
-      >
+    <div className="flex flex-col justify-between h-full">
+      <div className="ml-2 overflow-y-auto" ref={contentRef}>
         <div className="mr-2" key="map-details-accordion">
           <Accordion type="multiple">
             <AccordionItem value="map-details-accordion-item-1">
@@ -56,13 +53,13 @@ function Info() {
             </AccordionItem>
           </Accordion>
           {!isMapDetailsExpanded && (
-            <div className="mx-2 my-2">
+            <div className="mx-2">
               {mapDetailsShortened}
             </div>
           )}
         </div>
 
-        <div className="mr-2 my-2" key="data-sources-accordion">
+        <div className="mr-2" key="data-sources-accordion">
           <Accordion type="multiple">
             <AccordionItem value="data-sources-accordion-item-1">
               <AccordionHeader onClick={toggleDataSources}>
@@ -78,7 +75,7 @@ function Info() {
             </AccordionItem>
           </Accordion>
           {!isDataSourcesExpanded && (
-            <div className="mx-2 my-2">
+            <div className="mx-2">
               {dataSourcesShortened}
             </div>
           )}
@@ -135,8 +132,8 @@ function Info() {
         </Dialog>
       </div>
 
-      <div className="flex-none flex justify-center space-x-4 m-4 border-t border-secondary">
-        <div className='p-4'>
+      <div className="flex justify-center space-x-4 border-t border-secondary">
+        <div className='py-8'>
           <Button
             onClick={() => setCurrentContent({
               title: 'Layers',
@@ -145,7 +142,6 @@ function Info() {
               componentPath: '/src/components/sidebar/layers',
               component: Layers
             })}
-            className="mb-2 md:mb-0"
           >
             Start Exploring
           </Button>
