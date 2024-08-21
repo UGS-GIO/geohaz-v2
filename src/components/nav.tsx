@@ -90,55 +90,20 @@ export default function Nav({
 
   return (
     <div className="flex flex-1" >
-      {/* Icons Column */}
-      <div className="hidden md:flex flex-col items-center gap-4 p-2 border-r-2" >
-        {
-          links.map((link, index) => {
-            if (link.href) {
-              return (
-                <Link
-                  key={index}
-                  to={link.href}
-                  className={cn(
-                    buttonVariants({
-                      variant: 'ghost',
-                      size: 'icon',
-                    }),
-                    'transition-transform duration-200 ease-in-out'
-                  )}
-                >
-                  {link.icon}
-                </Link>
-              )
-            }
-            return (
+      <div className="hidden md:flex flex-col items-center gap-4 p-2 border-r" >
 
-              <Button
-                key={index}
-                variant="ghost"
-                size="icon"
-                aria-label={link.title}
-                className={`transition-transform duration-200 ease-in-out ${isCollapsed ? '' : 'rotate-0'}`}
-                onClick={() => {
-                  console.log(link.title);
-                  setCurrentContent(link)
-
-                  if (isCollapsed) {
-                    setIsCollapsed(false)
-                  }
-
-                  if (!isCollapsed && currentContent?.title === link.title) {
-                    setCurrentContent(null)
-                    setIsCollapsed(true)
-                  }
-                }}
-              >
-                {link.icon}
-              </Button>
-            )
-          })
-        }
-      </div >
+        {links.map((link, index) => (
+          <NavLinkIcon
+            key={index}
+            link={link}
+            isCollapsed={isCollapsed}
+            currentContent={currentContent}
+            setIsCollapsed={setIsCollapsed}
+            setCurrentContent={setCurrentContent}
+            closeNav={closeNav}
+          />
+        ))}
+      </div>
       <div
         data-collapsed={isCollapsed}
         className={cn(
@@ -223,8 +188,8 @@ function NavLink({
           variant: 'ghost',
           size: 'sm',
         }),
-        'h-9 justify-start text-wrap rounded-none px-6',
-        subLink && 'h-8 w-full border-l border-l-slate-500 px-2'
+        'h-12 justify-start text-wrap rounded-none px-6',
+        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
@@ -238,8 +203,8 @@ function NavLink({
           variant: 'ghost',
           size: 'sm',
         }),
-        'h-9 justify-start text-wrap rounded-none px-6',
-        subLink && 'h-8 w-full border-l border-l-slate-500 px-2'
+        'h-12 justify-start text-wrap rounded-none px-6',
+        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
@@ -298,38 +263,67 @@ function NavLinkDropdown({
   )
 }
 
-function NavLinkIcon({
-  icon,
-  title,
-  componentPath,
-  component,
-  closeNav,
-  setCurrentContent,
+interface NavLinkIconProps {
+  link: SideLink
+  isCollapsed: boolean
+  currentContent: SideLink | null
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>
+  setCurrentContent: (content: SideLink | null) => void
+  closeNav: () => void
+}
+
+export function NavLinkIcon({
+  link,
   isCollapsed,
+  currentContent,
   setIsCollapsed,
-}: NavLinkProps) {
+  setCurrentContent,
+  closeNav,
+}: NavLinkIconProps) {
   const { checkActiveNav } = useCheckActiveNav()
 
   const handleClick = () => {
-    setIsCollapsed && setIsCollapsed(!isCollapsed)
-    setCurrentContent({ title, icon, componentPath, component })
-    closeNav()
+    if (link.href) {
+      closeNav()
+      return
+    }
+
+    if (isCollapsed) {
+      setIsCollapsed(false)
+    }
+
+    if (!isCollapsed && currentContent?.title === link.title) {
+      setCurrentContent(null)
+      setIsCollapsed(true)
+    } else {
+      setCurrentContent(link)
+    }
   }
 
-  return (
-    <button
-      onClick={handleClick}
+  return link.href ? (
+    <Link
+      to={link.href}
       className={cn(
         buttonVariants({
           variant: 'ghost',
-          size: 'sm',
+          size: 'icon',
         }),
-        'h-12 w-12 justify-center rounded-none'
+        'h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out'
       )}
-      aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
+      aria-current={checkActiveNav(link.componentPath ?? '') ? 'page' : undefined}
     >
-      {icon}
-    </button>
+      {link.icon}
+    </Link>
+  ) : (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label={link.title}
+      className={`h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out ${isCollapsed ? '' : 'rotate-0'}`}
+      onClick={handleClick}
+    >
+      {link.icon}
+    </Button>
   )
 }
 
