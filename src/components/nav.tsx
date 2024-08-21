@@ -58,17 +58,7 @@ export default function Nav({
     //     />
     //   )
 
-    if (isCollapsed)
-      return (
-        <NavLinkIcon
-          {...link}
-          key={key}
-          closeNav={closeNav}
-          setCurrentContent={setCurrentContent}
-          isCollapsed={isCollapsed}
-          setIsCollapsed={setIsCollapsed}
-        />
-      )
+    if (isCollapsed) return;
 
     if (link.sub)
       return (
@@ -99,38 +89,69 @@ export default function Nav({
     : null
 
   return (
-    <div
-      data-collapsed={isCollapsed}
-      className={cn(
-        'group border-b bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none',
-        className
-      )}
-    >
-      <TooltipProvider delayDuration={0}>
-        {currentContent ? (
-          <div className="p-4 h-full">
-            <Suspense fallback={<div><LoadingSpinner /></div>}>
-              <Button onClick={handleBackToMenu} variant="ghost">
-                <ArrowLeft />&nbsp;Back to menu
-              </Button>
-              {DynamicComponent ? (
-                <div className='overflow-y-auto h-full'>
-                  <DynamicComponent />
-                </div>
-              ) : (
-                <div className='w-full flex justify-center'>
-                  <LoadingSpinner />
-                </div>
-              )}
-            </Suspense>
-          </div>
-        ) : (
-          <nav className='grid gap-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
-            {links.map(renderLink)}
-          </nav>
+    <div className="flex flex-1" >
+      {/* Icons Column */}
+      <div className="hidden md:flex flex-col items-center gap-4 p-2 border-r-2" >
+        {
+          links.map((link, index) => (
+            <Button
+              key={index}
+              variant="ghost"
+              size="icon"
+              aria-label={link.title}
+              className={`transition-transform duration-200 ease-in-out ${isCollapsed ? '' : 'rotate-0'}`}
+              onClick={() => {
+                console.log(link.title);
+                setCurrentContent(link)
+
+                if (isCollapsed) {
+                  setIsCollapsed(false)
+                }
+
+                if (!isCollapsed && currentContent?.title === link.title) {
+                  setCurrentContent(null)
+                  setIsCollapsed(true)
+                }
+              }}
+            >
+              {link.icon}
+            </Button>
+          ))
+        }
+      </div >
+      <div
+        data-collapsed={isCollapsed}
+        className={cn(
+          'group border-b bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none',
+          className
         )}
-      </TooltipProvider>
-    </div>
+      >
+        <TooltipProvider delayDuration={0}>
+          {currentContent ? (
+            <div className="px-4 pb-4 h-full">
+              <Suspense fallback={<div><LoadingSpinner /></div>}>
+                <Button onClick={handleBackToMenu} variant="ghost">
+                  <ArrowLeft />&nbsp;Back to menu
+                </Button>
+                {DynamicComponent ? (
+                  <div className='overflow-y-auto h-full'>
+                    <DynamicComponent />
+                  </div>
+                ) : (
+                  <div className='w-full flex justify-center'>
+                    <LoadingSpinner />
+                  </div>
+                )}
+              </Suspense>
+            </div>
+          ) : (
+            <nav className='grid gap-4 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
+              {links.map(renderLink)}
+            </nav>
+          )}
+        </TooltipProvider>
+      </div>
+    </div >
   )
 }
 
@@ -164,7 +185,7 @@ function NavLink({
 
   const linkContent = (
     <>
-      <div className='mr-2'>{icon}</div>
+      <div className='block md:hidden mr-2'>{icon}</div>
       {title}
       {label && (
         <div className='ml-2 rounded-lg bg-primary px-1 text-[0.75rem] text-primary-foreground'>
@@ -182,8 +203,8 @@ function NavLink({
           variant: 'ghost',
           size: 'sm',
         }),
-        'h-12 justify-start text-wrap rounded-none px-6',
-        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
+        'h-9 justify-start text-wrap rounded-none px-6',
+        subLink && 'h-8 w-full border-l border-l-slate-500 px-2'
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
@@ -197,8 +218,8 @@ function NavLink({
           variant: 'ghost',
           size: 'sm',
         }),
-        'h-12 justify-start text-wrap rounded-none px-6',
-        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
+        'h-9 justify-start text-wrap rounded-none px-6',
+        subLink && 'h-8 w-full border-l border-l-slate-500 px-2'
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
