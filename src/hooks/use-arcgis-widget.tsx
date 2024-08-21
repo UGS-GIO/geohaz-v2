@@ -70,7 +70,7 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
         let lat = xyPoint.y;
         let lon = xyPoint.x;
 
-        if (isDecimalDegrees) {
+        if (!isDecimalDegrees) {
             lat = convertDDToDMS(parseFloat(xyPoint.y))
             lon = convertDDToDMS(parseFloat(xyPoint.x))
         }
