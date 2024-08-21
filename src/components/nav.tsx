@@ -93,30 +93,50 @@ export default function Nav({
       {/* Icons Column */}
       <div className="hidden md:flex flex-col items-center gap-4 p-2 border-r-2" >
         {
-          links.map((link, index) => (
-            <Button
-              key={index}
-              variant="ghost"
-              size="icon"
-              aria-label={link.title}
-              className={`transition-transform duration-200 ease-in-out ${isCollapsed ? '' : 'rotate-0'}`}
-              onClick={() => {
-                console.log(link.title);
-                setCurrentContent(link)
+          links.map((link, index) => {
+            if (link.href) {
+              return (
+                <Link
+                  key={index}
+                  to={link.href}
+                  className={cn(
+                    buttonVariants({
+                      variant: 'ghost',
+                      size: 'icon',
+                    }),
+                    'transition-transform duration-200 ease-in-out'
+                  )}
+                >
+                  {link.icon}
+                </Link>
+              )
+            }
+            return (
 
-                if (isCollapsed) {
-                  setIsCollapsed(false)
-                }
+              <Button
+                key={index}
+                variant="ghost"
+                size="icon"
+                aria-label={link.title}
+                className={`transition-transform duration-200 ease-in-out ${isCollapsed ? '' : 'rotate-0'}`}
+                onClick={() => {
+                  console.log(link.title);
+                  setCurrentContent(link)
 
-                if (!isCollapsed && currentContent?.title === link.title) {
-                  setCurrentContent(null)
-                  setIsCollapsed(true)
-                }
-              }}
-            >
-              {link.icon}
-            </Button>
-          ))
+                  if (isCollapsed) {
+                    setIsCollapsed(false)
+                  }
+
+                  if (!isCollapsed && currentContent?.title === link.title) {
+                    setCurrentContent(null)
+                    setIsCollapsed(true)
+                  }
+                }}
+              >
+                {link.icon}
+              </Button>
+            )
+          })
         }
       </div >
       <div
