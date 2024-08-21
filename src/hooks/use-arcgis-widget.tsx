@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useEffect, useRef, useContext, useCallback, useState } from "react";
+import { useEffect, useRef, useContext, useCallback } from "react";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import PopupTemplate from "@arcgis/core/PopupTemplate.js";
