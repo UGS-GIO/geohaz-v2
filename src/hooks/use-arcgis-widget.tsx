@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useEffect, useRef, useContext, useCallback } from "react";
+import { useEffect, useRef, useContext, useCallback, useState } from "react";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import PopupTemplate from "@arcgis/core/PopupTemplate.js";
@@ -8,6 +8,7 @@ import { MapContext } from "@/context/map-provider";
 import { addCommas } from "@/lib/utils";
 import { UIPositionOptions } from "@/lib/types/mapping-types";
 import { WidgetConfig } from "@/pages/dashboard/components/map-widgets";
+import { convertDDToDMS } from "@/lib/mapping-utils";
 
 // Define a type for the widget constructors
 type WidgetConstructor<T extends __esri.Widget> = new (args: any) => T;
@@ -35,7 +36,7 @@ function isFeatureWidget(widget: __esri.Widget): widget is __esri.Feature {
 }
 
 function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
-    const { view, isMobile } = useContext(MapContext);
+    const { view, isMobile, isDecimalDegrees } = useContext(MapContext);
     const widgetInstances = useRef<Map<symbol, __esri.Widget>>(new Map());
     const lastPointerPosition = useRef<{ x: string; y: string }>({
         x: "",
@@ -65,16 +66,21 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
     );
 
     // Function to update the popup template
-    const updatePopupTemplate = useCallback(
-        ({ widget, xyPoint, scale }: UpdatePopupTemplateTypes) => {
-            widget.graphic.popupTemplate = new PopupTemplate({
-                content: `Lat: ${xyPoint.y}, Lon: ${xyPoint.x}<br>Scale: 1:${addCommas(
-                    scale.toFixed(0)
-                )}`,
-            });
-        },
-        []
-    );
+    const updatePopupTemplate = useCallback(({ widget, xyPoint, scale }: UpdatePopupTemplateTypes) => {
+        let lat = xyPoint.y;
+        let lon = xyPoint.x;
+
+        if (isDecimalDegrees) {
+            lat = convertDDToDMS(parseFloat(xyPoint.y))
+            lon = convertDDToDMS(parseFloat(xyPoint.x))
+        }
+
+        widget.graphic.popupTemplate = new PopupTemplate({
+            content: `Lat: ${lat}, Lon: ${lon}<br>Scale: 1:${addCommas(
+                scale.toFixed(0)
+            )}`,
+        });
+    }, [isDecimalDegrees]);
 
     // Function to handle zoom and center events for mobile
     const handleMobileViewChange = useCallback(

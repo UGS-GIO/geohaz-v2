@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { MapContext } from '@/context/map-provider';
 
 function MapConfigurations() {
   const [coordFormat, setCoordFormat] = useState("Degrees, Minutes, Seconds");
+  const { setIsDecimalDegrees } = useContext(MapContext);
 
   const handleCoordFormatChange = (value: string) => {
-    if (value) {
+    if (value && setIsDecimalDegrees) {
       setCoordFormat(value);
+      setIsDecimalDegrees(value === "Decimal Degrees");
     }
   };
 

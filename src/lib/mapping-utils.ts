@@ -480,3 +480,11 @@ export const fetchQFaultResults = async (params: GetResultsHandlerType, url: str
         target: target
     }];
 };
+
+export const convertDDToDMS = (D: number): string => {
+    const degrees = Math.floor(D);
+    const minutes = Math.floor((D < 0 ? -D : D) % 1 * 60);
+    const seconds = Math.floor(D * 60 % 1 * 60);
+
+    return `${degrees}\xB0 ${minutes}' ${seconds}"`; // "\xB0" is the special JS char for the degree symbol
+}
