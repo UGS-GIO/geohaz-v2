@@ -1,4 +1,4 @@
-import { FileText, Info as InfoIcon, Layers as LayersIcon, Route, Settings } from 'lucide-react'
+import { FileText, House, Info as InfoIcon, Layers as LayersIcon, Route, Settings } from 'lucide-react'
 import Info from '../components/sidebar/info'
 import Layers from '../components/sidebar/layers'
 import MapConfigurations from '@/components/sidebar/map-configurations'
@@ -18,6 +18,11 @@ export interface SideLink extends NavLink {
 }
 
 export const sidelinks: SideLink[] = [
+  {
+    title: 'Home',
+    label: '',
+    icon: <House />,
+  },
   {
     title: 'Info',
     label: '',

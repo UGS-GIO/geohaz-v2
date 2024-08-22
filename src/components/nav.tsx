@@ -115,7 +115,7 @@ export default function Nav({
           {currentContent ? (
             <div className="px-4 pb-4 h-full">
               <Suspense fallback={<div><LoadingSpinner /></div>}>
-                <Button onClick={handleBackToMenu} variant="ghost">
+                <Button onClick={handleBackToMenu} variant="ghost" className={cn('md:hidden')}>
                   <ArrowLeft />&nbsp;Back to menu
                 </Button>
                 {DynamicComponent ? (
@@ -189,7 +189,8 @@ function NavLink({
           size: 'sm',
         }),
         'h-12 justify-start text-wrap rounded-none px-6',
-        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
+        subLink && 'h-10 w-full border-l border-l-slate-500 px-2',
+        title === 'Home' ? 'hidden md:flex' : '' // hide Home on mobile
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
@@ -204,7 +205,8 @@ function NavLink({
           size: 'sm',
         }),
         'h-12 justify-start text-wrap rounded-none px-6',
-        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
+        subLink && 'h-10 w-full border-l border-l-slate-500 px-2',
+        title === 'Home' ? 'hidden md:flex' : '' // hide Home on mobile
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
@@ -281,8 +283,26 @@ export function NavLinkIcon({
   closeNav,
 }: NavLinkIconProps) {
   const { checkActiveNav } = useCheckActiveNav()
-
   const handleClick = () => {
+
+    // special case for Home
+    if (link.title === 'Home') {
+      if (isCollapsed) { // if the nav is collapsed, open it
+        // meets condition if click home and the nav is closed
+        setIsCollapsed(false)
+        // check if there is a title attribute, Home doesn't have a title attribute, if we click Home again, we want to close the nav
+      } else if (!isCollapsed && currentContent?.title !== undefined) {
+        // meets condition if on a menu item component and clicking Home
+        setCurrentContent(null)
+      } else { // if the nav is open, close it
+        // meets condition if on Home and clicking Home
+        setCurrentContent(null)
+        setIsCollapsed(true)
+      }
+      setCurrentContent(null)
+      return
+    }
+
     if (link.href) {
       closeNav()
       return
