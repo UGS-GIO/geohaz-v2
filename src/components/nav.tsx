@@ -90,7 +90,7 @@ export default function Nav({
 
   return (
     <div className="flex flex-1" >
-      <div className="hidden md:flex flex-col items-center gap-4 p-2 border-r" >
+      <div className="hidden md:flex flex-col items-center gap-4 pt-2 border-r" >
 
         {links.map((link, index) => (
           <NavLinkIcon
