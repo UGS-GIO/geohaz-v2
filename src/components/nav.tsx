@@ -8,10 +8,10 @@ import {
 
 // todo add tooltip functionality back
 import {
-  // Tooltip,
-  // TooltipContent,
+  Tooltip,
+  TooltipContent,
   TooltipProvider,
-  // TooltipTrigger,
+  TooltipTrigger,
 } from './ui/tooltip'
 import { cn } from '@/lib/utils'
 import useCheckActiveNav from '@/hooks/use-check-active-nav'
@@ -76,6 +76,8 @@ export default function Nav({
         key={key}
         closeNav={closeNav}
         setCurrentContent={setCurrentContent}
+        currentContent={currentContent}
+        isCollapsed={isCollapsed}
       />
     )
   }
@@ -91,7 +93,6 @@ export default function Nav({
   return (
     <div className="flex flex-1" >
       <div className="hidden md:flex flex-col items-center gap-4 pt-2 border-r" >
-
         {links.map((link, index) => (
           <NavLinkIcon
             key={index}
@@ -146,6 +147,7 @@ interface NavLinkProps extends SideLink {
   isCollapsed?: boolean
   href?: string
   setIsCollapsed?: React.Dispatch<React.SetStateAction<boolean>>
+  currentContent?: SideLink | null
   setCurrentContent: (content: SideLink) => void
 }
 
@@ -159,10 +161,15 @@ function NavLink({
   // closeNav,
   subLink = false,
   setCurrentContent,
+  isCollapsed,
+  currentContent
 }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav()
 
   const handleClick = () => {
+    if (title === 'Home') {
+      return
+    }
     if (!href) {
       setCurrentContent({ title, icon, label, componentPath, component })
     }
@@ -190,7 +197,7 @@ function NavLink({
         }),
         'h-12 justify-start text-wrap rounded-none px-6',
         subLink && 'h-10 w-full border-l border-l-slate-500 px-2',
-        title === 'Home' ? 'hidden md:flex' : '' // hide Home on mobile
+        title === 'Home' ? 'hidden md:flex' : '' // hide Home on mobile,
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
@@ -206,7 +213,9 @@ function NavLink({
         }),
         'h-12 justify-start text-wrap rounded-none px-6',
         subLink && 'h-10 w-full border-l border-l-slate-500 px-2',
-        title === 'Home' ? 'hidden md:flex' : '' // hide Home on mobile
+        title === 'Home' ? 'hidden md:flex' : '', // hide Home on mobile
+        title === 'Home' && !currentContent && !isCollapsed ? 'bg-accent text-accent-foreground' : ''
+
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
@@ -319,6 +328,7 @@ export function NavLinkIcon({
       setCurrentContent(link)
     }
   }
+  console.log('link title', link.title)
 
   return link.href ? (
     <Link
@@ -328,22 +338,47 @@ export function NavLinkIcon({
           variant: 'ghost',
           size: 'icon',
         }),
-        'h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out'
+        'h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out',
+        // checkActiveNav(link.title ?? '') ? 'bg-accent text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground'
+
       )}
       aria-current={checkActiveNav(link.componentPath ?? '') ? 'page' : undefined}
     >
-      {link.icon}
+      {/* {link.icon} */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {link.icon}
+          </TooltipTrigger>
+          <TooltipContent side='right' className="z-50">
+            <p>{link.title}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </Link>
   ) : (
     <Button
       variant="ghost"
       size="icon"
       aria-label={link.title}
-      className={`h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out ${isCollapsed ? '' : 'rotate-0'}`}
+      className={cn('h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out',
+        isCollapsed ? '' : 'rotate-0',
+        checkActiveNav(link.title ?? '') ? 'bg-accent text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground', // hover when active
+        // home can be active when currentContent is null
+        link.title === 'Home' && !currentContent && !isCollapsed ? 'bg-accent text-accent-foreground' : ''
+      )}
       onClick={handleClick}
     >
-      {link.icon}
-    </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {link.icon}
+          </TooltipTrigger>
+          <TooltipContent side='right' className="z-50">
+            <p>{link.title}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>    </Button>
   )
 }
 
