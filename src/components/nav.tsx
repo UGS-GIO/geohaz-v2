@@ -353,7 +353,7 @@ export function NavLinkIcon({
           </TooltipTrigger>
           <TooltipContent side='right' className="z-50 bg-secondary text-base">
             <p>{link.title}</p>
-            <TooltipArrow className="fill-current text-primary" />
+            <TooltipArrow className="fill-current text-secondary" />
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
