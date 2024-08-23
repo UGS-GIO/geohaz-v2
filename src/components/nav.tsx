@@ -12,6 +12,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TooltipArrow
 } from './ui/tooltip'
 import { cn } from '@/lib/utils'
 import useCheckActiveNav from '@/hooks/use-check-active-nav'
@@ -350,8 +351,9 @@ export function NavLinkIcon({
           <TooltipTrigger asChild>
             {link.icon}
           </TooltipTrigger>
-          <TooltipContent side='right' className="z-50">
+          <TooltipContent side='right' className="z-50 bg-secondary text-base">
             <p>{link.title}</p>
+            <TooltipArrow className="fill-current text-primary" />
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -361,7 +363,7 @@ export function NavLinkIcon({
       variant="ghost"
       size="icon"
       aria-label={link.title}
-      className={cn('h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out',
+      className={cn('h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out z-50',
         isCollapsed ? '' : 'rotate-0',
         checkActiveNav(link.title ?? '') ? 'bg-accent text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground', // hover when active
         // home can be active when currentContent is null
@@ -374,11 +376,13 @@ export function NavLinkIcon({
           <TooltipTrigger asChild>
             {link.icon}
           </TooltipTrigger>
-          <TooltipContent side='right' className="z-50">
+          <TooltipContent side='right' className="z-50 bg-secondary text-base">
             <p>{link.title}</p>
+            <TooltipArrow className="fill-current text-secondary" />
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider>    </Button>
+      </TooltipProvider>
+    </Button>
   )
 }
 
