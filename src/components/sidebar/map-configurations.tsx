@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { MapContext } from '@/context/map-provider';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 function MapConfigurations() {
   const [coordFormat, setCoordFormat] = useState("Degrees, Minutes, Seconds");
