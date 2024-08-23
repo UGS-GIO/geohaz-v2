@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { MapContext } from '@/context/map-provider';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 function MapConfigurations() {
   const [coordFormat, setCoordFormat] = useState("Degrees, Minutes, Seconds");
@@ -19,10 +20,14 @@ function MapConfigurations() {
       <div className="mb-4">
         <h3 className="text-lg font-medium mb-2">Map Configurations</h3>
       </div>
-
-      <div className="mb-4">
-        <h4 className="text-md font-medium mb-2">Location Coordinate Format</h4>
-        <div className="border border-secondary rounded-sm p-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Location Coordinate Format
+          </CardTitle>
+          {/* <CardDescription>Choose a coordinate format to toggle between decimal degrees and degrees, minutes, seconds.</CardDescription> */}
+        </CardHeader>
+        <CardContent>
           <RadioGroup
             value={coordFormat}
             onValueChange={handleCoordFormatChange}
@@ -47,8 +52,8 @@ function MapConfigurations() {
               </Label>
             </div>
           </RadioGroup>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
