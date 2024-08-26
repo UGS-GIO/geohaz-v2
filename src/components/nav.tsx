@@ -83,9 +83,6 @@ export default function Nav({
     )
   }
 
-  const handleBackToMenu = () => {
-    setCurrentContent(null)
-  }
 
   const DynamicComponent = currentContent?.component
     ? currentContent?.component
@@ -117,9 +114,6 @@ export default function Nav({
           {currentContent ? (
             <div className="px-4 pb-4 h-full">
               <Suspense fallback={<div><LoadingSpinner /></div>}>
-                <Button onClick={handleBackToMenu} variant="ghost" className={cn('md:hidden')}>
-                  <ArrowLeft />&nbsp;Back to menu
-                </Button>
                 {DynamicComponent ? (
                   <div className='overflow-y-auto h-full'>
                     <DynamicComponent />
