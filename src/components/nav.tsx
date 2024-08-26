@@ -19,7 +19,7 @@ import useCheckActiveNav from '@/hooks/use-check-active-nav'
 import { SideLink } from '@/data/sidelinks'
 import { Suspense, useEffect } from 'react'
 import { useSidebar } from '@/hooks/use-sidebar'
-import { ArrowLeft, ChevronLeft } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { LoadingSpinner } from './custom/loading-spinner'
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
