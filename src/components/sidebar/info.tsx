@@ -6,6 +6,7 @@ import { Button } from '../custom/button';
 import { useSidebar } from '@/hooks/use-sidebar';
 import Layers from '@/components/sidebar/layers';
 import { acknowledgements, dataDisclaimer, dataSources, dataSourcesShortened, mapDetails, mapDetailsShortened, references } from '@/data/website-info';
+import { BackToMenuButton } from '../custom/back-to-menu-button';
 
 function Info() {
   type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | ''
@@ -35,8 +36,9 @@ function Info() {
   };
 
   return (
-    <div className="flex flex-col justify-between h-full">
-      <div className="ml-2 overflow-y-auto" ref={contentRef}>
+    <div className="flex flex-col h-full">
+      <BackToMenuButton />
+      <div className="ml-2 overflow-y-auto flex-grow" ref={contentRef}>
         <div className="mr-2" key="map-details-accordion">
           <Accordion type="multiple">
             <AccordionItem value="map-details-accordion-item-1">
@@ -53,7 +55,7 @@ function Info() {
             </AccordionItem>
           </Accordion>
           {!isMapDetailsExpanded && (
-            <div className="mx-2">
+            <div>
               {mapDetailsShortened}
             </div>
           )}
@@ -75,7 +77,7 @@ function Info() {
             </AccordionItem>
           </Accordion>
           {!isDataSourcesExpanded && (
-            <div className="mx-2">
+            <div>
               {dataSourcesShortened}
             </div>
           )}
@@ -133,7 +135,7 @@ function Info() {
       </div>
 
       <div className="flex justify-center space-x-4 border-t border-secondary">
-        <div className='py-8'>
+        <div className='pt-6'>
           <Button
             onClick={() => setCurrentContent({
               title: 'Layers',

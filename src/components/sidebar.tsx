@@ -95,8 +95,10 @@ export default function Sidebar({
         {/* Navigation links */}
         <Nav
           id='sidebar-menu'
-          className={`z-40 h-full flex-1 overflow-hidden ${navOpened ? 'max-h-screen' : 'max-h-0 py-0 md:max-h-screen md:py-2'
-            }`}
+          className={cn(
+            'h-full flex-1 overflow-hidden z-40',
+            navOpened ? 'max-h-screen' : 'max-h-0 py-0 md:max-h-screen md:py-2'
+          )}
           closeNav={() => setNavOpened(!navOpened)}
           isCollapsed={isCollapsed}
           setIsCollapsed={setIsCollapsed}
@@ -108,7 +110,7 @@ export default function Sidebar({
           onClick={() => setIsCollapsed((prev) => !prev)}
           size='icon'
           variant='outline'
-          className='absolute -right-5 top-1/2 z-50 hidden rounded-none md:inline-flex w-6'
+          className='absolute -right-5 top-1/2 z-40 hidden rounded-none md:inline-flex w-6'
         >
           <IconChevronsLeft
             stroke={1.5}
