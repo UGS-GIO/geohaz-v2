@@ -21,25 +21,25 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Home',
     label: '',
-    icon: <House />,
+    icon: <House className='stroke-foreground' />,
   },
   {
     title: 'Info',
     label: '',
-    icon: <InfoIcon />,
+    icon: <InfoIcon className='stroke-foreground' />,
     component: Info, // Direct component reference
     componentPath: 'src/components/sidebar/info.tsx',
   },
   {
     title: 'Layers',
     label: '',
-    icon: <LayersIcon />,
+    icon: <LayersIcon className='stroke-foreground' />,
     component: Layers, // Direct component reference
   },
   {
     title: 'Map Configurations',
     label: '',
-    icon: <Settings />,
+    icon: <Settings className='stroke-foreground' />,
     component: MapConfigurations, // Direct component reference
   },
   // {
@@ -51,7 +51,7 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Report Generator',
     label: 'new!',
-    icon: <FileText size={18} />,
+    icon: <FileText className='stroke-foreground' size={18} />,
     component: ReportGenerator,
 
 
@@ -60,7 +60,7 @@ export const sidelinks: SideLink[] = [
     title: 'Utah Geology Homepage',
     label: 'we can route outside the app by providing an href attribute',
     href: 'https://geology.utah.gov/',
-    icon: <Route size={18} />,
+    icon: <Route className='stroke-foreground' size={18} />,
     // This link is external and does not need a component
   }
 ];

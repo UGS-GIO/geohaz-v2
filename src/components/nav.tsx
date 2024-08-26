@@ -215,7 +215,7 @@ function NavLink({
         'h-12 justify-start text-wrap rounded-none px-6',
         subLink && 'h-10 w-full border-l border-l-slate-500 px-2',
         title === 'Home' ? 'hidden md:flex' : '', // hide Home on mobile
-        title === 'Home' && !currentContent && !isCollapsed ? 'bg-accent text-accent-foreground' : ''
+        title === 'Home' && !currentContent && !isCollapsed ? 'underline' : ''
 
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
@@ -365,8 +365,7 @@ export function NavLinkIcon({
       aria-label={link.title}
       className={cn('h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out z-50',
         isCollapsed ? '' : 'rotate-0',
-        checkActiveNav(link.title ?? '') ? 'bg-accent text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground', // hover when active
-        // home can be active when currentContent is null
+        checkActiveNav(link.title ?? '') ? 'bg-accent text-primary-foreground text-white dark:text-black' : 'hover:bg-accent hover:text-accent-foreground',        // home can be active when currentContent is null
         link.title === 'Home' && !currentContent && !isCollapsed ? 'bg-accent text-accent-foreground' : ''
       )}
       onClick={handleClick}
