@@ -1,14 +1,13 @@
-import { useLocation } from 'react-router-dom'
+import { useSidebar } from '@/hooks/use-sidebar'
 
 export default function useCheckActiveNav() {
-  const { pathname } = useLocation()
+  const { currentContent } = useSidebar()
+
 
   const checkActiveNav = (nav: string) => {
-    const pathArray = pathname.split('/').filter((item) => item !== '')
+    if (!currentContent) return false
 
-    if (nav === '/' && pathArray.length < 1) return true
-
-    return pathArray.includes(nav.replace(/^\//, ''))
+    return currentContent.title === nav
   }
 
   return { checkActiveNav }
