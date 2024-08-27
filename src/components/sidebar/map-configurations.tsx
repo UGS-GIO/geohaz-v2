@@ -19,7 +19,7 @@ function MapConfigurations() {
   return (
     <>
       <BackToMenuButton />
-      <div className="p-4">
+      <div>
         <div className="mb-4">
           <h3 className="text-lg font-medium mb-2">Map Configurations</h3>
         </div>

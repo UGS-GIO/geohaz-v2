@@ -11,7 +11,7 @@ function Layers() {
   return (
     <>
       <BackToMenuButton />
-      <div key='layer-list' className='ml-2 overflow-y-visible max-h-[calc(100vh)]    '>
+      <div key='layer-list' className='overflow-y-visible max-h-[calc(100vh)]'>
         {layerList}
       </div>
     </>
