@@ -18,9 +18,9 @@ import { cn } from '@/lib/utils'
 import useCheckActiveNav from '@/hooks/use-check-active-nav'
 import { SideLink } from '@/data/sidelinks'
 import { Suspense, useEffect } from 'react'
-import { useSidebar } from '@/hooks/use-sidebar'
 import { ChevronLeft } from 'lucide-react'
 import { LoadingSpinner } from './custom/loading-spinner'
+import { useSidebar } from '@/hooks/use-sidebar'
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean
@@ -323,7 +323,6 @@ export function NavLinkIcon({
       setCurrentContent(link)
     }
   }
-  console.log('link title', link.title)
 
   return link.href ? (
     <Link

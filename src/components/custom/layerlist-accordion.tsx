@@ -4,6 +4,7 @@ import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionT
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapContext } from '@/context/map-provider';
 import { findLayerById } from '@/lib/mapping-utils';
+import { useSidebar } from '@/hooks/use-sidebar';
 
 interface LayerAccordionProps {
     layer: __esri.ListItem;
@@ -17,6 +18,8 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const [layerVisibility, setLayerVisibility] = useState<boolean>(layer.layer.visible);
     const [layerOpacity, setLayerOpacity] = useState<number>(layer.layer.opacity || 1);
     const typeNarrowedLayer = layer.layer as __esri.FeatureLayer | __esri.MapImageLayer | __esri.WMSLayer;
+    const isMobile = window.innerWidth < 768;
+    const { setIsCollapsed, setNavOpened } = useSidebar();
 
     useEffect(() => {
         if (activeLayers && layerId) {
@@ -48,6 +51,17 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const handleZoomToLayer = () => {
         if (currentLayer && currentLayer.layer.fullExtent) {
             view?.goTo(currentLayer.layer.fullExtent);
+
+            if (isMobile) {
+                // Mobile-specific action (close the layer list)
+                console.log("Closing layer list on mobile");
+                // Implement the logic to close the layer list here
+                setIsCollapsed(true);
+                setNavOpened(false);
+            } else {
+                // Desktop-specific action
+                console.log("Zooming to layer on desktop");
+            }
         }
     };
 

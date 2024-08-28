@@ -3,10 +3,10 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ExternalLink, Layers as LayersIcon } from 'lucide-react';
 import { Button } from '../custom/button';
-import { useSidebar } from '@/hooks/use-sidebar';
 import Layers from '@/components/sidebar/layers';
 import { acknowledgements, dataDisclaimer, dataSources, dataSourcesShortened, mapDetails, mapDetailsShortened, references } from '@/data/website-info';
 import { BackToMenuButton } from '../custom/back-to-menu-button';
+import { useSidebar } from '@/hooks/use-sidebar';
 
 function Info() {
   type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | ''
