@@ -53,14 +53,9 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
             view?.goTo(currentLayer.layer.fullExtent);
 
             if (isMobile) {
-                // Mobile-specific action (close the layer list)
-                console.log("Closing layer list on mobile");
-                // Implement the logic to close the layer list here
+                // if on mobile, collapse the sidebar and close the nav
                 setIsCollapsed(true);
                 setNavOpened(false);
-            } else {
-                // Desktop-specific action
-                console.log("Zooming to layer on desktop");
             }
         }
     };

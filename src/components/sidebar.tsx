@@ -7,10 +7,7 @@ import { cn } from '@/lib/utils';
 import { sidelinks } from '@/data/sidelinks';
 import { useSidebar } from '@/hooks/use-sidebar';
 
-interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
-  // isCollapsed?: boolean | undefined;
-  // setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
-}
+interface SidebarProps extends React.HTMLAttributes<HTMLElement> { }
 
 export default function Sidebar({
   className,
