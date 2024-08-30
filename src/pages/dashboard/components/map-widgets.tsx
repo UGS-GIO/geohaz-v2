@@ -3,11 +3,7 @@ import Home from '@arcgis/core/widgets/Home';
 import Locate from '@arcgis/core/widgets/Locate';
 import useArcGISWidget from '@/hooks/use-arcgis-widget';
 import Feature from "@arcgis/core/widgets/Feature.js";
-import Expand from '@arcgis/core/widgets/Expand';
-import BasemapGallery from "@arcgis/core/widgets/BasemapGallery.js";
 import { MapContext } from '@/context/map-provider';
-import Legend from '@arcgis/core/widgets/Legend';
-import Search from '@arcgis/core/widgets/Search';
 // import Extent from "@arcgis/core/geometry/Extent.js";
 // import SearchSource from "@arcgis/core/widgets/Search/SearchSource.js";
 // import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
@@ -32,21 +28,8 @@ interface CoordinateFeatureConfig extends BaseWidgetConfig {
     spatialReference: __esri.SpatialReference | undefined;
 }
 
-interface BasemapExpandConfig extends BaseWidgetConfig {
-    content: BasemapGallery;
-}
-
-interface LegendExpandConfig extends BaseWidgetConfig {
-    expanded: boolean;
-    content: Legend;
-}
-
-interface SearchExpandConfig extends BaseWidgetConfig {
-    content: Search;
-}
-
 // Union type for all widget configurations
-export type WidgetConfig = CoordinateFeatureConfig | BasemapExpandConfig | LegendExpandConfig | SearchExpandConfig;
+export type WidgetConfig = CoordinateFeatureConfig
 
 // ArcGISWidgetProps type using the WidgetConfig union
 // interface ArcGISWidgetProps {
@@ -72,17 +55,6 @@ const MapWidgets: React.FC = () => {
         map: view?.map,
         spatialReference: view?.spatialReference,
     };
-
-    const basemapExpandConfig: BasemapExpandConfig = {
-        id: 'basemap-gallery-expand',
-        view: view!,
-        content: new BasemapGallery({
-            view: view!,
-            container: document.createElement('div'),
-            id: 'basemap-gallery-widget',
-        }),
-    };
-
 
     // const searchExpandConfig: SearchExpandConfig = {
     //     id: 'search-expand',
@@ -135,11 +107,6 @@ const MapWidgets: React.FC = () => {
             WrappedWidget: Feature,
             position: isMobile ? 'top-right' : 'bottom-right',
             config: coordinateFeatureConfig,
-        },
-        {
-            WrappedWidget: Expand,
-            position: isMobile ? 'top-left' : 'top-right',
-            config: basemapExpandConfig,
         },
         // { WrappedWidget: Expand, position: 'top-right', config: searchExpandConfig },
     ]);
