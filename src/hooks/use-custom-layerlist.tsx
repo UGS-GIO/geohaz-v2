@@ -25,22 +25,9 @@ const useGroupLayerVisibility = (activeLayers: __esri.Collection<__esri.ListItem
         }
     }, [activeLayers]);
 
-    useEffect(() => {
-        console.log('what is groupLayerVisibility', groupLayerVisibility);
-
-        return () => {
-            console.log('cleaning up groupLayerVisibility');
-        };
-    }, [groupLayerVisibility]);
-
-
     // Memoized handler for toggling visibility
     const handleGroupLayerVisibilityToggle = useCallback((layerId: string) => {
-        console.log('executing handleGroupLayerVisibilityToggle');
-
         return (newVisibility: boolean) => {
-            console.log('setting visibility for layer', layerId, newVisibility);
-
             setGroupLayerVisibility(prevState => ({
                 ...prevState,
                 [layerId]: newVisibility
@@ -170,14 +157,8 @@ const useCustomLayerList = () => {
     // Use the custom hook for managing group layer visibility
     const { groupLayerVisibility, handleGroupLayerVisibilityToggle } = useGroupLayerVisibility(activeLayers);
 
-    useEffect(() => {
-        console.log('gadnklgdkln;amgklndanklagdnklagnlkgadklngadlnkagdlnkgdgdklnagndkla', groupLayerVisibility);
-    }, [groupLayerVisibility]);
-
     // Effect for updating the layer list
     useEffect(() => {
-        console.log('running useCustomLayerList effect');
-
         if (activeLayers) {
             const list = activeLayers.map((layer, index) => {
                 if (layer.layer.type === 'group') {
