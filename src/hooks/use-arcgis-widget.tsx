@@ -7,7 +7,6 @@ import PopupTemplate from "@arcgis/core/PopupTemplate.js";
 import { MapContext } from "@/context/map-provider";
 import { addCommas } from "@/lib/utils";
 import { UIPositionOptions } from "@/lib/types/mapping-types";
-import { WidgetConfig } from "@/pages/dashboard/components/map-widgets";
 import { convertDDToDMS } from "@/lib/mapping-utils";
 
 // Define a type for the widget constructors
@@ -16,7 +15,7 @@ type WidgetConstructor<T extends __esri.Widget> = new (args: any) => T;
 interface ArcGISWidgetProps {
     WrappedWidget: WidgetConstructor<__esri.Widget>;
     position?: UIPositionOptions;
-    config?: WidgetConfig; // Use `unknown` instead of `any`
+    config?: object; // Use `unknown` instead of `any`
 }
 
 interface FeatureHandleTypes {
@@ -48,7 +47,7 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
         (
             WrappedWidget: WidgetConstructor<__esri.Widget>,
             position: UIPositionOptions,
-            config: WidgetConfig | object = {}
+            config: object = {}
         ) => {
 
             const widget = new WrappedWidget({
