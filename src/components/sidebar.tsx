@@ -1,22 +1,18 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { IconChevronsLeft, IconMenu2, IconX } from '@tabler/icons-react';
 import { Layout } from './custom/layout';
 import { Button } from './custom/button';
 import Nav from './nav';
 import { cn } from '@/lib/utils';
 import { sidelinks } from '@/data/sidelinks';
+import { useSidebar } from '@/hooks/use-sidebar';
 
-interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
-  isCollapsed: boolean;
-  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
-}
+interface SidebarProps extends React.HTMLAttributes<HTMLElement> { }
 
 export default function Sidebar({
   className,
-  isCollapsed,
-  setIsCollapsed,
 }: SidebarProps) {
-  const [navOpened, setNavOpened] = useState(false);
+  const { navOpened, setNavOpened, isCollapsed, setIsCollapsed } = useSidebar();
   const transitionDuration = 700; // Duration in milliseconds
   const isTransitioning = useRef(false); // Ref to manage transition state
 

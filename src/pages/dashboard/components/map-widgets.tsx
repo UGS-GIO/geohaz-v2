@@ -2,11 +2,7 @@ import React, { useContext } from 'react';
 import Home from '@arcgis/core/widgets/Home';
 import Locate from '@arcgis/core/widgets/Locate';
 import useArcGISWidget from '@/hooks/use-arcgis-widget';
-import Expand from '@arcgis/core/widgets/Expand';
-import BasemapGallery from "@arcgis/core/widgets/BasemapGallery.js";
 import { MapContext } from '@/context/map-provider';
-import Legend from '@arcgis/core/widgets/Legend';
-import Search from '@arcgis/core/widgets/Search';
 // import Extent from "@arcgis/core/geometry/Extent.js";
 // import SearchSource from "@arcgis/core/widgets/Search/SearchSource.js";
 // import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol.js";
@@ -21,21 +17,15 @@ interface BaseWidgetConfig {
 
 // Specific widget configuration types extending the base type
 
-interface BasemapExpandConfig extends BaseWidgetConfig {
-    content: BasemapGallery;
+interface CoordinateFeatureConfig extends BaseWidgetConfig {
+    graphic: {
+        popupTemplate: {
+            content: string;
+        };
+    };
+    map: __esri.Map | undefined;
+    spatialReference: __esri.SpatialReference | undefined;
 }
-
-interface LegendExpandConfig extends BaseWidgetConfig {
-    expanded: boolean;
-    content: Legend;
-}
-
-interface SearchExpandConfig extends BaseWidgetConfig {
-    content: Search;
-}
-
-// Union type for all widget configurations
-export type WidgetConfig = BasemapExpandConfig | LegendExpandConfig | SearchExpandConfig;
 
 // ArcGISWidgetProps type using the WidgetConfig union
 // interface ArcGISWidgetProps {
@@ -46,20 +36,7 @@ export type WidgetConfig = BasemapExpandConfig | LegendExpandConfig | SearchExpa
 
 
 const MapWidgets: React.FC = () => {
-    const { view, isMobile } = useContext(MapContext);
     // const qFaultsUrl = 'https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json';
-
-
-    const basemapExpandConfig: BasemapExpandConfig = {
-        id: 'basemap-gallery-expand',
-        view: view!,
-        content: new BasemapGallery({
-            view: view!,
-            container: document.createElement('div'),
-            id: 'basemap-gallery-widget',
-        }),
-    };
-
 
     // const searchExpandConfig: SearchExpandConfig = {
     //     id: 'search-expand',
@@ -108,11 +85,6 @@ const MapWidgets: React.FC = () => {
     useArcGISWidget([
         { WrappedWidget: Home, position: 'top-left' },
         { WrappedWidget: Locate, position: 'top-left' },
-        {
-            WrappedWidget: Expand,
-            position: isMobile ? 'top-left' : 'top-right',
-            config: basemapExpandConfig,
-        },
         // { WrappedWidget: Expand, position: 'top-right', config: searchExpandConfig },
     ]);
 
