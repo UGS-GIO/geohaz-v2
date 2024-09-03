@@ -10,7 +10,7 @@ export default function Dashboard() {
     <Layout>
       {/* ===== Top Heading ===== */}
       <Layout.Header>
-        <TopNav links={topNav} />
+        <TopNav />
         <div className='ml-auto flex items-center space-x-4'>
           <SearchBar />
           <ThemeSwitch />
@@ -26,25 +26,3 @@ export default function Dashboard() {
   )
 }
 
-const topNav = [
-  {
-    title: 'Overview',
-    href: 'dashboard/overview',
-    isActive: true,
-  },
-  {
-    title: 'Customers',
-    href: 'dashboard/customers',
-    isActive: false,
-  },
-  {
-    title: 'Products',
-    href: 'dashboard/products',
-    isActive: false,
-  },
-  {
-    title: 'Settings',
-    href: 'dashboard/settings',
-    isActive: false,
-  },
-]
