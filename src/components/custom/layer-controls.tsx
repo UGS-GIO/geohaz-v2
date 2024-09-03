@@ -62,8 +62,8 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button variant="ghost" className="flex items-center">
-                                    <Info className="h-5 w-5 mr-2" />
-                                    <span>Info</span>
+                                    <Info className="h-5 w-5" />
+                                    <span className='hidden md:flex md:ml-2'>Info</span>
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
@@ -78,12 +78,12 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                         </Dialog>
 
                         <Button variant="ghost" className="flex items-center" onClick={handleZoomToLayer}>
-                            <Shrink className="h-5 w-5 mr-2" />
-                            <span>Zoom to</span>
+                            <Shrink className="h-5 w-5 " />
+                            <span className='hidden md:flex md:ml-2'>Zoom to</span>
                         </Button>
                         <Toggle ref={triggerButtonRef} aria-label="Toggle italic" className="flex items-center" onClick={handleToggleLegend}>
-                            <TableOfContents className="h-5 w-5 mr-2" />
-                            <span>Legend</span>
+                            <TableOfContents className="h-5 w-5" />
+                            <span className='hidden md:flex md:ml-2'>Legend</span>
                         </Toggle>
                     </div>
                 </div>
