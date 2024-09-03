@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import Home from '@arcgis/core/widgets/Home';
 import Locate from '@arcgis/core/widgets/Locate';
 import useArcGISWidget from '@/hooks/use-arcgis-widget';
-import Feature from "@arcgis/core/widgets/Feature.js";
 import Expand from '@arcgis/core/widgets/Expand';
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery.js";
 import { MapContext } from '@/context/map-provider';
@@ -22,16 +21,6 @@ interface BaseWidgetConfig {
 
 // Specific widget configuration types extending the base type
 
-interface CoordinateFeatureConfig extends BaseWidgetConfig {
-    graphic: {
-        popupTemplate: {
-            content: string;
-        };
-    };
-    map: __esri.Map | undefined;
-    spatialReference: __esri.SpatialReference | undefined;
-}
-
 interface BasemapExpandConfig extends BaseWidgetConfig {
     content: BasemapGallery;
 }
@@ -46,7 +35,7 @@ interface SearchExpandConfig extends BaseWidgetConfig {
 }
 
 // Union type for all widget configurations
-export type WidgetConfig = CoordinateFeatureConfig | BasemapExpandConfig | LegendExpandConfig | SearchExpandConfig;
+export type WidgetConfig = BasemapExpandConfig | LegendExpandConfig | SearchExpandConfig;
 
 // ArcGISWidgetProps type using the WidgetConfig union
 // interface ArcGISWidgetProps {
@@ -60,18 +49,6 @@ const MapWidgets: React.FC = () => {
     const { view, isMobile } = useContext(MapContext);
     // const qFaultsUrl = 'https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json';
 
-
-    const coordinateFeatureConfig: CoordinateFeatureConfig = {
-        id: 'coordinate-feature-widget',
-        view: view!,
-        graphic: {
-            popupTemplate: {
-                content: isMobile ? '' : 'Mouse over the map to update the coordinates.',
-            },
-        },
-        map: view?.map,
-        spatialReference: view?.spatialReference,
-    };
 
     const basemapExpandConfig: BasemapExpandConfig = {
         id: 'basemap-gallery-expand',
@@ -131,11 +108,6 @@ const MapWidgets: React.FC = () => {
     useArcGISWidget([
         { WrappedWidget: Home, position: 'top-left' },
         { WrappedWidget: Locate, position: 'top-left' },
-        {
-            WrappedWidget: Feature,
-            position: isMobile ? 'top-right' : 'bottom-right',
-            config: coordinateFeatureConfig,
-        },
         {
             WrappedWidget: Expand,
             position: isMobile ? 'top-left' : 'top-right',
