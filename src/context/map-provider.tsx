@@ -16,8 +16,8 @@ type MapContextProps = {
     isMobile?: boolean
     setIsMobile?: (isMobile: boolean) => void
     layerDescriptions?: Record<string, string>
-    isDecimalDegrees?: boolean
-    setIsDecimalDegrees?: (isDecimalDegrees: boolean) => void
+    isDecimalDegrees: boolean
+    setIsDecimalDegrees: (isDecimalDegrees: boolean) => void
 
 }
 
@@ -34,13 +34,23 @@ type MapContextProps = {
 //     features: Feature[];
 // };
 
-export const MapContext = createContext<MapContextProps>({});
+export const MapContext = createContext<MapContextProps>({
+    isDecimalDegrees: false,
+    setIsDecimalDegrees: () => { }
+});
 
 export function MapProvider({ children }: { children: React.ReactNode }) {
     const [view, setView] = useState<SceneView | MapView>();
     const [activeLayers, setActiveLayers] = useState<__esri.Collection<__esri.ListItem>>();
     const [isMobile, setIsMobile] = useState<boolean>(false);
-    const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(false);
+    const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(true);
+
+    console.log('isDecimalDegrees mapprovider', isDecimalDegrees);
+
+    useEffect(() => {
+        console.log('isDecimalDegrees mapprovider', isDecimalDegrees);
+    }, [isDecimalDegrees]);
+
     // const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
 
     // const fetchLayerDescriptions = async (): Promise<LayerDescriptionResponse> => {

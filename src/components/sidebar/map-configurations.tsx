@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { MapContext } from '@/context/map-provider';
@@ -7,7 +7,7 @@ import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 
 function MapConfigurations() {
   const [coordFormat, setCoordFormat] = useState("Degrees, Minutes, Seconds");
-  const { setIsDecimalDegrees } = useContext(MapContext);
+  const { isDecimalDegrees, setIsDecimalDegrees } = useContext(MapContext);
 
   const handleCoordFormatChange = (value: string) => {
     if (value && setIsDecimalDegrees) {
@@ -15,6 +15,17 @@ function MapConfigurations() {
       setIsDecimalDegrees(value === "Decimal Degrees");
     }
   };
+
+  useEffect(() => {
+    console.log('isDecimalDegrees map-configurations', isDecimalDegrees);
+
+    if (isDecimalDegrees) {
+      setCoordFormat("Decimal Degrees");
+    } else {
+      setCoordFormat("Degrees, Minutes, Seconds");
+    }
+  }, [isDecimalDegrees]);
+
 
   return (
     <>
