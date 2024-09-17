@@ -95,11 +95,11 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                             ref={triggerButtonRef}
                             aria-label="Toggle Legend"
                             className="p-2"
-                            size="stacked" // Use the new size variant
+                            size="stacked" // Use the new size variant for stacked behavior
                             onClick={handleToggleLegend}
                         >
                             <TableOfContents className="h-5 w-5" />
-                            <span className='mt-1'>Legend</span>
+                            <span className='mt-1 sm:ml-2 sm:mt-0'>Legend</span> {/* Stacked on mobile, side-by-side on desktop */}
                         </Toggle>
                     </div>
                 </div>
