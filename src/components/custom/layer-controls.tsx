@@ -93,8 +93,9 @@ const LayerControls: React.FC<LayerControlsProps> = ({
 
                         <Toggle
                             ref={triggerButtonRef}
+                            className='flex flex-col sm:flex-row items-center p-2'
                             aria-label="Toggle Legend"
-                            className="p-2"
+                            // className="p-2"
                             size="stacked" // Use the new size variant for stacked behavior
                             onClick={handleToggleLegend}
                         >
