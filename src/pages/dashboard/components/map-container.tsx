@@ -22,6 +22,10 @@ export default function ArcGISMap() {
 
             <MapWidgets />
             <PopupDrawer container={popupContainer} />
+            {/* This div serves as the custom container for the PopupDrawer component.
+                By setting its ref, it means the PopupDrawer is appended to this container
+                instead of the body element. 
+                https://github.com/emilkowalski/vaul?tab=readme-ov-file#custom-container */}
             <div ref={setPopupContainer} />
         </div>
     );

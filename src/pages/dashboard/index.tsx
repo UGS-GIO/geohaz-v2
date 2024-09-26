@@ -4,7 +4,6 @@ import ThemeSwitch from '@/components/theme-switch'
 import { TopNav } from '@/components/top-nav'
 // import { UserNav } from '@/components/user-nav'
 import MapContainer from './components/map-container'
-import { PopupDrawer } from '@/components/custom/popup-drawer'
 
 export default function Dashboard() {
   return (
