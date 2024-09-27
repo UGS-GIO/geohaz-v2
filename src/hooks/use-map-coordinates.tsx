@@ -10,8 +10,7 @@ export function useMapCoordinates() {
         x: "",
         y: "",
     });
-
-
+    const locationCoordinateFormat = context.isDecimalDegrees ? "Decimal Degrees" : "Degrees, Minutes, Seconds"
 
     // Ensure the hook is used within the SidebarContextProvider
     if (!context) {
@@ -20,8 +19,25 @@ export function useMapCoordinates() {
         );
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Return only the relevant values
     const { isDecimalDegrees, setIsDecimalDegrees } = context;
 
-    return { isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates, scale, setScale, lastPointerPosition };
+    return { isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates, scale, setScale, lastPointerPosition, locationCoordinateFormat };
 }

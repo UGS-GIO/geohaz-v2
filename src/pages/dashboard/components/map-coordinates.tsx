@@ -129,10 +129,6 @@ const MapCoordinates = () => {
             };
         }
 
-        // Cleanup
-        return () => {
-            console.log('cleanup')
-        };
     }, [
         view,
         isMobile,
