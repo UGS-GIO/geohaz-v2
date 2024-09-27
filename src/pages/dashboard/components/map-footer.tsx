@@ -1,4 +1,3 @@
-import { useContext, useEffect, useState } from "react"
 import { Link } from "@/components/custom/link"
 import { Facebook, Twitter, Instagram, Github } from "lucide-react"
 import { MapCoordinates } from "@/pages/dashboard/components/map-coordinates"
@@ -6,23 +5,12 @@ import { Switch } from "@/components/ui/switch"
 import { useCoordinateFormat } from "@/hooks/use-coordinate-format"
 
 const MapFooter = () => {
-    const [format, setFormat] = useState<'DD' | 'DMS'>('DD')
     const { isDecimalDegrees, setIsDecimalDegrees } = useCoordinateFormat()
 
-    useEffect(() => {
-        if (isDecimalDegrees) {
-            setFormat('DD')
-        } else {
-            setFormat('DMS')
-        }
-    }, [isDecimalDegrees])
-
-    const handleOnCheckedChange = (setFormat: React.Dispatch<React.SetStateAction<'DD' | 'DMS'>>) => (checked: boolean) => {
+    const handleOnCheckedChange = () => (checked: boolean) => {
         if (checked) {
-            setFormat('DMS')
             setIsDecimalDegrees(false)
         } else {
-            setFormat('DD')
             setIsDecimalDegrees(true)
         }
     }
@@ -54,16 +42,18 @@ const MapFooter = () => {
                 </div>
             </div>
             <div className="flex items-center space-x-2">
+                {/* decimal degrees */}
                 <span className="text-sm text-muted-foreground">DD</span>
                 <Switch
-                    checked={format === 'DMS'}
-                    onCheckedChange={handleOnCheckedChange(setFormat)}
+                    checked={isDecimalDegrees ? false : true}
+                    onCheckedChange={handleOnCheckedChange()}
                     aria-label="Toggle coordinate format"
                     // Use the primary color for the unchecked state also
                     // This is not an on/off toggle. it toggles between DD (left) and DMS (right)
                     // ossible non-standard use of the switch component
                     className="data-[state=unchecked]:bg-primary"
                 />
+                {/* degrees minutes seconds */}
                 <span className="text-sm text-muted-foreground">DMS</span>
                 <span className="text-sm">
                     <MapCoordinates />
