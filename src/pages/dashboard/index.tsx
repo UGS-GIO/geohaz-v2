@@ -4,6 +4,7 @@ import ThemeSwitch from '@/components/theme-switch'
 import { TopNav } from '@/components/top-nav'
 // import { UserNav } from '@/components/user-nav'
 import MapContainer from './components/map-container'
+import { MapFooter } from './components/map-footer'
 
 export default function Dashboard() {
   return (
@@ -22,6 +23,7 @@ export default function Dashboard() {
       <Layout.Body>
         <MapContainer />
       </Layout.Body>
+      <Layout.Footer dynamicContent={<MapFooter />} />
     </Layout>
   )
 }
