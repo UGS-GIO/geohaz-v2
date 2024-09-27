@@ -13,11 +13,11 @@ export function useCoordinateFormat() {
     }
 
     const { isDecimalDegrees, setIsDecimalDegrees } = context;
-    console.log('isDecimalDegrees use-coordinate-format', isDecimalDegrees);
+    // console.log('isDecimalDegrees use-coordinate-format', isDecimalDegrees);
 
 
     useEffect(() => {
-        console.log('isDecimalDegrees map-configurations', isDecimalDegrees);
+        // console.log('isDecimalDegrees map-configurations', isDecimalDegrees);
 
         if (isDecimalDegrees) {
             console.log("Decimal Degrees");
