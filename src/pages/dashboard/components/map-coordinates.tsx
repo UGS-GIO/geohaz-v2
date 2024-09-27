@@ -1,3 +1,29 @@
+// const handleMobileViewChange = useCallback(
+//     ({ view }: { view: __esri.MapView | __esri.SceneView }) => {
+//         let watchHandle: __esri.WatchHandle;
+//         view.when(() => {
+//             watchHandle = reactiveUtils.watch(
+//                 () => [view.zoom, view.center],
+//                 () => {
+//                     const xyPoint = {
+//                         x: view.center.longitude.toFixed(3),
+//                         y: view.center.latitude.toFixed(3),
+//                     };
+//                     const convertedCoords = convertCoordinates(xyPoint.x, xyPoint.y);
+//                     setCoordinates(convertedCoords);
+//                     setScale(view.scale);
+//                 }
+//             );
+//         })
+
+//         return () => {
+//             watchHandle.remove();
+//         };
+//     },
+//     [view]
+// );
+
+
 import { MapContext } from "@/context/map-provider";
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { convertDDToDMS } from "@/lib/mapping-utils";
@@ -10,20 +36,16 @@ const MapCoordinates = () => {
     const { view, isMobile } = useContext(MapContext);
     const {
         isDecimalDegrees,
-        setIsDecimalDegrees,
         coordinates,
         setCoordinates,
         scale,
         setScale,
-        lastPointerPosition
+        lastPointerPosition,
     } = useMapCoordinates();
 
-
-
+    // Function to convert coordinates based on the format (DD or DMS)
     const convertCoordinates = useCallback(
         (x: string, y: string) => {
-            console.log('convertCoordinates', isDecimalDegrees);
-
             if (isDecimalDegrees) {
                 return { x, y }; // Return decimal degrees
             } else {
@@ -35,51 +57,18 @@ const MapCoordinates = () => {
         [isDecimalDegrees]
     );
 
-    // const handleMobileViewChange = useCallback(
-    //     ({ view }: { view: __esri.MapView | __esri.SceneView }) => {
-    //         let watchHandle: __esri.WatchHandle;
-    //         view.when(() => {
-    //             watchHandle = reactiveUtils.watch(
-    //                 () => [view.zoom, view.center],
-    //                 () => {
-    //                     const xyPoint = {
-    //                         x: view.center.longitude.toFixed(3),
-    //                         y: view.center.latitude.toFixed(3),
-    //                     };
-    //                     const convertedCoords = convertCoordinates(xyPoint.x, xyPoint.y);
-    //                     setCoordinates(convertedCoords);
-    //                     setScale(view.scale);
-    //                 }
-    //             );
-    //         })
-
-    //         return () => {
-    //             watchHandle.remove();
-    //         };
-    //     },
-    //     [view]
-    // );
-
-    // Function to handle zoom and pointer move events for non-mobile
+    // Update coordinates when pointer moves or zoom changes for desktop view
     const handleDesktopViewChange = useCallback(
         ({ view }: { view: __esri.MapView | __esri.SceneView }) => {
             let zoomWatcher: __esri.WatchHandle;
             let pointerMoveHandler: __esri.WatchHandle;
+
             view.when(() => {
                 zoomWatcher = view.watch("zoom", () => {
-
-                    if (isDecimalDegrees) {
-                        setCoordinates({
-                            x: lastPointerPosition.current.x,
-                            y: lastPointerPosition.current.y,
-                        });
-                    }
-
+                    const { x, y } = lastPointerPosition.current;
+                    const convertedCoords = convertCoordinates(x, y);
+                    setCoordinates(convertedCoords);
                     setScale(view.scale);
-                    setCoordinates({
-                        x: lastPointerPosition.current.x,
-                        y: lastPointerPosition.current.y,
-                    });
                 });
 
                 pointerMoveHandler = view.on(
@@ -95,10 +84,8 @@ const MapCoordinates = () => {
                             y: mp.y.toFixed(3),
                         };
 
-                        const convertedCoords = convertCoordinates(xyPoint.x, xyPoint.y);
-                        lastPointerPosition.current = convertedCoords;
-
                         lastPointerPosition.current = xyPoint; // Store the last pointer position
+                        const convertedCoords = convertCoordinates(xyPoint.x, xyPoint.y);
                         setCoordinates(convertedCoords);
                         setScale(view.scale);
                     }
@@ -106,45 +93,52 @@ const MapCoordinates = () => {
             });
 
             return () => {
-                zoomWatcher.remove();
-                pointerMoveHandler.remove();
+                if (zoomWatcher && zoomWatcher.remove) {
+                    zoomWatcher.remove();
+                }
+
+                if (pointerMoveHandler && pointerMoveHandler.remove) {
+                    pointerMoveHandler.remove();
+                }
             };
         },
-        [view]
+        [view, convertCoordinates]
     );
 
+    // Update the coordinates format when `isDecimalDegrees` changes
     useEffect(() => {
+        const { x, y } = lastPointerPosition.current;
+        const convertedCoords = convertCoordinates(x, y);
+        setCoordinates(convertedCoords);
+    }, [isDecimalDegrees, convertCoordinates, lastPointerPosition, setCoordinates]);
+
+    // Use desktop or mobile view handlers based on device type
+    useEffect(() => {
+        let viewChangeHandler: () => void;
+
         if (view) {
-            // Use the type guard to check if the widget is a Feature widget
-            let viewChangeHandler: () => void;
 
             if (isMobile) {
                 // viewChangeHandler = handleMobileViewChange({ view });
             } else {
                 viewChangeHandler = handleDesktopViewChange({ view });
             }
-
-            return () => {
-                viewChangeHandler();
-            };
         }
 
-    }, [
-        view,
-        isMobile,
-        // handleMobileViewChange,
-        handleDesktopViewChange,
-        convertCoordinates
-    ]);
-
+        return () => {
+            if (viewChangeHandler) viewChangeHandler();
+        };
+    }, [view, isMobile, handleDesktopViewChange]);
 
     return (
         <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground">{coordinates.x}</span>
-            <span className="text-sm text-muted-foreground">{coordinates.y}</span>
-            <span className="text-sm text-muted-foreground">Scale: 1:{addCommas(scale?.toFixed(0).toString() || '')}</span>
+            <span className="text-sm text-muted-foreground">Lat:{' '}{coordinates.y}</span>
+            <span className="text-sm text-muted-foreground">Lon:{' '}{coordinates.x}</span>
+            <span className="text-sm text-muted-foreground">
+                Scale: 1:{addCommas(scale?.toFixed(0).toString() || '')}
+            </span>
         </div>
-    )
-}
+    );
+};
 
-export { MapCoordinates }
+export { MapCoordinates };
