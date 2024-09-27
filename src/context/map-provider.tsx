@@ -45,12 +45,6 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     const [isMobile, setIsMobile] = useState<boolean>(false);
     const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(true);
 
-    console.log('isDecimalDegrees mapprovider', isDecimalDegrees);
-
-    useEffect(() => {
-        console.log('isDecimalDegrees mapprovider', isDecimalDegrees);
-    }, [isDecimalDegrees]);
-
     // const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
 
     // const fetchLayerDescriptions = async (): Promise<LayerDescriptionResponse> => {

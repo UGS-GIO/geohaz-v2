@@ -2,10 +2,10 @@ import { Link } from "@/components/custom/link"
 import { Facebook, Twitter, Instagram, Github } from "lucide-react"
 import { MapCoordinates } from "@/pages/dashboard/components/map-coordinates"
 import { Switch } from "@/components/ui/switch"
-import { useCoordinateFormat } from "@/hooks/use-coordinate-format"
+import { useMapCoordinates } from "@/hooks/use-map-coordinates"
 
 const MapFooter = () => {
-    const { isDecimalDegrees, setIsDecimalDegrees } = useCoordinateFormat()
+    const { isDecimalDegrees, setIsDecimalDegrees } = useMapCoordinates()
 
     const handleOnCheckedChange = () => (checked: boolean) => {
         if (checked) {

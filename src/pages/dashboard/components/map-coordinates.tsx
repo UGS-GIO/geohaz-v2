@@ -1,19 +1,23 @@
 import { MapContext } from "@/context/map-provider";
-import { useCoordinateFormat } from "@/hooks/use-coordinate-format";
+import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { convertDDToDMS } from "@/lib/mapping-utils";
 import { addCommas } from "@/lib/utils";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect } from "react";
 
 const MapCoordinates = () => {
-    const { view, isMobile, isDecimalDegrees, setIsDecimalDegrees } = useContext(MapContext);
-    const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "", y: "" });
-    const [scale, setScale] = useState<number | null>(null);
-    const lastPointerPosition = useRef<{ x: string; y: string }>({
-        x: "",
-        y: "",
-    });
+    const { view, isMobile } = useContext(MapContext);
+    const {
+        isDecimalDegrees,
+        setIsDecimalDegrees,
+        coordinates,
+        setCoordinates,
+        scale,
+        setScale,
+        lastPointerPosition
+    } = useMapCoordinates();
+
 
 
     const convertCoordinates = useCallback(
