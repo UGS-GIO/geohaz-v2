@@ -5,8 +5,6 @@ import { TopNav } from '@/components/top-nav'
 // import { UserNav } from '@/components/user-nav'
 import MapContainer from './components/map-container'
 import { MapFooter } from './components/map-footer'
-import { useContext } from 'react'
-import { MapContext } from '@/context/map-provider'
 import { cn } from '@/lib/utils'
 
 export default function Dashboard() {
