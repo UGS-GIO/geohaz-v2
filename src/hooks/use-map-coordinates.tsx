@@ -19,24 +19,8 @@ export function useMapCoordinates() {
         );
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // Return only the relevant values
+    //TODO pull these values into this hook
     const { isDecimalDegrees, setIsDecimalDegrees } = context;
 
     return { isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates, scale, setScale, lastPointerPosition, locationCoordinateFormat };

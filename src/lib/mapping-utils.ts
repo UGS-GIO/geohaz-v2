@@ -481,10 +481,20 @@ export const fetchQFaultResults = async (params: GetResultsHandlerType, url: str
     }];
 };
 
-export const convertDDToDMS = (D: number): string => {
-    const degrees = Math.floor(D);
-    const minutes = Math.floor((D < 0 ? -D : D) % 1 * 60);
-    const seconds = Math.floor(D * 60 % 1 * 60);
+export function convertDDToDMS(dd: number, isLongitude: boolean = false) {
+    const dir = dd < 0
+        ? isLongitude ? 'W' : 'S'
+        : isLongitude ? 'E' : 'N';
 
-    return `${degrees}\xB0 ${minutes}' ${seconds}"`; // "\xB0" is the special JS char for the degree symbol
+    const absDd = Math.abs(dd);
+    const degrees = Math.floor(absDd);
+    const minutes = Math.floor((absDd - degrees) * 60);
+    const seconds = Math.round(((absDd - degrees) * 60 - minutes) * 60);
+
+    // Pad degrees, minutes, and seconds with leading zeros if they're less than 10
+    const degreesStr = degrees.toString().padStart(2, '0');
+    const minutesStr = minutes.toString().padStart(2, '0');
+    const secondsStr = seconds.toString().padStart(2, '0');
+
+    return `${degreesStr}° ${minutesStr}' ${secondsStr}" ${dir}`;
 }
