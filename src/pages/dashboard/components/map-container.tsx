@@ -39,7 +39,7 @@ export default function ArcGISMap() {
             });
             hiddenTriggerRef.current.dispatchEvent(contextMenuEvent);
         }
-    }, [view]);
+    }, [view, setCoordinates]);
 
     useEffect(() => {
         if (mapRef.current && loadMap) {

@@ -512,7 +512,7 @@ export function createGraphic(lat: number, long: number, view: SceneView | MapVi
         yoffset: 10
     });
     // Create a graphic and add the geometry and symbol to it
-    var pointGraphic = new Graphic({
+    const pointGraphic = new Graphic({
         geometry: new Point({
             longitude: long,
             latitude: lat

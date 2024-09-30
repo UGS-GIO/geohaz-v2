@@ -27,7 +27,7 @@ const MapContextMenu = ({ hiddenTriggerRef, coordinates }: Props) => {
     const handleCopyCoordinates = useCallback(() => {
         const coordsString = `${formattedCoordinates.y}, ${formattedCoordinates.x}`;
         navigator.clipboard.writeText(coordsString);
-    }, [coordinates]);
+    }, [formattedCoordinates]);
 
     // Remove graphics from the map
     const handleRemoveGraphics = useCallback(() => {

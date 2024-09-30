@@ -86,7 +86,7 @@ export function useMapCoordinates() {
                 }
             };
         },
-        [view, convertCoordinates]
+        [convertCoordinates]
     );
 
     // Ensure the hook is used within the SidebarContextProvider
