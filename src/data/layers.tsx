@@ -254,7 +254,7 @@ const shakingVectorConfig: LayerProps = {
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: publicWorkspaceUrl,
-    title: 'Quaternary Faults',
+    title: 'Hazardous (Quaternary age) Faults',
     visible: true,
     sublayers: [
         {

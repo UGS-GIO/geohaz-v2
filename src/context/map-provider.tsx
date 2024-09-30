@@ -5,6 +5,7 @@ import LayerList from "@arcgis/core/widgets/LayerList";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 // import { useQuery } from "@tanstack/react-query";
 import { RendererProps } from "@/lib/types/mapping-types";
+import { useFetchLayerDescriptions } from "@/hooks/use-fetch-layer-descriptions";
 
 
 type MapContextProps = {
@@ -36,11 +37,24 @@ type MapContextProps = {
 // };
 
 export const MapContext = createContext<MapContextProps>({
-    isDecimalDegrees: false,
-    setIsDecimalDegrees: () => { },
     coordinates: { x: "000.000", y: "000.000" },
     setCoordinates: () => { },
+    view: undefined,
+    activeLayers: undefined,
+    loadMap: async () => { },
+    setActiveLayers: () => { },
+    getRenderer: async () => { return undefined },
+    isMobile: false,
+    setIsMobile: () => { },
+    layerDescriptions: {},
+    isDecimalDegrees: false,
+    setIsDecimalDegrees: () => { },
 });
+
+const fetchLayerDescriptions = async (setLayerDescriptions: (descriptions: Record<string, string>) => void) => {
+    const descriptions = await useFetchLayerDescriptions();
+    setLayerDescriptions(descriptions);
+}
 
 export function MapProvider({ children }: { children: React.ReactNode }) {
     const [view, setView] = useState<SceneView | MapView>();
@@ -48,6 +62,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "000.000", y: "000.000" });
     const [isMobile, setIsMobile] = useState<boolean>(false);
     const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(true);
+    const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
 
     // const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
 
@@ -96,7 +111,9 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
                 }
             }
         );
+
         setIsMobile(view.widthBreakpoint === "xsmall" || view.heightBreakpoint === "xsmall");
+        fetchLayerDescriptions(setLayerDescriptions);
 
         // Clean up - destroy the LayerList widget when component unmounts
         return () => {
@@ -105,6 +122,9 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
     }, [view]);
 
+    useEffect(() => {
+        console.log(layerDescriptions);
+    }, [layerDescriptions]);
     async function loadMap(container: HTMLDivElement) {
         if (view) return;
         const { init } = await import("@/lib/mapping-utils")

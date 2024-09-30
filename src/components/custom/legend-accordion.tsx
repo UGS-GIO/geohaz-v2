@@ -25,7 +25,7 @@ const LegendAccordion = ({ layerId, url, triggerBtn }: LegendAccordionProps) => 
             <Accordion type='single' collapsible value={openItem} onValueChange={setOpenItem}>
                 <AccordionItem value="legend-accordion">
                     <AccordionContent>
-                        <>
+                        <div className='pt-4 px-4'>
                             {isLoading && <div>Loading legend...</div>}
                             {error && <div>Error loading legend: {error.message}</div>}
                             {preview?.map((previewItem, index) => (
@@ -34,7 +34,7 @@ const LegendAccordion = ({ layerId, url, triggerBtn }: LegendAccordionProps) => 
                                     <span>{previewItem.label}</span>
                                 </div>
                             ))}
-                        </>
+                        </div>
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>

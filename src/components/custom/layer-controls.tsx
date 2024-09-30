@@ -1,19 +1,12 @@
 import { Info, Shrink, TableOfContents } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { Button } from '@/components/custom/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { LegendAccordion } from '@/components/custom/legend-accordion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Toggle } from '@/components/ui/toggle';
+import { LayerDescriptionAccordion } from '@/components/custom/layer-description-accordion';
 
 interface LayerControlsProps {
     handleZoomToLayer: () => void;
@@ -34,81 +27,131 @@ const LayerControls: React.FC<LayerControlsProps> = ({
     layerId,
     url
 }) => {
-    // const [labelsVisible, setLabelsVisible] = useState(false);
     const cleanDescription = DOMPurify.sanitize(description, { USE_PROFILES: { html: true } });
-    const triggerButtonRef = useRef<HTMLButtonElement>(null)
+    const legendTriggerButtonRef = useRef<HTMLButtonElement>(null);
+    const infoTriggerButtonRef = useRef<HTMLButtonElement>(null);
+    const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+    const [infoPressed, setInfoPressed] = useState(false);
+    const [legendPressed, setLegendPressed] = useState(false);
 
-    const handleToggleLegend = () => {
-        if (triggerButtonRef.current != null) {
-            triggerButtonRef.current.click()
+    const handleToggleTriggers = (
+        type: 'legend' | 'info',
+        ref: React.RefObject<HTMLButtonElement>,
+        turnOffRef: React.RefObject<HTMLButtonElement>
+    ) => {
+        const isAlreadyOpen = openAccordion === type;
+
+        // Update accordion state
+        if (isAlreadyOpen) {
+            setOpenAccordion(null);
+        } else {
+            setOpenAccordion(type);
         }
-    }
+
+        // Update toggle states
+        if (type === 'info') {
+            setInfoPressed(!isAlreadyOpen);
+            setLegendPressed(false); // Ensure legend is not active
+            if (ref.current) ref.current.click();
+            if (turnOffRef.current && openAccordion === 'legend') turnOffRef.current.click();
+        } else if (type === 'legend') {
+            setLegendPressed(!isAlreadyOpen);
+            setInfoPressed(false); // Ensure info is not active
+            if (ref.current) ref.current.click();
+            if (turnOffRef.current && openAccordion === 'info') turnOffRef.current.click();
+        }
+    };
 
     return (
-        <div className="flex flex-col gap-y-4 mx-8">
-            <div className="flex flex-col justify-between items-center w-full gap-y-4">
-                <div className="flex flex-row items-center justify-around gap-x-2 mt-2 w-full mx-auto">
-                    <Label htmlFor={`${title}-opacity`}>
-                        Opacity
-                    </Label>
-                    <Slider
-                        className="flex-grow"
-                        defaultValue={[layerOpacity * 100]}
-                        onValueChange={(e) => handleOpacityChange(e[0])}
-                    />
-                </div>
-                <div className="flex flex-col sm:flex-row justify-around items-center w-full gap-y-4 sm:gap-y-0">
-                    <div className="flex flex-wrap justify-start items-center gap-y-2 sm:gap-y-0 sm:gap-x-4">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="ghost" className="flex items-center">
-                                    <Info className="h-5 w-5" />
-                                    <span className='hidden md:flex md:ml-2'>Info</span>
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                    <DialogTitle>{title}</DialogTitle>
-                                </DialogHeader>
-                                <DialogDescription className="text-sm text-muted-foreground">
-                                    This is a placeholder to show that a muted description can be added to the dialog.
-                                </DialogDescription>
-                                <div className="custom-tooltip" dangerouslySetInnerHTML={{ __html: cleanDescription }} />
-                            </DialogContent>
-                        </Dialog>
+        <>
+            <div className="flex flex-col gap-y-4 mx-8">
+                <div className="flex flex-col justify-between items-center w-full gap-y-4">
+                    <div className="flex flex-row items-center justify-around gap-x-2 mt-2 w-full mx-auto">
+                        <Label htmlFor={`${title}-opacity`}>
+                            Opacity
+                        </Label>
+                        <Slider
+                            className="flex-grow"
+                            defaultValue={[layerOpacity * 100]}
+                            onValueChange={(e) => handleOpacityChange(e[0])}
+                        />
+                    </div>
 
-                        <Button variant="ghost" className="flex items-center" onClick={handleZoomToLayer}>
-                            <Shrink className="h-5 w-5 " />
-                            <span className='hidden md:flex md:ml-2'>Zoom to</span>
+                    <div className="flex justify-around items-stretch w-full gap-x-4">
+                        <Toggle
+                            ref={infoTriggerButtonRef}
+                            aria-label="Toggle info"
+                            size="stacked"
+                            className="flex flex-col items-center p-2 flex-1"
+                            onClick={() => handleToggleTriggers('info', infoTriggerButtonRef, legendTriggerButtonRef)}
+                            pressed={infoPressed}
+                            style={{ alignItems: 'center', flexGrow: 1 }}
+                        >
+                            <Info className="h-5 w-5" />
+                            <span className='mt-1 sm:ml-2 sm:mt-0'>Info</span>
+                        </Toggle>
+
+                        <Button
+                            variant="ghost"
+                            size="stacked"
+                            className="flex flex-col items-center p-2 flex-1"
+                            onClick={handleZoomToLayer}
+                            style={{ alignItems: 'center', flexGrow: 1 }}
+                        >
+                            <Shrink className="h-5 w-5" />
+                            <span className='mt-1 sm:ml-2 sm:mt-0'>Zoom to</span>
                         </Button>
-                        <Toggle ref={triggerButtonRef} aria-label="Toggle italic" className="flex items-center" onClick={handleToggleLegend}>
+
+                        <Toggle
+                            ref={legendTriggerButtonRef}
+                            aria-label="Toggle legend"
+                            size="stacked"
+                            className="flex flex-col items-center p-2 flex-1"
+                            onClick={() => handleToggleTriggers('legend', legendTriggerButtonRef, infoTriggerButtonRef)}
+                            pressed={legendPressed}
+                            style={{ alignItems: 'center', flexGrow: 1 }}
+                        >
                             <TableOfContents className="h-5 w-5" />
-                            <span className='hidden md:flex md:ml-2'>Legend</span>
+                            <span className='mt-1 sm:ml-2 sm:mt-0'>Legend</span>
                         </Toggle>
                     </div>
-                </div>
 
-                {/* TODO: Implement label visibility */}
-                {/* <div className="flex items-center justify-between gap-x-2 w-full">
-                <Label htmlFor={`${title}-label-visibility`} className="mx-auto">
-                    Turn Labels {labelsVisible ? 'Off' : 'On'} (in progress)
-                </Label>
-                <Switch
-                    id={`${title}-label-visibility`}
-                    className="ml-auto"
-                    checked={labelsVisible}
-                    onCheckedChange={() => setLabelsVisible(!labelsVisible)}
-                />
-            </div> */}
+                    {/* TODO: Implement label visibility */}
+                    {/* <div className="flex items-center justify-between gap-x-2 w-full">
+                        <Label htmlFor={`${title}-label-visibility`} className="mx-auto">
+                            Turn Labels {labelsVisible ? 'Off' : 'On'} (in progress)
+                        </Label>
+                        <Toggle
+                            size="stacked"
+                            aria-label="Toggle labels visibility"
+                            pressed={labelsVisible}
+                            onCheckedChange={() => setLabelsVisible(!labelsVisible)}
+                        />
+                    </div> */}
+                </div>
             </div>
-            <LegendAccordion
-                layerId={layerId}
-                url={url}
-                triggerBtn={<button ref={triggerButtonRef} style={{ display: 'none' }}>Open Dialog</button>} // Hidden button as trigger
-            />
-        </div >
+
+            <div>
+                <LayerDescriptionAccordion
+                    description={cleanDescription}
+                    triggerBtn={
+                        <button ref={infoTriggerButtonRef} className="hidden">
+                            Open Dialog
+                        </button>
+                    }
+                />
+                <LegendAccordion
+                    layerId={layerId}
+                    url={url}
+                    triggerBtn={
+                        <button ref={legendTriggerButtonRef} className="hidden">
+                            Open Dialog
+                        </button>
+                    }
+                />
+            </div>
+        </>
     );
 };
 
 export default LayerControls;
-
