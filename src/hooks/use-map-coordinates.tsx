@@ -7,7 +7,7 @@ import * as webMercatorUtils from '@arcgis/core/geometry/support/webMercatorUtil
 export function useMapCoordinates() {
 
     const context = useContext(MapContext);
-    const { isDecimalDegrees, setIsDecimalDegrees, view } = context;
+    const { isDecimalDegrees, setIsDecimalDegrees } = context;
     const [scale, setScale] = useState<number>(context.view?.scale || 0);
     const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({
         x: "",
