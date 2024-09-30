@@ -9,8 +9,7 @@ export default function ArcGISMap() {
     const mapRef = useRef<HTMLDivElement>(null);
     const hiddenTriggerRef = useRef<HTMLDivElement>(null);
     const { loadMap, view } = useContext(MapContext);
-    const { coordinates, setCoordinates, lastPointerPosition } = useMapCoordinates();
-    // const [selectedCoordinates, setSelectedCoordinates] = useState({ x: 0, y: 0 });
+    const { coordinates, setCoordinates } = useMapCoordinates();
 
     // Handle right-click event to show the context menu
     const handleOnContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {

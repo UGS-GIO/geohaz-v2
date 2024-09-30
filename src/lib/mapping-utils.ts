@@ -21,7 +21,6 @@ import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
 import Point from "@arcgis/core/geometry/Point.js";
 import { MAP_PIN_ICON } from '@/assets/icons';
 
-
 // Create a global app object to store the view
 const app: MapApp = {}
 

@@ -7,7 +7,6 @@ import { useMapCoordinates } from '@/hooks/use-map-coordinates';
 function MapConfigurations() {
   const { setIsDecimalDegrees, locationCoordinateFormat } = useMapCoordinates();
 
-
   const handleCoordFormatChange = (value: string) => {
     if (value && setIsDecimalDegrees) {
       setIsDecimalDegrees(value === "Decimal Degrees");
