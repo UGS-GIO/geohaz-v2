@@ -18,7 +18,8 @@ type MapContextProps = {
     layerDescriptions?: Record<string, string>
     isDecimalDegrees: boolean
     setIsDecimalDegrees: (isDecimalDegrees: boolean) => void
-
+    coordinates: { x: string; y: string }
+    setCoordinates: (coords: { x: string; y: string }) => void
 }
 
 // type FeatureAttributes = {
@@ -36,12 +37,15 @@ type MapContextProps = {
 
 export const MapContext = createContext<MapContextProps>({
     isDecimalDegrees: false,
-    setIsDecimalDegrees: () => { }
+    setIsDecimalDegrees: () => { },
+    coordinates: { x: "000.000", y: "000.000" },
+    setCoordinates: () => { },
 });
 
 export function MapProvider({ children }: { children: React.ReactNode }) {
     const [view, setView] = useState<SceneView | MapView>();
     const [activeLayers, setActiveLayers] = useState<__esri.Collection<__esri.ListItem>>();
+    const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "000.000", y: "000.000" });
     const [isMobile, setIsMobile] = useState<boolean>(false);
     const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(true);
 
@@ -110,7 +114,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile /* , layerDescriptions */, isDecimalDegrees, setIsDecimalDegrees }}>
+        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile /* , layerDescriptions */, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates }}>
             {children}
         </MapContext.Provider>
     )

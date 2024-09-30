@@ -280,9 +280,6 @@ const qFaultsWMSConfig: WMSLayerProps = {
 
             const data = await response.json();
 
-            console.log(data.features);
-
-
             return data.features.map(
                 (feature: Feature) => new Graphic({
                     attributes: feature.properties,

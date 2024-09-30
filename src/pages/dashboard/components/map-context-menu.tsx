@@ -1,34 +1,33 @@
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
-import { RefObject, useCallback, useMemo } from 'react';
-import { convertDDToDMS } from "@/lib/mapping-utils";
+import { RefObject, useCallback, useContext, useMemo } from 'react';
 import { ClipboardCopy } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { convertDDToDMS, removeGraphics } from '@/lib/mapping-utils';
+import { MapContext } from '@/context/map-provider';
 
 interface Props {
     hiddenTriggerRef: RefObject<HTMLDivElement>,
-    selectedCoordinates: {
-        x: number;
-        y: number;
-    }
+    coordinates: { x: string; y: string }
 }
 
-const MapContextMenu = ({ hiddenTriggerRef, selectedCoordinates }: Props) => {
+const MapContextMenu = ({ hiddenTriggerRef, coordinates }: Props) => {
     const { isDecimalDegrees } = useMapCoordinates();
+    const { view } = useContext(MapContext);
 
     // Function to convert coordinates based on current setting
     const formattedCoordinates = useMemo(() => {
-        const { x, y } = selectedCoordinates;
+        const { x, y } = coordinates;
         return isDecimalDegrees
-            ? { x: x.toFixed(3), y: y.toFixed(3) }
-            : { x: convertDDToDMS(x), y: convertDDToDMS(y) };
-    }, [selectedCoordinates, isDecimalDegrees]);
+            ? { x: Number(x).toFixed(3), y: Number(y).toFixed(3) }
+            : { x: convertDDToDMS(Number(x)), y: convertDDToDMS(Number(y)) };
+    }, [coordinates, isDecimalDegrees]);
 
     // Copy coordinates to clipboard
     const handleCopyCoordinates = useCallback(() => {
-        const coordsString = `${formattedCoordinates.y}, ${formattedCoordinates.x}`;
+        const coordsString = `${coordinates.y}, ${coordinates.x}`;
         navigator.clipboard.writeText(coordsString);
-    }, [formattedCoordinates]);
+    }, [coordinates]);
 
     return (
         <ContextMenu>
@@ -36,12 +35,12 @@ const MapContextMenu = ({ hiddenTriggerRef, selectedCoordinates }: Props) => {
                 {/* Hidden div for manually triggering the context menu */}
                 <div ref={hiddenTriggerRef} className="hidden" />
             </ContextMenuTrigger>
-            <ContextMenuContent>
+            <ContextMenuContent onInteractOutside={() => view && removeGraphics(view)}>
                 <ContextMenuItem
                     className={cn('px-2 py-1 cursor-pointer')}
                     onSelect={handleCopyCoordinates}
                 >
-                    Coordinates: {formattedCoordinates.x}, {formattedCoordinates.y}&nbsp;&nbsp;&nbsp;<ClipboardCopy className="h-4 w-4" />
+                    Coordinates: {formattedCoordinates.y}, {formattedCoordinates.x}&nbsp;&nbsp;&nbsp;<ClipboardCopy className="h-4 w-4" />
                 </ContextMenuItem>
             </ContextMenuContent>
         </ContextMenu>

@@ -17,6 +17,10 @@ import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
 import { Feature, FeatureCollection } from 'geojson';
 import { createEsriSymbol } from '@/lib/legend/symbol-generator';
 import { LegendProps, LegendRule } from '@/lib/types/geoserver-types';
+import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
+import Point from "@arcgis/core/geometry/Point.js";
+import { MAP_PIN_ICON } from '@/assets/icons';
+
 
 // Create a global app object to store the view
 const app: MapApp = {}
@@ -497,4 +501,31 @@ export function convertDDToDMS(dd: number, isLongitude: boolean = false) {
     const secondsStr = seconds.toString().padStart(2, '0');
 
     return `${degreesStr}° ${minutesStr}' ${secondsStr}" ${dir}`;
+}
+
+// Create a graphic to display a point on the map
+export function createGraphic(lat: number, long: number, view: SceneView | MapView) {
+    // Create a symbol for drawing the point
+    const markerSymbol = new PictureMarkerSymbol({
+        url: `${MAP_PIN_ICON}`,
+        width: "20px",
+        height: "20px",
+        yoffset: 10
+    });
+    // Create a graphic and add the geometry and symbol to it
+    var pointGraphic = new Graphic({
+        geometry: new Point({
+            longitude: long,
+            latitude: lat
+        }),
+        symbol: markerSymbol
+    });
+
+    // Add the graphics to the view's graphics layer
+    view.graphics.add(pointGraphic);
+}
+
+// Remove all graphics from the view
+export function removeGraphics(view: SceneView | MapView) {
+    view.graphics.removeAll();
 }
