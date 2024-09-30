@@ -1,4 +1,4 @@
-import { useRef, useContext, useEffect, useState, useCallback } from "react";
+import { useRef, useContext, useEffect, useCallback } from "react";
 import MapWidgets from './map-widgets';
 import { MapContext } from '@/context/map-provider';
 import { MapContextMenu } from "./map-context-menu";
