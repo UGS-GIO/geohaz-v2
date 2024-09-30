@@ -25,7 +25,7 @@ export function useMapCoordinates() {
             if (isDecimalDegrees) {
                 return { x, y }; // Return decimal degrees
             } else {
-                const dmsX = convertDDToDMS(parseFloat(x));
+                const dmsX = convertDDToDMS(parseFloat(x), true);
                 const dmsY = convertDDToDMS(parseFloat(y));
                 return { x: dmsX, y: dmsY }; // Return DMS format
             }

@@ -20,7 +20,7 @@ const MapContextMenu = ({ hiddenTriggerRef, coordinates }: Props) => {
         const { x, y } = coordinates;
         return isDecimalDegrees
             ? { x: Number(x).toFixed(3), y: Number(y).toFixed(3) }
-            : { x: convertDDToDMS(Number(x)), y: convertDDToDMS(Number(y)) };
+            : { x: convertDDToDMS(Number(x), true), y: convertDDToDMS(Number(y)) };
     }, [coordinates, isDecimalDegrees]);
 
     // Copy coordinates to clipboard
