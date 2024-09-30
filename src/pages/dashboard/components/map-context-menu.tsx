@@ -25,9 +25,16 @@ const MapContextMenu = ({ hiddenTriggerRef, coordinates }: Props) => {
 
     // Copy coordinates to clipboard
     const handleCopyCoordinates = useCallback(() => {
-        const coordsString = `${coordinates.y}, ${coordinates.x}`;
+        const coordsString = `${formattedCoordinates.y}, ${formattedCoordinates.x}`;
         navigator.clipboard.writeText(coordsString);
     }, [coordinates]);
+
+    // Remove graphics from the map
+    const handleRemoveGraphics = useCallback(() => {
+        if (view) {
+            removeGraphics(view);
+        }
+    }, [view]);
 
     return (
         <ContextMenu>
@@ -35,7 +42,7 @@ const MapContextMenu = ({ hiddenTriggerRef, coordinates }: Props) => {
                 {/* Hidden div for manually triggering the context menu */}
                 <div ref={hiddenTriggerRef} className="hidden" />
             </ContextMenuTrigger>
-            <ContextMenuContent onInteractOutside={() => view && removeGraphics(view)}>
+            <ContextMenuContent onCloseAutoFocus={handleRemoveGraphics}>
                 <ContextMenuItem
                     className={cn('px-2 py-1 cursor-pointer')}
                     onSelect={handleCopyCoordinates}
