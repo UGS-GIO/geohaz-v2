@@ -4,6 +4,8 @@ import ThemeSwitch from '@/components/theme-switch'
 import { TopNav } from '@/components/top-nav'
 // import { UserNav } from '@/components/user-nav'
 import MapContainer from './components/map-container'
+import { MapFooter } from './components/map-footer'
+import { cn } from '@/lib/utils'
 
 export default function Dashboard() {
   return (
@@ -22,6 +24,10 @@ export default function Dashboard() {
       <Layout.Body>
         <MapContainer />
       </Layout.Body>
+
+      {/* ===== Footer ===== */}
+      {/* no footer on mobile */}
+      <Layout.Footer className={cn('hidden md:flex')} dynamicContent={<MapFooter />} />
     </Layout>
   )
 }

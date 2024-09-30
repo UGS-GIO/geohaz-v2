@@ -126,9 +126,13 @@
   }
 }
 
-.esri-view-width-xlarge .esri-popup__main-container {
-  width: 40% !important; 
-}
+.esri-view-width-xlarge .esri-popup__main-container,
+.esri-view-width-large .esri-popup__main-container,
+.esri-view-width-medium .esri-popup__main-container
+{
+  max-height: 900px !important;
+  max-width: 900px !important;
+}‍‍‍‍‍‍
 
 /* 
   basic styling for the text inside of a feature widget, 
