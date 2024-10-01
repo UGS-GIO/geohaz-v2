@@ -8,13 +8,12 @@ import { acknowledgements, dataDisclaimer, dataSources, dataSourcesShortened, ma
 import { BackToMenuButton } from '../custom/back-to-menu-button';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerTrigger } from '@/components/ui/drawer';
-import { cn } from '@/lib/utils';
 
 function Info() {
   type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | '';
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType | ''>('');
-  const { setCurrentContent, isCollapsed } = useSidebar();
+  const { setCurrentContent } = useSidebar();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isMapDetailsExpanded, setIsMapDetailsExpanded] = useState(false);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
@@ -119,7 +118,7 @@ function Info() {
               Open Dialog
             </button>
           </DrawerTrigger>
-          <DrawerContent className={cn(isCollapsed ? 'md:ml-14' : 'md:ml-[36rem]')}>
+          <DrawerContent>
             <div className="py-2">
               {modalType === 'disclaimer' && <DrawerHeader><DrawerTitle>Data Disclaimer</DrawerTitle></DrawerHeader>}
               {modalType === 'references' && <DrawerHeader><DrawerTitle>References</DrawerTitle></DrawerHeader>}
@@ -138,7 +137,7 @@ function Info() {
           <DialogTrigger asChild>
             <div className="hidden"></div>
           </DialogTrigger>
-          <DialogContent className="hidden md:block">
+          <DialogContent>
             {modalType === 'disclaimer' && (
               <>
                 <DialogHeader>
