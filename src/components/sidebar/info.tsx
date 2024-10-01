@@ -180,9 +180,16 @@ function Info() {
             Start Exploring
           </Button>
           <Button
-            className='text-foreground'
+            className='text-foreground hidden md:inline-flex'
             variant='link'
             onClick={() => handleOpenModal('disclaimer')}
+          >
+            Open Data Disclaimer
+          </Button>
+          <Button
+            className='text-foreground md:hidden'
+            variant='link'
+            onClick={() => handleOpenDrawer('disclaimer')}
           >
             Open Data Disclaimer
           </Button>
