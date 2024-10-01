@@ -5,6 +5,7 @@ import LayerList from "@arcgis/core/widgets/LayerList";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 // import { useQuery } from "@tanstack/react-query";
 import { RendererProps } from "@/lib/types/mapping-types";
+import { useFetchLayerDescriptions } from "@/hooks/use-fetch-layer-descriptions";
 
 
 type MapContextProps = {
@@ -16,7 +17,10 @@ type MapContextProps = {
     isMobile?: boolean
     setIsMobile?: (isMobile: boolean) => void
     layerDescriptions?: Record<string, string>
-
+    isDecimalDegrees: boolean
+    setIsDecimalDegrees: (isDecimalDegrees: boolean) => void
+    coordinates: { x: string; y: string }
+    setCoordinates: (coords: { x: string; y: string }) => void
 }
 
 // type FeatureAttributes = {
@@ -32,12 +36,34 @@ type MapContextProps = {
 //     features: Feature[];
 // };
 
-export const MapContext = createContext<MapContextProps>({});
+export const MapContext = createContext<MapContextProps>({
+    coordinates: { x: "000.000", y: "000.000" },
+    setCoordinates: () => { },
+    view: undefined,
+    activeLayers: undefined,
+    loadMap: async () => { },
+    setActiveLayers: () => { },
+    getRenderer: async () => { return undefined },
+    isMobile: false,
+    setIsMobile: () => { },
+    layerDescriptions: {},
+    isDecimalDegrees: false,
+    setIsDecimalDegrees: () => { },
+});
+
+const fetchLayerDescriptions = async (setLayerDescriptions: (descriptions: Record<string, string>) => void) => {
+    const descriptions = await useFetchLayerDescriptions();
+    setLayerDescriptions(descriptions);
+}
 
 export function MapProvider({ children }: { children: React.ReactNode }) {
     const [view, setView] = useState<SceneView | MapView>();
     const [activeLayers, setActiveLayers] = useState<__esri.Collection<__esri.ListItem>>();
+    const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "000.000", y: "000.000" });
     const [isMobile, setIsMobile] = useState<boolean>(false);
+    const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(true);
+    const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
+
     // const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
 
     // const fetchLayerDescriptions = async (): Promise<LayerDescriptionResponse> => {
@@ -85,7 +111,9 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
                 }
             }
         );
+
         setIsMobile(view.widthBreakpoint === "xsmall" || view.heightBreakpoint === "xsmall");
+        fetchLayerDescriptions(setLayerDescriptions);
 
         // Clean up - destroy the LayerList widget when component unmounts
         return () => {
@@ -94,6 +122,9 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
     }, [view]);
 
+    useEffect(() => {
+        console.log(layerDescriptions);
+    }, [layerDescriptions]);
     async function loadMap(container: HTMLDivElement) {
         if (view) return;
         const { init } = await import("@/lib/mapping-utils")
@@ -103,7 +134,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile /* , layerDescriptions */ }}>
+        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile /* , layerDescriptions */, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates }}>
             {children}
         </MapContext.Provider>
     )

@@ -254,7 +254,7 @@ const shakingVectorConfig: LayerProps = {
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: publicWorkspaceUrl,
-    title: 'Quaternary Faults',
+    title: 'Hazardous (Quaternary age) Faults',
     visible: true,
     sublayers: [
         {
@@ -279,9 +279,6 @@ const qFaultsWMSConfig: WMSLayerProps = {
             }
 
             const data = await response.json();
-
-            console.log(data.features);
-
 
             return data.features.map(
                 (feature: Feature) => new Graphic({

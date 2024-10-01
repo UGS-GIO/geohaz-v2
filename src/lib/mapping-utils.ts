@@ -17,6 +17,9 @@ import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
 import { Feature, FeatureCollection } from 'geojson';
 import { createEsriSymbol } from '@/lib/legend/symbol-generator';
 import { LegendProps, LegendRule } from '@/lib/types/geoserver-types';
+import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
+import Point from "@arcgis/core/geometry/Point.js";
+import { MAP_PIN_ICON } from '@/assets/icons';
 
 // Create a global app object to store the view
 const app: MapApp = {}
@@ -480,3 +483,48 @@ export const fetchQFaultResults = async (params: GetResultsHandlerType, url: str
         target: target
     }];
 };
+
+export function convertDDToDMS(dd: number, isLongitude: boolean = false) {
+    const dir = dd < 0
+        ? isLongitude ? 'W' : 'S'
+        : isLongitude ? 'E' : 'N';
+
+    const absDd = Math.abs(dd);
+    const degrees = Math.floor(absDd);
+    const minutes = Math.floor((absDd - degrees) * 60);
+    const seconds = Math.round(((absDd - degrees) * 60 - minutes) * 60);
+
+    // Pad degrees, minutes, and seconds with leading zeros if they're less than 10
+    const degreesStr = degrees.toString().padStart(2, '0');
+    const minutesStr = minutes.toString().padStart(2, '0');
+    const secondsStr = seconds.toString().padStart(2, '0');
+
+    return `${degreesStr}° ${minutesStr}' ${secondsStr}" ${dir}`;
+}
+
+// Create a graphic to display a point on the map
+export function createGraphic(lat: number, long: number, view: SceneView | MapView) {
+    // Create a symbol for drawing the point
+    const markerSymbol = new PictureMarkerSymbol({
+        url: `${MAP_PIN_ICON}`,
+        width: "20px",
+        height: "20px",
+        yoffset: 10
+    });
+    // Create a graphic and add the geometry and symbol to it
+    const pointGraphic = new Graphic({
+        geometry: new Point({
+            longitude: long,
+            latitude: lat
+        }),
+        symbol: markerSymbol
+    });
+
+    // Add the graphics to the view's graphics layer
+    view.graphics.add(pointGraphic);
+}
+
+// Remove all graphics from the view
+export function removeGraphics(view: SceneView | MapView) {
+    view.graphics.removeAll();
+}
