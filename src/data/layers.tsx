@@ -62,16 +62,16 @@
 // }
 
 import CustomContent from "@arcgis/core/popup/content/CustomContent.js";
-import {
-    // rendererLiquefaction,
-    // rendererBedrockPot,
-    // surfaceFaultRuptureRenderer,
-    quadRenderer,
-} from "./renderers";
+// import {
+// rendererLiquefaction,
+// rendererBedrockPot,
+// surfaceFaultRuptureRenderer,
+// quadRenderer,
+// } from "./renderers";
 import { createRoot } from "react-dom/client";
-import { StudyAreasPopup } from "@/components/custom/popups/study-areas-popup";
+// import { StudyAreasPopup } from "@/components/custom/popups/study-areas-popup";
 // import { LandslideSourcePopup } from "@/components/custom/popups/landslide-source-popup";
-import { LandslideCompPopup } from "@/components/custom/popups/landslide-comp-popup";
+// import { LandslideCompPopup } from "@/components/custom/popups/landslide-comp-popup";
 import { QFaultsPopup } from "@/components/custom/popups/qfaults-popup";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 import Graphic from "@arcgis/core/Graphic";
@@ -123,7 +123,7 @@ const landslideLegacyWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -219,7 +219,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -312,7 +312,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -504,7 +504,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -576,7 +576,7 @@ const groundshakingWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -734,7 +734,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -838,7 +838,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -938,7 +938,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1045,7 +1045,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1153,7 +1153,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1260,7 +1260,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1280,45 +1280,45 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
     }
 }
 
-const pipingSusConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/13',
-    options: {
-        title: 'Piping and Erosion Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/11/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'PESMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/11/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/11/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/11/Description}<br><b>Mapped Scale: </b>{PESMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const pipingSusConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/13',
+//     options: {
+//         title: 'Piping and Erosion Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/11/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'PESMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/11/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/11/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/11/Description}<br><b>Mapped Scale: </b>{PESMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
 const expansiveSoilRockLayerName = 'expansivesoilrock';
 const expansiveSoilRockWMSTitle = 'Expansive Soil and Rock Susceptibility';
@@ -1362,7 +1362,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1464,7 +1464,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1567,7 +1567,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1709,7 +1709,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1771,7 +1771,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1791,45 +1791,45 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
     }
 }
 
-const collapsibleSoilConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/6',
-    options: {
-        title: 'Collapsible Soil Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/5/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'CSSMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/5/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/5/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/5/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const collapsibleSoilConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/6',
+//     options: {
+//         title: 'Collapsible Soil Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/5/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'CSSMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/5/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/5/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/5/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
 const solubleSoilAndRockLayerName = 'solublesoilandrock';
 const solubleSoilAndRockWMSTitle = 'Soluble Soil and Rock Susceptibility';
@@ -1873,7 +1873,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1975,7 +1975,7 @@ const calicheWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -1995,45 +1995,45 @@ const calicheWMSConfig: WMSLayerProps = {
     }
 }
 
-const calicheConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/5',
-    options: {
-        title: 'Caliche Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/4/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'CASMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/4/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/4/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CASMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const calicheConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/5',
+//     options: {
+//         title: 'Caliche Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/4/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'CASMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/4/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/4/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CASMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
 // const floodHazardConfig: LayerProps = {
 //     type: 'feature',
@@ -2117,7 +2117,7 @@ const floodAndDebrisWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -2182,7 +2182,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -2202,45 +2202,45 @@ const earthFissureWMSConfig: WMSLayerProps = {
     }
 }
 
-const earthFissureConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/8',
-    options: {
-        title: 'Earth Fissure Hazard',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/7/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'EFHMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/7/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/7/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/7/Description}<br><b>Mapped Scale: </b>{EFHMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const earthFissureConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/8',
+//     options: {
+//         title: 'Earth Fissure Hazard',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/7/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'EFHMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/7/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/7/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/7/Description}<br><b>Mapped Scale: </b>{EFHMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
 const erosionHazardZoneLayerName = 'erosionhazardzone';
 const erosionHazardZoneWMSTitle = 'J.E. Fuller Flood Erosion Hazard Zones';
@@ -2284,7 +2284,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -2426,7 +2426,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -2528,7 +2528,7 @@ const quads24kWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -2548,31 +2548,31 @@ const quads24kWMSConfig: WMSLayerProps = {
     }
 }
 
-const quadBoundariesConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/0',
-    options: {
-        title: 'USGS 1:24,000-Scale Quadrangle Boundaries',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        labelingInfo: {
-            labelExpressionInfo: {
-                expression: '$feature.NAME',
-            },
-            symbol: {
-                type: 'text',
-                color: '#db0202',
-                font: {
-                    family: 'serif',
-                    size: 10,
-                    weight: 'bold',
-                    style: 'italic',
-                },
-            },
-        },
-        renderer: quadRenderer,
-        visible: false,
-    },
-};
+// const quadBoundariesConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/0',
+//     options: {
+//         title: 'USGS 1:24,000-Scale Quadrangle Boundaries',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         labelingInfo: {
+//             labelExpressionInfo: {
+//                 expression: '$feature.NAME',
+//             },
+//             symbol: {
+//                 type: 'text',
+//                 color: '#db0202',
+//                 font: {
+//                     family: 'serif',
+//                     size: 10,
+//                     weight: 'bold',
+//                     style: 'italic',
+//                 },
+//             },
+//         },
+//         renderer: quadRenderer,
+//         visible: false,
+//     },
+// };
 
 const studyAreasLayerName = 'studyareas';
 const studyAreasWMSTitle = 'Mapped Areas';
@@ -2616,7 +2616,7 @@ const studyAreasWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
@@ -2636,36 +2636,36 @@ const studyAreasWMSConfig: WMSLayerProps = {
     }
 }
 
-const hazardStudyConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/1',
-    options: {
-        visible: true,
-        title: 'Mapped Areas',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        outFields: ['*'],
-        popupTemplate: {
-            outFields: ['*'],
-            title: '<b>Mapped Areas</b>',
-            content: [
-                new CustomContent({
-                    outFields: ['*'],
-                    creator: (event) => {
-                        const div = document.createElement('div');
-                        if (event) {
-                            const { graphic } = event;
-                            const root = createRoot(div);
-                            root.render(
-                                <StudyAreasPopup graphic={graphic} />
-                            );
-                        }
-                        return div;
-                    },
-                }),
-            ],
-        },
-    },
-};
+// const hazardStudyConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/1',
+//     options: {
+//         visible: true,
+//         title: 'Mapped Areas',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         outFields: ['*'],
+//         popupTemplate: {
+//             outFields: ['*'],
+//             title: '<b>Mapped Areas</b>',
+//             content: [
+//                 new CustomContent({
+//                     outFields: ['*'],
+//                     creator: (event) => {
+//                         const div = document.createElement('div');
+//                         if (event) {
+//                             // const { graphic } = event;
+//                             const root = createRoot(div);
+//                             root.render(
+//                                 <StudyAreasPopup graphic={graphic} />
+//                             );
+//                         }
+//                         return div;
+//                     },
+//                 }),
+//             ],
+//         },
+//     },
+// };
 
 // const lidarBoundsConfig: LayerProps = {
 //     type: 'feature',
@@ -2730,7 +2730,7 @@ const areasNotMappedWMSConfig: WMSLayerProps = {
                                 creator: (event) => {
                                     const div = document.createElement('div');
                                     if (event) {
-                                        const { graphic } = event;
+                                        // const { graphic } = event;
                                         const root = createRoot(div);
                                         root.render(
                                             <>placeholder</>
