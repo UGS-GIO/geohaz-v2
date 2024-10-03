@@ -16,9 +16,11 @@ type MapContextProps = {
     getRenderer?: (id: string, url: string) => Promise<RendererProps | undefined>
     isMobile?: boolean
     setIsMobile?: (isMobile: boolean) => void
-    layerDescriptions: Record<string, string>
-    isDecimalDegrees?: boolean
-    setIsDecimalDegrees?: (isDecimalDegrees: boolean) => void
+    layerDescriptions?: Record<string, string>
+    isDecimalDegrees: boolean
+    setIsDecimalDegrees: (isDecimalDegrees: boolean) => void
+    coordinates: { x: string; y: string }
+    setCoordinates: (coords: { x: string; y: string }) => void
 }
 
 // type FeatureAttributes = {
@@ -35,6 +37,8 @@ type MapContextProps = {
 // };
 
 export const MapContext = createContext<MapContextProps>({
+    coordinates: { x: "000.000", y: "000.000" },
+    setCoordinates: () => { },
     view: undefined,
     activeLayers: undefined,
     loadMap: async () => { },
@@ -55,9 +59,29 @@ const fetchLayerDescriptions = async (setLayerDescriptions: (descriptions: Recor
 export function MapProvider({ children }: { children: React.ReactNode }) {
     const [view, setView] = useState<SceneView | MapView>();
     const [activeLayers, setActiveLayers] = useState<__esri.Collection<__esri.ListItem>>();
+    const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "000.000", y: "000.000" });
     const [isMobile, setIsMobile] = useState<boolean>(false);
-    const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(false);
+    const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(true);
     const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
+
+    // const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
+
+    // const fetchLayerDescriptions = async (): Promise<LayerDescriptionResponse> => {
+    //     const response = await fetch(`https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Hazard_Layer_Info_t1/FeatureServer/0/query?where=1%3D1&objectIds=&time=&resultType=none&outFields=*&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token=`);
+    //     const data: LayerDescriptionResponse = await response.json();
+    //     const descriptions: Record<string, string> = {};
+    //     data.features.forEach(feature => {
+    //         descriptions[feature.attributes.title] = feature.attributes.content;
+    //     });
+    //     setLayerDescriptions(descriptions);
+    //     return { features: data.features };
+    // }
+
+    // // fetch and return the layer descriptions only on the initial render using useQuery
+    // const { data } = useQuery({
+    //     queryKey: ['layerDescriptions'],
+    //     queryFn: fetchLayerDescriptions,
+    // });
 
     useEffect(() => {
         if (!view) return;
@@ -110,7 +134,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile, layerDescriptions, isDecimalDegrees, setIsDecimalDegrees }}>
+        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile /* , layerDescriptions */, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates }}>
             {children}
         </MapContext.Provider>
     )

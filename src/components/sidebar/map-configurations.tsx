@@ -1,17 +1,14 @@
-import { useContext, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { MapContext } from '@/context/map-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
+import { useMapCoordinates } from '@/hooks/use-map-coordinates';
 
 function MapConfigurations() {
-  const [coordFormat, setCoordFormat] = useState("Degrees, Minutes, Seconds");
-  const { setIsDecimalDegrees } = useContext(MapContext);
+  const { setIsDecimalDegrees, locationCoordinateFormat } = useMapCoordinates();
 
   const handleCoordFormatChange = (value: string) => {
     if (value && setIsDecimalDegrees) {
-      setCoordFormat(value);
       setIsDecimalDegrees(value === "Decimal Degrees");
     }
   };
@@ -32,7 +29,7 @@ function MapConfigurations() {
           </CardHeader>
           <CardContent>
             <RadioGroup
-              value={coordFormat}
+              value={locationCoordinateFormat}
               onValueChange={handleCoordFormatChange}
               className="grid grid-cols-1 sm:grid-cols-2 gap-2"
             >
