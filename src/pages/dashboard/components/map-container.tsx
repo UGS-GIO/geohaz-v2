@@ -1,15 +1,18 @@
-import { useRef, useContext, useEffect, useCallback } from "react";
+import { useRef, useContext, useEffect, useCallback, useState } from "react";
 import MapWidgets from './map-widgets';
 import { MapContext } from '@/context/map-provider';
 import { MapContextMenu } from "./map-context-menu";
 import { createGraphic, removeGraphics } from "@/lib/mapping-utils";
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
+import { PopupDrawer } from "@/components/custom/popup-drawer";
 
 export default function ArcGISMap() {
     const mapRef = useRef<HTMLDivElement>(null);
     const hiddenTriggerRef = useRef<HTMLDivElement>(null);
     const { loadMap, view } = useContext(MapContext);
     const { coordinates, setCoordinates } = useMapCoordinates();
+    const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null)
+
 
     // Handle right-click event to show the context menu
     const handleOnContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -56,6 +59,12 @@ export default function ArcGISMap() {
                 onContextMenu={handleOnContextMenu}  // Trigger context menu on right-click
             >
                 <MapWidgets />
+                <PopupDrawer container={popupContainer} />
+                {/* This div serves as the custom container for the PopupDrawer component.
+                By setting its ref, it means the PopupDrawer is appended to this container
+                instead of the body element. 
+                https://github.com/emilkowalski/vaul?tab=readme-ov-file#custom-container */}
+                <div ref={setPopupContainer} />
             </div>
         </>
     );
