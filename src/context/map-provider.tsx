@@ -7,7 +7,6 @@ import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import { RendererProps } from "@/lib/types/mapping-types";
 import { useFetchLayerDescriptions } from "@/hooks/use-fetch-layer-descriptions";
 
-
 type MapContextProps = {
     view?: SceneView | MapView,
     activeLayers?: __esri.Collection<__esri.ListItem>, // add a layers property to the context
@@ -122,9 +121,6 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
     }, [view]);
 
-    useEffect(() => {
-        console.log(layerDescriptions);
-    }, [layerDescriptions]);
     async function loadMap(container: HTMLDivElement) {
         if (view) return;
         const { init } = await import("@/lib/mapping-utils")
