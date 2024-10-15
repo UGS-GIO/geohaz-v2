@@ -163,10 +163,6 @@ export const handleWMSLayer = async (
             if (legendData && legendData.Legend) {
                 legendData.Legend.forEach((legend: LegendProps) => {
                     legend.rules.forEach((rule: LegendRule) => {
-                        console.log('layer title', layer.title);
-                        console.log('symbolizer rule', rule);
-
-
                         const renderer = {
                             label: rule.title,
                             renderer: createEsriSymbol(rule.symbolizers),

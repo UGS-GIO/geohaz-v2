@@ -1,13 +1,16 @@
 import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol";
 import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol.js";
+import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
 import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol.js";
 import Symbol from "@arcgis/core/symbols/Symbol.js";
-import { LineSymbolizer, Symbolizer } from "@/lib/types/geoserver-types";
+import { FillSymbolizer, LineCap, LineJoin, StrokeSymbolizer, Symbolizer } from "@/lib/types/geoserver-types";
 
-export function createLineSymbol(symbolizer: Symbolizer): __esri.Symbol {
+export function createLineSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
+    const lineSymbolizer = symbolizers.find(symbolizer => 'Line' in symbolizer)?.Line as StrokeSymbolizer;
 
-    const LineSymbolizer = symbolizer.Line as LineSymbolizer;
-
+    if (!lineSymbolizer) {
+        throw new Error("No valid Line symbolizer found in the provided symbolizers.");
+    }
 
     const {
         stroke,
@@ -15,9 +18,8 @@ export function createLineSymbol(symbolizer: Symbolizer): __esri.Symbol {
         "stroke-linecap": strokeLinecap,
         "stroke-linejoin": strokeLinejoin,
         "stroke-dasharray": strokeDasharray,
-    } = LineSymbolizer;
+    } = lineSymbolizer;
 
-    // console.log('line-symbolizer', symbolizer);
     return new SimpleLineSymbol({
         color: stroke,
         width: strokeWidth,
@@ -28,35 +30,92 @@ export function createLineSymbol(symbolizer: Symbolizer): __esri.Symbol {
     });
 }
 
-export function createPolygonSymbol(symbolizer: any): __esri.Symbol {
+type SymbolizerWithPolygon = Symbolizer & { Polygon: FillSymbolizer | StrokeSymbolizer };
 
-    const {
+function isSymbolizerWithPolygon(symbolizer: Symbolizer): symbolizer is SymbolizerWithPolygon {
+    return 'Polygon' in symbolizer;
+}
 
-    } = symbolizer.Polygon;
+function handleFillSymbolizer(fillSymbolizer: FillSymbolizer) {
+    const fillOpacity = parseFloat(fillSymbolizer["fill-opacity"]);
+    return addOpacityToHex(fillSymbolizer.fill, fillOpacity);
+}
 
-    // console.log('polygon-symbolizer', symbolizer);
+function handleStrokeSymbolizer(strokeSymbolizer: StrokeSymbolizer) {
+    const strokeOpacity = parseFloat(strokeSymbolizer["stroke-opacity"]) || 1;
+    const strokeWidth = parseFloat(strokeSymbolizer["stroke-width"]) || 1;
+    const strokeJoin = strokeSymbolizer["stroke-linejoin"] || "round";
+    const strokeCap = strokeSymbolizer["stroke-linecap"] || "round";
+    const strokeColorWithOpacity = addOpacityToHex(strokeSymbolizer.stroke, strokeOpacity);
+
+    return { strokeColorWithOpacity, strokeWidth, strokeJoin, strokeCap };
+}
+
+export function createPolygonSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
+    let fillColorWithOpacity = "";
+    let strokeColorWithOpacity = "";
+    let strokeWidth = 1;
+    let strokeJoin: LineJoin = "round";
+    let strokeCap: LineCap = "round";
+
+    symbolizers.forEach(symbolizer => {
+        if (isSymbolizerWithPolygon(symbolizer)) {
+            if ('fill' in symbolizer.Polygon) {
+                fillColorWithOpacity = handleFillSymbolizer(symbolizer.Polygon);
+            } else if ('stroke' in symbolizer.Polygon) {
+                const strokeSymbolizer = handleStrokeSymbolizer(symbolizer.Polygon);
+                strokeColorWithOpacity = strokeSymbolizer.strokeColorWithOpacity;
+                strokeWidth = strokeSymbolizer.strokeWidth;
+                strokeJoin = strokeSymbolizer.strokeJoin;
+                strokeCap = strokeSymbolizer.strokeCap;
+            }
+        }
+    });
 
     return new SimpleFillSymbol({
-        // fill this in with real values
+        color: fillColorWithOpacity,
+        style: "solid", // Default style
+        outline: {
+            color: strokeColorWithOpacity,
+            width: strokeWidth,
+            join: strokeJoin,
+            cap: strokeCap
+        }
     });
 }
 
-export function createPointSymbol(symbolizer: any): __esri.Symbol {
-    const { size, opacity, rotation } = symbolizer.Point;
-    const graphic = symbolizer.Point.graphics[0]; // Take the first graphic only
+export function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
+    const pointSymbolizer = symbolizers.find(symbolizer => 'Point' in symbolizer)?.Point;
+
+    if (!pointSymbolizer) {
+        throw new Error("No valid Point symbolizer found in the provided symbolizers.");
+    }
+
+    const { size, opacity, rotation, url } = pointSymbolizer;
+
+    const graphic = pointSymbolizer.graphics[0]; // Take the first graphic only
 
     const fillColorWithOpacity = addOpacityToHex(graphic.fill, parseFloat(opacity) * parseFloat(graphic["fill-opacity"]));
+
+    if (url) {
+        return new PictureMarkerSymbol({
+            url,
+            width: parseFloat(size),
+            height: parseFloat(size),
+        });
+    }
 
     return new SimpleMarkerSymbol({
         color: fillColorWithOpacity,
         size: parseFloat(size),
         angle: parseFloat(rotation),
-        style: graphic.mark.toLowerCase(), // Converts 'square' to 'SQUARE'
+        // style:  graphic.mark.toLowerCase(), // Converts 'square' to 'SQUARE'
         outline: {
-            color: "#000000", // Black outline by default
-            width: 1 // Default outline width
+            color: graphic.stroke, // Use stroke color from graphic
+            width: parseFloat(graphic["stroke-width"]) // Use stroke width from graphic
         }
     });
+
 }
 
 function addOpacityToHex(hex: string, opacity: number): string {
@@ -67,16 +126,15 @@ function addOpacityToHex(hex: string, opacity: number): string {
 
 
 
-export function createEsriSymbol(symbolizer: any): __esri.Symbol {
-    // console.log(symbolizer);
-    if (symbolizer.Line) {
-        return createLineSymbol(symbolizer);
-    } else if (symbolizer.Polygon) {
-        return createPolygonSymbol(symbolizer);
-    } else if (symbolizer.Point) {
-        return createPointSymbol(symbolizer);
+export function createEsriSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
+    if (symbolizers.every(symbolizer => symbolizer.Line)) {
+        return createLineSymbol(symbolizers);
+    } else if (symbolizers.every(symbolizer => symbolizer.Polygon)) {
+        return createPolygonSymbol(symbolizers);
+    } else if (symbolizers.every(symbolizer => symbolizer.Point)) {
+        return createPointSymbol(symbolizers);
     } else {
-        console.error("Unsupported symbol type:", symbolizer.Line.type);
+        console.error("Unsupported symbol type:", symbolizers);
         return new Symbol();
     }
 }
