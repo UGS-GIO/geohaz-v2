@@ -100,12 +100,6 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
         setIsMobile(view.widthBreakpoint === "xsmall" || view.heightBreakpoint === "xsmall");
         fetchLayerDescriptions(setLayerDescriptions);
-
-        // Clean up - destroy the LayerList widget when component unmounts
-        return () => {
-            // layerList.destroy();
-        };
-
     }, [view]);
 
     async function loadMap(container: HTMLDivElement) {
