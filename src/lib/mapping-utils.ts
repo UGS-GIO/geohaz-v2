@@ -163,9 +163,13 @@ export const handleWMSLayer = async (
             if (legendData && legendData.Legend) {
                 legendData.Legend.forEach((legend: LegendProps) => {
                     legend.rules.forEach((rule: LegendRule) => {
+                        console.log('layer title', layer.title);
+                        console.log('symbolizer rule', rule);
+
+
                         const renderer = {
                             label: rule.title,
-                            renderer: createEsriSymbol(rule.symbolizers[0]),
+                            renderer: createEsriSymbol(rule.symbolizers),
                             id: layer.id.toString(),
                             url: layer.url,
                         };
@@ -187,8 +191,22 @@ export const handleWMSLayer = async (
     }
 };
 
-export const findLayerById = (layers: __esri.Collection<__esri.ListItem>, id: string) => { const flatLayers = layers.flatten(layer => layer.children || []); return flatLayers.find(layer => String(layer.layer.id) === String(id)); };
+export const findLayerById = (layers: __esri.Collection<__esri.Layer>, id: string): __esri.Layer | undefined => {
+    let foundLayer: __esri.Layer | undefined;
 
+    layers.forEach(layer => {
+        if (layer.id === id) {
+            foundLayer = layer;
+        } else if (layer instanceof GroupLayer) {
+            const childLayer = findLayerById(layer.layers, id);
+            if (childLayer) {
+                foundLayer = childLayer;
+            }
+        }
+    });
+
+    return foundLayer;
+};
 export function init(container: HTMLDivElement, isMobile: boolean, initialView?: 'map' | 'scene'): SceneView | MapView {
     // // Destroy the view if it exists
     if (app.view) {
