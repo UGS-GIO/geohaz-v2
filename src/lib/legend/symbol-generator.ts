@@ -58,6 +58,12 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
     let strokeJoin: LineJoin = "round";
     let strokeCap: LineCap = "round";
 
+    const PolygonSymbolizer = symbolizers.find(symbolizer => 'Polygon' in symbolizer)?.Polygon as StrokeSymbolizer;
+
+    if (!PolygonSymbolizer) {
+        throw new Error("No valid Polygon symbolizer found in the provided symbolizers.");
+    }
+
     symbolizers.forEach(symbolizer => {
         if (isSymbolizerWithPolygon(symbolizer)) {
             if ('fill' in symbolizer.Polygon) {

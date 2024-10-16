@@ -87,10 +87,23 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
         }
     };
 
-    const handleVisibilityToggle = () => updateLayer(layer => {
-        layer.visible = !layer.visible;
-    });
+    const handleVisibilityToggle = () =>
+        updateLayer((layer) => {
+            layer.visible = !layer.visible;
 
+            // If the layer has a parent, adjust the parent's visibility accordingly
+            if (layer.parent) {
+                const parentGroupLayer = layer.parent as __esri.GroupLayer;
+
+                // Logic:
+                // - If the parent is *not visible* and we're turning this layer *on*, make the parent visible.
+                // - If the parent is *not visible* and we're turning this layer *off*, leave the parent as is.
+                // - If we're turning this layer *off*, do nothing to the parent layer's visibility.
+                if (!parentGroupLayer.visible && layer.visible) {
+                    handleGroupLayerVisibilityToggle(parentGroupLayer.id)(true);
+                }
+            }
+        });
     const handleOpacityChange = (value: number) => updateLayer(layer => {
         layer.opacity = value / 100;
     });
