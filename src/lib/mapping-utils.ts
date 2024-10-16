@@ -116,7 +116,7 @@ const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
 };
 
 const getWMSLayerRenderer = async (layer: __esri.WMSLayer) => {
-    const sublayer: __esri.WMSSublayer = layer.sublayers.getItemAt(0); // Use the first sublayer as an example
+    const sublayer: __esri.WMSSublayer = layer.sublayers.getItemAt(0); // we are currently only supporting the first sublayer, but a wms layer can have multiple sublayers
 
     const legendUrl = `${layer.url}?service=WMS&request=GetLegendGraphic&format=application/json&layer=${sublayer.name}`;
 
