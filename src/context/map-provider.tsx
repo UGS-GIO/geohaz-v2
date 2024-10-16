@@ -2,8 +2,6 @@ import { createContext, useEffect, useState } from "react";
 import type SceneView from "@arcgis/core/views/SceneView";
 import type MapView from "@arcgis/core/views/MapView";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
-// import { useQuery } from "@tanstack/react-query";
-import { RendererProps } from "@/lib/types/mapping-types";
 import { useFetchLayerDescriptions } from "@/hooks/use-fetch-layer-descriptions";
 
 type MapContextProps = {
@@ -11,7 +9,6 @@ type MapContextProps = {
     activeLayers?: __esri.Collection<__esri.Layer>, // add a layers property to the context
     loadMap?: (container: HTMLDivElement) => Promise<void>
     setActiveLayers?: (layers: __esri.Collection<__esri.Layer>) => void
-    getRenderer?: (id: string, url: string) => Promise<RendererProps | undefined>
     isMobile?: boolean
     setIsMobile?: (isMobile: boolean) => void
     layerDescriptions?: Record<string, string>
@@ -41,7 +38,6 @@ export const MapContext = createContext<MapContextProps>({
     activeLayers: undefined,
     loadMap: async () => { },
     setActiveLayers: () => { },
-    getRenderer: async () => { return undefined },
     isMobile: false,
     setIsMobile: () => { },
     layerDescriptions: {},
@@ -111,7 +107,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile /* , layerDescriptions */, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates }}>
+        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile, layerDescriptions, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates }}>
             {children}
         </MapContext.Provider>
     )

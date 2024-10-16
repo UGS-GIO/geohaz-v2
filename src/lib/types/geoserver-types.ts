@@ -13,6 +13,10 @@ export interface LegendRule {
 
 }
 
+export interface Legend {
+    Legend: LegendProps[];
+}
+
 export interface Symbolizer {
     Line?: StrokeSymbolizer;
     Polygon?: FillSymbolizer | StrokeSymbolizer;
