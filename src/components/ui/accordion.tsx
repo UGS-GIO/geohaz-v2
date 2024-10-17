@@ -38,7 +38,9 @@ const AccordionHeader = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Header ref={ref} className={cn("flex items-center justify-between", className)} {...props}>
     {children}
-    <AccordionPrimitive.Trigger>
+    <AccordionPrimitive.Trigger
+      className="transition-all hover:underline [&[data-state=open]>svg]:rotate-180"
+    >
       <ChevronDownIcon className="h-4 w-4 shrink-0 transition-transform duration-200 mr-2" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
