@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink } from "@tanstack/react-router";
 import { cva, type VariantProps } from 'class-variance-authority';
 
 // Define link variants using cva
