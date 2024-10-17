@@ -62,7 +62,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "000.000", y: "000.000" });
     const [isMobile, setIsMobile] = useState<boolean>(false);
     const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(true);
-    const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
+    const [__layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
 
     // const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
 
