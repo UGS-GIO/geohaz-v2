@@ -11,7 +11,7 @@ import { useFetchLayerDescriptions } from "@/hooks/use-fetch-layer-descriptions"
 type MapContextProps = {
     view?: SceneView | MapView,
     activeLayers?: __esri.Collection<__esri.ListItem>, // add a layers property to the context
-    loadMap?: (container: HTMLDivElement) => Promise<void>
+    loadMap?: (container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }) => Promise<void>
     setActiveLayers?: (layers: __esri.Collection<__esri.ListItem>) => void
     getRenderer?: (id: string, url: string) => Promise<RendererProps | undefined>
     isMobile?: boolean
@@ -122,13 +122,10 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
     }, [view]);
 
-    useEffect(() => {
-        console.log(layerDescriptions);
-    }, [layerDescriptions]);
-    async function loadMap(container: HTMLDivElement) {
+    async function loadMap(container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }) {
         if (view) return;
         const { init } = await import("@/lib/mapping-utils")
-        setView(init(container, isMobile, 'map'))
+        setView(init(container, isMobile, { zoom, center }, 'map'));
     }
 
 

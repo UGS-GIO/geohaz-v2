@@ -189,28 +189,33 @@ export const handleWMSLayer = async (
 
 export const findLayerById = (layers: __esri.Collection<__esri.ListItem>, id: string) => { const flatLayers = layers.flatten(layer => layer.children || []); return flatLayers.find(layer => String(layer.layer.id) === String(id)); };
 
-export function init(container: HTMLDivElement, isMobile: boolean, initialView?: 'map' | 'scene'): SceneView | MapView {
-    // // Destroy the view if it exists
+export function init(
+    container: HTMLDivElement,
+    isMobile: boolean,
+    { zoom, center }: { zoom: number, center: [number, number] },
+    initialView?: 'map' | 'scene'
+): SceneView | MapView {
+    // Destroy the view if it exists
     if (app.view) {
-        app.view.destroy()
+        app.view.destroy();
     }
 
     // Create a new map and view
-    const map = createMap()
+    const map = createMap();
 
     // Create the view
-    const view = createView(container, map, initialView, isMobile)
+    const view = createView(container, map, initialView, isMobile, { zoom, center });
 
     // Add layers to the map
-    addLayersToMap(map, layers)
+    addLayersToMap(map, layers);
 
-    // prevent collision with the edges of the view
+    // Prevent collision with the edges of the view
     setPopupAlignment(view);
 
-    // // expand widget handler
+    // Expand widget handler
     expandClickHandlers(view);
 
-    return view
+    return view;
 }
 
 
@@ -224,41 +229,44 @@ export const createMap = () => {
 }
 
 // Create a new view
-export const createView = (container: HTMLDivElement, map: Map, viewType: 'map' | 'scene' = 'scene', isMobile: boolean) => {
-
+export const createView = (
+    container: HTMLDivElement,
+    map: Map,
+    viewType: 'map' | 'scene' = 'scene',
+    isMobile: boolean,
+    initialView: { zoom: number; center: [number, number] } // Changed to [number, number] for more flexibility
+) => {
     // Common options for both MapView and SceneView
     const commonOptions = {
-        container: container,
-        map: map,
-        zoom: 8,
-        center: [-112, 39.5],
+        container,
+        map,
+        zoom: initialView.zoom,
+        center: initialView.center,
         highlightOptions: {
             color: new Color([255, 255, 0, 1]),
             haloColor: new Color("white"),
             haloOpacity: 0.9,
-            fillOpacity: 0.2
+            fillOpacity: 0.2,
         },
         ui: {
-            components: ['zoom', 'compass', 'attribution',]
+            components: ['zoom', 'compass', 'attribution'],
         },
         ...(!isMobile && {
             popup: new Popup({
                 dockEnabled: true,
                 dockOptions: {
-                    // Disables the dock button from the popup
                     buttonEnabled: false,
-                    // Ignore the default sizes that trigger responsive docking
                     breakpoint: false,
                     position: 'bottom-left',
-                }
-            })
+                },
+            }),
         }),
-    }
+    };
 
     return viewType === 'scene'
         ? new SceneView({ ...commonOptions })
         : new MapView({ ...commonOptions });
-}
+};
 
 // Dynamically add layers to the map
 export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
