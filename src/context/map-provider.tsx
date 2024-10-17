@@ -7,7 +7,7 @@ import { useFetchLayerDescriptions } from "@/hooks/use-fetch-layer-descriptions"
 type MapContextProps = {
     view?: SceneView | MapView,
     activeLayers?: __esri.Collection<__esri.Layer>, // add a layers property to the context
-    loadMap?: (container: HTMLDivElement) => Promise<void>
+    loadMap?: (container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }) => Promise<void>
     setActiveLayers?: (layers: __esri.Collection<__esri.Layer>) => void
     isMobile?: boolean
     setIsMobile?: (isMobile: boolean) => void
@@ -58,8 +58,6 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(true);
     const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
 
-    // const [layerDescriptions, setLayerDescriptions] = useState<Record<string, string>>({});
-
     // const fetchLayerDescriptions = async (): Promise<LayerDescriptionResponse> => {
     //     const response = await fetch(`https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Hazard_Layer_Info_t1/FeatureServer/0/query?where=1%3D1&objectIds=&time=&resultType=none&outFields=*&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnDistinctValues=false&cacheHint=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&sqlFormat=none&f=pjson&token=`);
     //     const data: LayerDescriptionResponse = await response.json();
@@ -98,10 +96,10 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         fetchLayerDescriptions(setLayerDescriptions);
     }, [view]);
 
-    async function loadMap(container: HTMLDivElement) {
+    async function loadMap(container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }) {
         if (view) return;
         const { init } = await import("@/lib/mapping-utils")
-        setView(init(container, isMobile, 'map'))
+        setView(init(container, isMobile, { zoom, center }, 'map'));
     }
 
 

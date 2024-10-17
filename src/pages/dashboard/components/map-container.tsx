@@ -6,6 +6,7 @@ import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { PopupDrawer } from "@/components/custom/popup-drawer";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { TestDrawer } from "@/components/custom/test-drawer";
+import useMapUrlParams from "@/hooks/use-map-url-params";
 
 export default function ArcGISMap() {
     const mapRef = useRef<HTMLDivElement>(null);
@@ -20,12 +21,18 @@ export default function ArcGISMap() {
     const [isDragging, setIsDragging] = useState(false);
     const [startPos, setStartPos] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
     const dragThreshold = 5; // Adjust this value to your liking
+    // Get zoom and center from URL params
+    const { zoom, center } = useMapUrlParams(view);
 
+    // Initialize the map with URL parameters
     useEffect(() => {
         if (mapRef.current && loadMap) {
-            loadMap(mapRef.current);
+            // Check if zoom and center are valid before loading
+            if (zoom && center) {
+                loadMap(mapRef.current, { zoom, center });
+            }
         }
-    }, [mapRef, loadMap]);
+    }, [loadMap, mapRef, zoom, center]); // Add zoom and center as dependencies
 
     interface HandleMapClickProps {
         e: React.MouseEvent<HTMLDivElement>;

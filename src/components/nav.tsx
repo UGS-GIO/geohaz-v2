@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
 import { Button, buttonVariants } from './custom/button'
+import { Link } from '@tanstack/react-router'
 import {
   Collapsible,
   CollapsibleContent,
