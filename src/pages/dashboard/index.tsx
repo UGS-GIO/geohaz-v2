@@ -7,7 +7,7 @@ import MapContainer from './components/map-container'
 import { MapFooter } from './components/map-footer'
 import { cn } from '@/lib/utils'
 
-export default function Dashboard() {
+export default function HazardMap() {
   return (
     <Layout>
       {/* ===== Top Heading ===== */}
