@@ -158,3 +158,8 @@ h2.esri-widget__heading.esri-feature__title {
   color: #0079c1;
   text-decoration: underline;
 }
+
+/* removing the outline from the map */
+.esri-view .esri-view-surface--touch-none:focus::after {
+  outline: none !important;
+}

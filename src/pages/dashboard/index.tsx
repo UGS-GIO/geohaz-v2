@@ -27,7 +27,7 @@ export default function HazardMap() {
 
       {/* ===== Footer ===== */}
       {/* no footer on mobile */}
-      <Layout.Footer className={cn('hidden md:flex')} dynamicContent={<MapFooter />} />
+      <Layout.Footer className={cn('hidden md:flex z-10')} dynamicContent={<MapFooter />} />
     </Layout>
   )
 }
