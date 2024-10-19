@@ -67,3 +67,29 @@ export interface FillSymbolizer {
 }
 
 export type PolygonSymbolizer = FillSymbolizer | StrokeSymbolizer;
+
+export interface Feature {
+    type: string;
+    id: string;
+    geometry: Geometry;
+    geometry_name: string;
+    properties: Properties;
+    bbox: number[];
+}
+
+interface Geometry {
+    type: string;
+    coordinates: number[][][][];
+}
+
+interface Properties {
+    name: string;
+    location: string;
+    ohio_code: string;
+    tile: string;
+    path: string;
+    ext: string;
+    size: number;
+    shape_length: number;
+    shape_area: number;
+}

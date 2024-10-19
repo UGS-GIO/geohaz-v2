@@ -1,59 +1,60 @@
-import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerOverlay, DrawerPortal, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { useMemo, useState, useEffect } from 'react';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/custom/button';
-import { Drawer as VaulDrawer } from 'vaul';
-import { MapContext } from '@/context/map-provider';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { cn } from '@/lib/utils';
-import { useMapInteractions } from '@/hooks/use-map-interactions';
+import { Feature } from 'geojson';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import * as React from "react"
-import { MinusIcon, PlusIcon } from "@radix-ui/react-icons"
-import { Bar, BarChart, ResponsiveContainer } from "recharts"
+interface PopupContent {
+    features: Feature[];
+    visible: boolean;
+    groupLayerTitle: string;
+    layerTitle: string;
+}
 
-const data = [
-    { goal: 400 }, { goal: 300 }, { goal: 200 }, { goal: 300 },
-    { goal: 200 }, { goal: 278 }, { goal: 189 }, { goal: 239 },
-    { goal: 300 }, { goal: 200 }, { goal: 278 }, { goal: 189 },
-    { goal: 349 },
-];
-
-function TestDrawer({ container, drawerTriggerRef }: { container: HTMLDivElement | null, drawerTriggerRef: React.RefObject<HTMLButtonElement> }) {
+function TestDrawer({ container, popupContent, drawerTriggerRef }: {
+    container: HTMLDivElement | null,
+    popupContent: PopupContent[],
+    drawerTriggerRef: React.RefObject<HTMLButtonElement>;
+}) {
     const { isCollapsed } = useSidebar();
-    const [goal, setGoal] = useState(350);
     const [snap, setSnap] = useState<number | string | null>(0);
     const snapPoints = [0.2, 0.5, 0.8];
-    const { visibleLayers } = useMapInteractions();
-    const [layerContent, setLayerContent] = useState<string>("");
 
-    // Trigger function to fetch visible layers when drawer is opened
-    const handleDrawerOpen = () => {
-        const layerInfo = visibleLayers.map(layer => layer.title).join(', ');
-        setLayerContent(layerInfo ? `Visible layers: ${layerInfo}` : 'No visible layers');
-    };
+    const layerContent = useMemo(() =>
+        popupContent.length ? popupContent : [],
+        [popupContent]
+    );
 
+    // Initialize activeTab state
+    const [activeTab, setActiveTab] = useState<string>('');
+
+    // Update activeTab whenever layerContent changes
     useEffect(() => {
-        const triggerBtn = drawerTriggerRef.current;
-        if (triggerBtn) {
-            triggerBtn.addEventListener('click', handleDrawerOpen);
+        if (layerContent.length > 0) {
+            setActiveTab(layerContent[0].groupLayerTitle);
         }
+    }, [layerContent]);
 
-        return () => {
-            if (triggerBtn) {
-                triggerBtn.removeEventListener('click', handleDrawerOpen);
-            }
-        };
-    }, [drawerTriggerRef, visibleLayers]);
-
-    function onClick(adjustment: number) {
-        setGoal(Math.max(200, Math.min(400, goal + adjustment)));
-    }
+    const filteredContent = useMemo(() => {
+        return layerContent.filter(layer => layer.groupLayerTitle === activeTab);
+    }, [layerContent, activeTab]);
 
     const triggerBtn = (
         <button ref={drawerTriggerRef} className="hidden">
             Open Dialog
         </button>
     );
+
+    // Create unique tabs based on groupLayerTitle
+    const tabsHeadList = Array.from(new Set(popupContent.map(({ groupLayerTitle }) => groupLayerTitle)))
+        .map(title => ({
+            id: title,
+            value: title,
+            label: title
+        }));
 
     return (
         <Drawer snapPoints={snapPoints} modal={false} container={container} activeSnapPoint={snap} setActiveSnapPoint={setSnap}>
@@ -62,65 +63,67 @@ function TestDrawer({ container, drawerTriggerRef }: { container: HTMLDivElement
             </DrawerTrigger>
             <DrawerContent className={cn('max-w-4xl', isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]', 'mb-10 z-10')}>
                 <DrawerHeader>
-                    <DrawerTitle>Move Goal</DrawerTitle>
-                    <DrawerDescription>Set your daily activity goal.</DrawerDescription>
+                    <DrawerTitle>Hazards in Your Region </DrawerTitle>
+                    <DrawerDescription>
+                        <ScrollArea>
+                            <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+                                <div className="w-full relative h-10 justify-center flex overflow-x-auto
+                                ">
+                                    <TabsList className="flex absolute h-10">
+                                        {tabsHeadList.map(({ id, value, label }) => (
+                                            <TabsTrigger key={id} value={value}>
+                                                {label}
+                                            </TabsTrigger>
+                                        ))}
+                                    </TabsList>
+                                </div>
+                            </Tabs>
+                            <ScrollBar orientation="horizontal" />
+                        </ScrollArea>
+                    </DrawerDescription>
                 </DrawerHeader>
 
-                {/* Add layer content here */}
-                <div className="p-4 pb-0">
-                    <div className="mb-4">
-                        <h4 className="font-bold">Map Layers</h4>
-                        <p>{layerContent}</p>
-                    </div>
+                <div className="p-4 overflow-y-scroll h-20">
+                    {filteredContent.length > 0 ? (
+                        filteredContent.map((layer, index) => {
 
-                    <div className="flex items-center justify-center space-x-2">
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8 shrink-0 rounded-full"
-                            onClick={() => onClick(-10)}
-                            disabled={goal <= 200}
-                        >
-                            <MinusIcon className="h-4 w-4" />
-                            <span className="sr-only">Decrease</span>
-                        </Button>
-                        <div className="flex-1 text-center">
-                            <div className="text-7xl font-bold tracking-tighter">{goal}</div>
-                            <div className="text-[0.70rem] uppercase text-muted-foreground">Calories/day</div>
-                        </div>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8 shrink-0 rounded-full"
-                            onClick={() => onClick(10)}
-                            disabled={goal >= 400}
-                        >
-                            <PlusIcon className="h-4 w-4" />
-                            <span className="sr-only">Increase</span>
-                        </Button>
-                    </div>
+                            return (
+                                <div key={index}>
+                                    <h3>{layer.layerTitle}</h3>
+                                    {
+                                        layer.features.map((feature, index) => (
+                                            <div key={index}>
+                                                <p>{feature.id}</p>
+                                                {/* render all properties*/}
+                                                {/* TODO: use popuptemplates that include an array of properties to display */}
+                                                {
+                                                    feature.properties && Object.entries(feature.properties).map(([key, value], index) => (
+                                                        <div key={index}>
+                                                            <p>{key}: {value}</p>
+                                                        </div>
+                                                    ))
+                                                }
 
-                    <div className="mt-3 h-[120px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data}>
-                                <Bar
-                                    dataKey="goal"
-                                    style={{ fill: "hsl(var(--foreground))", opacity: 0.9 }}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
+                                            </div>
+                                        ))
+
+                                    }
+                                </div>
+                            )
+                        })
+                    ) : (
+                        <p>No data available for this tab.</p>
+                    )}
                 </div>
 
                 <DrawerFooter>
-                    <Button>Submit</Button>
                     <DrawerClose asChild>
                         <Button variant="outline">Cancel</Button>
                     </DrawerClose>
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>
-    )
+    );
 }
 
 export { TestDrawer };

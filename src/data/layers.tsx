@@ -9,7 +9,7 @@
 //     sublayers: [
 //         {
 //             name: `${HAZARDS_WORKSPACE}:${exampleLayerName}`,
-//             popupEnabled: true,
+//             popupEnabled: false,
 //             queryable: true,
 //         },
 //     ],
@@ -91,7 +91,7 @@ const landslideLegacyWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideLegacyLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -187,7 +187,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideInventoryLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -280,7 +280,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideSusceptibilityLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -472,7 +472,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${liquefactionLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -544,7 +544,7 @@ const groundshakingWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${groundshakingLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -639,7 +639,7 @@ const qFaultsWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -702,7 +702,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${surfaceFaultRuptureLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -806,7 +806,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${windBlownSandLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -906,7 +906,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${saltTectonicsDeformationLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1013,7 +1013,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${shallowBedrockLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1121,7 +1121,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${rockfallHazardLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1228,7 +1228,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${pipingAndErosionLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1330,7 +1330,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${expansiveSoilRockLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1432,7 +1432,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${shallowGroundwaterLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1535,7 +1535,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${radonSusceptibilityLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1677,7 +1677,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${corrosiveSoilRockLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1739,7 +1739,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${collapsibleSoilLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1841,7 +1841,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${solubleSoilAndRockLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -1943,7 +1943,7 @@ const calicheWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${calicheLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -2085,7 +2085,7 @@ const floodAndDebrisWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${floodAndDebrisLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -2150,7 +2150,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${earthFissureLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -2252,7 +2252,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${erosionHazardZoneLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -2394,7 +2394,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${karstFeaturesLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -2496,7 +2496,7 @@ const quads24kWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${GEN_GIS_WORKSPACE}:${quads24kLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -2584,7 +2584,7 @@ const studyAreasWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${studyAreasLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -2698,7 +2698,7 @@ const areasNotMappedWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${areasNotMappedLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
@@ -2769,7 +2769,7 @@ const floodHazardsConfig: LayerProps = {
 
 const earthquakesConfig: LayerProps = {
     type: 'group',
-    title: 'Earthquake Hazards',
+    title: 'Earthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake Hazards',
     visible: true,
     layers: [groundshakingWMSConfig, liquefactionWMSConfig, surfaceFaultRuptureWMSConfig, qFaultsWMSConfig],
 };

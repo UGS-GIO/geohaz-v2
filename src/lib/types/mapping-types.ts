@@ -21,7 +21,7 @@ interface BaseLayerProps {
 export interface WMSLayerProps extends BaseLayerProps {
     type: 'wms';
     fetchFeatureInfoFunction: __esri.FetchFeatureInfoFunction;
-    sublayers?: (__esri.CollectionProperties<__esri.SublayerProperties> | __esri.CollectionProperties<__esri.WMSSublayerProperties>) | undefined
+    sublayers?: (__esri.CollectionProperties<__esri.SublayerProperties> & __esri.CollectionProperties<__esri.WMSSublayerProperties>) | undefined
 }
 
 export interface GroupLayerProps extends BaseLayerProps {
