@@ -2769,7 +2769,7 @@ const floodHazardsConfig: LayerProps = {
 
 const earthquakesConfig: LayerProps = {
     type: 'group',
-    title: 'Earthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake HazardsEarthquake Hazards',
+    title: 'Earthquake Hazards',
     visible: true,
     layers: [groundshakingWMSConfig, liquefactionWMSConfig, surfaceFaultRuptureWMSConfig, qFaultsWMSConfig],
 };
