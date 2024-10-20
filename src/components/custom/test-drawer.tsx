@@ -1,129 +1,192 @@
-import { useMemo, useState, useEffect } from 'react';
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Button } from '@/components/custom/button';
-import { useSidebar } from '@/hooks/use-sidebar';
-import { cn } from '@/lib/utils';
-import { Feature } from 'geojson';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+"use client"
+
+import * as React from "react"
+import { useMemo, useState, useEffect } from "react"
+import { Feature } from "geojson"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer"
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarProvider,
+} from "@/components/ui/sidebar"
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel"
+import { cn } from "@/lib/utils"
+import { useSidebar } from "@/hooks/use-sidebar"
 
 interface PopupContent {
-    features: Feature[];
-    visible: boolean;
-    groupLayerTitle: string;
-    layerTitle: string;
+    features: Feature[]
+    visible: boolean
+    groupLayerTitle: string
+    layerTitle: string
 }
 
-function TestDrawer({ container, popupContent, drawerTriggerRef }: {
-    container: HTMLDivElement | null,
-    popupContent: PopupContent[],
-    drawerTriggerRef: React.RefObject<HTMLButtonElement>;
-}) {
-    const { isCollapsed } = useSidebar();
+interface CombinedSidebarDrawerProps {
+    container: HTMLDivElement | null
+    popupContent: PopupContent[]
+    drawerTriggerRef: React.RefObject<HTMLButtonElement>
+}
+
+export default function TestDrawer({
+    container,
+    popupContent,
+    drawerTriggerRef,
+}: CombinedSidebarDrawerProps) {
+    const [open, setOpen] = React.useState(false)
+    const [activeGroup, setActiveGroup] = useState<string | null>(null)
+    const [activeLayer, setActiveLayer] = useState<string | null>(null)
     const [snap, setSnap] = useState<number | string | null>(0);
     const snapPoints = [0.2, 0.5, 0.8];
+    const { isCollapsed } = useSidebar();
 
-    const layerContent = useMemo(() =>
-        popupContent.length ? popupContent : [],
-        [popupContent]
-    );
+    const layerContent = useMemo(() => popupContent, [popupContent])
 
-    // Initialize activeTab state
-    const [activeTab, setActiveTab] = useState<string>('');
+    const groupedTitles = useMemo(
+        () => Array.from(new Set(layerContent.map(({ groupLayerTitle }) => groupLayerTitle))),
+        [layerContent]
+    )
 
-    // Update activeTab whenever layerContent changes
+    const filteredContent = useMemo(
+        () => layerContent.filter((layer) => layer.groupLayerTitle === activeGroup),
+        [layerContent, activeGroup]
+    )
+
     useEffect(() => {
-        if (layerContent.length > 0) {
-            setActiveTab(layerContent[0].groupLayerTitle);
+        if (filteredContent.length > 0) {
+            setActiveLayer(filteredContent[0].layerTitle)
         }
-    }, [layerContent]);
+    }, [filteredContent])
 
-    const filteredContent = useMemo(() => {
-        return layerContent.filter(layer => layer.groupLayerTitle === activeTab);
-    }, [layerContent, activeTab]);
+    const activeLayerContent = useMemo(
+        () => filteredContent.find((layer) => layer.layerTitle === activeLayer),
+        [filteredContent, activeLayer]
+    )
 
-    const triggerBtn = (
-        <button ref={drawerTriggerRef} className="hidden">
-            Open Dialog
-        </button>
-    );
-
-    // Create unique tabs based on groupLayerTitle
-    const tabsHeadList = Array.from(new Set(popupContent.map(({ groupLayerTitle }) => groupLayerTitle)))
-        .map(title => ({
-            id: title,
-            value: title,
-            label: title
-        }));
+    const handleGroupChange = (title: string) => {
+        setActiveGroup(title)
+        const firstLayerInGroup = layerContent.find((layer) => layer.groupLayerTitle === title)
+        if (firstLayerInGroup) {
+            setActiveLayer(firstLayerInGroup.layerTitle)
+        }
+    }
 
     return (
-        <Drawer snapPoints={snapPoints} modal={false} container={container} activeSnapPoint={snap} setActiveSnapPoint={setSnap}>
+        <Drawer
+            snapPoints={snapPoints}
+            modal={false}
+            container={container}
+            activeSnapPoint={snap}
+            setActiveSnapPoint={setSnap}
+        >
             <DrawerTrigger asChild>
-                {triggerBtn}
+                <Button ref={drawerTriggerRef} size="sm">
+                    Open Drawer
+                </Button>
             </DrawerTrigger>
-            <DrawerContent className={cn('max-w-4xl', isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]', 'mb-10 z-10')}>
+            <DrawerContent className={cn('max-w-4xl', isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]', 'mb-10 z-10 h-[75vh]')}>
                 <DrawerHeader>
-                    <DrawerTitle>Hazards in Your Region </DrawerTitle>
-                    <DrawerDescription>
-                        <ScrollArea>
-                            <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
-                                <div className="w-full relative h-10 justify-center flex overflow-x-auto
-                                ">
-                                    <TabsList className="flex absolute h-10">
-                                        {tabsHeadList.map(({ id, value, label }) => (
-                                            <TabsTrigger key={id} value={value}>
-                                                {label}
-                                            </TabsTrigger>
-                                        ))}
-                                    </TabsList>
-                                </div>
-                            </Tabs>
-                            <ScrollBar orientation="horizontal" />
-                        </ScrollArea>
-                    </DrawerDescription>
+                    <DrawerTitle>Hazards in Your Region</DrawerTitle>
+                    <DrawerDescription>Explore hazards in your region by category.</DrawerDescription>
                 </DrawerHeader>
-
-                <div className="p-4 overflow-y-scroll h-20">
-                    {filteredContent.length > 0 ? (
-                        filteredContent.map((layer, index) => {
-
-                            return (
-                                <div key={index}>
-                                    <h3>{layer.layerTitle}</h3>
-                                    {
-                                        layer.features.map((feature, index) => (
-                                            <div key={index}>
-                                                <p>{feature.id}</p>
-                                                {/* render all properties*/}
-                                                {/* TODO: use popuptemplates that include an array of properties to display */}
-                                                {
-                                                    feature.properties && Object.entries(feature.properties).map(([key, value], index) => (
-                                                        <div key={index}>
-                                                            <p>{key}: {value}</p>
-                                                        </div>
-                                                    ))
-                                                }
-
+                <div className="flex flex-1 overflow-hidden">
+                    <SidebarProvider className="items-start">
+                        <Sidebar collapsible="none" className="hidden md:flex">
+                            <SidebarContent>
+                                <SidebarGroup>
+                                    <SidebarGroupContent>
+                                        <SidebarMenu>
+                                            {filteredContent.map((item) => (
+                                                <SidebarMenuItem key={item.layerTitle}>
+                                                    <SidebarMenuButton
+                                                        asChild
+                                                        isActive={item.layerTitle === activeLayer}
+                                                        onClick={() => setActiveLayer(item.layerTitle)}
+                                                    >
+                                                        <a href="#">
+                                                            <span>{item.layerTitle}</span>
+                                                        </a>
+                                                    </SidebarMenuButton>
+                                                </SidebarMenuItem>
+                                            ))}
+                                        </SidebarMenu>
+                                    </SidebarGroupContent>
+                                </SidebarGroup>
+                            </SidebarContent>
+                        </Sidebar>
+                        <main className="flex flex-1 flex-col overflow-hidden">
+                            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+                                <Carousel className="w-full max-w-xs">
+                                    <CarouselContent>
+                                        {groupedTitles.map((title, idx) => (
+                                            <CarouselItem key={idx}>
+                                                <Button
+                                                    variant={activeGroup === title ? "default" : "outline"}
+                                                    className="w-full"
+                                                    onClick={() => handleGroupChange(title)}
+                                                >
+                                                    {title}
+                                                </Button>
+                                            </CarouselItem>
+                                        ))}
+                                    </CarouselContent>
+                                    <CarouselPrevious />
+                                    <CarouselNext />
+                                </Carousel>
+                            </header>
+                            <div className="flex-1 overflow-y-auto p-4">
+                                {activeLayerContent && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-4">{activeLayerContent.layerTitle}</h3>
+                                        {activeLayerContent.features.map((feature, featureIdx) => (
+                                            <div key={featureIdx} className="p-2 border-b mb-2">
+                                                <p className="font-semibold">ID: {feature.id}</p>
+                                                {feature.properties && (
+                                                    <div className="ml-2">
+                                                        {Object.entries(feature.properties).map(([key, value], propIdx) => (
+                                                            <p key={propIdx} className="text-sm">
+                                                                <span className="font-medium">{key}:</span> {value}
+                                                            </p>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
-                                        ))
-
-                                    }
-                                </div>
-                            )
-                        })
-                    ) : (
-                        <p>No data available for this tab.</p>
-                    )}
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </main>
+                    </SidebarProvider>
                 </div>
-
                 <DrawerFooter>
                     <DrawerClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">Close</Button>
                     </DrawerClose>
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>
-    );
+    )
 }
 
-export { TestDrawer };
+export { TestDrawer }
