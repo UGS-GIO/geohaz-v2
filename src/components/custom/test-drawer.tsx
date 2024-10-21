@@ -3,36 +3,10 @@
 import * as React from "react"
 import { useMemo, useState, useEffect } from "react"
 import { Feature } from "geojson"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
-import {
-    Drawer,
-    DrawerClose,
-    DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerTrigger,
-} from "@/components/ui/drawer"
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarProvider,
-} from "@/components/ui/sidebar"
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from "@/components/ui/carousel"
+import { Sidebar, SidebarContent, SidebarGroupContent, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar"
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/hooks/use-sidebar"
 
@@ -54,130 +28,215 @@ export default function TestDrawer({
     popupContent,
     drawerTriggerRef,
 }: CombinedSidebarDrawerProps) {
-    const [open, setOpen] = React.useState(false)
     const [activeGroup, setActiveGroup] = useState<string | null>(null)
     const [activeLayer, setActiveLayer] = useState<string | null>(null)
-    const [snap, setSnap] = useState<number | string | null>(0);
-    const snapPoints = [0.2, 0.5, 0.8];
-    const { isCollapsed } = useSidebar();
+    const [showSidebar, setShowSidebar] = useState(false)
+    const { isCollapsed } = useSidebar()
 
     const layerContent = useMemo(() => popupContent, [popupContent])
 
-    const groupedTitles = useMemo(
-        () => Array.from(new Set(layerContent.map(({ groupLayerTitle }) => groupLayerTitle))),
-        [layerContent]
-    )
+    const groupedLayers = useMemo(() => {
+        return layerContent.reduce((acc, item) => {
+            const { groupLayerTitle, layerTitle } = item
+            if (!acc[groupLayerTitle]) acc[groupLayerTitle] = []
+            acc[groupLayerTitle].push(layerTitle)
+            return acc
+        }, {} as Record<string, string[]>)
+    }, [layerContent])
 
-    const filteredContent = useMemo(
-        () => layerContent.filter((layer) => layer.groupLayerTitle === activeGroup),
-        [layerContent, activeGroup]
-    )
+    const handleGroupClick = (group: string, hasSublayers: boolean) => {
+        setActiveGroup(group)
+        console.log("hasSublayers", hasSublayers);
 
-    useEffect(() => {
-        if (filteredContent.length > 0) {
-            setActiveLayer(filteredContent[0].layerTitle)
-        }
-    }, [filteredContent])
+        if (hasSublayers) { setShowSidebar(true) }
+        else setShowSidebar(false)
 
-    const activeLayerContent = useMemo(
-        () => filteredContent.find((layer) => layer.layerTitle === activeLayer),
-        [filteredContent, activeLayer]
-    )
 
-    const handleGroupChange = (title: string) => {
-        setActiveGroup(title)
-        const firstLayerInGroup = layerContent.find((layer) => layer.groupLayerTitle === title)
+        // check if its a groulayer with layer or if it is just a layer that is not grouped
+        console.log("group", group);
+
+        // Set the first layer of the group as active
+        const firstLayerInGroup = layerContent.find(layer => layer.groupLayerTitle === group)
         if (firstLayerInGroup) {
             setActiveLayer(firstLayerInGroup.layerTitle)
         }
     }
 
+    const handleLayerClick = (layer: string) => {
+        setActiveLayer(layer)
+        // setShowSidebar(false)
+    }
+
+    const activeLayerContent = useMemo(() => {
+        return layerContent.find((layer) => layer.layerTitle === activeLayer)
+    }, [layerContent, activeLayer])
+
+    const isMobile = () => window.innerWidth < 768
+
+    useEffect(() => {
+        if (isMobile()) setShowSidebar(false)
+    }, [activeGroup])
+
     return (
-        <Drawer
-            snapPoints={snapPoints}
-            modal={false}
-            container={container}
-            activeSnapPoint={snap}
-            setActiveSnapPoint={setSnap}
-        >
+        <Drawer container={container} modal={false}>
             <DrawerTrigger asChild>
-                <Button ref={drawerTriggerRef} size="sm">
-                    Open Drawer
-                </Button>
+                <Button ref={drawerTriggerRef} size="sm" className="hidden">Open Drawer</Button>
             </DrawerTrigger>
-            <DrawerContent className={cn('max-w-4xl', isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]', 'mb-10 z-10 h-[75vh]')}>
+
+            <DrawerContent className={cn(
+                'max-w-4xl',
+                isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]',
+                'mb-10 z-10 h-[75vh] overflow-hidden'
+            )}>
                 <DrawerHeader>
                     <DrawerTitle>Hazards in Your Region</DrawerTitle>
-                    <DrawerDescription>Explore hazards in your region by category.</DrawerDescription>
                 </DrawerHeader>
-                <div className="flex flex-1 overflow-hidden">
-                    <SidebarProvider className="items-start">
-                        <Sidebar collapsible="none" className="hidden md:flex">
-                            <SidebarContent>
-                                <SidebarGroup>
-                                    <SidebarGroupContent>
-                                        <SidebarMenu>
-                                            {filteredContent.map((item) => (
-                                                <SidebarMenuItem key={item.layerTitle}>
-                                                    <SidebarMenuButton
-                                                        asChild
-                                                        isActive={item.layerTitle === activeLayer}
-                                                        onClick={() => setActiveLayer(item.layerTitle)}
-                                                    >
-                                                        <a href="#">
-                                                            <span>{item.layerTitle}</span>
-                                                        </a>
-                                                    </SidebarMenuButton>
-                                                </SidebarMenuItem>
-                                            ))}
-                                        </SidebarMenu>
-                                    </SidebarGroupContent>
-                                </SidebarGroup>
-                            </SidebarContent>
-                        </Sidebar>
-                        <main className="flex flex-1 flex-col overflow-hidden">
-                            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                                <Carousel className="w-full max-w-xs">
-                                    <CarouselContent>
-                                        {groupedTitles.map((title, idx) => (
-                                            <CarouselItem key={idx}>
-                                                <Button
-                                                    variant={activeGroup === title ? "default" : "outline"}
-                                                    className="w-full"
-                                                    onClick={() => handleGroupChange(title)}
+
+                <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden">
+                    <header className="border-b overflow-hidden h-12">
+                        <Carousel className="w-full h-full relative px-8">
+                            <CarouselContent className="-ml-2 px-4">
+                                {Object.entries(groupedLayers).map(([groupTitle, layers], groupIdx) => {
+                                    const hasSublayers = layers && layers.length > 0 && layers[0] !== ''
+                                    return (
+                                        <React.Fragment key={`parent-group-${groupIdx}`}>
+                                            <CarouselItem key={`group-${groupIdx}`} className="pl-2 basis-auto">
+                                                <button
+                                                    className={cn(
+                                                        "px-3 py-2 text-sm font-bold transition-all",
+                                                        activeGroup === groupTitle ? "border-b-2 border-primary" : "text-secondary-foreground"
+                                                    )}
+                                                    onClick={() => handleGroupClick(groupTitle, hasSublayers)}
                                                 >
-                                                    {title}
-                                                </Button>
+                                                    {groupTitle}
+                                                </button>
                                             </CarouselItem>
-                                        ))}
-                                    </CarouselContent>
-                                    <CarouselPrevious />
-                                    <CarouselNext />
-                                </Carousel>
-                            </header>
-                            <div className="flex-1 overflow-y-auto p-4">
-                                {activeLayerContent && (
-                                    <div>
-                                        <h3 className="text-lg font-semibold mb-4">{activeLayerContent.layerTitle}</h3>
-                                        {activeLayerContent.features.map((feature, featureIdx) => (
-                                            <div key={featureIdx} className="p-2 border-b mb-2">
-                                                <p className="font-semibold">ID: {feature.id}</p>
-                                                {feature.properties && (
-                                                    <div className="ml-2">
-                                                        {Object.entries(feature.properties).map(([key, value], propIdx) => (
-                                                            <p key={propIdx} className="text-sm">
-                                                                <span className="font-medium">{key}:</span> {value}
-                                                            </p>
-                                                        ))}
-                                                    </div>
+
+                                            {layers && layers.length > 0 && layers
+                                                .filter((layer) => layer && layer.trim() !== '')
+                                                .map((layer, layerIdx) => (
+                                                    <CarouselItem key={`layer-${groupIdx}-${layerIdx}`} className="pl-2 basis-auto">
+                                                        <button
+                                                            className={cn(
+                                                                "px-3 py-2 text-sm transition-all",
+                                                                activeLayer === layer ? "border-b-2 border-primary" : "text-secondary-foreground"
+                                                            )}
+                                                            onClick={() => handleLayerClick(layer)}
+                                                        >
+                                                            {layer}
+                                                        </button>
+                                                    </CarouselItem>
+                                                ))
+                                            }
+                                        </React.Fragment>
+                                    )
+                                })}
+
+                                {/* {layerContent
+                                    .filter((item) => !item.groupLayerTitle || !groupedLayers[item.groupLayerTitle])
+                                    .map((item, idx) => (
+                                        <CarouselItem key={`individual-${idx}`} className="pl-2 basis-auto">
+                                            <button
+                                                className={cn(
+                                                    "px-3 py-2 text-sm transition-all",
+                                                    activeLayer === item.layerTitle ? "border-b-2 border-primary" : "text-muted-foreground"
+                                                )}
+                                                onClick={() => handleLayerClick(item.layerTitle)}
+                                            >
+                                                {item.layerTitle}
+                                            </button>
+                                        </CarouselItem>
+                                    ))} */}
+                            </CarouselContent>
+                            <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2" />
+                            <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2" />
+                        </Carousel>
+                    </header>
+
+                    <div className="flex overflow-hidden pt-2">
+                        {showSidebar && !isMobile() && (
+                            <SidebarProvider>
+                                <Sidebar collapsible="none" className="hidden md:flex pl-2
+                                ">
+                                    <SidebarContent>
+                                        <SidebarGroupContent>
+                                            <SidebarMenu>
+                                                {layerContent
+                                                    .filter((layer) => layer.groupLayerTitle === activeGroup)
+                                                    .map((item) => (
+                                                        <SidebarMenuItem key={item.layerTitle}>
+                                                            <SidebarMenuButton
+                                                                size={'lg'}
+                                                                isActive={item.layerTitle === activeLayer}
+                                                                onClick={() => setActiveLayer(item.layerTitle)}
+                                                            >
+                                                                {item.layerTitle}
+                                                            </SidebarMenuButton>
+                                                        </SidebarMenuItem>
+                                                    ))}
+                                            </SidebarMenu>
+                                        </SidebarGroupContent>
+                                    </SidebarContent>
+                                </Sidebar>
+                                <SidebarInset>
+                                    <div className="flex flex-1 flex-col gap-4 p-4">
+                                        {activeLayerContent && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold mb-4">
+                                                    {activeLayerContent.layerTitle}
+                                                </h3>
+                                                {activeLayerContent.features && activeLayerContent.features.length > 0 ? (
+                                                    activeLayerContent.features.map((feature, idx) => (
+                                                        <div key={idx} className="p-2 border-b mb-2">
+                                                            <p>ID: {feature.id}</p>
+                                                            <div className="ml-2">
+                                                                {feature.properties &&
+                                                                    Object.entries(feature.properties).map(([key, value], propIdx) => (
+                                                                        <p key={propIdx}>
+                                                                            <strong>{key}:</strong> {String(value)}
+                                                                        </p>
+                                                                    ))}
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p>No features available for this layer.</p>
                                                 )}
                                             </div>
-                                        ))}
+                                        )}
+                                    </div>
+                                </SidebarInset>
+                            </SidebarProvider>
+                        )}
+                        {!showSidebar && (
+                            <div className="flex flex-1 flex-col gap-4 p-4">
+                                {activeLayerContent && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-4">
+                                            {activeLayerContent.layerTitle}
+                                        </h3>
+                                        {activeLayerContent.features && activeLayerContent.features.length > 0 ? (
+                                            activeLayerContent.features.map((feature, idx) => (
+                                                <div key={idx} className="p-2 border-b mb-2">
+                                                    <p>ID: {feature.id}</p>
+                                                    <div className="ml-2">
+                                                        {feature.properties &&
+                                                            Object.entries(feature.properties).map(([key, value], propIdx) => (
+                                                                <p key={propIdx}>
+                                                                    <strong>{key}:</strong> {String(value)}
+                                                                </p>
+                                                            ))}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p>No features available for this layer.</p>
+                                        )}
                                     </div>
                                 )}
                             </div>
-                        </main>
-                    </SidebarProvider>
+                        )}
+                    </div>
                 </div>
                 <DrawerFooter>
                     <DrawerClose asChild>
