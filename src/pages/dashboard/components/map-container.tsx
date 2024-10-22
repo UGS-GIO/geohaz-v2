@@ -197,8 +197,6 @@ export default function ArcGISMap() {
                         layerTitle: value.layerTitle,
                         groupLayerTitle: value.groupLayerTitle,
                         features: featureInfo.features.filter((feature: Feature) => {
-                            console.log('feature:', feature, 'key1:', key);
-
                             return (feature.id?.toString().split('.')[0].includes(key.split(':')[1]) || feature.id?.toString().includes(key.split(':')[0]));
                         })
                     };
