@@ -8,7 +8,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/hooks/use-sidebar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Minus, Plus } from "lucide-react"
+import { ChevronRight, Minus, Plus } from "lucide-react"
 
 interface PopupContent {
     features: Feature[]
@@ -199,8 +199,7 @@ export default function TestDrawer({
                                                                             }}
                                                                         >
                                                                             {item.layerTitle}{" "}
-                                                                            <Plus className="ml-auto group-data-[state=open]/collapsible:hidden" />
-                                                                            <Minus className="ml-auto group-data-[state=closed]/collapsible:hidden" />
+                                                                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                                                                         </SidebarMenuButton>
                                                                     </CollapsibleTrigger>
                                                                     {item.features && item.features.length > 0 && (
