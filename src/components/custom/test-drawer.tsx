@@ -8,7 +8,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/hooks/use-sidebar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ChevronRight, Minus, Plus } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 
 interface PopupContent {
     features: Feature[]
@@ -34,7 +34,6 @@ export default function TestDrawer({
     const { isCollapsed } = useSidebar()
     const [sidebarInsetContent, setSidebarInsetContent] = useState<Feature<Geometry, GeoJsonProperties> | null>(null)
     const carouselRef = useRef<HTMLDivElement>(null)
-
 
     const layerContent = useMemo(() => popupContent, [popupContent])
 
