@@ -2,13 +2,18 @@ import * as React from "react"
 import { useMemo, useState, useEffect, useRef } from "react"
 import { Feature, GeoJsonProperties, Geometry } from "geojson"
 import { Button } from "@/components/ui/button"
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarProvider } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarProvider, SidebarMenuSubButton } from "@/components/ui/sidebar"
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/hooks/use-sidebar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, RotateCcw } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { Badge } from "@/components/ui/badge"
+import { SidebarInsetWithPagination } from "./sidebar-inset-with-pagination"
 
 interface PopupContent {
     features: Feature[]
@@ -32,8 +37,9 @@ export default function TestDrawer({
     const [activeLayer, setActiveLayer] = useState<string | null>(null)
     const [showSidebar, setShowSidebar] = useState(false)
     const { isCollapsed } = useSidebar()
-    const [sidebarInsetContent, setSidebarInsetContent] = useState<Feature<Geometry, GeoJsonProperties> | null>(null)
+    const [selectedFeatures, setSelectedFeatures] = useState<Set<string>>(new Set())
     const carouselRef = useRef<HTMLDivElement>(null)
+    const isMobile = useIsMobile()
 
     const layerContent = useMemo(() => popupContent, [popupContent])
 
@@ -55,61 +61,119 @@ export default function TestDrawer({
         }
     }
 
-    const handleGroupClick = (group: string, hasSublayers: boolean) => {
+    const handleGroupClick = (group: string) => {
         setActiveGroup(group)
-        console.log('Group:', group);
-        console.log('Has sublayers:', hasSublayers);
-
-        setShowSidebar(hasSublayers)
-
-        // Set the first layer of the group as active
-        const firstLayerInGroup = layerContent.find(layer => layer.groupLayerTitle === group)
-        if (firstLayerInGroup) {
-            setActiveLayer(firstLayerInGroup.layerTitle)
-        }
-
+        setShowSidebar(true)
+        setActiveLayer(null)
         scrollToCarouselItem(`group-${group}`)
     }
 
-    const handleLayerClick = (layer: string, hasSublayers: boolean) => {
-        console.log('Layer123:', layer);
-
+    const handleLayerClick = (layer: string) => {
         setActiveLayer(layer)
-        setShowSidebar(hasSublayers)
-        setSidebarInsetContent(null); // Ensure we're not showing just one feature
+        setShowSidebar(false)
         scrollToCarouselItem(`layer-${layer}`)
+        const selectedLayer = layerContent.find(item => item.layerTitle === layer)
+        if (selectedLayer) {
+            setSelectedFeatures(new Set(selectedLayer.features.map(f => f.id as string)))
+        }
     }
 
-    const activeLayerContent = useMemo(() => {
-        return layerContent.find((layer) => layer.layerTitle === activeLayer)
-    }, [layerContent, activeLayer])
+    const toggleFeature = (featureId: string) => {
+        setSelectedFeatures(prev => {
+            const newSet = new Set(prev)
+            if (newSet.has(featureId)) {
+                newSet.delete(featureId)
+            } else {
+                newSet.add(featureId)
+            }
+            return newSet
+        })
+    }
 
-    const isMobile = () => window.innerWidth < 768
+    const toggleAllFeaturesInLayer = (layer: PopupContent) => {
+        setSelectedFeatures(prev => {
+            const newSet = new Set(prev)
+            const layerFeatureIds = new Set(layer.features.map(f => f.id as string))
+            const allSelected = layer.features.every(f => prev.has(f.id as string))
+
+            if (allSelected) {
+                layerFeatureIds.forEach(id => newSet.delete(id))
+            } else {
+                layerFeatureIds.forEach(id => newSet.add(id))
+            }
+
+            return newSet
+        })
+    }
+
+    const toggleAllFeaturesInGroup = (group: string) => {
+        setSelectedFeatures(prev => {
+            const newSet = new Set(prev)
+            const groupLayers = layerContent.filter(layer => layer.groupLayerTitle === group)
+            const groupFeatureIds = new Set(groupLayers.flatMap(layer => layer.features.map(f => f.id as string)))
+            const allSelected = groupLayers.every(layer =>
+                layer.features.every(f => prev.has(f.id as string))
+            )
+
+            if (allSelected) {
+                groupFeatureIds.forEach(id => newSet.delete(id))
+            } else {
+                groupFeatureIds.forEach(id => newSet.add(id))
+            }
+
+            return newSet
+        })
+    }
+
+    const handleCheckboxClick = (
+        e: React.MouseEvent<HTMLDivElement>,
+        item: PopupContent | string
+    ) => {
+        e.stopPropagation()
+        if (typeof item === 'string') {
+            toggleAllFeaturesInGroup(item)
+        } else {
+            toggleAllFeaturesInLayer(item)
+        }
+    }
+
+    const resetDisplayState = () => {
+        setSelectedFeatures(new Set())
+        setActiveGroup(null)
+        setActiveLayer(null)
+        setShowSidebar(false)
+    }
 
     useEffect(() => {
-        if (isMobile()) setShowSidebar(false)
-    }, [activeGroup])
+        if (isMobile) setShowSidebar(false)
+    }, [activeGroup, isMobile])
 
-    // Set initial active group and layer
     useEffect(() => {
         if (layerContent.length > 0) {
             const firstGroup = layerContent[0].groupLayerTitle
-            const firstLayer = layerContent[0].layerTitle
-
-            console.log('First group:', firstGroup);
-            console.log('First layer:', firstLayer);
-
-            if (firstLayer !== '') {
-                setActiveGroup(firstGroup)
-                setActiveLayer(firstLayer)
-                setShowSidebar(true)
-            } else {
-                setActiveGroup(firstGroup)
-                setActiveLayer(null)
-                setShowSidebar(false)
-            }
+            setActiveGroup(firstGroup)
+            setShowSidebar(true)
         }
     }, [layerContent])
+
+
+    // replace with popup templates
+    const featureContent = (feature: Feature<Geometry, GeoJsonProperties>) => {
+        return (
+            feature.properties &&
+            Object.entries(feature.properties).map(([key, value], propIdx) => (
+                <div key={propIdx} className="flex flex-col">
+                    <p className="font-bold underline text-primary">{key}</p>
+                    <p
+                        className="max-w-full break-words"
+                        style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+                    >
+                        {String(value)}
+                    </p>
+                </div>
+            ))
+        )
+    }
 
     return (
         <Drawer container={container} modal={false}>
@@ -120,51 +184,55 @@ export default function TestDrawer({
             <DrawerContent className={cn(
                 'max-w-4xl',
                 isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]',
-                'mb-10 z-10 h-[75vh] overflow-hidden'
+                'mb-10 z-10 max-h-[85vh] overflow-hidden'
             )}>
-                <DrawerHeader>
+                <DrawerHeader className="flex justify-between items-center">
                     <DrawerTitle>Hazards in Your Region</DrawerTitle>
+                    <Button variant="ghost" size="icon" onClick={resetDisplayState}>
+                        <RotateCcw className="h-4 w-4" />
+                    </Button>
                 </DrawerHeader>
 
                 <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden">
                     <header className="border-b overflow-hidden h-12">
                         <Carousel className="w-full h-full relative px-8">
                             <CarouselContent className="-ml-2 px-4" ref={carouselRef}>
-                                {Object.entries(groupedLayers).map(([groupTitle, layers], groupIdx) => {
-                                    const hasSublayers = layers && layers.length > 0 && layers[0] !== ''
-                                    return (
-                                        <React.Fragment key={`parent-group-${groupIdx}`}>
-                                            <CarouselItem key={`group-${groupIdx}`} className="pl-2 basis-auto" data-id={`group-${groupTitle}`}>
-                                                <button
-                                                    className={cn(
-                                                        "px-3 py-2 text-sm font-bold transition-all",
-                                                        activeGroup === groupTitle ? "border-b-2 border-primary" : "text-secondary-foreground"
-                                                    )}
-                                                    onClick={() => handleGroupClick(groupTitle, hasSublayers)}
-                                                >
-                                                    {groupTitle}
-                                                </button>
-                                            </CarouselItem>
+                                {Object.entries(groupedLayers).map(([groupTitle, layers], groupIdx) => (
+                                    <React.Fragment key={`parent-group-${groupIdx}`}>
+                                        <CarouselItem key={`group-${groupIdx}`} className="pl-2 basis-auto" data-id={`group-${groupTitle}`}>
+                                            <button
+                                                className={cn(
+                                                    "px-3 py-2 text-sm font-bold transition-all",
+                                                    activeGroup === groupTitle ? "border-b-2 border-primary" : "text-secondary-foreground"
+                                                )}
+                                                onClick={() => !isMobile && handleGroupClick(groupTitle)}
+                                            >
+                                                {groupTitle}{
+                                                    layers && layers.length > 0 && layers[0] !== '' && (
+                                                        ":"
+                                                    )
+                                                }
+                                            </button>
+                                        </CarouselItem>
 
-                                            {layers && layers.length > 0 && layers
-                                                .filter((layer) => layer && layer.trim() !== '')
-                                                .map((layer, layerIdx) => (
-                                                    <CarouselItem key={`layer-${groupIdx}-${layerIdx}`} className="pl-2 basis-auto" data-id={`layer-${layer}`}>
-                                                        <button
-                                                            className={cn(
-                                                                "px-3 py-2 text-sm transition-all",
-                                                                activeLayer === layer ? "border-b-2 border-primary" : "text-secondary-foreground"
-                                                            )}
-                                                            onClick={() => handleLayerClick(layer, false)}
-                                                        >
-                                                            {layer}
-                                                        </button>
-                                                    </CarouselItem>
-                                                ))
-                                            }
-                                        </React.Fragment>
-                                    )
-                                })}
+                                        {layers && layers.length > 0 && layers
+                                            .filter((layer) => layer && layer.trim() !== '')
+                                            .map((layer, layerIdx) => (
+                                                <CarouselItem key={`layer-${groupIdx}-${layerIdx}`} className="pl-2 basis-auto" data-id={`layer-${layer}`}>
+                                                    <button
+                                                        className={cn(
+                                                            "px-3 py-2 text-sm transition-all",
+                                                            activeLayer === layer ? "border-b-2 border-primary" : "text-secondary-foreground"
+                                                        )}
+                                                        onClick={() => handleLayerClick(layer)}
+                                                    >
+                                                        {layer}
+                                                    </button>
+                                                </CarouselItem>
+                                            ))
+                                        }
+                                    </React.Fragment>
+                                ))}
                             </CarouselContent>
                             <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2" />
                             <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2" />
@@ -172,116 +240,166 @@ export default function TestDrawer({
                     </header>
 
                     <div className="flex overflow-hidden pt-2">
-                        {showSidebar && !isMobile() && (
-                            <SidebarProvider>
+                        {showSidebar && !isMobile && (
+                            <SidebarProvider className="min-h-full">
                                 <Sidebar collapsible="none" className="hidden md:flex pl-2">
                                     <SidebarContent>
-                                        <SidebarGroupContent>
-                                            <SidebarGroup>
-                                                <SidebarMenu>
-                                                    {layerContent
-                                                        .filter((layer) => layer.groupLayerTitle === activeGroup)
-                                                        .map((item) => (
-                                                            <Collapsible
-                                                                key={item.layerTitle}
-                                                                defaultOpen={true}
-                                                                className="group/collapsible"
-                                                            >
-                                                                <SidebarMenuItem>
-                                                                    <CollapsibleTrigger asChild>
-                                                                        <SidebarMenuButton
-                                                                            size={'lg'}
-                                                                            isActive={item.layerTitle === activeLayer}
-                                                                            onClick={() => {
-                                                                                setActiveLayer(item.layerTitle)
-                                                                                scrollToCarouselItem(`group-${item.layerTitle}`)
-                                                                            }}
-                                                                        >
-                                                                            {item.layerTitle}{" "}
-                                                                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                                                                        </SidebarMenuButton>
-                                                                    </CollapsibleTrigger>
-                                                                    {item.features && item.features.length > 0 && (
+                                        {Object.entries(groupedLayers).map(([groupTitle]) => {
+                                            return (
+                                                <SidebarGroup key={groupTitle} className="gap-2 border border-secondary rounded">
+                                                    <SidebarGroupLabel
+                                                        className="!h-auto !min-h-0 px-2 py-1"
+                                                    >
+                                                        <div className="flex items-center justify-between w-full">
+                                                            <span className="text-xs leading-tight">{groupTitle}</span>
+                                                        </div>
+                                                    </SidebarGroupLabel>
+                                                    <SidebarGroupContent>
+                                                        <SidebarMenu>
+                                                            {layerContent
+                                                                .filter((layer) => layer.groupLayerTitle === groupTitle)
+                                                                .map((item) => (
+                                                                    <Collapsible
+                                                                        key={item.layerTitle}
+                                                                        defaultOpen={false}
+                                                                        className="group/collapsible"
+                                                                    >
+                                                                        <SidebarMenuItem>
+                                                                            <CollapsibleTrigger asChild>
+                                                                                <div
+                                                                                    className="flex items-center w-full cursor-pointer px-3 py-2"
+                                                                                    onClick={() => {
+                                                                                        setActiveLayer(item.layerTitle)
+                                                                                        scrollToCarouselItem(`layer-${item.layerTitle}`)
+                                                                                    }}
+                                                                                >
+                                                                                    <div
+                                                                                        onClick={(e) => handleCheckboxClick(e, item)}
+                                                                                        className="mr-2 flex-shrink-0"
+                                                                                    >
+                                                                                        <Checkbox
+                                                                                            checked={item.features.every(f => selectedFeatures.has(f.id as string))}
+                                                                                        />
+                                                                                    </div>
+                                                                                    <span className="text-sm">
+                                                                                        {item.layerTitle === '' ? groupTitle : item.layerTitle}
+                                                                                    </span>
+                                                                                    <Badge variant="outline" className="ml-2">{item.features.length}</Badge>
+                                                                                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                                                                </div>
+                                                                            </CollapsibleTrigger>
+                                                                        </SidebarMenuItem>
                                                                         <CollapsibleContent>
                                                                             <SidebarMenuSub>
-                                                                                {item.features.map((feature) => (
+                                                                                {item.features && item.features.length > 0 && item.features.map((feature) => (
                                                                                     <SidebarMenuSubItem key={feature.id}>
                                                                                         <SidebarMenuSubButton
-                                                                                            size={"md"} asChild
-                                                                                            onClick={() => setSidebarInsetContent(feature)}
-                                                                                            isActive={sidebarInsetContent?.id === feature.id}
+                                                                                            size={"md"}
+                                                                                            isActive={selectedFeatures.has(feature.id as string)}
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation()
+                                                                                                toggleFeature(feature.id as string)
+                                                                                            }}
                                                                                         >
-                                                                                            <span>{`Feature ${feature.id?.toString().split('.')[1]}`}</span>
+                                                                                            <div className="flex items-center">
+                                                                                                <Checkbox
+                                                                                                    checked={selectedFeatures.has(feature.id as string)}
+                                                                                                />
+
+                                                                                                <span className="ml-2 text-xs">{`Feature ${feature.id?.toString().split('.')[1]}`}</span>
+                                                                                            </div>
                                                                                         </SidebarMenuSubButton>
                                                                                     </SidebarMenuSubItem>
                                                                                 ))}
                                                                             </SidebarMenuSub>
                                                                         </CollapsibleContent>
-                                                                    )}
-                                                                </SidebarMenuItem>
-                                                            </Collapsible>
-                                                        ))}
-                                                </SidebarMenu>
-                                            </SidebarGroup>
-                                        </SidebarGroupContent>
+                                                                    </Collapsible>
+                                                                ))}
+                                                        </SidebarMenu>
+                                                    </SidebarGroupContent>
+                                                </SidebarGroup>
+                                            )
+                                        })}
                                     </SidebarContent>
                                 </Sidebar>
-                                <SidebarInset>
-                                    <div className="flex flex-1 flex-col gap-4 p-4">
-                                        {activeLayerContent && (
-                                            <div>
-                                                <h3 className="text-lg font-semibold mb-4">
-                                                    {activeLayerContent.layerTitle}
-                                                </h3>
-                                                {sidebarInsetContent ? (
-                                                    <div key={sidebarInsetContent?.id} className="p-2">
-                                                        <p>ID: {sidebarInsetContent?.id}</p>
-                                                        <div className="ml-2 grid grid-cols-3 gap-4"> {/* Adjust the number of columns by changing grid-cols-3 */}
-                                                            {sidebarInsetContent?.properties &&
-                                                                Object.entries(sidebarInsetContent?.properties).map(([key, value], propIdx) => (
-                                                                    <div key={propIdx} className="flex flex-col">
-                                                                        <p className="font-bold underline">{key}</p>
-                                                                        <p>{String(value)}</p>
-                                                                    </div>
-                                                                ))}
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <p>No features available for this layer.</p>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </SidebarInset>
-                            </SidebarProvider>
-                        )}
-                        {!showSidebar && (
-                            <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto">
-                                {activeLayerContent && (
-                                    <div>
-                                        <h3 className="text-lg font-semibold mb-4">
-                                            {activeLayerContent.layerTitle}
-                                        </h3>
-                                        {activeLayerContent.features && activeLayerContent.features.length > 0 ? (
-                                            activeLayerContent.features.map((feature, idx) => (
-                                                <div key={idx} className="p-2 border-b mb-2">
-                                                    <p>ID: {feature.id}</p>
-                                                    <div className="ml-2 grid grid-cols-3 gap-4"> {/* Adjust the number of columns by changing grid-cols-3 */}
-                                                        {feature.properties &&
-                                                            Object.entries(feature.properties).map(([key, value], propIdx) => (
-                                                                <div key={propIdx} className="flex flex-col">
-                                                                    <p className="font-bold underline">{key}</p>
-                                                                    <p>{String(value)}</p>
-                                                                </div>
+                                {/* <SidebarInset className="min-h-full">
+                                    <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto">
+                                        {layerContent.map((layer) => (
+                                            <React.Fragment key={layer.layerTitle}>
+                                                {layer.features.some(feature => selectedFeatures.has(feature.id as string)) && (
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold mb-4">
+                                                            {layer.groupLayerTitle}{layer.layerTitle === '' ? '' : ` - ${layer.layerTitle}`}
+                                                        </h3>
+                                                        {layer.features
+                                                            .filter(feature => selectedFeatures.has(feature.id as string))
+                                                            .map((feature, idx) => (
+                                                                <Accordion key={idx} type="multiple">
+                                                                    <AccordionItem value={`Feature ${feature.id?.toString().split('.')[1]}`}>
+                                                                        <AccordionHeader>
+                                                                            <AccordionTrigger>
+                                                                                <h3 className="text-md font-medium text-left">
+                                                                                    {`Feature ${feature.id?.toString().split('.')[1]}`}
+                                                                                </h3>
+                                                                            </AccordionTrigger>
+                                                                        </AccordionHeader>
+
+                                                                        <AccordionContent className="p-2 border-b mb-2">
+                                                                            <div className="ml-2 grid grid-cols-3 gap-4">
+                                                                                {featureContent(feature)}
+                                                                            </div>
+                                                                        </AccordionContent>
+                                                                    </AccordionItem>
+                                                                </Accordion>
                                                             ))}
                                                     </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <p>No features available for this layer.</p>
-                                        )}
+                                                )}
+                                            </React.Fragment>
+                                        ))}
                                     </div>
-                                )}
+                                </SidebarInset> */}
+                                <SidebarInsetWithPagination
+                                    layerContent={layerContent}
+                                    selectedFeatures={selectedFeatures}
+                                    featureContent={featureContent}
+                                />
+                            </SidebarProvider>
+                        )}
+
+                        {!showSidebar && (
+                            <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto">
+                                {layerContent.map((layer) => (
+                                    <React.Fragment key={layer.layerTitle}>
+                                        {(layer.features.some(feature => selectedFeatures.has(feature.id as string)) || layer.layerTitle === activeLayer) && (
+                                            <div>
+                                                <h3 className="text-lg font-semibold mb-4">
+                                                    {layer.groupLayerTitle} - {layer.layerTitle}
+                                                </h3>
+                                                {layer.features
+                                                    .filter(feature => selectedFeatures.has(feature.id as string) || layer.layerTitle === activeLayer)
+                                                    .map((feature, idx) => (
+                                                        <Accordion key={idx} type="multiple">
+                                                            <AccordionItem value={`Feature ${feature.id?.toString().split('.')[1]}`}>
+                                                                <AccordionHeader>
+                                                                    <AccordionTrigger>
+                                                                        <h3 className="text-md font-medium text-left">
+                                                                            {`Feature ${feature.id?.toString().split('.')[1]}`}
+                                                                        </h3>
+                                                                    </AccordionTrigger>
+                                                                </AccordionHeader>
+
+                                                                <AccordionContent className="p-2 border-b mb-2">
+                                                                    <div className="ml-2 grid grid-cols-3 gap-4">
+                                                                        {featureContent(feature)}
+                                                                    </div>
+                                                                </AccordionContent>
+                                                            </AccordionItem>
+                                                        </Accordion>
+                                                    ))}
+                                            </div>
+                                        )}
+                                    </React.Fragment>
+                                ))}
                             </div>
                         )}
                     </div>

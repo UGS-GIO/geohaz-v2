@@ -20,7 +20,7 @@ export default function ArcGISMap() {
     // New state for tracking drag
     const [isDragging, setIsDragging] = useState(false);
     const [startPos, setStartPos] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
-    const dragThreshold = 5; // Adjust this value to your liking
+    const dragThreshold = 5;
     // Get zoom and center from URL params
     const { zoom, center } = useMapUrlParams(view);
 
@@ -164,68 +164,66 @@ export default function ArcGISMap() {
 
     const handleMapClick = async ({ e, view, drawerTriggerRef }: HandleMapClickProps) => {
 
-        if (!view) return; // Skip click if dragging
+        if (!view || isDragging) return; // Skip click if dragging or no view
+        console.log('handleMapClick');
 
         if (e.button === 0) {
             const layers = getVisibleLayers({ view });
             const visibleLayersMap = layers.layerVisibilityMap;
 
             const { offsetX: x, offsetY: y } = e.nativeEvent;
-            const mapPoint = view.toMap({ x: x, y: y });
+            const mapPoint = view.toMap({ x, y });
 
-            console.log('visibleLayersMap:', visibleLayersMap);
-
-
-            // Get visible layers from the map and filter out non-visible layers
             const keys = Object.entries(visibleLayersMap)
-                .filter(([_, layerInfo]) => layerInfo.visible) // Keep only entries where visible is true
-                .map(([key]) => key); // Extract the keys
+                .filter(([_, layerInfo]) => layerInfo.visible)
+                .map(([key]) => key);
 
-            // Send GetFeatureInfo request with visible layers and map point
             const featureInfo = await fetchGetFeatureInfo({
                 mapPoint,
                 view,
-                visibleLayers: keys
+                visibleLayers: keys,
             });
 
             if (featureInfo) {
-                // zip up visibleLayersMap (use grouplayertitle as the key) with featureInfo so that layers appear under the relevant grouplayer (or not in the case of a non-group layer)
-                const layerInfo = Object.entries(visibleLayersMap).map(([key, value]): { groupLayerTitle: string, layerTitle: string, visible: boolean, features: Feature[] } => {
-                    return {
-
+                const layerInfo = Object.entries(visibleLayersMap).map(
+                    ([key, value]): { groupLayerTitle: string; layerTitle: string; visible: boolean; features: Feature[] } => ({
                         visible: value.visible,
                         layerTitle: value.layerTitle,
                         groupLayerTitle: value.groupLayerTitle,
-                        features: featureInfo.features.filter((feature: Feature) => {
-                            return (feature.id?.toString().split('.')[0].includes(key.split(':')[1]) || feature.id?.toString().includes(key.split(':')[0]));
-                        })
-                    };
-                });
+                        features: featureInfo.features.filter((feature: Feature) =>
+                            feature.id?.toString().includes(key.split(':')[0]) ||
+                            feature.id?.toString().split('.')[0].includes(key.split(':')[1])
+                        ),
+                    })
+                );
 
-                // strip out any layers that have no features
                 const layerInfoFiltered = layerInfo.filter(layer => layer.features.length > 0);
 
                 console.log('layerInfoFiltered:', layerInfoFiltered);
-
                 updatePopupContent(layerInfoFiltered);
-                console.log('popupContent:', popupContent);
             }
 
+            // Handle drawer state with more robust logic
             const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
-            if (drawerTriggerRef.current && drawerState === 'open') {
-                drawerTriggerRef.current.click(); // Close the drawer
-                console.log('trying to open drawer');
 
+            if (drawerState === 'open') {
+                drawerTriggerRef.current?.click(); // Close drawer first
+                setTimeout(() => drawerTriggerRef.current?.click(), 50); // Reopen with new content
             } else {
-                drawerTriggerRef.current?.click(); // Open the drawer
-                console.log('trying to close drawer');
+                drawerTriggerRef.current?.click(); // Open drawer
             }
         }
     };
 
 
     const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (isDragging) return; // Prevent click logic if dragging is happening
+        // if (isDragging) return; // Prevent click logic if dragging is happening
+
+        // check if the testdrawer is open. if it is, close and reopen with new content
+        // if it isn't, open the testdrawer with the new content
+
+
+
         handleMapClick({ e, view, drawerTriggerRef });
     };
 

@@ -52,14 +52,12 @@ export const useMapInteractions = () => {
     }) {
         const layerVisibilityMap: LayerVisibilityMapProps = {};
 
-        console.log("Step 1: Building visibility map from layerConfig...");
 
         // Step 1: Build the visibility map from layerConfig
         layerConfig.forEach(layer => {
             if (isWMSLayer(layer) && layer.sublayers) {
                 layer.sublayers.forEach(sublayer => {
                     if (sublayer.name) {
-                        console.log(`Initializing visibility for WMS sublayer`, sublayer);
                         layerVisibilityMap[sublayer.name] = {
                             visible: false,
                             groupLayerTitle: layer.title || '',
@@ -74,9 +72,6 @@ export const useMapInteractions = () => {
                     if (isWMSLayer(layer) && layer.sublayers) {
                         layer.sublayers.forEach(sublayer => {
                             if (sublayer.name) {
-
-                                console.log('groupLayer1:', groupLayer);
-                                console.log(`Initializing visibility for nested WMS sublayer`, sublayer);
                                 layerVisibilityMap[sublayer.name] = {
                                     visible: false,
                                     groupLayerTitle: groupLayer.title || '',
@@ -89,14 +84,9 @@ export const useMapInteractions = () => {
             }
         });
 
-        console.log("Initial Layer Visibility Map:", layerVisibilityMap);
-
-        console.log("Step 2: Updating visibility based on mapLayers...");
-
         // Step 2: Update visibility based on mapLayers
         mapLayers.forEach(mapLayer => {
             if (isWMSMapLayer(mapLayer)) {
-                console.log(`Processing WMS map layer: ${mapLayer.title}`);
                 mapLayer.sublayers.forEach(sublayer => {
                     const sublayerName = sublayer.name;
                     if (
@@ -105,16 +95,12 @@ export const useMapInteractions = () => {
                         mapLayer.visible &&
                         sublayer.visible
                     ) {
-                        console.log(`Setting visibility to true for: ${sublayerName}`);
                         layerVisibilityMap[sublayerName].visible = true;
                     }
                 });
             } else if (isGroupMapLayer(mapLayer)) {
-
-                console.log(`Processing group map layer: ${mapLayer.title}`);
                 mapLayer.layers?.forEach(groupedMapLayer => {
                     if (isWMSMapLayer(groupedMapLayer)) {
-                        console.log(`Processing nested WMS layer: ${groupedMapLayer.title}`);
                         groupedMapLayer.sublayers.forEach(sublayer => {
                             const sublayerName = sublayer.name;
                             if (
@@ -124,7 +110,6 @@ export const useMapInteractions = () => {
                                 groupedMapLayer.visible &&
                                 sublayer.visible
                             ) {
-                                console.log(`Setting visibility to true for: ${sublayerName}`);
                                 layerVisibilityMap[sublayerName].visible = true;
                             }
                         });
@@ -132,10 +117,6 @@ export const useMapInteractions = () => {
                 });
             }
         });
-
-        console.log("Final Layer Visibility Map:", layerVisibilityMap);
-
-        console.log("Step 3: Filtering WMS layers based on visibility...");
 
         // Step 3: Filter WMS layers based on visibility
         const filteredWMSLayers = mapLayers.filter(mapLayer => {
@@ -153,8 +134,6 @@ export const useMapInteractions = () => {
             }
             return false;
         });
-
-        console.log("Filtered WMS Layers:", filteredWMSLayers);
 
         return { layerVisibilityMap, filteredWMSLayers };
     }
