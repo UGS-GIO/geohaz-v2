@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
 import { Button, buttonVariants } from './custom/button'
+import { Link } from '@tanstack/react-router'
 import {
   Collapsible,
   CollapsibleContent,
@@ -8,18 +8,19 @@ import {
 
 // todo add tooltip functionality back
 import {
-  // Tooltip,
-  // TooltipContent,
+  Tooltip,
+  TooltipContent,
   TooltipProvider,
-  // TooltipTrigger,
+  TooltipTrigger,
+  TooltipArrow
 } from './ui/tooltip'
 import { cn } from '@/lib/utils'
 import useCheckActiveNav from '@/hooks/use-check-active-nav'
 import { SideLink } from '@/data/sidelinks'
 import { Suspense, useEffect } from 'react'
-import { useSidebar } from '@/hooks/use-sidebar'
-import { ArrowLeft, ChevronLeft } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { LoadingSpinner } from './custom/loading-spinner'
+import { useSidebar } from '@/hooks/use-sidebar'
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean
@@ -58,17 +59,7 @@ export default function Nav({
     //     />
     //   )
 
-    if (isCollapsed)
-      return (
-        <NavLinkIcon
-          {...link}
-          key={key}
-          closeNav={closeNav}
-          setCurrentContent={setCurrentContent}
-          isCollapsed={isCollapsed}
-          setIsCollapsed={setIsCollapsed}
-        />
-      )
+    if (isCollapsed) return;
 
     if (link.sub)
       return (
@@ -86,51 +77,62 @@ export default function Nav({
         key={key}
         closeNav={closeNav}
         setCurrentContent={setCurrentContent}
+        currentContent={currentContent}
+        isCollapsed={isCollapsed}
       />
     )
   }
 
-  const handleBackToMenu = () => {
-    setCurrentContent(null)
-  }
 
   const DynamicComponent = currentContent?.component
     ? currentContent?.component
     : null
 
   return (
-    <div
-      data-collapsed={isCollapsed}
-      className={cn(
-        'group border-b bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none',
-        className
-      )}
-    >
-      <TooltipProvider delayDuration={0}>
-        {currentContent ? (
-          <div className="p-4">
-            <Button onClick={handleBackToMenu} variant="ghost" className="mb-4">
-              <ArrowLeft />&nbsp;Back to menu
-            </Button>
-            <Suspense fallback={<div><LoadingSpinner /></div>}>
-              {DynamicComponent ? (
-                <div className='overflow-y-auto max-h-[calc(100vh-10rem)]'>
-                  <DynamicComponent />
-                </div>
-              ) : (
-                <div className='w-full flex justify-center mb-4'>
-                  <LoadingSpinner />
-                </div>
-              )}
-            </Suspense>
-          </div>
-        ) : (
-          <nav className='grid gap-1 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
-            {links.map(renderLink)}
-          </nav>
+    <div className="flex flex-1 overflow-hidden" >
+      <div className="hidden md:flex flex-col items-center gap-4 pt-2 border-r" >
+        {links.map((link, index) => (
+          <NavLinkIcon
+            key={index}
+            link={link}
+            isCollapsed={isCollapsed}
+            currentContent={currentContent}
+            setIsCollapsed={setIsCollapsed}
+            setCurrentContent={setCurrentContent}
+            closeNav={closeNav}
+          />
+        ))}
+      </div>
+      <div
+        data-collapsed={isCollapsed}
+        className={cn(
+          'group border-b bg-background py-2 transition-[max-height,padding] duration-500 data-[collapsed=true]:py-2 md:border-none',
+          className
         )}
-      </TooltipProvider>
-    </div>
+      >
+        <TooltipProvider delayDuration={0}>
+          {currentContent ? (
+            <div className="px-4 pb-4 h-full">
+              <Suspense fallback={<div><LoadingSpinner /></div>}>
+                {DynamicComponent ? (
+                  <div className='overflow-y-auto h-full'>
+                    <DynamicComponent />
+                  </div>
+                ) : (
+                  <div className='w-full flex justify-center'>
+                    <LoadingSpinner />
+                  </div>
+                )}
+              </Suspense>
+            </div>
+          ) : (
+            <nav className='grid gap-4 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
+              {links.map(renderLink)}
+            </nav>
+          )}
+        </TooltipProvider>
+      </div>
+    </div >
   )
 }
 
@@ -140,6 +142,7 @@ interface NavLinkProps extends SideLink {
   isCollapsed?: boolean
   href?: string
   setIsCollapsed?: React.Dispatch<React.SetStateAction<boolean>>
+  currentContent?: SideLink | null
   setCurrentContent: (content: SideLink) => void
 }
 
@@ -153,10 +156,15 @@ function NavLink({
   // closeNav,
   subLink = false,
   setCurrentContent,
+  isCollapsed,
+  currentContent
 }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav()
 
   const handleClick = () => {
+    if (title === 'Home') {
+      return
+    }
     if (!href) {
       setCurrentContent({ title, icon, label, componentPath, component })
     }
@@ -164,7 +172,7 @@ function NavLink({
 
   const linkContent = (
     <>
-      <div className='mr-2'>{icon}</div>
+      <div className='block md:hidden mr-2'>{icon}</div>
       {title}
       {label && (
         <div className='ml-2 rounded-lg bg-primary px-1 text-[0.75rem] text-primary-foreground'>
@@ -183,7 +191,8 @@ function NavLink({
           size: 'sm',
         }),
         'h-12 justify-start text-wrap rounded-none px-6',
-        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
+        subLink && 'h-10 w-full border-l border-l-slate-500 px-2',
+        title === 'Home' ? 'hidden md:flex' : '' // hide Home on mobile,
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
@@ -198,7 +207,10 @@ function NavLink({
           size: 'sm',
         }),
         'h-12 justify-start text-wrap rounded-none px-6',
-        subLink && 'h-10 w-full border-l border-l-slate-500 px-2'
+        subLink && 'h-10 w-full border-l border-l-slate-500 px-2',
+        title === 'Home' ? 'hidden md:flex' : '', // hide Home on mobile
+        title === 'Home' && !currentContent && !isCollapsed ? 'underline' : ''
+
       )}
       aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
     >
@@ -257,38 +269,112 @@ function NavLinkDropdown({
   )
 }
 
-function NavLinkIcon({
-  icon,
-  title,
-  componentPath,
-  component,
-  closeNav,
-  setCurrentContent,
-  isCollapsed,
-  setIsCollapsed,
-}: NavLinkProps) {
-  const { checkActiveNav } = useCheckActiveNav()
+interface NavLinkIconProps {
+  link: SideLink
+  isCollapsed: boolean
+  currentContent: SideLink | null
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>
+  setCurrentContent: (content: SideLink | null) => void
+  closeNav: () => void
+}
 
+export function NavLinkIcon({
+  link,
+  isCollapsed,
+  currentContent,
+  setIsCollapsed,
+  setCurrentContent,
+  closeNav,
+}: NavLinkIconProps) {
+  const { checkActiveNav } = useCheckActiveNav()
   const handleClick = () => {
-    setIsCollapsed && setIsCollapsed(!isCollapsed)
-    setCurrentContent({ title, icon, componentPath, component })
-    closeNav()
+
+    // special case for Home
+    if (link.title === 'Home') {
+      if (isCollapsed) { // if the nav is collapsed, open it
+        // meets condition if click home and the nav is closed
+        setIsCollapsed(false)
+        // check if there is a title attribute, Home doesn't have a title attribute, if we click Home again, we want to close the nav
+      } else if (!isCollapsed && currentContent?.title !== undefined) {
+        // meets condition if on a menu item component and clicking Home
+        setCurrentContent(null)
+      } else { // if the nav is open, close it
+        // meets condition if on Home and clicking Home
+        setCurrentContent(null)
+        setIsCollapsed(true)
+      }
+      setCurrentContent(null)
+      return
+    }
+
+    if (link.href) {
+      closeNav()
+      return
+    }
+
+    if (isCollapsed) {
+      setIsCollapsed(false)
+    }
+
+    if (!isCollapsed && currentContent?.title === link.title) {
+      setCurrentContent(null)
+      setIsCollapsed(true)
+    } else {
+      setCurrentContent(link)
+    }
   }
 
-  return (
-    <button
-      onClick={handleClick}
+  return link.href ? (
+    <Link
+      to={link.href}
       className={cn(
         buttonVariants({
           variant: 'ghost',
-          size: 'sm',
+          size: 'icon',
         }),
-        'h-12 w-12 justify-center rounded-none'
+        'h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out',
+        // checkActiveNav(link.title ?? '') ? 'bg-accent text-primary-foreground' : 'hover:bg-accent hover:text-accent-foreground'
+
       )}
-      aria-current={checkActiveNav(componentPath ?? '') ? 'page' : undefined}
+      aria-current={checkActiveNav(link.componentPath ?? '') ? 'page' : undefined}
     >
-      {icon}
-    </button>
+      {/* {link.icon} */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {link.icon}
+          </TooltipTrigger>
+          <TooltipContent side='right' className="z-50 bg-secondary text-base">
+            <p>{link.title}</p>
+            <TooltipArrow className="fill-current text-secondary" />
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </Link>
+  ) : (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label={link.title}
+      className={cn('h-12 w-14 justify-center rounded-none transition-transform duration-200 ease-in-out z-50',
+        isCollapsed ? '' : 'rotate-0',
+        checkActiveNav(link.title ?? '') ? 'bg-accent text-primary-foreground text-white dark:text-black' : 'hover:bg-accent hover:text-accent-foreground',        // home can be active when currentContent is null
+        link.title === 'Home' && !currentContent && !isCollapsed ? 'bg-accent text-accent-foreground' : ''
+      )}
+      onClick={handleClick}
+    >
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {link.icon}
+          </TooltipTrigger>
+          <TooltipContent side='right' className="z-50 bg-secondary text-base">
+            <p>{link.title}</p>
+            <TooltipArrow className="fill-current text-secondary" />
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </Button>
   )
 }
 
