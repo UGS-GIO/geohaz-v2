@@ -273,7 +273,6 @@ function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
             title: typedLayer.title,
             visible: typedLayer.visible,
             sublayers: typedLayer.sublayers,
-            fetchFeatureInfoFunction: typedLayer.fetchFeatureInfoFunction,
         });
     }
 
