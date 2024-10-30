@@ -13,6 +13,8 @@ import React from "react"
 import { SidebarInset } from "@/components/ui/sidebar"
 import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
+import { GenericPopup } from "./popups/generic-popup"
+import { RelatedTable } from "@/lib/types/mapping-types"
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
@@ -21,12 +23,13 @@ interface SidebarInsetWithPaginationProps {
         groupLayerTitle: string
         layerTitle: string
         features: Feature<Geometry, GeoJsonProperties>[]
+        popupFields?: Record<string, string>
+        relatedTables?: RelatedTable[]
     }[]
     selectedFeatures: Set<string>
-    featureContent: (feature: Feature<Geometry, GeoJsonProperties>) => React.ReactNode
 }
 
-export function SidebarInsetWithPagination({ layerContent, selectedFeatures, featureContent }: SidebarInsetWithPaginationProps) {
+export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: SidebarInsetWithPaginationProps) {
     const [itemsPerPage, setItemsPerPage] = useState(5)
     const [currentPage, setCurrentPage] = useState(1)
 
@@ -35,7 +38,7 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures, fea
         if (page >= 1 && page <= totalPages) setCurrentPage(page)
     }
 
-    const renderPaginatedFeatures = (features: Feature<Geometry, GeoJsonProperties>[]) => {
+    const renderPaginatedFeatures = (features: Feature<Geometry, GeoJsonProperties>[], layerTitle: string, popupFields: Record<string, string>, relatedTables: RelatedTable[]) => {
         const totalPages = Math.ceil(features.length / itemsPerPage)
         const paginatedFeatures = features.slice(
             (currentPage - 1) * itemsPerPage,
@@ -45,8 +48,6 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures, fea
         return (
             <>
                 {paginatedFeatures.map((feature, idx) => {
-                    console.log("feature", feature);
-
                     return (
                         <Accordion key={idx} type="multiple">
                             <AccordionItem value={`Feature ${feature.id?.toString().split('.')[1]}`}>
@@ -59,9 +60,7 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures, fea
                                 </AccordionHeader>
 
                                 <AccordionContent className="p-2 border-b mb-2">
-                                    <div className="ml-2 grid grid-cols-3 gap-4">
-                                        {featureContent(feature)}
-                                    </div>
+                                    <GenericPopup feature={feature} layout="grid" layerTitle={layerTitle} popupFields={popupFields} relatedTable={relatedTables} />
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
@@ -165,10 +164,14 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures, fea
 
 
                                         {renderPaginatedFeatures(
-                                            layer.features.filter((feature) =>
-                                                selectedFeatures.has(feature.id as string)
-                                            )
-                                        )}
+                                            layer.features.filter((feature) => {
+                                                return selectedFeatures.has(feature.id as string)
+                                            }),
+                                            layer.layerTitle,
+                                            layer.popupFields || {},
+                                            layer.relatedTables || []
+                                        )
+                                        }
                                     </div>
                                 )}
                         </React.Fragment>

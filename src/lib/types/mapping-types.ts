@@ -18,10 +18,19 @@ interface BaseLayerProps {
     options?: any;
 }
 
+type CustomSublayerProps = {
+    popupFields?: Record<string, string>; // Maps field labels to attribute names
+    relatedTables?: RelatedTable[];
+};
+
+type ExtendedSublayerProperties =
+    __esri.SublayerProperties &
+    __esri.WMSSublayerProperties &
+    CustomSublayerProps;
+
 export interface WMSLayerProps extends BaseLayerProps {
     type: 'wms';
-    fetchFeatureInfoFunction: __esri.FetchFeatureInfoFunction;
-    sublayers?: (__esri.CollectionProperties<__esri.SublayerProperties> & __esri.CollectionProperties<__esri.WMSSublayerProperties>) | undefined
+    sublayers: __esri.CollectionProperties<ExtendedSublayerProperties>;
 }
 
 export interface GroupLayerProps extends BaseLayerProps {
@@ -108,3 +117,10 @@ export type GetResultsHandlerType = { exactMatch: boolean, location: __esri.Poin
 
 export type GetSuggestionsHandlerType = { exactMatch: boolean, location: __esri.Point, maxResults: number, sourceIndex: number, spatialReference: __esri.SpatialReference, suggestResult: __esri.SuggestResult, view: __esri.MapView | __esri.SceneView }
 
+export type RelatedTable = {
+    targetField: string;
+    url: string;
+    acceptProfile: string;
+    matchingField: string;
+    fieldLabel: string;
+};

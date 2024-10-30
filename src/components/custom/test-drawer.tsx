@@ -361,7 +361,6 @@ export default function TestDrawer({
                                 <SidebarInsetWithPagination
                                     layerContent={layerContent}
                                     selectedFeatures={selectedFeatures}
-                                    featureContent={featureContent}
                                 />
                             </SidebarProvider>
                         )}

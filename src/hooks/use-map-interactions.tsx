@@ -3,7 +3,7 @@ import { removeGraphics, createGraphic } from "@/lib/mapping-utils";
 import Collection from "@arcgis/core/core/Collection.js";
 import { MapContext } from "@/context/map-provider";
 import layersConfig from "@/data/layers";
-import { GroupLayerProps, LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
+import { GroupLayerProps, LayerProps, RelatedTable, WMSLayerProps } from "@/lib/types/mapping-types";
 
 export const useMapInteractions = () => {
     const [visibleLayers, setVisibleLayers] = useState<Record<string, {
@@ -16,6 +16,9 @@ export const useMapInteractions = () => {
         visible: boolean;
         groupLayerTitle: string,
         layerTitle: string;
+        popupFields?: Record<string, string>;
+        relatedTables?: RelatedTable[];
+
     }>;
 
     type VisibleLayersResult = {
@@ -61,7 +64,9 @@ export const useMapInteractions = () => {
                         layerVisibilityMap[sublayer.name] = {
                             visible: false,
                             groupLayerTitle: layer.title || '',
-                            layerTitle: sublayer.title || ''
+                            layerTitle: sublayer.title || '',
+                            popupFields: sublayer.popupFields,
+                            relatedTables: sublayer.relatedTables,
                         };
                     }
                 });
@@ -75,7 +80,9 @@ export const useMapInteractions = () => {
                                 layerVisibilityMap[sublayer.name] = {
                                     visible: false,
                                     groupLayerTitle: groupLayer.title || '',
-                                    layerTitle: layer.title || ''
+                                    layerTitle: layer.title || '',
+                                    popupFields: sublayer.popupFields,
+                                    relatedTables: sublayer.relatedTables,
                                 };
                             }
                         });

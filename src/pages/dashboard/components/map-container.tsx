@@ -7,6 +7,7 @@ import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { TestDrawer } from "@/components/custom/test-drawer";
 import useMapUrlParams from "@/hooks/use-map-url-params";
 import { Feature } from "geojson";
+import { RelatedTable } from "@/lib/types/mapping-types";
 
 export default function ArcGISMap() {
     const mapRef = useRef<HTMLDivElement>(null);
@@ -120,7 +121,7 @@ export default function ArcGISMap() {
 
 
     const updatePopupContent = useCallback(
-        (newContent: { features: Feature[]; visible: boolean; layerTitle: string, groupLayerTitle: string }[]) => {
+        (newContent: { features: Feature[]; visible: boolean; layerTitle: string, groupLayerTitle: string, popupFields?: Record<string, string>; relatedTables?: RelatedTable[] }[]) => {
             console.log('newContent:', newContent);
 
             setPopupContent((prevContent) => {
@@ -186,7 +187,14 @@ export default function ArcGISMap() {
 
             if (featureInfo) {
                 const layerInfo = Object.entries(visibleLayersMap).map(
-                    ([key, value]): { groupLayerTitle: string; layerTitle: string; visible: boolean; features: Feature[] } => ({
+                    ([key, value]): {
+                        groupLayerTitle: string;
+                        layerTitle: string;
+                        visible: boolean;
+                        features: Feature[];
+                        popupFields?: Record<string, string>;
+                        relatedTables?: RelatedTable[];
+                    } => ({
                         visible: value.visible,
                         layerTitle: value.layerTitle,
                         groupLayerTitle: value.groupLayerTitle,
@@ -194,6 +202,14 @@ export default function ArcGISMap() {
                             feature.id?.toString().includes(key.split(':')[0]) ||
                             feature.id?.toString().split('.')[0].includes(key.split(':')[1])
                         ),
+                        ...(value.popupFields && { popupFields: value.popupFields }),
+                        ...(value.relatedTables && value.relatedTables.length > 0 && {
+                            relatedTables: value.relatedTables.map(table => ({
+                                ...table,
+                                matchingField: table.matchingField || "",  // Default value if missing
+                                fieldLabel: table.fieldLabel || ""         // Default value if missing
+                            }))
+                        }),
                     })
                 );
 
