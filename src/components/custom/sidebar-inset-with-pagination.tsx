@@ -11,7 +11,6 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import React from "react"
 import { SidebarInset } from "@/components/ui/sidebar"
-import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { GenericPopup } from "./popups/generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
@@ -48,7 +47,6 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
         return (
             <div>
                 <div className="space-y-4">
-
                     {paginatedFeatures.map((feature, idx) => {
                         return (
                             <div className="border p-4 rounded" key={idx}>
