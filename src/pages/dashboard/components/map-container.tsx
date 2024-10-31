@@ -84,7 +84,7 @@ export default function ArcGISMap() {
         }
 
         // Create a bbox around the clicked map point
-        const bbox = createBbox({ mapPoint, resolution: view.resolution, buffer: 50 });
+        const bbox = createBbox({ mapPoint, resolution: view.resolution, buffer: 10 });
         const { minX, minY, maxX, maxY } = bbox;
 
         // WMS GetFeatureInfo parameters
@@ -176,8 +176,10 @@ export default function ArcGISMap() {
             const mapPoint = view.toMap({ x, y });
 
             const keys = Object.entries(visibleLayersMap)
-                .filter(([_, layerInfo]) => layerInfo.visible)
+                .filter(([_, layerInfo]) => layerInfo.visible && layerInfo.queryable)
                 .map(([key]) => key);
+            console.log('keys:', keys);
+
 
             const featureInfo = await fetchGetFeatureInfo({
                 mapPoint,
@@ -185,6 +187,7 @@ export default function ArcGISMap() {
                 visibleLayers: keys,
             });
 
+            // Update popup content with the new feature info
             if (featureInfo) {
                 const layerInfo = Object.entries(visibleLayersMap).map(
                     ([key, value]): {
@@ -214,19 +217,21 @@ export default function ArcGISMap() {
                 );
 
                 const layerInfoFiltered = layerInfo.filter(layer => layer.features.length > 0);
+                const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
 
-                console.log('layerInfoFiltered:', layerInfoFiltered);
+                if (layerInfoFiltered.length === 0) {
+                    // do we want the popup to close if no features are found?
+                    // Close the drawer if no features found
+                    // drawerState === 'open' && drawerTriggerRef.current?.click();
+                    return
+                }
                 updatePopupContent(layerInfoFiltered);
-            }
-
-            // Handle drawer state with more robust logic
-            const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
-
-            if (drawerState === 'open') {
-                drawerTriggerRef.current?.click(); // Close drawer first
-                setTimeout(() => drawerTriggerRef.current?.click(), 50); // Reopen with new content
-            } else {
-                drawerTriggerRef.current?.click(); // Open drawer
+                if (drawerState === 'open') {
+                    drawerTriggerRef.current?.click(); // Close drawer first
+                    setTimeout(() => drawerTriggerRef.current?.click(), 50); // Reopen with new content
+                } else {
+                    drawerTriggerRef.current?.click(); // Open drawer
+                }
             }
         }
     };

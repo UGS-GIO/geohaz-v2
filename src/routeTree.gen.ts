@@ -21,6 +21,7 @@ const HazardMapLazyImport = createFileRoute('/hazard-map')()
 // Create/Update Routes
 
 const HazardMapLazyRoute = HazardMapLazyImport.update({
+  id: '/hazard-map',
   path: '/hazard-map',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/hazard-map.lazy').then((d) => d.Route))

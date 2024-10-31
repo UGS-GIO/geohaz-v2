@@ -48,6 +48,7 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
         return (
             <>
                 {paginatedFeatures.map((feature, idx) => {
+
                     return (
                         <Accordion key={idx} type="multiple">
                             <AccordionItem value={`Feature ${feature.id?.toString().split('.')[1]}`}>

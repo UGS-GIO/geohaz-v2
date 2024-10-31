@@ -6,11 +6,11 @@ type ReusablePopupProps = {
     feature: Feature<Geometry, GeoJsonProperties>;
     layerTitle: string;
     layout?: "grid" | "stacked";
-    popupFields: Record<string, string>;
+    popupFields?: Record<string, string>;
     relatedTable?: RelatedTable[];
 };
 
-const GenericPopup = ({ feature, layerTitle, relatedTable, popupFields }: ReusablePopupProps) => {
+const GenericPopup = ({ feature, layerTitle, relatedTable, popupFields, }: ReusablePopupProps) => {
     const relatedTables = relatedTable || [];
     const { data, isLoading, error } = useRelatedTable(relatedTables);
 
@@ -34,15 +34,14 @@ const GenericPopup = ({ feature, layerTitle, relatedTable, popupFields }: Reusab
             data.forEach((entry) => {
                 // Use targetField from the table configuration for dynamic matching in each entry
                 entry?.find((item: Record<string, string>) => {
-                    console.log('item', item);
-
-                    if (item[matchingField] === targetField) {
+                    const value = item[matchingField];
+                    if (value && value === targetField) {
                         matchedValues.push(item.Description);
                     }
                 });
 
-                if (entry?.[table.matchingField] === field) {
-                    matchedValues.push(entry.Description);
+                if (entry && entry?.[matchingField] === field) {
+                    matchedValues.push(entry.Description || "N/A");
                 }
             });
         });
@@ -51,16 +50,24 @@ const GenericPopup = ({ feature, layerTitle, relatedTable, popupFields }: Reusab
     };
 
     // Generate content for the properties of the feature
-    const featureContent = Object.entries(popupFields).map(([label, field]) => {
-        console.log('properties', properties);
-
+    // default to properties if popupFields is not provided
+    const featureContent = (
+        popupFields && Object.keys(popupFields).length > 0
+            ? Object.entries(popupFields)
+            : Object.entries(properties)
+    ).map(([label, field]) => {
+        const value = popupFields && Object.keys(popupFields).length > 0
+            ? properties[field]
+            : field; // In case we're iterating over `properties`
         return (
-            <div key={field} className="flex flex-col">
-                <p className="font-bold underline text-primary">{label}</p>
-                <p className="break-words">
-                    {properties[field]}
-                </p>
-            </div>
+            value && (
+                <div key={label} className="flex flex-col">
+                    <p className="font-bold underline text-primary">{label}</p>
+                    <p className="break-words">
+                        {value ?? "N/A"}
+                    </p>
+                </div>
+            )
         );
     });
 

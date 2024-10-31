@@ -35,7 +35,30 @@ const landslideLegacyWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${landslideLegacyLayerName}`,
             popupEnabled: false,
             queryable: true,
-            // popupFields: 
+            popupFields: {
+                'State Landslide ID': 'statelsid',
+                'Landslide Unit': 'lsunit',
+                'Movement Type': 'movetype',
+                'Historical': 'historical',
+                'Geologic Unit': 'geolunit',
+                'Map Scale': 'mapscale',
+                'Map Name': 'mapname',
+                'Pub Date': 'pubdate',
+                'Author(s)': 'author_s',
+                'Affiliated Unit': 'affunit',
+                'Movement Unit': 'moveunit',
+                'Movement Cause': 'movecause',
+                'Notes': 'notes',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lsfhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -86,6 +109,26 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${landslideInventoryLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Name': 's_name',
+                'Activity': 'activity',
+                'Confidence': 'confidence',
+                'Comments': 'comments',
+                'Deposit Movement 1': 'd_h_move1',
+                'Deposit Movement 2': 'd_h_move2',
+                'Deposit Movement 3': 'd_h_move3',
+                'Primary Geologic Unit Involved': 'd_geologic_unit1',
+                'Secondary Geologic Unit Involved': 'd_geologic_unit2',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lsfhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -133,6 +176,20 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${landslideSusceptibilityLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Hazard': 'hazard_symbology_text',
+                'Mapped Scale': 'lssmappedscale',
+                'Critical Angle': 'lsscriticalangle',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lsshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -279,6 +336,19 @@ const liquefactionWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${liquefactionLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Hazard': 'hazard_symbology_text',
+                'Mapped Scale': 'lqsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lqshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 };
@@ -293,6 +363,8 @@ const liquefactionWMSConfig: WMSLayerProps = {
 //     },
 // };
 
+
+// TODO: explore refactor to display peak ground acceleration like the imagery layer
 const groundshakingLayerName = 'groundshaking';
 const groundshakingWMSTitle = 'Earthquake Ground Shaking';
 const groundshakingWMSConfig: WMSLayerProps = {
@@ -305,6 +377,9 @@ const groundshakingWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${groundshakingLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Peak Ground Acceleration': 'acc',
+            },
         },
     ],
 }
@@ -345,8 +420,6 @@ const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
-    // https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/ows?SERVICE=WMS&REQUEST=GetCapabilities
-
     title: qFaultsWMSTitle,
     visible: true,
     sublayers: [
@@ -354,6 +427,22 @@ const qFaultsWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Fault Zone Name': 'faultzone',
+                'Summary': 'summary',
+                'Fault Name': 'faultname',
+                'Section Name': 'sectionname',
+                'Strand Name': 'strandname',
+                'Structure Number': 'faultnum',
+                'Mapped Scale': 'mappedscale',
+                'Dip Direction': 'dipdirection',
+                'Slip Sense': 'slipsense',
+                'Slip Rate': 'sliprate',
+                'Structure Class': 'faultclass',
+                'Structure Age': 'faultage',
+                'Detailed Report': 'usgs_link',
+            },
+
         },
     ],
 };
@@ -371,6 +460,18 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${surfaceFaultRuptureLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sfrmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sfrhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -423,7 +524,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: windBlownSandWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${windBlownSandLayerName}`,
@@ -495,6 +596,18 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${saltTectonicsDeformationLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sdhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sdhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -556,6 +669,18 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${shallowBedrockLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sbpmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sbphazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -618,6 +743,18 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${rockfallHazardLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'rfhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'rfhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -679,6 +816,18 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${pipingAndErosionLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'pesmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'peshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -735,6 +884,18 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${expansiveSoilRockLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'exsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'exshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -791,6 +952,18 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${shallowGroundwaterLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sgsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sgshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -835,7 +1008,6 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
 //     },
 // };
 
-// ALERT: THIS LAYER IS NOT MATCHING THE ARCGIS COUNTERPART. IT HAS MORE DATA
 const radonSusceptibilityLayerName = 'radonsusceptibility';
 const radonSusceptibilityWMSTitle = 'Geologic Radon Susceptibility';
 const radonSusceptibilityWMSConfig: WMSLayerProps = {
@@ -848,6 +1020,18 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${radonSusceptibilityLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'grsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'grshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -944,6 +1128,18 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${corrosiveSoilRockLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'crsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'crshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -960,6 +1156,18 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${collapsibleSoilLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'cssmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'csshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -1016,6 +1224,18 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${solubleSoilAndRockLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'slsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'slshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -1072,6 +1292,18 @@ const calicheWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${calicheLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'casmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'cashazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -1168,6 +1400,18 @@ const floodAndDebrisWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${floodAndDebrisLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'flhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'flhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -1181,12 +1425,24 @@ const earthFissureWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: earthFissureWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${earthFissureLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'efhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'efhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -1394,7 +1650,7 @@ const quads24kWMSConfig: WMSLayerProps = {
         {
             name: `${GEN_GIS_WORKSPACE}:${quads24kLayerName}`,
             popupEnabled: false,
-            queryable: true,
+            queryable: false,
         },
     ],
 }
@@ -1437,6 +1693,11 @@ const studyAreasWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${studyAreasLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Name': 'name',
+                'Report ID': 'repor_id',
+                'Mapped Hazards': 'hazard_name',
+            },
         },
     ],
 }
@@ -1503,8 +1764,7 @@ const areasNotMappedWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${areasNotMappedLayerName}`,
-            popupEnabled: false,
-            queryable: true,
+            queryable: false,
         },
     ],
 }

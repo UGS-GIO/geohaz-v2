@@ -18,7 +18,7 @@ export const useMapInteractions = () => {
         layerTitle: string;
         popupFields?: Record<string, string>;
         relatedTables?: RelatedTable[];
-
+        queryable?: boolean;
     }>;
 
     type VisibleLayersResult = {
@@ -67,6 +67,7 @@ export const useMapInteractions = () => {
                             layerTitle: sublayer.title || '',
                             popupFields: sublayer.popupFields,
                             relatedTables: sublayer.relatedTables,
+                            queryable: sublayer.queryable,
                         };
                     }
                 });
@@ -83,6 +84,7 @@ export const useMapInteractions = () => {
                                     layerTitle: layer.title || '',
                                     popupFields: sublayer.popupFields,
                                     relatedTables: sublayer.relatedTables,
+                                    queryable: sublayer.queryable,
                                 };
                             }
                         });

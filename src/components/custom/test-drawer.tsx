@@ -150,9 +150,19 @@ export default function TestDrawer({
 
     useEffect(() => {
         if (layerContent.length > 0) {
-            const firstGroup = layerContent[0].groupLayerTitle
-            setActiveGroup(firstGroup)
-            setShowSidebar(true)
+            const firstGroup = layerContent[0].groupLayerTitle;
+            const firstLayer = layerContent.find(item => item.groupLayerTitle === firstGroup);
+            console.log('firstGroup', firstGroup);
+            console.log('firstLayer', firstLayer);
+
+            setActiveGroup(firstGroup);
+            setActiveLayer(firstLayer?.layerTitle || null);
+
+            if (firstLayer) {
+                setSelectedFeatures(new Set(firstLayer.features.map(f => f.id as string)));
+            }
+
+            setShowSidebar(true);
         }
     }, [layerContent])
 
@@ -181,11 +191,12 @@ export default function TestDrawer({
                 <Button ref={drawerTriggerRef} size="sm" className="hidden">Open Drawer</Button>
             </DrawerTrigger>
 
-            <DrawerContent className={cn(
-                'max-w-4xl',
-                isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]',
-                'mb-10 z-10 max-h-[85vh] overflow-hidden'
-            )}>
+            <DrawerContent
+                className={cn(
+                    'max-w-4xl',
+                    isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]',
+                    'mb-10 z-10 max-h-[85vh] overflow-hidden'
+                )}>
                 <DrawerHeader className="flex justify-between items-center">
                     <DrawerTitle>Hazards in Your Region</DrawerTitle>
                     <Button variant="ghost" size="icon" onClick={resetDisplayState}>
@@ -366,7 +377,7 @@ export default function TestDrawer({
                         )}
 
                         {!showSidebar && (
-                            <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto">
+                            <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto select-text">
                                 {layerContent.map((layer) => (
                                     <React.Fragment key={layer.layerTitle}>
                                         {(layer.features.some(feature => selectedFeatures.has(feature.id as string)) || layer.layerTitle === activeLayer) && (
