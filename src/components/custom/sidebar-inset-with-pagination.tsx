@@ -46,27 +46,17 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
         )
 
         return (
-            <>
-                {paginatedFeatures.map((feature, idx) => {
+            <div>
+                <div className="space-y-4">
 
-                    return (
-                        <Accordion key={idx} type="multiple">
-                            <AccordionItem value={`Feature ${feature.id?.toString().split('.')[1]}`}>
-                                <AccordionHeader>
-                                    <AccordionTrigger>
-                                        <h3 className="text-md font-medium text-left">
-                                            {`Feature ${feature.id?.toString().split('.')[1]}`}
-                                        </h3>
-                                    </AccordionTrigger>
-                                </AccordionHeader>
-
-                                <AccordionContent className="p-2 border-b mb-2">
-                                    <GenericPopup feature={feature} layout="grid" layerTitle={layerTitle} popupFields={popupFields} relatedTable={relatedTables} />
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
-                    )
-                })}
+                    {paginatedFeatures.map((feature, idx) => {
+                        return (
+                            <div className="border p-4 rounded" key={idx}>
+                                <GenericPopup key={idx} feature={feature} layout="grid" layerTitle={layerTitle} popupFields={popupFields} relatedTable={relatedTables} />
+                            </div>
+                        )
+                    })}
+                </div>
 
                 {features.length > itemsPerPage && (
                     // only show pagination if there are more than itemsPerPage features
@@ -112,7 +102,7 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
                     </Pagination>
                 )
                 }
-            </>
+            </div>
         )
     }
 
