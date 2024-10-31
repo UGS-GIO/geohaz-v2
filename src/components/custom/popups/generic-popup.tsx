@@ -88,7 +88,6 @@ const GenericPopup = ({ feature, layerTitle, relatedTable, popupFields, }: Reusa
     // Render the popup content
     return (
         <div className="space-y-4">
-            <h2 className="text-xl font-bold">{layerTitle}</h2>
             {featureContent}
             {relatedContent}
         </div>
