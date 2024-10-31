@@ -8,7 +8,7 @@ import { RelatedTable } from "@/lib/types/mapping-types"
 import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-react"
 
-const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
+const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
 interface SidebarInsetWithPaginationProps {
     layerContent: {
@@ -104,7 +104,7 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
 }
 
 export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: SidebarInsetWithPaginationProps) {
-    const [itemsPerPage, setItemsPerPage] = useState(5)
+    const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
 
     const handlePageChange = (layerTitle: string, page: number) => {
