@@ -81,14 +81,24 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange }: PopupPag
 
 export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: SidebarInsetWithPaginationProps) {
     const [itemsPerPage, setItemsPerPage] = useState(5)
-    const [currentPage, setCurrentPage] = useState(1)
+    const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
 
-    const handlePageChange = (page: number, totalPages: number = Math.ceil(selectedFeatures.size / itemsPerPage)
-    ) => {
-        if (page >= 1 && page <= totalPages) setCurrentPage(page)
+    const handlePageChange = (layerTitle: string, page: number, totalPages: number) => {
+        if (page >= 1 && page <= totalPages) {
+            setPaginationStates((prevState) => ({
+                ...prevState,
+                [layerTitle]: page,
+            }))
+        }
     }
 
-    const renderPaginatedFeatures = (features: Feature<Geometry, GeoJsonProperties>[], popupFields: Record<string, string>, relatedTables: RelatedTable[]) => {
+    const renderPaginatedFeatures = (
+        features: Feature<Geometry, GeoJsonProperties>[],
+        popupFields: Record<string, string>,
+        relatedTables: RelatedTable[],
+        layerTitle: string
+    ) => {
+        const currentPage = paginationStates[layerTitle] || 1
         const paginatedFeatures = features.slice(
             (currentPage - 1) * itemsPerPage,
             currentPage * itemsPerPage
@@ -99,13 +109,24 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
                 <div className="space-y-4">
                     {paginatedFeatures.map((feature, idx) => {
                         return (
-                            <div className="border p-4 rounded" key={idx} onClick={() => console.log('this will eventually zoom and highlight the user to the spot')}>
-                                <GenericPopup key={idx} feature={feature} layout="grid" popupFields={popupFields} relatedTable={relatedTables} />
+                            <div
+                                className="border p-4 rounded"
+                                key={idx}
+                                onClick={() =>
+                                    console.log("this will eventually zoom and highlight the user to the spot")
+                                }
+                            >
+                                <GenericPopup
+                                    key={idx}
+                                    feature={feature}
+                                    layout="grid"
+                                    popupFields={popupFields}
+                                    relatedTable={relatedTables}
+                                />
                             </div>
                         )
                     })}
                 </div>
-
             </div>
         )
     }
@@ -114,67 +135,86 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
         <SidebarInset className="min-h-full">
             <div className="flex flex-1 flex-col gap-4 px-2 overflow-y-auto select-text">
                 {layerContent.map((layer) => {
-
                     const features = layer.features.filter((feature) =>
                         selectedFeatures.has(feature.id as string)
                     )
 
                     return (
                         <React.Fragment key={layer.layerTitle}>
-                            {layer.features.some((feature) =>
-                                selectedFeatures.has(feature.id as string)
-                            ) && (
-                                    <div>
-                                        <div className="sticky top-0 bg-background z-10 p-4">
-                                            <div className="flex items-center justify-between mb-4">
-                                                {/* Title */}
-                                                <h3 className="text-lg font-semibold text-primary">
-                                                    {layer.groupLayerTitle}
-                                                    {layer.layerTitle === "" ? "" : ` - ${layer.layerTitle}`}
-                                                </h3>
-                                                {features.length > itemsPerPage && (
-                                                    <div>
-                                                        <Select
-                                                            onValueChange={(value) => {
-                                                                setItemsPerPage(value === "Infinity" ? layer.features.length : parseInt(value, 10))
-                                                                setCurrentPage(1) // Reset to the first page when itemsPerPage changes
-                                                            }}
-                                                        >
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder={itemsPerPage} />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {ITEMS_PER_PAGE_OPTIONS.map((option) => (
-                                                                    <SelectItem key={option} value={option.toString()}>
-                                                                        {option === Infinity ? "All" : option}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {features.length > itemsPerPage && (
-                                                // only show pagination if there are more than itemsPerPage features
-                                                <PopupPagination currentPage={currentPage} totalPages={Math.ceil(features.length / itemsPerPage)} handlePageChange={handlePageChange} />
+                            {features.length > 0 && (
+                                <div>
+                                    <div className="sticky top-0 bg-background z-10 p-4">
+                                        <div className="flex items-center justify-between mb-4">
+                                            {/* Title */}
+                                            <h3 className="text-lg font-semibold text-primary">
+                                                {layer.groupLayerTitle}
+                                                {layer.layerTitle === "" ? "" : ` - ${layer.layerTitle}`}
+                                            </h3>
+                                            {features.length > ITEMS_PER_PAGE_OPTIONS[0] && (
+                                                <div className="flex justify-end mt-4">
+                                                    {/* Items Per Page Select */}
+                                                    < Select
+                                                        onValueChange={(value) => {
+                                                            setItemsPerPage(
+                                                                value === "Infinity"
+                                                                    ? features.length
+                                                                    : parseInt(value, 10)
+                                                            )
+                                                            setPaginationStates((prevState) => ({
+                                                                ...prevState,
+                                                                [layer.layerTitle]: 1, // Reset to page 1 when itemsPerPage changes
+                                                            }))
+                                                        }}
+                                                    >
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder={itemsPerPage} />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                                                                <SelectItem key={option} value={option.toString()}>
+                                                                    {option === Infinity ? "All" : option}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
                                             )}
                                         </div>
-
-
-                                        {renderPaginatedFeatures(
-                                            layer.features.filter((feature) => {
-                                                return selectedFeatures.has(feature.id as string)
-                                            }),
-                                            layer.popupFields || {},
-                                            layer.relatedTables || []
-                                        )
-                                        }
+                                        {features.length > itemsPerPage && (
+                                            <div className="flex justify-between items-center">
+                                                {/* Pagination */}
+                                                <PopupPagination
+                                                    currentPage={paginationStates[layer.layerTitle] || 1}
+                                                    totalPages={Math.ceil(features.length / itemsPerPage)}
+                                                    handlePageChange={(page) =>
+                                                        handlePageChange(
+                                                            layer.layerTitle,
+                                                            page,
+                                                            Math.ceil(features.length / itemsPerPage)
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+
+                                    {
+                                        renderPaginatedFeatures(
+                                            layer.features.filter((feature) =>
+                                                selectedFeatures.has(feature.id as string)
+                                            ),
+                                            layer.popupFields || {},
+                                            layer.relatedTables || [],
+                                            layer.layerTitle
+                                        )
+                                    }
+                                </div>
+                            )
+                            }
                         </React.Fragment>
                     )
                 })}
-            </div>
-        </SidebarInset>
+            </div >
+        </SidebarInset >
     )
 }
