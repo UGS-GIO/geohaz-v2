@@ -4,13 +4,12 @@ import { Feature, Geometry, GeoJsonProperties } from "geojson";
 
 type ReusablePopupProps = {
     feature: Feature<Geometry, GeoJsonProperties>;
-    layerTitle: string;
     layout?: "grid" | "stacked";
     popupFields?: Record<string, string>;
     relatedTable?: RelatedTable[];
 };
 
-const GenericPopup = ({ feature, layerTitle, relatedTable, popupFields, }: ReusablePopupProps) => {
+const GenericPopup = ({ feature, relatedTable, popupFields, }: ReusablePopupProps) => {
     const relatedTables = relatedTable || [];
     const { data, isLoading, error } = useRelatedTable(relatedTables);
 

@@ -88,7 +88,7 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
         if (page >= 1 && page <= totalPages) setCurrentPage(page)
     }
 
-    const renderPaginatedFeatures = (features: Feature<Geometry, GeoJsonProperties>[], layerTitle: string, popupFields: Record<string, string>, relatedTables: RelatedTable[]) => {
+    const renderPaginatedFeatures = (features: Feature<Geometry, GeoJsonProperties>[], popupFields: Record<string, string>, relatedTables: RelatedTable[]) => {
         const paginatedFeatures = features.slice(
             (currentPage - 1) * itemsPerPage,
             currentPage * itemsPerPage
@@ -100,7 +100,7 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
                     {paginatedFeatures.map((feature, idx) => {
                         return (
                             <div className="border p-4 rounded" key={idx} onClick={() => console.log('this will eventually zoom and highlight the user to the spot')}>
-                                <GenericPopup key={idx} feature={feature} layout="grid" layerTitle={layerTitle} popupFields={popupFields} relatedTable={relatedTables} />
+                                <GenericPopup key={idx} feature={feature} layout="grid" popupFields={popupFields} relatedTable={relatedTables} />
                             </div>
                         )
                     })}
@@ -165,7 +165,6 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
                                             layer.features.filter((feature) => {
                                                 return selectedFeatures.has(feature.id as string)
                                             }),
-                                            layer.layerTitle,
                                             layer.popupFields || {},
                                             layer.relatedTables || []
                                         )
