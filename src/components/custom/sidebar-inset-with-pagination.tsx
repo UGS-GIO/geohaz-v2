@@ -118,7 +118,7 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
 
     return (
         <SidebarInset className="min-h-full">
-            <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto">
+            <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto select-text">
                 {layerContent.map((layer) => {
 
                     const features = layer.features.filter((feature) =>
