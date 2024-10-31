@@ -1,19 +1,12 @@
 import { useState } from "react"
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import React from "react"
 import { SidebarInset } from "@/components/ui/sidebar"
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { GenericPopup } from "./popups/generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
+import { Button } from "@/components/ui/button"
+import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-react"
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
@@ -29,53 +22,84 @@ interface SidebarInsetWithPaginationProps {
 }
 
 interface PopupPaginationProps {
-    currentPage: number
-    totalPages: number
-    handlePageChange: (page: number) => void
+    currentPage: number;
+    totalPages: number;
+    handlePageChange: (page: number) => void;
+    itemsPerPage: number;
+    onItemsPerPageChange: (size: number) => void;
+    showPagination: boolean;
 }
 
-const PopupPagination = ({ currentPage, totalPages, handlePageChange }: PopupPaginationProps) => {
+const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPage, onItemsPerPageChange, showPagination }: PopupPaginationProps) => {
     return (
-        <Pagination>
-            <PaginationContent>
-                <PaginationItem>
-                    <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            handlePageChange(currentPage - 1)
-                        }}
-                    />
-                </PaginationItem>
+        <div className="flex items-center justify-between px-4 py-2 w-full">
+            <div className="flex-1 text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex items-center space-x-2">
 
-                {[...Array(totalPages)].map((_, index) => (
-                    <PaginationItem key={index}>
-                        <PaginationLink
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault()
-                                handlePageChange(index + 1)
-                            }}
-                            isActive={currentPage === index + 1}
+                <div className="flex-shrink-0">
+                    <Select
+                        value={`${itemsPerPage}`}
+                        onValueChange={(value) => {
+                            onItemsPerPageChange(value === "Infinity" ? Infinity : Number(value));
+                        }}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder={itemsPerPage.toString()} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                                <SelectItem key={option} value={`${option}`}>
+                                    {option === Infinity ? "All" : option}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {showPagination && (
+                    <>
+                        <Button
+                            variant="outline"
+                            onClick={() => handlePageChange(1)}
+                            disabled={currentPage === 1}
+                            className="h-8 w-8 p-0"
                         >
-                            {index + 1}
-                        </PaginationLink>
-                    </PaginationItem>
-                ))}
-
-                {totalPages > 5 && <PaginationEllipsis />}
-
-                <PaginationItem>
-                    <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            handlePageChange(currentPage + 1)
-                        }}
-                    />
-                </PaginationItem>
-            </PaginationContent>
-        </Pagination>
+                            <span className="sr-only">Go to first page</span>
+                            <ChevronFirst className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="h-8 w-8 p-0"
+                        >
+                            <span className="sr-only">Go to previous page</span>
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="h-8 w-8 p-0"
+                        >
+                            <span className="sr-only">Go to next page</span>
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => handlePageChange(totalPages)}
+                            disabled={currentPage === totalPages}
+                            className="h-8 w-8 p-0"
+                        >
+                            <span className="sr-only">Go to last page</span>
+                            <ChevronLast className="h-4 w-4" />
+                        </Button>
+                    </>
+                )}
+            </div>
+        </div>
     )
 }
 
@@ -83,13 +107,11 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
     const [itemsPerPage, setItemsPerPage] = useState(5)
     const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
 
-    const handlePageChange = (layerTitle: string, page: number, totalPages: number) => {
-        if (page >= 1 && page <= totalPages) {
-            setPaginationStates((prevState) => ({
-                ...prevState,
-                [layerTitle]: page,
-            }))
-        }
+    const handlePageChange = (layerTitle: string, page: number) => {
+        setPaginationStates((prevState) => ({
+            ...prevState,
+            [layerTitle]: page,
+        }))
     }
 
     const renderPaginatedFeatures = (
@@ -150,49 +172,17 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
                                                 {layer.groupLayerTitle}
                                                 {layer.layerTitle === "" ? "" : ` - ${layer.layerTitle}`}
                                             </h3>
-                                            {features.length > ITEMS_PER_PAGE_OPTIONS[0] && (
-                                                <div className="flex justify-end mt-4">
-                                                    {/* Items Per Page Select */}
-                                                    < Select
-                                                        onValueChange={(value) => {
-                                                            setItemsPerPage(
-                                                                value === "Infinity"
-                                                                    ? features.length
-                                                                    : parseInt(value, 10)
-                                                            )
-                                                            setPaginationStates((prevState) => ({
-                                                                ...prevState,
-                                                                [layer.layerTitle]: 1, // Reset to page 1 when itemsPerPage changes
-                                                            }))
-                                                        }}
-                                                    >
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder={itemsPerPage} />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {ITEMS_PER_PAGE_OPTIONS.map((option) => (
-                                                                <SelectItem key={option} value={option.toString()}>
-                                                                    {option === Infinity ? "All" : option}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                            )}
                                         </div>
-                                        {features.length > itemsPerPage && (
+                                        {features.length > ITEMS_PER_PAGE_OPTIONS[0] && (
                                             <div className="flex justify-between items-center">
                                                 {/* Pagination */}
                                                 <PopupPagination
+                                                    showPagination={features.length > itemsPerPage}
                                                     currentPage={paginationStates[layer.layerTitle] || 1}
                                                     totalPages={Math.ceil(features.length / itemsPerPage)}
-                                                    handlePageChange={(page) =>
-                                                        handlePageChange(
-                                                            layer.layerTitle,
-                                                            page,
-                                                            Math.ceil(features.length / itemsPerPage)
-                                                        )
-                                                    }
+                                                    handlePageChange={(page) => handlePageChange(layer.layerTitle, page)}
+                                                    itemsPerPage={itemsPerPage}
+                                                    onItemsPerPageChange={setItemsPerPage}
                                                 />
                                             </div>
                                         )}
