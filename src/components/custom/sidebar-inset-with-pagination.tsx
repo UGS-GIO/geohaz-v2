@@ -126,25 +126,33 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
             currentPage * itemsPerPage
         )
 
+        const handleZoomToFeature = () => {
+            console.log("TODO: Zoom to feature")
+        }
+
         return (
             <div>
                 <div className="space-y-4">
                     {paginatedFeatures.map((feature, idx) => {
                         return (
-                            <div
-                                className="border p-4 rounded"
-                                key={idx}
-                                onClick={() =>
-                                    console.log("this will eventually zoom and highlight the user to the spot")
-                                }
-                            >
-                                <GenericPopup
+                            <div className="border p-4 rounded space-y-2"                            >
+                                <div className="flex justify-start">
+                                    <Button onClick={handleZoomToFeature} variant={'secondary'}>Zoom to Feature</Button>
+                                </div>
+                                <div
                                     key={idx}
-                                    feature={feature}
-                                    layout="grid"
-                                    popupFields={popupFields}
-                                    relatedTable={relatedTables}
-                                />
+                                    onClick={() =>
+                                        console.log("this will eventually zoom and highlight the user to the spot")
+                                    }
+                                >
+                                    <GenericPopup
+                                        key={idx}
+                                        feature={feature}
+                                        layout="grid"
+                                        popupFields={popupFields}
+                                        relatedTable={relatedTables}
+                                    />
+                                </div>
                             </div>
                         )
                     })}
@@ -187,17 +195,14 @@ export function SidebarInsetWithPagination({ layerContent, selectedFeatures }: S
                                             </div>
                                         )}
                                     </div>
-
-                                    {
-                                        renderPaginatedFeatures(
-                                            layer.features.filter((feature) =>
-                                                selectedFeatures.has(feature.id as string)
-                                            ),
-                                            layer.popupFields || {},
-                                            layer.relatedTables || [],
-                                            layer.layerTitle
-                                        )
-                                    }
+                                    {renderPaginatedFeatures(
+                                        layer.features.filter((feature) =>
+                                            selectedFeatures.has(feature.id as string)
+                                        ),
+                                        layer.popupFields || {},
+                                        layer.relatedTables || [],
+                                        layer.layerTitle
+                                    )}
                                 </div>
                             )
                             }
