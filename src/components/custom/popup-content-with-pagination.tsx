@@ -72,7 +72,7 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
     )
 }
 
-export function PopupContentWithPagination({ layerContent }: SidebarInsetWithPaginationProps) {
+function PopupContentWithPagination({ layerContent }: SidebarInsetWithPaginationProps) {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
 
@@ -81,7 +81,6 @@ export function PopupContentWithPagination({ layerContent }: SidebarInsetWithPag
             ...prevState,
             [layerTitle]: page,
         }))
-        document.getElementById(`content-${layerTitle}`)?.scrollIntoView({ behavior: "smooth" });
     }
 
     const renderPaginatedFeatures = (
@@ -97,7 +96,7 @@ export function PopupContentWithPagination({ layerContent }: SidebarInsetWithPag
         )
 
         return (
-            <div id={`content-${layerTitle}`} className="scroll-smooth">
+            <div className="scroll-smooth">
                 <div className="space-y-4">
                     {paginatedFeatures.map((feature, idx) => (
                         <div className="border p-4 rounded space-y-2" key={idx}>
@@ -122,7 +121,7 @@ export function PopupContentWithPagination({ layerContent }: SidebarInsetWithPag
                 return (
                     <React.Fragment key={layer.layerTitle}>
                         {features.length > 0 && (
-                            <div>
+                            <div id={`page-${layer.layerTitle}`}>
                                 <div className="sticky top-0 bg-background z-10 p-4">
                                     <div className="flex flex-col gap-2">
                                         <h3 className="text-lg font-semibold text-primary">
@@ -148,3 +147,5 @@ export function PopupContentWithPagination({ layerContent }: SidebarInsetWithPag
         </div>
     )
 }
+
+export { PopupContentWithPagination }

@@ -39,6 +39,15 @@ export default function TestDrawer({
         }, {} as Record<string, string[]>)
     }, [layerContent])
 
+    const handleCarouselClick = (layerTitle: string) => {
+        const element = document.getElementById(`page-${layerTitle}`);
+        if (element) {
+            // Scroll to the element
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
+
+
+        }
+    };
 
     return (
         <Drawer container={container} modal={false}>
@@ -59,7 +68,10 @@ export default function TestDrawer({
                                     <React.Fragment key={`parent-group-${groupIdx}`}>
                                         {layers.map((layer, layerIdx) => (
                                             <CarouselItem key={`layer-${layerIdx}`} className="pl-2 basis-auto" data-id={`layer-${layer}`}>
-                                                <button className="px-3 py-2 text-sm font-bold transition-all text-secondary-foreground">
+                                                <button
+                                                    className="px-3 py-2 text-sm font-bold transition-all text-secondary-foreground"
+                                                    onClick={() => handleCarouselClick(layer)}
+                                                >
                                                     {layer}
                                                 </button>
                                             </CarouselItem>
