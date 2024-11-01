@@ -95,6 +95,8 @@ function PopupContentWithPagination({ layerContent }: SidebarInsetWithPagination
             currentPage * itemsPerPage
         )
 
+        const layout = Object.keys(popupFields).length > 5 ? "grid" : "stacked";
+
         return (
             <div className="scroll-smooth">
                 <div className="space-y-4">
@@ -102,7 +104,7 @@ function PopupContentWithPagination({ layerContent }: SidebarInsetWithPagination
                         <div className="border p-4 rounded space-y-2" key={idx}>
                             <GenericPopup
                                 feature={feature}
-                                layout="grid"
+                                layout={layout}
                                 popupFields={popupFields}
                                 relatedTable={relatedTables}
                             />
