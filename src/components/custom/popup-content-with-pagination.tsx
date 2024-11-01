@@ -126,7 +126,7 @@ function PopupContentWithPagination({ layerContent }: SidebarInsetWithPagination
                             <div id={`page-${layer.layerTitle}`}>
                                 <div className="sticky top-0 bg-background z-10 p-4">
                                     <div className="flex flex-col gap-2">
-                                        <h3 className="text-lg font-semibold text-primary">
+                                        <h3 className="text-xl font-semibold text-primary">
                                             {layer.groupLayerTitle}
                                             {layer.layerTitle && ` - ${layer.layerTitle}`}
                                         </h3>
