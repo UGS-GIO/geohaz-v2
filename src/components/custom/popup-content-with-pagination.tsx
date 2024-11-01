@@ -97,11 +97,18 @@ function PopupContentWithPagination({ layerContent }: SidebarInsetWithPagination
 
         const layout = Object.keys(popupFields).length > 5 ? "grid" : "stacked";
 
+        const handleZoomToFeature = () => {
+            console.log("TODO: Zoom to feature")
+        }
+
         return (
             <div className="scroll-smooth">
                 <div className="space-y-4">
                     {paginatedFeatures.map((feature, idx) => (
                         <div className="border p-4 rounded space-y-2" key={idx}>
+                            <div className="flex justify-end">
+                                <Button onClick={handleZoomToFeature} variant={'secondary'}>Zoom to Feature</Button>
+                            </div>
                             <GenericPopup
                                 feature={feature}
                                 layout={layout}
