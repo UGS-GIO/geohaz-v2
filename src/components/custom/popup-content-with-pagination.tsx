@@ -7,7 +7,7 @@ import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-rea
 import { GenericPopup } from "./popups/generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
 
-const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
 interface SidebarInsetWithPaginationProps {
     layerContent: {

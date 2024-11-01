@@ -1,6 +1,8 @@
+import { Button } from "@/components/ui/button";
 import { useRelatedTable } from "@/hooks/use-related-table";
 import { RelatedTable } from "@/lib/types/mapping-types";
 import { Feature, Geometry, GeoJsonProperties } from "geojson";
+import { ExternalLink } from "lucide-react";
 
 type ReusablePopupProps = {
     feature: Feature<Geometry, GeoJsonProperties>;
@@ -9,7 +11,7 @@ type ReusablePopupProps = {
     relatedTable?: RelatedTable[];
 };
 
-const GenericPopup = ({ feature, relatedTable, popupFields, }: ReusablePopupProps) => {
+const GenericPopup = ({ feature, relatedTable, popupFields }: ReusablePopupProps) => {
     const relatedTables = relatedTable || [];
     const { data, isLoading, error } = useRelatedTable(relatedTables);
 
@@ -29,7 +31,7 @@ const GenericPopup = ({ feature, relatedTable, popupFields, }: ReusablePopupProp
             const targetField = properties[table.targetField];
             const matchingField = table.matchingField;
 
-            // for eaech related table, there will be an array of data
+            // for each related table, there will be an array of data
             data.forEach((entry) => {
                 // Use targetField from the table configuration for dynamic matching in each entry
                 entry?.find((item: Record<string, string>) => {
@@ -48,22 +50,31 @@ const GenericPopup = ({ feature, relatedTable, popupFields, }: ReusablePopupProp
         return matchedValues.length > 0 ? matchedValues : ["N/A"];
     };
 
+    // Regular expression to detect URLs
+    const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/;
+
     // Generate content for the properties of the feature
     // default to properties if popupFields is not provided
-    const featureContent = (
-        popupFields && Object.keys(popupFields).length > 0
-            ? Object.entries(popupFields)
-            : Object.entries(properties)
+    const featureContent = (popupFields && Object.keys(popupFields).length > 0
+        ? Object.entries(popupFields)
+        : Object.entries(properties)
     ).map(([label, field]) => {
         const value = popupFields && Object.keys(popupFields).length > 0
             ? properties[field]
             : field; // In case we're iterating over `properties`
+
         return (
             value && (
                 <div key={label} className="flex flex-col">
                     <p className="font-bold underline text-primary">{label}</p>
                     <p className="break-words">
-                        {value ?? "N/A"}
+                        {urlPattern.test(value) ? (
+                            <Button className="px-0" variant={'link'} onClick={() => window.open(value, '_blank')}>
+                                {value}&nbsp;<ExternalLink size={16} />
+                            </Button>
+                        ) : (
+                            value ?? "N/A"
+                        )}
                     </p>
                 </div>
             )
