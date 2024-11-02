@@ -1,25 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 
+const fetchLayerDescriptions = async () => {
+    const outfieds = 'content,title';
+    const url = `https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/hazlayerinfo?select=${outfieds}`;
+    const acceptProfile = 'hazards';
+
+    const response = await fetch(url, {
+        headers: {
+            "Accept-Profile": acceptProfile,
+            "Accept": "application/json",
+            "Cache-Control": "no-cache",
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch layer descriptions: ${response.statusText}`);
+    }
+
+    return await response.json();
+};
+
 const useFetchLayerDescriptions = () => {
-    const fetchLayerDescriptions = async () => {
-        const outfieds = 'content,title';
-        const url = `https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/hazlayerinfo?select=${outfieds}`;
-        const acceptProfile = 'hazards';
-
-        const response = await fetch(url, {
-            headers: {
-                "Accept-Profile": acceptProfile,
-                "Accept": "application/json",
-                "Cache-Control": "no-cache",
-            },
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch layer descriptions: ${response.statusText}`);
-        }
-
-        return await response.json();
-    };
 
     const { data = [], isLoading, error } = useQuery({
         queryKey: ['layerDescriptions'],
@@ -36,11 +37,6 @@ const useFetchLayerDescriptions = () => {
         data: Record<string, string>;
         isLoading: boolean;
         error: Error | null;
-    }
-
-    // Log data when it becomes available
-    if (!isLoading && data.length > 0) {
-        console.log('Fetched data:', data);
     }
 
     // Combine results for easier consumption
