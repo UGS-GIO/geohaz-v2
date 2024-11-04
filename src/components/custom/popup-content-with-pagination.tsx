@@ -17,6 +17,7 @@ interface SidebarInsetWithPaginationProps {
         popupFields?: Record<string, string>
         relatedTables?: RelatedTable[]
     }[]
+    handleScroll: (event: React.UIEvent<HTMLDivElement>) => void
 }
 
 interface PopupPaginationProps {
@@ -72,7 +73,7 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
     )
 }
 
-function PopupContentWithPagination({ layerContent }: SidebarInsetWithPaginationProps) {
+function PopupContentWithPagination({ layerContent, handleScroll }: SidebarInsetWithPaginationProps) {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
 
@@ -81,6 +82,10 @@ function PopupContentWithPagination({ layerContent }: SidebarInsetWithPagination
             ...prevState,
             [layerTitle]: page,
         }))
+    }
+
+    const handleScrollEvent = (e: React.UIEvent<HTMLDivElement>) => {
+        handleScroll(e)
     }
 
     const renderPaginatedFeatures = (
@@ -123,7 +128,8 @@ function PopupContentWithPagination({ layerContent }: SidebarInsetWithPagination
     }
 
     return (
-        <div className="flex flex-1 flex-col gap-4 px-2 overflow-y-auto select-text min-h-full">
+        <div className="flex flex-1 flex-col gap-4 px-2 overflow-y-auto select-text min-h-full"
+            onScroll={handleScrollEvent}>
             {layerContent.map((layer) => {
                 const features = layer.features
 

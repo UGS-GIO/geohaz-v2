@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useMemo, useRef } from "react"
+import { useCallback, useMemo, useRef, useState, useEffect } from "react"
 import { Feature } from "geojson"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
@@ -28,6 +28,9 @@ export default function TestDrawer({
 }: CombinedSidebarDrawerProps) {
     const { isCollapsed } = useSidebar()
     const carouselRef = useRef<HTMLDivElement>(null)
+    const containerRef = useRef<HTMLDivElement | null>(null)
+    const [activeLayer, setActiveLayer] = useState<string>("")
+
     const layerContent = useMemo(() => popupContent, [popupContent])
 
     const groupedLayers = useMemo(() => {
@@ -39,14 +42,47 @@ export default function TestDrawer({
         }, {} as Record<string, string[]>)
     }, [layerContent])
 
-    const handleCarouselClick = (layerTitle: string) => {
-        const element = document.getElementById(`page-${layerTitle}`);
-        if (element) {
-            element.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Scroll handler
+    const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+        const scrollTarget = event.currentTarget;
+        const elements = Array.from(scrollTarget.querySelectorAll("[id^='page-']")).filter((el): el is HTMLElement => el instanceof HTMLElement);
 
+        let closestElement: HTMLElement | null = null;
+        let minDistance = Infinity;
 
+        elements.forEach((element) => {
+            const rect = element.getBoundingClientRect();
+            const distanceFromTop = Math.abs(rect.top);
+
+            console.log('Checking element:', element.id, 'Distance from top:', distanceFromTop);
+
+            if (distanceFromTop < minDistance) {
+                minDistance = distanceFromTop;
+                closestElement = element;
+            }
+        });
+
+        if (closestElement !== null) {
+            const closestElementTyped = closestElement as HTMLElement;
+            const layerTitle = closestElementTyped.id.replace("page-", "");
+            console.log(`Setting activeLayer to closest: ${layerTitle}`);
+            setActiveLayer(layerTitle);
         }
-    };
+    }, []);
+
+
+
+    const setContainerRef = useCallback((node: HTMLDivElement | null) => {
+        containerRef.current = node
+    }, [handleScroll])
+
+    const handleCarouselClick = (layerTitle: string) => {
+        const element = document.getElementById(`page-${layerTitle}`)
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "start" })
+            setActiveLayer(layerTitle)
+        }
+    }
 
     return (
         <Drawer container={container} modal={false}>
@@ -68,7 +104,9 @@ export default function TestDrawer({
                                         {layers.map((layer, layerIdx) => (
                                             <CarouselItem key={`layer-${layerIdx}`} className="pl-2 basis-auto" data-id={`layer-${layer}`}>
                                                 <button
-                                                    className="px-3 py-2 text-sm font-bold transition-all text-secondary-foreground"
+                                                    className={cn("px-3 py-2 text-sm font-bold transition-all text-secondary-foreground", {
+                                                        'underline text-primary': activeLayer === layer,
+                                                    })}
                                                     onClick={() => handleCarouselClick(layer)}
                                                 >
                                                     {layer}
@@ -84,9 +122,13 @@ export default function TestDrawer({
                     </header>
 
                     <div className="flex overflow-hidden pt-2">
-                        <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-auto select-text">
-                            {/* Pass all layers to PopupContentWithPagination to handle pagination */}
-                            <PopupContentWithPagination layerContent={layerContent} />
+                        <div
+                            ref={setContainerRef}
+                            className={cn(`flex flex-1 flex-col gap-4 p-4 overflow-y-auto select-text`)}
+                        >
+                            <PopupContentWithPagination layerContent={layerContent}
+                                handleScroll={handleScroll}
+                            />
                         </div>
                     </div>
                 </div>
@@ -98,7 +140,7 @@ export default function TestDrawer({
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>
-    );
+    )
 }
 
-export { TestDrawer };
+export { TestDrawer }
