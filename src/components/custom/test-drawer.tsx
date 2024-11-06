@@ -1,24 +1,25 @@
-import * as React from "react"
-import { useCallback, useMemo, useRef, useState, useEffect } from "react"
-import { Feature } from "geojson"
-import { Button } from "@/components/ui/button"
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { cn } from "@/lib/utils"
-import { useSidebar } from "@/hooks/use-sidebar"
-import { PopupContentWithPagination } from "./popup-content-with-pagination"
+import * as React from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Feature } from "geojson";
+import { Button } from "@/components/ui/button";
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { cn } from "@/lib/utils";
+import { useSidebar } from "@/hooks/use-sidebar";
+import { PopupContentWithPagination } from "./popup-content-with-pagination";
+import { useDebouncedCallback } from "use-debounce";
 
 interface PopupContent {
-    features: Feature[]
-    visible: boolean
-    groupLayerTitle: string
-    layerTitle: string
+    features: Feature[];
+    visible: boolean;
+    groupLayerTitle: string;
+    layerTitle: string;
 }
 
 interface CombinedSidebarDrawerProps {
-    container: HTMLDivElement | null
-    popupContent: PopupContent[]
-    drawerTriggerRef: React.RefObject<HTMLButtonElement>
+    container: HTMLDivElement | null;
+    popupContent: PopupContent[];
+    drawerTriggerRef: React.RefObject<HTMLButtonElement>;
 }
 
 export default function TestDrawer({
@@ -26,26 +27,35 @@ export default function TestDrawer({
     popupContent,
     drawerTriggerRef,
 }: CombinedSidebarDrawerProps) {
-    const { isCollapsed } = useSidebar()
-    const carouselRef = useRef<HTMLDivElement>(null)
-    const containerRef = useRef<HTMLDivElement | null>(null)
-    const [activeLayer, setActiveLayer] = useState<string>("")
+    const { isCollapsed } = useSidebar();
+    const carouselRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const [activeLayer, setActiveLayer] = useState<string>("");
+    const [isCarouselControllingScroll, setIsCarouselControllingScroll] = useState(false);
+    const [scrollStopped, setScrollStopped] = useState(false);
 
-    const layerContent = useMemo(() => popupContent, [popupContent])
+    const layerContent = useMemo(() => popupContent, [popupContent]);
 
     const groupedLayers = useMemo(() => {
         return layerContent.reduce((acc, item) => {
-            const { groupLayerTitle, layerTitle } = item
-            if (!acc[groupLayerTitle]) acc[groupLayerTitle] = []
-            acc[groupLayerTitle].push(layerTitle)
-            return acc
-        }, {} as Record<string, string[]>)
-    }, [layerContent])
+            const { groupLayerTitle, layerTitle } = item;
+            if (!acc[groupLayerTitle]) acc[groupLayerTitle] = [];
+            acc[groupLayerTitle].push(layerTitle);
+            return acc;
+        }, {} as Record<string, string[]>);
+    }, [layerContent]);
 
-    // Scroll handler
-    const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
-        const scrollTarget = event.currentTarget;
-        const elements = Array.from(scrollTarget.querySelectorAll("[id^='page-']")).filter((el): el is HTMLElement => el instanceof HTMLElement);
+    // Ref to store the last scroll target and elements, accessible in debounced function
+    const scrollDataRef = useRef<{ scrollTarget: HTMLDivElement | null; elements: HTMLElement[] }>({
+        scrollTarget: null,
+        elements: [],
+    });
+
+    const debouncedHandleScroll = useDebouncedCallback(() => {
+        const { scrollTarget, elements } = scrollDataRef.current;
+        if (!scrollTarget) return;
+
+        console.log('Debounced scroll handling with scrollTarget:', scrollTarget);
 
         let closestElement: HTMLElement | null = null;
         let minDistance = Infinity;
@@ -68,21 +78,49 @@ export default function TestDrawer({
             console.log(`Setting activeLayer to closest: ${layerTitle}`);
             setActiveLayer(layerTitle);
         }
-    }, []);
 
+        setScrollStopped(true); // Set after debounce delay
+    }, 500);
 
+    // Scroll handler
+    const handleScroll = useCallback(
+        (event: React.UIEvent<HTMLDivElement>) => {
+            if (isCarouselControllingScroll) return;
+
+            setScrollStopped(false); // Reset when scrolling starts
+
+            const scrollTarget = event.currentTarget;
+            const elements = Array.from(scrollTarget.querySelectorAll("[id^='page-']"))
+                .filter((el): el is HTMLElement => el instanceof HTMLElement);
+
+            // Store scrollTarget and elements in ref for use in debounced callback
+            scrollDataRef.current = { scrollTarget, elements };
+
+            debouncedHandleScroll(); // Debounce further logic
+        },
+        [isCarouselControllingScroll, debouncedHandleScroll]
+    );
+
+    const handleCarouselClick = useCallback(
+        (layerTitle: string) => {
+            const element = document.getElementById(`page-${layerTitle}`);
+            if (element) {
+                setIsCarouselControllingScroll(true); // Indicate that the carousel is controlling the scroll
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+
+                setTimeout(() => {
+                    setIsCarouselControllingScroll(false);
+                }, 1000); // Adjust delay if necessary
+
+                setActiveLayer(layerTitle); // Set the active layer based on the clicked carousel item
+            }
+        },
+        []
+    );
 
     const setContainerRef = useCallback((node: HTMLDivElement | null) => {
-        containerRef.current = node
-    }, [handleScroll])
-
-    const handleCarouselClick = (layerTitle: string) => {
-        const element = document.getElementById(`page-${layerTitle}`)
-        if (element) {
-            element.scrollIntoView({ behavior: "smooth", block: "start" })
-            setActiveLayer(layerTitle)
-        }
-    }
+        containerRef.current = node;
+    }, []);
 
     return (
         <Drawer container={container} modal={false}>
@@ -126,9 +164,7 @@ export default function TestDrawer({
                             ref={setContainerRef}
                             className={cn(`flex flex-1 flex-col gap-4 p-4 overflow-y-auto select-text`)}
                         >
-                            <PopupContentWithPagination layerContent={layerContent}
-                                handleScroll={handleScroll}
-                            />
+                            <PopupContentWithPagination layerContent={layerContent} handleScroll={handleScroll} />
                         </div>
                     </div>
                 </div>
@@ -140,7 +176,7 @@ export default function TestDrawer({
                 </DrawerFooter>
             </DrawerContent>
         </Drawer>
-    )
+    );
 }
 
-export { TestDrawer }
+export { TestDrawer };
