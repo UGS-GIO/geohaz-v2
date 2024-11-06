@@ -7,7 +7,6 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { PopupContentWithPagination } from "./popup-content-with-pagination";
-import { useDebouncedCallback } from "use-debounce";
 
 interface PopupContent {
     features: Feature[];
@@ -32,7 +31,6 @@ export default function TestDrawer({
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [activeLayer, setActiveLayer] = useState<string>("");
     const [isCarouselControllingScroll, setIsCarouselControllingScroll] = useState(false);
-    const [scrollStopped, setScrollStopped] = useState(false);
 
     const layerContent = useMemo(() => popupContent, [popupContent]);
 
@@ -44,62 +42,6 @@ export default function TestDrawer({
             return acc;
         }, {} as Record<string, string[]>);
     }, [layerContent]);
-
-    // Ref to store the last scroll target and elements, accessible in debounced function
-    const scrollDataRef = useRef<{ scrollTarget: HTMLDivElement | null; elements: HTMLElement[] }>({
-        scrollTarget: null,
-        elements: [],
-    });
-
-    const debouncedHandleScroll = useDebouncedCallback(() => {
-        const { scrollTarget, elements } = scrollDataRef.current;
-        if (!scrollTarget) return;
-
-        console.log('Debounced scroll handling with scrollTarget:', scrollTarget);
-
-        let closestElement: HTMLElement | null = null;
-        let minDistance = Infinity;
-
-        elements.forEach((element) => {
-            const rect = element.getBoundingClientRect();
-            const distanceFromTop = Math.abs(rect.top);
-
-            console.log('Checking element:', element.id, 'Distance from top:', distanceFromTop);
-
-            if (distanceFromTop < minDistance) {
-                minDistance = distanceFromTop;
-                closestElement = element;
-            }
-        });
-
-        if (closestElement !== null) {
-            const closestElementTyped = closestElement as HTMLElement;
-            const layerTitle = closestElementTyped.id.replace("page-", "");
-            console.log(`Setting activeLayer to closest: ${layerTitle}`);
-            setActiveLayer(layerTitle);
-        }
-
-        setScrollStopped(true); // Set after debounce delay
-    }, 500);
-
-    // Scroll handler
-    const handleScroll = useCallback(
-        (event: React.UIEvent<HTMLDivElement>) => {
-            if (isCarouselControllingScroll) return;
-
-            setScrollStopped(false); // Reset when scrolling starts
-
-            const scrollTarget = event.currentTarget;
-            const elements = Array.from(scrollTarget.querySelectorAll("[id^='page-']"))
-                .filter((el): el is HTMLElement => el instanceof HTMLElement);
-
-            // Store scrollTarget and elements in ref for use in debounced callback
-            scrollDataRef.current = { scrollTarget, elements };
-
-            debouncedHandleScroll(); // Debounce further logic
-        },
-        [isCarouselControllingScroll, debouncedHandleScroll]
-    );
 
     const handleCarouselClick = useCallback(
         (layerTitle: string) => {
@@ -116,6 +58,36 @@ export default function TestDrawer({
             }
         },
         []
+    );
+
+    const handleScroll = useCallback(
+        (event: React.UIEvent<HTMLDivElement>) => {
+            if (isCarouselControllingScroll) return;
+
+            const scrollTarget = event.currentTarget;
+            const elements = Array.from(scrollTarget.querySelectorAll("[id^='page-']"))
+                .filter((el): el is HTMLElement => el instanceof HTMLElement);
+
+            let closestElement: HTMLElement | null = null;
+            let minDistance = Infinity;
+
+            elements.forEach((element) => {
+                const rect = element.getBoundingClientRect();
+                const distanceFromTop = Math.abs(rect.top);
+
+                if (distanceFromTop < minDistance) {
+                    minDistance = distanceFromTop;
+                    closestElement = element;
+                }
+            });
+
+            if (closestElement !== null) {
+                const closestElementTyped = closestElement as HTMLElement;
+                const layerTitle = closestElementTyped.id.replace("page-", "");
+                setActiveLayer(layerTitle);
+            }
+        },
+        [isCarouselControllingScroll]
     );
 
     const setContainerRef = useCallback((node: HTMLDivElement | null) => {
@@ -164,7 +136,10 @@ export default function TestDrawer({
                             ref={setContainerRef}
                             className={cn(`flex flex-1 flex-col gap-4 p-4 overflow-y-auto select-text`)}
                         >
-                            <PopupContentWithPagination layerContent={layerContent} handleScroll={handleScroll} />
+                            <PopupContentWithPagination
+                                layerContent={layerContent}
+                                handleScroll={handleScroll}
+                            />
                         </div>
                     </div>
                 </div>
