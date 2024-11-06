@@ -35,6 +35,8 @@ export default function TestDrawer({
     const layerContent = useMemo(() => popupContent, [popupContent]);
 
     const groupedLayers = useMemo(() => {
+        const layers = layerContent.map((item) => item.layerTitle);
+        setActiveLayer(layers[0]);
         return layerContent.reduce((acc, item) => {
             const { groupLayerTitle, layerTitle } = item;
             if (!acc[groupLayerTitle]) acc[groupLayerTitle] = [];
