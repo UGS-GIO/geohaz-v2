@@ -7,7 +7,7 @@ import { GenericPopup } from "./popups/generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
 import { cn } from "@/lib/utils"
 
-const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
+const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
 interface SidebarInsetWithPaginationProps {
     layerContent: {
@@ -32,28 +32,27 @@ interface PopupPaginationProps {
 const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPage, onItemsPerPageChange, showPagination }: PopupPaginationProps) => {
     return (
         <div className="flex items-center justify-between px-4 py-2 w-full bg-background">
-            <div className="flex-1 text-sm text-muted-foreground">
-                Page {currentPage} of {totalPages}
-            </div>
-            <div className="flex items-center space-x-2">
-                <Select
-                    value={`${itemsPerPage}`}
-                    onValueChange={(value) => onItemsPerPageChange(value === "Infinity" ? Infinity : Number(value))}
-                >
-                    <SelectTrigger>
-                        <SelectValue placeholder={itemsPerPage.toString()} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {ITEMS_PER_PAGE_OPTIONS.map((option) => (
-                            <SelectItem key={option} value={`${option}`}>
-                                {option === Infinity ? "All" : option}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                {showPagination && (
-                    <>
+            {showPagination && (
+                <>
+                    <div className="flex-1 text-sm text-muted-foreground">
+                        Page {currentPage} of {totalPages}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Select
+                            value={`${itemsPerPage}`}
+                            onValueChange={(value) => onItemsPerPageChange(value === "Infinity" ? Infinity : Number(value))}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder={itemsPerPage.toString()} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                                    <SelectItem key={option} value={`${option}`}>
+                                        {option === Infinity ? "All" : option}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         <Button variant="outline" onClick={() => handlePageChange(1)} disabled={currentPage === 1} className="h-8 w-8 p-0">
                             <ChevronFirst className="h-4 w-4" />
                         </Button>
@@ -66,9 +65,9 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
                         <Button variant="outline" onClick={() => handlePageChange(totalPages)} disabled={currentPage === totalPages} className="h-8 w-8 p-0">
                             <ChevronLast className="h-4 w-4" />
                         </Button>
-                    </>
-                )}
-            </div>
+                    </div>
+                </>
+            )}
         </div>
     )
 }
@@ -193,7 +192,7 @@ function PopupContentWithPagination({ layerContent, onSectionChange
                                             {layer.layerTitle && ` - ${layer.layerTitle}`}
                                         </h3>
                                         <PopupPagination
-                                            showPagination={features.length > itemsPerPage}
+                                            showPagination={features.length > ITEMS_PER_PAGE_OPTIONS[0]}
                                             currentPage={paginationStates[layer.layerTitle] || 1}
                                             totalPages={Math.ceil(features.length / itemsPerPage)}
                                             handlePageChange={(page) => handlePageChange(layer.layerTitle, page)}
