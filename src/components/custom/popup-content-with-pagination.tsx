@@ -31,9 +31,9 @@ interface PopupPaginationProps {
 
 const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPage, onItemsPerPageChange, showPagination }: PopupPaginationProps) => {
     return (
-        <div className="flex items-center justify-between px-4 py-2 w-full bg-background">
+        <>
             {showPagination && (
-                <>
+                <div className="flex items-center justify-between px-4 py-2 w-full bg-background">
                     <div className="flex-1 text-sm text-muted-foreground">
                         Page {currentPage} of {totalPages}
                     </div>
@@ -66,9 +66,9 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
                             <ChevronLast className="h-4 w-4" />
                         </Button>
                     </div>
-                </>
+                </div>
             )}
-        </div>
+        </>
     )
 }
 
@@ -78,9 +78,11 @@ function PopupContentWithPagination({ layerContent, onSectionChange
     const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
 
     const sectionIds = useMemo(
-        () => layerContent.map(layer => `section-${layer.layerTitle}`),
+        () => layerContent.map(layer => `section-${layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle}`),
         [layerContent]
     )
+
+    console.log('sectionIds:', sectionIds);
 
     useEffect(() => {
         // Create an observer instance with specific options
@@ -173,7 +175,8 @@ function PopupContentWithPagination({ layerContent, onSectionChange
         <div className="flex flex-1 flex-col gap-4 px-2 overflow-y-auto select-text h-full scrollable-container">
             {layerContent.map((layer) => {
                 const features = layer.features
-                const sectionId = `section-${layer.layerTitle}`
+                const title = layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle
+                const sectionId = `section-${title}`
 
                 return (
                     <div key={layer.layerTitle} className="relative">

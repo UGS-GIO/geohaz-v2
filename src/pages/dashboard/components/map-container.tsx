@@ -4,7 +4,7 @@ import { MapContext } from '@/context/map-provider';
 import { MapContextMenu } from "./map-context-menu";
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
-import { TestDrawer } from "@/components/custom/test-drawer";
+import { PopupDrawer } from "@/components/custom/popup-drawer";
 import useMapUrlParams from "@/hooks/use-map-url-params";
 import { Feature } from "geojson";
 import { RelatedTable } from "@/lib/types/mapping-types";
@@ -262,7 +262,7 @@ export default function ArcGISMap() {
                 <MapWidgets />
                 {/* <div ref={setPopupContainer} className="fixed inset-x-0 flex items-center justify-center"> */}
             </div>
-            <TestDrawer container={popupContainer} drawerTriggerRef={drawerTriggerRef} popupContent={popupContent} />
+            <PopupDrawer container={popupContainer} drawerTriggerRef={drawerTriggerRef} popupContent={popupContent} />
             {/* This div serves as the custom container for the PopupDrawer component.
                 By setting its ref, it means the PopupDrawer is appended to this container
                 instead of the body element. 
