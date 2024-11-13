@@ -122,18 +122,14 @@ export default function ArcGISMap() {
 
     const updatePopupContent = useCallback(
         (newContent: { features: Feature[]; visible: boolean; layerTitle: string, groupLayerTitle: string, popupFields?: Record<string, string>; relatedTables?: RelatedTable[] }[]) => {
-            console.log('newContent:', newContent);
-
             setPopupContent((prevContent) => {
                 console.log('Previous content:', prevContent);
 
                 // Only update if new content is different to avoid unnecessary rerenders
                 if (JSON.stringify(prevContent) !== JSON.stringify(newContent)) {
-                    console.log('Updating popup content');
                     return newContent;
                 }
 
-                console.log('Content is identical, no update needed');
                 return prevContent; // No state update if content is identical
             });
         },
@@ -166,7 +162,6 @@ export default function ArcGISMap() {
     const handleMapClick = async ({ e, view, drawerTriggerRef }: HandleMapClickProps) => {
 
         if (!view || isDragging) return; // Skip click if dragging or no view
-        console.log('handleMapClick');
 
         if (e.button === 0) {
             const layers = getVisibleLayers({ view });
@@ -178,8 +173,6 @@ export default function ArcGISMap() {
             const keys = Object.entries(visibleLayersMap)
                 .filter(([_, layerInfo]) => layerInfo.visible && layerInfo.queryable)
                 .map(([key]) => key);
-            console.log('keys:', keys);
-
 
             const featureInfo = await fetchGetFeatureInfo({
                 mapPoint,

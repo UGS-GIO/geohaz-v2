@@ -57,8 +57,6 @@ function PopupDrawer({
     }, []);
 
     const onSectionChange = useCallback((layerTitle: string) => {
-        console.log('onSectionChange', layerTitle);
-
         // Escape layerTitle for querySelector using CSS.escape
         const escapedLayerTitle = CSS.escape(`layer-${layerTitle}`);
 
@@ -67,8 +65,6 @@ function PopupDrawer({
         // - center carousel item in carousel
         const carouselItem = document.getElementById(`${escapedLayerTitle}`);
         if (carouselItem) {
-            console.log('carouselItem', carouselItem);
-
             carouselItem.scrollIntoView({ behavior: "smooth", block: "center" });
         }
     }, [handleCarouselClick]);

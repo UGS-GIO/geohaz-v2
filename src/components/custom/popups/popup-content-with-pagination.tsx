@@ -82,8 +82,6 @@ function PopupContentWithPagination({ layerContent, onSectionChange
         [layerContent]
     )
 
-    console.log('sectionIds:', sectionIds);
-
     useEffect(() => {
         // Create an observer instance with specific options
         const observer = new IntersectionObserver(
