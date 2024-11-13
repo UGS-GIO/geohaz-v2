@@ -1,126 +1,240 @@
 
-import CustomContent from "@arcgis/core/popup/content/CustomContent.js";
-import {
-    rendererLiquefaction,
-    rendererBedrockPot,
-    surfaceFaultRuptureRenderer,
-    quadRenderer,
-} from "./renderers";
-import { createRoot } from "react-dom/client";
-import { StudyAreasPopup } from "@/components/custom/popups/study-areas-popup";
-import { LandslideSourcePopup } from "@/components/custom/popups/landslide-source-popup";
-import { LandslideCompPopup } from "@/components/custom/popups/landslide-comp-popup";
-import { QFaultsPopup } from "@/components/custom/popups/qfaults-popup";
+// const exampleLayerName = 'groundshaking';
+// const exampleWMSTitle = 'Earthquake Ground Shaking';
+// const exampleWMSConfig: WMSLayerProps = {
+//     type: 'wms',
+//     url: `${PROD_GEOSERVER_URL}/wms`,
+//     title: exampleWMSTitle,
+//     visible: false,
+//     sublayers: [
+//         {
+//             name: `${HAZARDS_WORKSPACE}:${exampleLayerName}`,
+//             popupEnabled: false,
+//             queryable: true,
+//         },
+//     ],
+//     }
+// }
+
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
-import Graphic from "@arcgis/core/Graphic";
-import { Feature } from "geojson";
 
-const publicWorkspaceUrl = 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/ows';
+const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
+const HAZARDS_WORKSPACE = 'hazards';
+const GEN_GIS_WORKSPACE = 'gen_gis';
+const UNIT_DESCRIPTIONS_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/unit_descriptions';
 
-const landslideCompConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/4',
-    options: {
-        title: 'Legacy Landslide Compilation',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>Legacy Landslide Compilation</b>',
-            outFields: ['*'],
-            content: [
-                new CustomContent({
-                    outFields: ['*'],
-                    creator: (event) => {
-                        const div = document.createElement('div');
-                        if (event) {
-                            const { graphic } = event
-                            const root = createRoot(div);
-                            root.render(
-                                <LandslideCompPopup graphic={graphic} />
-                            );
-                        }
-                        return div;
-                    },
-                }),
-            ],
-        },
-        minScale: 300000,
-    },
-};
-
-const landslideDepositConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/3',
-    options: {
-        title: 'Landslides',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>Landslides</b>',
-            outFields: ['*'],
-            content: [
-                new CustomContent({
-                    outFields: ['*'],
-                    creator: (event) => {
-                        const div = document.createElement('div');
-                        if (event) {
-                            const { graphic } = event
-                            const root = createRoot(div);
-                            root.render(
-                                <LandslideSourcePopup graphic={graphic} />
-                            );
-                        }
-                        return div;
-                    },
-                }),
-            ],
-        },
-    },
-};
-
-const landslideSusceptibilityConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/2',
-    options: {
-        title: 'Landslide Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>Landslide Susceptibility</b>',
-            outFields: ['*'],
-            content: [
+const landslideLegacyLayerName = 'landslidelegacy';
+const landslideLegacyWMSTitle = 'Legacy Landslide Compilation';
+const landslideLegacyWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: landslideLegacyWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${landslideLegacyLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'State Landslide ID': 'statelsid',
+                'Landslide Unit': 'lsunit',
+                'Movement Type': 'movetype',
+                'Historical': 'historical',
+                'Geologic Unit': 'geolunit',
+                'Map Scale': 'mapscale',
+                'Map Name': 'mapname',
+                'Pub Date': 'pubdate',
+                'Author(s)': 'author_s',
+                'Affiliated Unit': 'affunit',
+                'Movement Unit': 'moveunit',
+                'Movement Cause': 'movecause',
+                'Notes': 'notes',
+            },
+            relatedTables: [
                 {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'relationships/2/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'Hazard_Symbology_Text',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                        {
-                            fieldName: 'LSSCriticalAngle',
-                            visible: false,
-                            label: 'Critical Angle',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text:
-                        '<b>{Hazard_Symbology_Text}: </b>{relationships/2/Description}<br><b>Mapped Scale: </b>{LSSMappedScale}<br><b>Critical Angle: </b>{LSSCriticalAngle}',
-                },
-            ],
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lsfhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
-    },
-};
+    ],
+}
+
+// const landslideCompConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/4',
+//     options: {
+//         title: 'Legacy Landslide Compilation',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>Legacy Landslide Compilation</b>',
+//             outFields: ['*'],
+//             content: [
+//                 new CustomContent({
+//                     outFields: ['*'],
+//                     creator: (event) => {
+//                         const div = document.createElement('div');
+//                         if (event) {
+//                             const { graphic } = event
+//                             const root = createRoot(div);
+//                             root.render(
+//                                 <LandslideCompPopup graphic={graphic} />
+//                             );
+//                         }
+//                         return div;
+//                     },
+//                 }),
+//             ],
+//         },
+//         minScale: 300000,
+//     },
+// };
+
+
+
+const landslideInventoryLayerName = 'landslideinventory';
+const landslideInventoryWMSTitle = 'Landslides';
+const landslideInventoryWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: landslideInventoryWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${landslideInventoryLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Name': 's_name',
+                'Activity': 'activity',
+                'Confidence': 'confidence',
+                'Comments': 'comments',
+                'Deposit Movement 1': 'd_h_move1',
+                'Deposit Movement 2': 'd_h_move2',
+                'Deposit Movement 3': 'd_h_move3',
+                'Primary Geologic Unit Involved': 'd_geologic_unit1',
+                'Secondary Geologic Unit Involved': 'd_geologic_unit2',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lsfhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+// const landslideDepositConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/3',
+//     options: {
+//         title: 'Landslides',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>Landslides</b>',
+//             outFields: ['*'],
+//             content: [
+//                 new CustomContent({
+//                     outFields: ['*'],
+//                     creator: (event) => {
+//                         const div = document.createElement('div');
+//                         if (event) {
+//                             const { graphic } = event
+//                             const root = createRoot(div);
+//                             root.render(
+//                                 <LandslideSourcePopup graphic={graphic} />
+//                             );
+//                         }
+//                         return div;
+//                     },
+//                 }),
+//             ],
+//         },
+//     },
+// };
+
+const landslideSusceptibilityLayerName = 'landslidesusceptibility';
+const landslideSusceptibilityWMSTitle = 'Landslide Susceptibility';
+const landslideSusceptibilityWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: landslideSusceptibilityWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${landslideSusceptibilityLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Hazard': 'hazard_symbology_text',
+                'Mapped Scale': 'lssmappedscale',
+                'Critical Angle': 'lsscriticalangle',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lsshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+// const landslideSusceptibilityConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/2',
+//     options: {
+//         title: 'Landslide Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>Landslide Susceptibility</b>',
+//             outFields: ['*'],
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'relationships/2/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'Hazard_Symbology_Text',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                         {
+//                             fieldName: 'LSSCriticalAngle',
+//                             visible: false,
+//                             label: 'Critical Angle',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text:
+//                         '<b>{Hazard_Symbology_Text}: </b>{relationships/2/Description}<br><b>Mapped Scale: </b>{LSSMappedScale}<br><b>Critical Angle: </b>{LSSCriticalAngle}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
 // const epicentersRecentConfig: LayerProps & { featureReduction: object } = {
 //     type: 'feature',
@@ -166,59 +280,109 @@ const landslideSusceptibilityConfig: LayerProps = {
 //     },
 // };
 
-const liquefactionConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/2',
-    options: {
-        title: 'Liquefaction Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        renderer: rendererLiquefaction,
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>Liquefaction Susceptibility</b>',
-            outFields: ['*'],
-            content: [
+// const liquefactionConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/2',
+//     options: {
+//         title: 'Liquefaction Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         renderer: rendererLiquefaction,
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>Liquefaction Susceptibility</b>',
+//             outFields: ['*'],
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'Hazard_Symbology_Text',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                         {
+//                             fieldName: 'relationships/0/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'MappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text:
+//                         '<b>{Hazard_Symbology_Text}: </b>{relationships/0/Description}<br><b>Mapped Scale: </b>{LQSMappedScale}',
+//                 },
+//             ],
+//         },
+//         // content: "{LQSHazardUnit:liquefactionPopup}{LQSMappedScale:liquefactionPopup}"
+//     },
+// };
+
+const liquefactionLayerName = 'liquefaction';
+const liquefactionWMSTitle = 'Liquefaction Susceptibility';
+const liquefactionWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: liquefactionWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${liquefactionLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Hazard': 'hazard_symbology_text',
+                'Mapped Scale': 'lqsmappedscale',
+            },
+            relatedTables: [
                 {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'Hazard_Symbology_Text',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                        {
-                            fieldName: 'relationships/0/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'MappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text:
-                        '<b>{Hazard_Symbology_Text}: </b>{relationships/0/Description}<br><b>Mapped Scale: </b>{LQSMappedScale}',
-                },
-            ],
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lqshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
-        // content: "{LQSHazardUnit:liquefactionPopup}{LQSMappedScale:liquefactionPopup}"
-    },
+    ],
 };
 
-const shakingVectorConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/ArcGIS/rest/services/Utah_Earthquake_Hazards/FeatureServer/5',
-    options: {
-        title: 'Earthquake Ground Shaking',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-    },
-};
+// const shakingVectorConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/ArcGIS/rest/services/Utah_Earthquake_Hazards/FeatureServer/5',
+//     options: {
+//         title: 'Earthquake Ground Shaking',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//     },
+// };
+
+
+// TODO: explore refactor to display peak ground acceleration like the imagery layer
+const groundshakingLayerName = 'groundshaking';
+const groundshakingWMSTitle = 'Earthquake Ground Shaking';
+const groundshakingWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: groundshakingWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${groundshakingLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Peak Ground Acceleration': 'acc',
+            },
+        },
+    ],
+}
 
 // const shakingRasterConfig: LayerProps = {
 //     type: 'imagery',
@@ -251,728 +415,1133 @@ const shakingVectorConfig: LayerProps = {
 //     'forceRule:True;' +
 //     'fontName:SansSerif';
 
+const qFaultsLayerName = 'quaternaryfaults';
+const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
-    url: publicWorkspaceUrl,
-    title: 'Quaternary Faults',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: qFaultsWMSTitle,
     visible: true,
     sublayers: [
         {
-            name: 'quaternaryfaults',
-            popupEnabled: true,
+            name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
+            popupEnabled: false,
             queryable: true,
-            legendUrl: 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/wms?REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=public:quaternaryfaults',
+            popupFields: {
+                'Fault Zone Name': 'faultzone',
+                'Summary': 'summary',
+                'Fault Name': 'faultname',
+                'Section Name': 'sectionname',
+                'Strand Name': 'strandname',
+                'Structure Number': 'faultnum',
+                'Mapped Scale': 'mappedscale',
+                'Dip Direction': 'dipdirection',
+                'Slip Sense': 'slipsense',
+                'Slip Rate': 'sliprate',
+                'Structure Class': 'faultclass',
+                'Structure Age': 'faultage',
+                'Detailed Report': 'usgs_link',
+            },
+
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${qFaultsWMSConfig.url}?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            console.log(data.features);
-
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: '<b>Quaternary Faults</b>',
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <QFaultsPopup graphic={graphic} />
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 };
 
 
-
-
-
-const faultRuptureConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/3',
-    options: {
-        title: 'Surface Fault Rupture Special Study Zones',
-        renderer: surfaceFaultRuptureRenderer,
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/1/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'SFRMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/1/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/1/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '{relationships/1/Description}<br><b>Mapped Scale: </b>{SFRMappedScale}',
-                },
-            ],
-        },
-    },
-};
-
-const eolianSusConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/19',
-    options: {
-        title: 'Wind-Blown Sand Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>Wind-Blown Sand Susceptibility</b>',
-            content: [{
-                type: 'fields',
-                fieldInfos: [{
-                    fieldName: 'Hazard_Symbology_Text',
-                    visible: false,
-                    label: 'Hazard'
-                },
-                {
-                    fieldName: 'relationships/17/Description',
-                    visible: false,
-                    label: 'Hazard Description'
-                },
-                {
-                    fieldName: 'relationships/17/HazardName',
-                    visible: false,
-                    label: 'Hazard'
-                }
-                ]
+const surfaceFaultRuptureLayerName = 'surfacefaultrupture';
+const surfaceFaultRuptureWMSTitle = 'Surface Fault Rupture Special Study Zones';
+const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: surfaceFaultRuptureWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${surfaceFaultRuptureLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sfrmappedscale',
             },
-            {
-                type: 'text',
-                text: '<b>{Hazard_Symbology_Text}: </b>{relationships/17/Description}<br><b>Mapped Scale: </b>{WSSMappedScale}'
-            }
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sfrhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
             ]
-        }
-    },
-};
-
-const tectonicDefConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/16',
-    options: {
-        title: 'Salt Tectonics-Related Ground Deformation',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/14/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'Hazard_Symbology_Text',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                        {
-                            fieldName: 'SDHMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/14/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/14/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/14/Description}<br><b>Mapped Scale: </b>{SDHMappedScale}',
-                },
-            ],
         },
-    },
-};
+    ],
+}
 
-const bedrockPotConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/17',
-    options: {
-        title: 'Shallow Bedrock Potential',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        renderer: rendererBedrockPot,
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/15/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'Hazard_Symbology_Text',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                        {
-                            fieldName: 'SBPMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/15/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/15/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/15/Description}<br><b>Mapped Scale: </b>{SBPMappedScale}',
-                },
-            ],
-        },
-    },
-};
 
-const rockfallHazConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/15',
-    options: {
-        title: 'Rockfall Hazard',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/13/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'Hazard_Symbology_Text',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                        {
-                            fieldName: 'RFHMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/13/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/13/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/13/Description}<br><b>Mapped Scale: </b>{RFHMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const faultRuptureConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Earthquake_Hazards/FeatureServer/3',
+//     options: {
+//         title: 'Surface Fault Rupture Special Study Zones',
+//         renderer: surfaceFaultRuptureRenderer,
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/1/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'SFRMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/1/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/1/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '{relationships/1/Description}<br><b>Mapped Scale: </b>{SFRMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
-const pipingSusConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/13',
-    options: {
-        title: 'Piping and Erosion Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/11/HazardName}</b>',
-            content: [
+const windBlownSandLayerName = 'windblownsand';
+const windBlownSandWMSTitle = 'Wind-Blown Sand Susceptibility';
+const windBlownSandWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: windBlownSandWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${windBlownSandLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'wssmappedscale',
+            },
+            relatedTables: [
                 {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'PESMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/11/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/11/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/11/Description}<br><b>Mapped Scale: </b>{PESMappedScale}',
-                },
-            ],
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'wsshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
-    },
-};
+    ],
+}
 
-const expansiveSoilConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/10',
-    options: {
-        title: 'Expansive Soil and Rock Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/9/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'EXSMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/9/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/9/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/9/Description}<br><b>Mapped Scale: </b>{EXSMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const eolianSusConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/19',
+//     options: {
+//         title: 'Wind-Blown Sand Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>Wind-Blown Sand Susceptibility</b>',
+//             content: [{
+//                 type: 'fields',
+//                 fieldInfos: [{
+//                     fieldName: 'Hazard_Symbology_Text',
+//                     visible: false,
+//                     label: 'Hazard'
+//                 },
+//                 {
+//                     fieldName: 'relationships/17/Description',
+//                     visible: false,
+//                     label: 'Hazard Description'
+//                 },
+//                 {
+//                     fieldName: 'relationships/17/HazardName',
+//                     visible: false,
+//                     label: 'Hazard'
+//                 }
+//                 ]
+//             },
+//             {
+//                 type: 'text',
+//                 text: '<b>{Hazard_Symbology_Text}: </b>{relationships/17/Description}<br><b>Mapped Scale: </b>{WSSMappedScale}'
+//             }
+//             ]
+//         }
+//     },
+// };
 
-const groundwaterSusConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/1',
-    options: {
-        title: 'Shallow Groundwater Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/1/HazardName}</b>',
-            content: [
+const saltTectonicsDeformationLayerName = 'salttectonicsdeformation';
+const saltTectonicsDeformationWMSTitle = 'Salt Tectonics-Related Ground Deformation';
+const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: saltTectonicsDeformationWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${saltTectonicsDeformationLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sdhmappedscale',
+            },
+            relatedTables: [
                 {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'FLHMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/1/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/1/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/1/Description}<br><b>Mapped Scale: </b>{SGSMappedScale}',
-                },
-            ],
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sdhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
-    },
-};
+    ],
+}
 
-const radonSusConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/14',
-    options: {
-        title: 'Geologic Radon Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/12/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'GRSMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/12/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/12/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/12/Description}<br><b>Mapped Scale: </b>{GRSMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const tectonicDefConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/16',
+//     options: {
+//         title: 'Salt Tectonics-Related Ground Deformation',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/14/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'Hazard_Symbology_Text',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                         {
+//                             fieldName: 'SDHMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/14/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/14/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/14/Description}<br><b>Mapped Scale: </b>{SDHMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
-const corrosiveSoilConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/7',
-    options: {
-        title: 'Corrosive Soil and Rock Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/6/HazardName}</b>',
-            content: [
+const shallowBedrockLayerName = 'shallowbedrock';
+const shallowBedrockWMSTitle = 'Shallow Bedrock Potential';
+const shallowBedrockWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: shallowBedrockWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${shallowBedrockLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sbpmappedscale',
+            },
+            relatedTables: [
                 {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'CRSMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/6/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/6/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/6/Description}<br><b>Mapped Scale: </b>{CRSMappedScale}',
-                },
-            ],
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sbphazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
-    },
-};
+    ],
+}
 
-const collapsibleSoilConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/6',
-    options: {
-        title: 'Collapsible Soil Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/5/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'CSSMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/5/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/5/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/5/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const bedrockPotConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/17',
+//     options: {
+//         title: 'Shallow Bedrock Potential',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         renderer: rendererBedrockPot,
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/15/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'Hazard_Symbology_Text',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                         {
+//                             fieldName: 'SBPMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/15/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/15/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/15/Description}<br><b>Mapped Scale: </b>{SBPMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
-const solubleSoilConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/18',
-    options: {
-        title: 'Soluble Soil and Rock Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/16/HazardName}</b>',
-            content: [
+const rockfallHazardLayerName = 'rockfall';
+const rockfallHazardWMSTitle = 'Rockfall Hazard';
+const rockfallHazardWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: rockfallHazardWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${rockfallHazardLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'rfhmappedscale',
+            },
+            relatedTables: [
                 {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'SLSMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/16/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/16/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/16/Description}<br><b>Mapped Scale: </b>{SLSMappedScale}',
-                },
-            ],
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'rfhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
-    },
-};
+    ],
+}
 
-const calicheConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/5',
-    options: {
-        title: 'Caliche Susceptibility',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/4/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'CASMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/4/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/4/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CASMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const rockfallHazConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/15',
+//     options: {
+//         title: 'Rockfall Hazard',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/13/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'Hazard_Symbology_Text',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                         {
+//                             fieldName: 'RFHMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/13/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/13/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/13/Description}<br><b>Mapped Scale: </b>{RFHMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
-const floodHazardConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/0',
-    options: {
-        title: 'Flood and Debris-Flow Hazard',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/0/HazardName}</b>',
-            content: [
+const pipingAndErosionLayerName = 'pipinganderosion';
+const pipingAndErosionWMSTitle = 'Piping and Erosion Susceptibility';
+const pipingAndErosionWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: pipingAndErosionWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${pipingAndErosionLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'pesmappedscale',
+            },
+            relatedTables: [
                 {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'FLHMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/0/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/0/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/0/Description}<br><b>Mapped Scale: </b>{FLHMappedScale}',
-                },
-            ],
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'peshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
-    },
-};
+    ],
+}
 
-const earthFissureConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/8',
-    options: {
-        title: 'Earth Fissure Hazard',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/7/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'EFHMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/7/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/7/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/7/Description}<br><b>Mapped Scale: </b>{EFHMappedScale}',
-                },
-            ],
-        },
-    },
-};
+// const pipingSusConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/13',
+//     options: {
+//         title: 'Piping and Erosion Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/11/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'PESMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/11/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/11/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/11/Description}<br><b>Mapped Scale: </b>{PESMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
-const erosionZoneConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/9',
-    options: {
-        title: 'J.E. Fuller Flood Erosion Hazard Zones',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/8/HazardName}</b>',
-            content: [
+const expansiveSoilRockLayerName = 'expansivesoilrock';
+const expansiveSoilRockWMSTitle = 'Expansive Soil and Rock Susceptibility';
+const expansiveSoilRockWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: expansiveSoilRockWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${expansiveSoilRockLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'exsmappedscale',
+            },
+            relatedTables: [
                 {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'ERZMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/8/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/8/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '{relationships/8/Description}<br><b>Mapped Scale: </b>{ERZMappedScale}',
-                },
-            ],
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'exshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
-    },
-};
+    ],
+}
+
+// const expansiveSoilConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/10',
+//     options: {
+//         title: 'Expansive Soil and Rock Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/9/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'EXSMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/9/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/9/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/9/Description}<br><b>Mapped Scale: </b>{EXSMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
+
+const shallowGroundwaterLayerName = 'shallowgroundwater';
+const shallowGroundwaterWMSTitle = 'Shallow Groundwater Susceptibility';
+const shallowGroundwaterWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: shallowGroundwaterWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${shallowGroundwaterLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sgsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sgshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+// const groundwaterSusConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/1',
+//     options: {
+//         title: 'Shallow Groundwater Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/1/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'FLHMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/1/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/1/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/1/Description}<br><b>Mapped Scale: </b>{SGSMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
+
+const radonSusceptibilityLayerName = 'radonsusceptibility';
+const radonSusceptibilityWMSTitle = 'Geologic Radon Susceptibility';
+const radonSusceptibilityWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: radonSusceptibilityWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${radonSusceptibilityLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'grsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'grshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+// const radonSusConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/14',
+//     options: {
+//         title: 'Geologic Radon Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/12/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'GRSMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/12/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/12/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/12/Description}<br><b>Mapped Scale: </b>{GRSMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
+
+// const corrosiveSoilConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/7',
+//     options: {
+//         title: 'Corrosive Soil and Rock Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/6/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'CRSMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/6/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/6/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/6/Description}<br><b>Mapped Scale: </b>{CRSMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
+
+const corrosiveSoilRockLayerName = 'corrosivesoilrock';
+const corrosiveSoilRockWMSTitle = 'Corrosive Soil and Rock Susceptibility';
+const corrosiveSoilRockWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: corrosiveSoilRockWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${corrosiveSoilRockLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'crsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'crshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+const collapsibleSoilLayerName = 'collapsiblesoil';
+const collapsibleSoilWMSTitle = 'Collapsible Soil Susceptibility';
+const collapsibleSoilWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: collapsibleSoilWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${collapsibleSoilLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'cssmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'csshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+// const collapsibleSoilConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/6',
+//     options: {
+//         title: 'Collapsible Soil Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/5/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'CSSMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/5/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/5/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/5/Description}<br><b>Mapped Scale: </b>{CSSMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
+
+const solubleSoilAndRockLayerName = 'solublesoilandrock';
+const solubleSoilAndRockWMSTitle = 'Soluble Soil and Rock Susceptibility';
+const solubleSoilAndRockWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: solubleSoilAndRockWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${solubleSoilAndRockLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'slsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'slshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+// const solubleSoilConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/18',
+//     options: {
+//         title: 'Soluble Soil and Rock Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/16/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'SLSMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/16/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/16/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/16/Description}<br><b>Mapped Scale: </b>{SLSMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
+
+const calicheLayerName = 'caliche';
+const calicheWMSTitle = 'Caliche Susceptibility';
+const calicheWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: calicheWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${calicheLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'casmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'cashazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+// const calicheConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/5',
+//     options: {
+//         title: 'Caliche Susceptibility',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/4/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'CASMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/4/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/4/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '{relationships/4/Description}<br><b>Mapped Scale: </b>{CASMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
+
+// const floodHazardConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/0',
+//     options: {
+//         title: 'Flood and Debris-Flow Hazard',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/0/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'FLHMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/0/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/0/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/0/Description}<br><b>Mapped Scale: </b>{FLHMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
+
+const floodAndDebrisLayerName = 'floodanddebrisflow';
+const floodAndDebrisWMSTitle = 'Flood and Debris-Flow Hazard';
+const floodAndDebrisWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: floodAndDebrisWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${floodAndDebrisLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'flhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'flhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+// const floodAndDebrisFlowConfig: LayerProps = {
+//     type
+
+const earthFissureLayerName = 'earthfissure';
+const earthFissureWMSTitle = 'Earth Fissure Hazard';
+const earthFissureWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: earthFissureWMSTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${earthFissureLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': 'efhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'efhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
+        },
+    ],
+}
+
+// const earthFissureConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/8',
+//     options: {
+//         title: 'Earth Fissure Hazard',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/7/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'EFHMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/7/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/7/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/7/Description}<br><b>Mapped Scale: </b>{EFHMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
+
+const erosionHazardZoneLayerName = 'erosionhazardzone';
+const erosionHazardZoneWMSTitle = 'J.E. Fuller Flood Erosion Hazard Zones';
+const erosionHazardZoneWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: erosionHazardZoneWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${erosionHazardZoneLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+        },
+    ],
+}
+
+// const erosionZoneConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/9',
+//     options: {
+//         title: 'J.E. Fuller Flood Erosion Hazard Zones',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/8/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'ERZMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/8/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/8/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '{relationships/8/Description}<br><b>Mapped Scale: </b>{ERZMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
 // const groundSubsidenceConfig: LayerProps = {
 //     type: 'feature',
@@ -1014,109 +1583,155 @@ const erosionZoneConfig: LayerProps = {
 //     },
 // };
 
-const karstFeaturesConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/12',
-    options: {
-        title: 'Karst Features',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: false,
-        outFields: ['*'],
-        popupTemplate: {
-            title: '<b>{relationships/10/HazardName}</b>',
-            content: [
-                {
-                    type: 'fields',
-                    fieldInfos: [
-                        {
-                            fieldName: 'GSPMappedScale',
-                            visible: false,
-                            label: 'Mapped Scale',
-                        },
-                        {
-                            fieldName: 'relationships/10/Description',
-                            visible: false,
-                            label: 'Hazard Description',
-                        },
-                        {
-                            fieldName: 'relationships/10/HazardName',
-                            visible: false,
-                            label: 'Hazard',
-                        },
-                    ],
-                },
-                {
-                    type: 'text',
-                    text: '<b>{Hazard_Symbology_Text}: </b>{relationships/10/Description}<br><b>Mapped Scale: </b>{GSPMappedScale}',
-                },
-            ],
+const karstFeaturesLayerName = 'karstfeatures';
+const karstFeaturesWMSTitle = 'Karst Features';
+const karstFeaturesWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: karstFeaturesWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${karstFeaturesLayerName}`,
+            popupEnabled: false,
+            queryable: true,
         },
-    },
-};
+    ],
+}
 
-const soilHazardsConfig: LayerProps = {
-    type: 'group',
-    title: 'Problem Soil and Rock Hazards',
-    visible: true,
-    layers: [eolianSusConfig, solubleSoilConfig, bedrockPotConfig, tectonicDefConfig, radonSusConfig, pipingSusConfig, karstFeaturesConfig, erosionZoneConfig, expansiveSoilConfig, earthFissureConfig, corrosiveSoilConfig, collapsibleSoilConfig, calicheConfig],
-};
+// const karstFeaturesConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards/FeatureServer/12',
+//     options: {
+//         title: 'Karst Features',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: false,
+//         outFields: ['*'],
+//         popupTemplate: {
+//             title: '<b>{relationships/10/HazardName}</b>',
+//             content: [
+//                 {
+//                     type: 'fields',
+//                     fieldInfos: [
+//                         {
+//                             fieldName: 'GSPMappedScale',
+//                             visible: false,
+//                             label: 'Mapped Scale',
+//                         },
+//                         {
+//                             fieldName: 'relationships/10/Description',
+//                             visible: false,
+//                             label: 'Hazard Description',
+//                         },
+//                         {
+//                             fieldName: 'relationships/10/HazardName',
+//                             visible: false,
+//                             label: 'Hazard',
+//                         },
+//                     ],
+//                 },
+//                 {
+//                     type: 'text',
+//                     text: '<b>{Hazard_Symbology_Text}: </b>{relationships/10/Description}<br><b>Mapped Scale: </b>{GSPMappedScale}',
+//                 },
+//             ],
+//         },
+//     },
+// };
 
-const quadBoundariesConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/0',
-    options: {
-        title: 'USGS 1:24,000-Scale Quadrangle Boundaries',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        labelingInfo: {
-            labelExpressionInfo: {
-                expression: '$feature.NAME',
+const quads24kLayerName = '24kquads';
+const quads24kWMSTitle = 'USGS 1:24,000-Scale Quadrangle Boundaries';
+const quads24kWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: quads24kWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${GEN_GIS_WORKSPACE}:${quads24kLayerName}`,
+            popupEnabled: false,
+            queryable: false,
+        },
+    ],
+}
+
+// const quadBoundariesConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/0',
+//     options: {
+//         title: 'USGS 1:24,000-Scale Quadrangle Boundaries',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         labelingInfo: {
+//             labelExpressionInfo: {
+//                 expression: '$feature.NAME',
+//             },
+//             symbol: {
+//                 type: 'text',
+//                 color: '#db0202',
+//                 font: {
+//                     family: 'serif',
+//                     size: 10,
+//                     weight: 'bold',
+//                     style: 'italic',
+//                 },
+//             },
+//         },
+//         renderer: quadRenderer,
+//         visible: false,
+//     },
+// };
+
+const studyAreasLayerName = 'studyareas';
+const studyAreasWMSTitle = 'Mapped Areas';
+const studyAreasWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: studyAreasWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${studyAreasLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Name': 'name',
+                'Report ID': 'repor_id',
+                'Mapped Hazards': 'hazard_name',
             },
-            symbol: {
-                type: 'text',
-                color: '#db0202',
-                font: {
-                    family: 'serif',
-                    size: 10,
-                    weight: 'bold',
-                    style: 'italic',
-                },
-            },
         },
-        renderer: quadRenderer,
-        visible: false,
-    },
-};
+    ],
+}
 
-const hazardStudyConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/1',
-    options: {
-        visible: true,
-        title: 'Mapped Areas',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        outFields: ['*'],
-        popupTemplate: {
-            outFields: ['*'],
-            title: '<b>Mapped Areas</b>',
-            content: [
-                new CustomContent({
-                    outFields: ['*'],
-                    creator: (event) => {
-                        const div = document.createElement('div');
-                        if (event) {
-                            const { graphic } = event;
-                            const root = createRoot(div);
-                            root.render(
-                                <StudyAreasPopup graphic={graphic} />
-                            );
-                        }
-                        return div;
-                    },
-                }),
-            ],
-        },
-    },
-};
+// const hazardStudyConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/1',
+//     options: {
+//         visible: true,
+//         title: 'Mapped Areas',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         outFields: ['*'],
+//         popupTemplate: {
+//             outFields: ['*'],
+//             title: '<b>Mapped Areas</b>',
+//             content: [
+//                 new CustomContent({
+//                     outFields: ['*'],
+//                     creator: (event) => {
+//                         const div = document.createElement('div');
+//                         if (event) {
+//                             // const { graphic } = event;
+//                             const root = createRoot(div);
+//                             root.render(
+//                                 <StudyAreasPopup graphic={graphic} />
+//                             );
+//                         }
+//                         return div;
+//                     },
+//                 }),
+//             ],
+//         },
+//     },
+// };
 
 // const lidarBoundsConfig: LayerProps = {
 //     type: 'feature',
@@ -1139,45 +1754,67 @@ const hazardStudyConfig: LayerProps = {
 //     },
 // };
 
-const notMappedConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/4',
-    options: {
-        title: 'Areas Not Mapped within Project Areas',
-        elevationInfo: [{ mode: 'on-the-ground' }],
-        visible: true,
-    },
-};
+const areasNotMappedLayerName = 'areasnotmapped';
+const areasNotMappedWMSTitle = 'Areas Not Mapped within Project Areas';
+const areasNotMappedWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: areasNotMappedWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${areasNotMappedLayerName}`,
+            queryable: false,
+        },
+    ],
+}
+
+// const notMappedConfig: LayerProps = {
+//     type: 'feature',
+//     url: 'https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Utah_Geologic_Hazards_Supplemental_Data_View/FeatureServer/4',
+//     options: {
+//         title: 'Areas Not Mapped within Project Areas',
+//         elevationInfo: [{ mode: 'on-the-ground' }],
+//         visible: true,
+//     },
+// };
 
 const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards',
     visible: false,
-    layers: [floodHazardConfig, groundwaterSusConfig],
+    layers: [floodAndDebrisWMSConfig, shallowGroundwaterWMSConfig],
 };
 
 const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
     visible: true,
-    layers: [shakingVectorConfig, liquefactionConfig, faultRuptureConfig, qFaultsWMSConfig],
+    layers: [groundshakingWMSConfig, liquefactionWMSConfig, surfaceFaultRuptureWMSConfig, qFaultsWMSConfig],
 };
 
 const landslidesConfig: LayerProps = {
     type: 'group',
     title: 'Landslide Hazards',
     visible: true,
-    layers: [landslideCompConfig, landslideSusceptibilityConfig, landslideDepositConfig, rockfallHazConfig],
+    layers: [landslideLegacyWMSConfig, landslideSusceptibilityWMSConfig, landslideInventoryWMSConfig, rockfallHazardWMSConfig],
+};
+
+const soilHazardsConfig: LayerProps = {
+    type: 'group',
+    title: 'Problem Soil and Rock Hazards',
+    visible: true,
+    layers: [windBlownSandWMSConfig, solubleSoilAndRockWMSConfig, shallowBedrockWMSConfig, saltTectonicsDeformationWMSConfig, radonSusceptibilityWMSConfig, pipingAndErosionWMSConfig, karstFeaturesWMSConfig, erosionHazardZoneWMSConfig, expansiveSoilRockWMSConfig, earthFissureWMSConfig, corrosiveSoilRockWMSConfig, collapsibleSoilWMSConfig, calicheWMSConfig],
 };
 
 const layersConfig: LayerProps[] = [
-    quadBoundariesConfig,
-    notMappedConfig,
-    hazardStudyConfig,
+    quads24kWMSConfig,
+    areasNotMappedWMSConfig,
+    studyAreasWMSConfig,
     soilHazardsConfig,
     landslidesConfig,
-    earthquakesConfig,
     floodHazardsConfig,
+    earthquakesConfig,
 ];
 
 export default layersConfig;

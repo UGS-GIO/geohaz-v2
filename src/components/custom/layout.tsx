@@ -94,10 +94,42 @@ const Body = React.forwardRef<
       {...props}
     />
   );
-});
-Body.displayName = 'Body'
+}
+);
+Body.displayName = 'Body';
 
-Layout.Header = Header
-Layout.Body = Body
+interface FooterProps extends React.HTMLAttributes<HTMLDivElement> {
+  dynamicContent?: React.ReactNode; // This allows you to pass in dynamic content
+}
 
-export { Layout }
+const Footer = React.forwardRef<HTMLDivElement, FooterProps>(
+  ({ className, dynamicContent, ...props }, ref) => {
+    const contextVal = React.useContext(LayoutContext);
+    if (contextVal === null) {
+      throw new Error(`Layout.Footer must be used within ${Layout.displayName}.`);
+    }
+
+    return (
+      <div
+        ref={ref}
+        data-layout="footer"
+        className={cn(
+          "flex items-center justify-between p-2 border-t bg-background", // Footer style
+          contextVal.fixed && 'flex-none',
+          className
+        )}
+        {...props}
+      >
+        {dynamicContent && dynamicContent}
+      </div>
+    );
+  }
+);
+Footer.displayName = 'Footer';
+
+// Combine the components under Layout
+Layout.Header = Header;
+Layout.Body = Body;
+Layout.Footer = Footer;
+
+export { Layout };

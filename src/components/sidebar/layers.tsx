@@ -1,4 +1,5 @@
 import { useCustomLayerList } from "@/hooks/use-custom-layerlist";
+import { BackToMenuButton } from "../custom/back-to-menu-button";
 
 function Layers() {
   const layerList = useCustomLayerList();
@@ -8,9 +9,12 @@ function Layers() {
   }
 
   return (
-    <div key='layer-list' className='ml-2 overflow-y-visible max-h-[calc(100vh)]    '>
-      {layerList}
-    </div>
+    <>
+      <BackToMenuButton />
+      <div key='layer-list' className='overflow-y-visible max-h-[calc(100vh)]'>
+        {layerList}
+      </div>
+    </>
   )
 }
 

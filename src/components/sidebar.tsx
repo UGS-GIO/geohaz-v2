@@ -1,22 +1,18 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { IconChevronsLeft, IconMenu2, IconX } from '@tabler/icons-react';
 import { Layout } from './custom/layout';
 import { Button } from './custom/button';
 import Nav from './nav';
 import { cn } from '@/lib/utils';
 import { sidelinks } from '@/data/sidelinks';
+import { useSidebar } from '@/hooks/use-sidebar';
 
-interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
-  isCollapsed: boolean;
-  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
-}
+interface SidebarProps extends React.HTMLAttributes<HTMLElement> { }
 
 export default function Sidebar({
   className,
-  isCollapsed,
-  setIsCollapsed,
 }: SidebarProps) {
-  const [navOpened, setNavOpened] = useState(false);
+  const { navOpened, setNavOpened, isCollapsed, setIsCollapsed } = useSidebar();
   const transitionDuration = 700; // Duration in milliseconds
   const isTransitioning = useRef(false); // Ref to manage transition state
 
@@ -95,8 +91,10 @@ export default function Sidebar({
         {/* Navigation links */}
         <Nav
           id='sidebar-menu'
-          className={`z-40 h-full flex-1 overflow-hidden ${navOpened ? 'max-h-screen' : 'max-h-0 py-0 md:max-h-screen md:py-2'
-            }`}
+          className={cn(
+            'h-full flex-1 overflow-hidden z-40',
+            navOpened ? 'max-h-screen' : 'max-h-0 py-0 md:max-h-screen md:py-2'
+          )}
           closeNav={() => setNavOpened(!navOpened)}
           isCollapsed={isCollapsed}
           setIsCollapsed={setIsCollapsed}
@@ -108,7 +106,7 @@ export default function Sidebar({
           onClick={() => setIsCollapsed((prev) => !prev)}
           size='icon'
           variant='outline'
-          className='absolute -right-5 top-1/2 z-50 hidden rounded-none md:inline-flex w-6'
+          className='absolute -right-5 top-1/2 z-40 hidden rounded-none md:inline-flex w-6'
         >
           <IconChevronsLeft
             stroke={1.5}

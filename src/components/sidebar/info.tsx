@@ -3,17 +3,30 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ExternalLink, Layers as LayersIcon } from 'lucide-react';
 import { Button } from '../custom/button';
-import { useSidebar } from '@/hooks/use-sidebar';
 import Layers from '@/components/sidebar/layers';
 import { acknowledgements, dataDisclaimer, dataSources, dataSourcesShortened, mapDetails, mapDetailsShortened, references } from '@/data/website-info';
+import { BackToMenuButton } from '../custom/back-to-menu-button';
+import { useSidebar } from '@/hooks/use-sidebar';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerTrigger } from '@/components/ui/drawer';
 
 function Info() {
-  type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | ''
-  const [modalOpen, setModalOpen] = useState(false)
-  const [modalType, setModalType] = useState<ModalType | ''>('')
+  type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | '';
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<ModalType | ''>('');
   const { setCurrentContent } = useSidebar();
   const contentRef = useRef<HTMLDivElement>(null);
-  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [isMapDetailsExpanded, setIsMapDetailsExpanded] = useState(false);
+  const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
+  const drawerTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const toggleMapDetails = () => {
+    setIsMapDetailsExpanded(!isMapDetailsExpanded);
+  };
+
+  const toggleDataSources = () => {
+    setIsDataSourcesExpanded(!isDataSourcesExpanded);
+  };
+
   const handleOpenModal = (type: ModalType) => {
     setModalType(type);
     setModalOpen(true);
@@ -24,24 +37,25 @@ function Info() {
     setModalType('');
   };
 
-  const handleAccordionToggle = (id: string) => {
-    setExpandedItem(expandedItem === id ? null : id);
-  }
+  const handleOpenDrawer = (type: ModalType) => {
+    setModalType(type);
+    if (drawerTriggerRef.current) {
+      drawerTriggerRef.current.click();
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex-grow ml-2 overflow-y-auto"
-        ref={contentRef}
-      >
-        <div className='mr-2' key={`map-details-accordion`}>
-          <Accordion type="single" collapsible>
+      <BackToMenuButton />
+      <div className="ml-2 overflow-y-auto flex-grow" ref={contentRef}>
+        {/* Map Details Accordion */}
+        <div className="mr-2" key="map-details-accordion">
+          <Accordion type="multiple">
             <AccordionItem value="map-details-accordion-item-1">
-              <AccordionHeader onClick={() => handleAccordionToggle('map-details-accordion-item-1')} >
-                <AccordionTrigger >
+              <AccordionHeader onClick={toggleMapDetails}>
+                <AccordionTrigger>
                   <div className="flex flex-col mx-2 items-start">
                     <h3 className="font-large text-left text-lg">Map Details</h3>
-
                   </div>
                 </AccordionTrigger>
               </AccordionHeader>
@@ -49,39 +63,29 @@ function Info() {
                 {mapDetails}
               </AccordionContent>
             </AccordionItem>
-
           </Accordion>
-          {expandedItem !== 'map-details-accordion-item-1' && (
-            <>
-              {mapDetailsShortened}
-            </>
-          )}
+          {!isMapDetailsExpanded && <div>{mapDetailsShortened}</div>}
         </div>
 
-        <div className='mr-2 my-2 ' key={`data-sources-accordion`}>
-          <Accordion type="single" collapsible>
+        {/* Data Sources Accordion */}
+        <div className="mr-2" key="data-sources-accordion">
+          <Accordion type="multiple">
             <AccordionItem value="data-sources-accordion-item-1">
-              <AccordionHeader onClick={() => handleAccordionToggle('data-sources-accordion-item-1')} >
-                <AccordionTrigger >
+              <AccordionHeader onClick={toggleDataSources}>
+                <AccordionTrigger>
                   <div className="flex flex-col mx-2 items-start">
                     <h3 className="font-large text-left text-lg">Data Sources</h3>
                   </div>
                 </AccordionTrigger>
               </AccordionHeader>
-              <AccordionContent>
-                {dataSources}
-              </AccordionContent>
+              <AccordionContent>{dataSources}</AccordionContent>
             </AccordionItem>
           </Accordion>
-          {expandedItem !== 'data-sources-accordion-item-1' && (
-            <>
-              {dataSourcesShortened}
-            </>
-
-          )}
+          {!isDataSourcesExpanded && <div>{dataSourcesShortened}</div>}
         </div>
 
-        <div className="flex flex-wrap justify-center mx-2">
+        {/* Desktop Modal Buttons */}
+        <div className="flex flex-wrap justify-center mx-2 hidden md:flex">
           <Button variant={'link'} onClick={() => handleOpenModal('references')}>
             References
           </Button>
@@ -93,6 +97,42 @@ function Info() {
           </Button>
         </div>
 
+
+        {/* Mobile Modal Buttons */}
+        <div className="flex flex-wrap justify-center mx-2 md:hidden">
+          <Button variant={'link'} onClick={() => handleOpenDrawer('references')}>
+            References
+          </Button>
+          <Button variant={'link'} onClick={() => handleOpenDrawer('acknowledgements')}>
+            Acknowledgements
+          </Button>
+          <Button variant={'link'} onClick={() => window.open('https://geology.utah.gov/about-us/contact-webmaster/', '_blank')}>
+            Contact Webmaster&nbsp;<ExternalLink size={16} />
+          </Button>
+        </div>
+
+        {/* Drawer for mobile */}
+        <Drawer>
+          <DrawerTrigger asChild>
+            <button ref={drawerTriggerRef} className="hidden">
+              Open Dialog
+            </button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <div className="py-2">
+              {modalType === 'disclaimer' && <DrawerHeader><DrawerTitle>Data Disclaimer</DrawerTitle></DrawerHeader>}
+              {modalType === 'references' && <DrawerHeader><DrawerTitle>References</DrawerTitle></DrawerHeader>}
+              {modalType === 'acknowledgements' && <DrawerHeader><DrawerTitle>Acknowledgements</DrawerTitle></DrawerHeader>}
+            </div>
+            <div data-vaul-no-drag className="overflow-y-auto p-4">
+              {modalType === 'disclaimer' && <DrawerDescription>{dataDisclaimer}</DrawerDescription>}
+              {modalType === 'references' && <DrawerDescription>{references}</DrawerDescription>}
+              {modalType === 'acknowledgements' && <DrawerDescription>{acknowledgements}</DrawerDescription>}
+            </div>
+          </DrawerContent>
+        </Drawer>
+
+        {/* Dialog for desktop */}
         <Dialog open={modalOpen} onOpenChange={handleCloseModal}>
           <DialogTrigger asChild>
             <div className="hidden"></div>
@@ -103,9 +143,7 @@ function Info() {
                 <DialogHeader>
                   <DialogTitle>Data Disclaimer</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>
-                  {dataDisclaimer}
-                </DialogDescription>
+                <DialogDescription>{dataDisclaimer}</DialogDescription>
               </>
             )}
             {modalType === 'references' && (
@@ -113,9 +151,7 @@ function Info() {
                 <DialogHeader>
                   <DialogTitle>References</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>
-                  {references}
-                </DialogDescription>
+                <DialogDescription>{references}</DialogDescription>
               </>
             )}
             {modalType === 'acknowledgements' && (
@@ -123,17 +159,15 @@ function Info() {
                 <DialogHeader>
                   <DialogTitle>Acknowledgements</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>
-                  {acknowledgements}
-                </DialogDescription>
+                <DialogDescription>{acknowledgements}</DialogDescription>
               </>
             )}
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="flex-none flex justify-center space-x-4 m-4 border-t border-secondary">
-        <div className='p-4'>
+      <div className='flex justify-center space-x-4 border-t border-secondary'>
+        <div className='pt-6'>
           <Button
             onClick={() => setCurrentContent({
               title: 'Layers',
@@ -142,14 +176,20 @@ function Info() {
               componentPath: '/src/components/sidebar/layers',
               component: Layers
             })}
-            className="mb-2 md:mb-0"
           >
             Start Exploring
           </Button>
           <Button
-            className='text-foreground'
-            variant="link"
+            className='text-foreground hidden md:inline-flex'
+            variant='link'
             onClick={() => handleOpenModal('disclaimer')}
+          >
+            Open Data Disclaimer
+          </Button>
+          <Button
+            className='text-foreground md:hidden'
+            variant='link'
+            onClick={() => handleOpenDrawer('disclaimer')}
           >
             Open Data Disclaimer
           </Button>

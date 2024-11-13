@@ -6,12 +6,12 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%;
     --foreground: 31 50% 10%;
     --card: 0 0% 100%;
     --card-foreground: 31 50% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 31 50% 10%;
+    --popover-foreground: 30 2% 18%;
     --primary: 28 95% 36%;
     --primary-foreground: 60 9.1% 97.8%;
     --secondary: 20 5.9% 90%;
@@ -31,14 +31,22 @@
     --chart-3: ;
     --chart-4: ;
     --chart-5: ;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
     --background: 0 0% 21%;
     --foreground: 60 9.1% 97.8%;
-    --card: 31 50% 10%;
+    --card: 0 0% 21%;
     --card-foreground: 60 9.1% 97.8%;
-    --popover: 31 50% 10%;
+    --popover: 0 0% 21%;
     --popover-foreground: 60 9.1% 97.8%;
     --primary: 27 84% 55%;
     --primary-foreground: 60 9.1% 97.8%;
@@ -58,7 +66,15 @@
     --chart-3: ;
     --chart-4: ;
     --chart-5: ;
-    color-scheme: dark; /* changing the scrollbar color */
+    color-scheme: dark; /* changing the scrollbar color */ 
+    --sidebar-background: 0 0% 21%; 
+    --sidebar-foreground: 240 4.8% 95.9%; 
+    --sidebar-primary: 224.3 76.3% 48%; 
+    --sidebar-primary-foreground: 0 0% 100%; 
+    --sidebar-accent: 240 3.7% 15.9%; 
+    --sidebar-accent-foreground: 240 4.8% 95.9%; 
+    --sidebar-border: 240 3.7% 15.9%; 
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   /* styles.css */
@@ -126,9 +142,13 @@
   }
 }
 
-.esri-view-width-xlarge .esri-popup__main-container {
-  width: 40% !important; 
-}
+.esri-view-width-xlarge .esri-popup__main-container,
+.esri-view-width-large .esri-popup__main-container,
+.esri-view-width-medium .esri-popup__main-container
+{
+  max-height: 900px !important;
+  max-width: 900px !important;
+}‍‍‍‍‍‍
 
 /* 
   basic styling for the text inside of a feature widget, 
@@ -153,4 +173,9 @@ h2.esri-widget__heading.esri-feature__title {
 .custom-tooltip a {
   color: #0079c1;
   text-decoration: underline;
+}
+
+/* removing the outline from the map */
+.esri-view .esri-view-surface--touch-none:focus::after {
+  outline: none !important;
 }

@@ -4,6 +4,7 @@ import SketchViewModel from "@arcgis/core/widgets/Sketch/SketchViewModel";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Layer from "@arcgis/core/layers/Layer";
 import { Button } from '@/components/custom/button';
+import { BackToMenuButton } from "@/components/custom/back-to-menu-button";
 
 function addGraphic(
   event: __esri.SketchViewModelCreateEvent,
@@ -152,6 +153,7 @@ function GeologicalUnitSearch() {
 
   return (
     <div>
+      <BackToMenuButton />
       <div className="p-4 space-y-4">
         <div>
           <h3 className="text-lg font-medium mb-2">Report Generator</h3>

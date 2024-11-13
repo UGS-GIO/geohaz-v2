@@ -1,88 +1,56 @@
-import { useContext, useEffect, useState, useCallback } from 'react';
-import { RendererProps } from '@/lib/types/mapping-types';
+import { useQuery } from '@tanstack/react-query';
 import { RendererFactory } from '@/lib/legend/renderer-factory';
-import { getRenderers } from '@/lib/mapping-utils';
+import { getRenderer } from '@/lib/mapping-utils'; // Assumes getRenderer returns a single renderer
 import { MapContext } from '@/context/map-provider';
+import { useContext } from 'react';
 
 const useLegendPreview = (layerId: string, url: string) => {
-    const [preview, setPreview] = useState<{ html: HTMLElement, label: string, title: string }[] | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [error, setError] = useState<Error | null>(null);
     const { view } = useContext(MapContext);
 
-    // Fetch renderers and map image renderers
-    const fetchRenderers = useCallback(async () => {
-        if (!view || !view.map) return { renderers: [], mapImageRenderers: [] };
+    const fetchLegendData = async () => {
+        if (!view || !view.map) return [];
 
-        const { renderers, mapImageRenderers } = await getRenderers(view, view.map as __esri.Map);
-        return { renderers, mapImageRenderers };
-    }, [view]);
+        try {
+            // Fetch the renderer(s) for the given layer ID
+            const renderer = await getRenderer(view, view.map, layerId);
 
-    // Filter Regular Layer Renderer by ID
-    const filterRegularLayerRenderer = useCallback((renderers: any[], id: string) => {
-        return renderers.filter(renderer => renderer.id === id);
-    }, []);
-
-    // Filter Map Image Layer Renderer by URL
-    const filterMapImageLayerRenderer = useCallback((mapImageRenderers: any[], url: string) => {
-        return mapImageRenderers.filter(renderer => renderer.url === url);
-    }, []);
-
-    // Get Renderer data by ID and URL
-    const getRenderer = useCallback(async (id: string, url: string): Promise<RendererProps | undefined> => {
-        const { renderers, mapImageRenderers } = await fetchRenderers();
-
-        if (!renderers || !mapImageRenderers) return;
-
-        const RegularLayerRenderer = filterRegularLayerRenderer(renderers, id);
-        const MapImageLayerRenderer = filterMapImageLayerRenderer(mapImageRenderers, url);
-
-        return {
-            MapImageLayerRenderer,
-            RegularLayerRenderer,
-        };
-    }, [fetchRenderers, filterRegularLayerRenderer, filterMapImageLayerRenderer]);
-
-    // Fetch and process legend data
-    useEffect(() => {
-        const fetchLegendData = async () => {
-            setIsLoading(true);
-            setError(null);
-
-            try {
-                const data = await getRenderer(layerId, url);
-                if (data) {
-                    const previews = await generatePreviews(data);
-                    setPreview(previews);
-                } else {
-                    setPreview([]);
-                }
-            } catch (err) {
-                setError(err as Error);
-                setPreview([]);
-            } finally {
-                setIsLoading(false);
+            if (!renderer) {
+                console.warn(`Renderer not found for layer ID: ${layerId}`);
+                return [];
             }
-        };
 
-        const generatePreviews = async (rendererData: RendererProps) => {
-            const allRenderers = [...rendererData.MapImageLayerRenderer, ...rendererData.RegularLayerRenderer];
+            // Ensure renderer is handled as an array (for multiple WMS rules or other cases)
+            const renderers = Array.isArray(renderer) ? renderer : [renderer];
+
+            // Generate previews for all renderers
             const previews = await Promise.all(
-                allRenderers.map(async (renderer) => {
+                renderers.map(async (r) => {
                     try {
-                        const preview = await RendererFactory.createPreview(renderer);
-                        return preview;
-                    } catch (error) {
-                        console.error('Error generating preview:', error);
-                        return null;
+                        const preview = await RendererFactory.createPreview(r);
+                        return preview; // Return individual preview if successful
+                    } catch (err) {
+                        console.error('Error generating preview:', err);
+                        return null; // Return null on error to filter out later
                     }
                 })
             );
-            return previews.filter(Boolean) as { html: HTMLElement, label: string, title: string }[]; // Ensure the return type matches the state type
-        };
 
-        fetchLegendData();
-    }, [layerId, url, getRenderer]);
+            // Filter out any failed previews (null values)
+            return previews.filter(Boolean);
+        } catch (error) {
+            console.error('Error fetching legend data:', error);
+            return [];
+        }
+    };
+
+
+    // Query with dependencies: view, layerId, and url (for caching and refetch logic)
+    const { data: preview = [], isLoading, error } = useQuery({
+        queryKey: ['legendPreview', layerId, url], // Query key
+        queryFn: fetchLegendData,
+        enabled: !!view, // Only run the query when the view
+        staleTime: 1000 * 60 * 60 * 1, // Cache for 1 hours
+    });
 
     return { preview, isLoading, error };
 };
