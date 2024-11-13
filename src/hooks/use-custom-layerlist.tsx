@@ -2,11 +2,11 @@ import { useContext, useEffect, useState, useCallback } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapContext } from '@/context/map-provider';
-// import { LayerAccordion } from '@/components/custom/layerlist-accordion';
 import LayerControls from '@/components/custom/layer-controls';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { findLayerById } from '@/lib/mapping-utils';
 import { LayerListContext } from '@/context/layerlist-provider';
+import { useFetchLayerDescriptions } from './use-fetch-layer-descriptions';
 
 const useGroupLayerVisibility = (activeLayers: __esri.Collection<__esri.Layer> | undefined) => {
     const { groupLayerVisibility, setGroupLayerVisibility } = useContext(LayerListContext);
@@ -71,13 +71,13 @@ interface LayerAccordionProps {
 
 const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer;
-    const { view, layerDescriptions, activeLayers } = useContext(MapContext);
-
+    const { view, activeLayers } = useContext(MapContext);
     const typeNarrowedLayer = layer as __esri.FeatureLayer | __esri.MapImageLayer | __esri.WMSLayer;
     const isMobile = window.innerWidth < 768;
-    const { setIsCollapsed, setNavOpened } = useSidebar();
     const { currentLayer, layerVisibility, layerOpacity, setLayerVisibility, setLayerOpacity } = useLayerVisibility(layer);
     const { handleGroupLayerVisibilityToggle } = useGroupLayerVisibility(activeLayers);
+    const { setIsCollapsed, setNavOpened } = useSidebar();
+    const { data: layerDescriptions, isLoading, error } = useFetchLayerDescriptions();
 
     const updateLayer = (updateFn: (layer: __esri.Layer) => void) => {
         if (currentLayer) {
@@ -131,6 +131,9 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
             }
         }
     };
+
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
 
     return (
         <div key={layerId}>

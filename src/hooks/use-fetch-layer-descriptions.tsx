@@ -1,12 +1,55 @@
-const useFetchLayerDescriptions = async (): Promise<Record<string, string>> => {
-    const response = await fetch(`https://services.arcgis.com/ZzrwjTRez6FJiOq4/arcgis/rest/services/Hazard_Layer_Info_t1/FeatureServer/0/query?f=json&outFields=content,title&returnGeometry=false&spatialRel=esriSpatialRelIntersects&where=1=1`)
-    const data = await response.json();
-    const { features } = data;
+import { useQuery } from "@tanstack/react-query";
 
-    return features.reduce((acc: Record<string, string>, feature: any) => {
-        acc[feature.attributes.title] = feature.attributes.content;
-        return acc;
-    }, {});
-}
+const fetchLayerDescriptions = async () => {
+    const outfieds = 'content,title';
+    const url = `https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/hazlayerinfo?select=${outfieds}`;
+    const acceptProfile = 'hazards';
+
+    const response = await fetch(url, {
+        headers: {
+            "Accept-Profile": acceptProfile,
+            "Accept": "application/json",
+            "Cache-Control": "no-cache",
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch layer descriptions: ${response.statusText}`);
+    }
+
+    return await response.json();
+};
+
+const useFetchLayerDescriptions = () => {
+
+    const { data = [], isLoading, error } = useQuery({
+        queryKey: ['layerDescriptions'],
+        queryFn: fetchLayerDescriptions,
+        staleTime: 1000 * 60 * 60 * 1, // Cache for 1 hour
+    });
+
+    type FeatureAttributes = {
+        title: string;
+        content: string;
+    };
+
+    interface CombinedResult {
+        data: Record<string, string>;
+        isLoading: boolean;
+        error: Error | null;
+    }
+
+    // Combine results for easier consumption
+    const combinedResult: CombinedResult = {
+        data: data.reduce((acc: Record<string, string>, feature: FeatureAttributes) => {
+            acc[feature.title] = feature.content;
+            return acc;
+        }, {}),
+        isLoading,
+        error,
+    };
+
+    return combinedResult;
+};
 
 export { useFetchLayerDescriptions };
