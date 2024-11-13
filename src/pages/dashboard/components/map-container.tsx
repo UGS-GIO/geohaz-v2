@@ -4,7 +4,7 @@ import { MapContext } from '@/context/map-provider';
 import { MapContextMenu } from "./map-context-menu";
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
-import { PopupDrawer } from "@/components/custom/popup-drawer";
+import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import useMapUrlParams from "@/hooks/use-map-url-params";
 import { Feature } from "geojson";
 import { RelatedTable } from "@/lib/types/mapping-types";
