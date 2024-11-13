@@ -9,77 +9,19 @@
 //     sublayers: [
 //         {
 //             name: `${HAZARDS_WORKSPACE}:${exampleLayerName}`,
-//             popupEnabled: true,
+//             popupEnabled: false,
 //             queryable: true,
 //         },
 //     ],
-//     fetchFeatureInfoFunction: async (query) => {
-//         // Assuming this function is defined within the WMSLayer scope
-//         query.info_format = "application/json";
-
-//         // Ensure featureInfoUrl is properly defined
-//         const featureInfoUrl = `${exampleWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-//         try {
-//             const response = await fetch(featureInfoUrl);
-
-//             if (!response.ok) {
-//                 throw new Error("Network response was not ok");
-//             }
-
-//             const data = await response.json();
-
-//             return data.features.map(
-//                 (feature: Feature) => new Graphic({
-//                     attributes: feature.properties,
-//                     popupTemplate: {
-//                         outFields: ['*'],
-//                         title: exampleWMSTitle,
-//                         content: [
-//                             new CustomContent({
-//                                 outFields: ['*'],
-//                                 creator: (event) => {
-//                                     const div = document.createElement('div');
-//                                     if (event) {
-//                                         const { graphic } = event;
-//                                         const root = createRoot(div);
-//                                         root.render(
-//                                             <>placeholder</>
-//                                         );
-//                                     }
-//                                     return div;
-//                                 },
-//                             }),
-//                         ],
-//                     },
-//                 })
-//             );
-//         } catch (error) {
-//             console.error("Failed to fetch feature info:", error);
-//             return [];
-//         }
 //     }
 // }
 
-import CustomContent from "@arcgis/core/popup/content/CustomContent.js";
-// import {
-// rendererLiquefaction,
-// rendererBedrockPot,
-// surfaceFaultRuptureRenderer,
-// quadRenderer,
-// } from "./renderers";
-import { createRoot } from "react-dom/client";
-// import { StudyAreasPopup } from "@/components/custom/popups/study-areas-popup";
-// import { LandslideSourcePopup } from "@/components/custom/popups/landslide-source-popup";
-// import { LandslideCompPopup } from "@/components/custom/popups/landslide-comp-popup";
-import { QFaultsPopup } from "@/components/custom/popups/qfaults-popup";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
-import Graphic from "@arcgis/core/Graphic";
-import { Feature } from "geojson";
 
 const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
 const HAZARDS_WORKSPACE = 'hazards';
 const GEN_GIS_WORKSPACE = 'gen_gis';
+const UNIT_DESCRIPTIONS_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/unit_descriptions';
 
 const landslideLegacyLayerName = 'landslidelegacy';
 const landslideLegacyWMSTitle = 'Legacy Landslide Compilation';
@@ -91,56 +33,34 @@ const landslideLegacyWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideLegacyLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'State Landslide ID': 'statelsid',
+                'Landslide Unit': 'lsunit',
+                'Movement Type': 'movetype',
+                'Historical': 'historical',
+                'Geologic Unit': 'geolunit',
+                'Map Scale': 'mapscale',
+                'Map Name': 'mapname',
+                'Pub Date': 'pubdate',
+                'Author(s)': 'author_s',
+                'Affiliated Unit': 'affunit',
+                'Movement Unit': 'moveunit',
+                'Movement Cause': 'movecause',
+                'Notes': 'notes',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lsfhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${landslideLegacyWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: landslideLegacyWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const landslideCompConfig: LayerProps = {
@@ -187,56 +107,30 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideInventoryLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Name': 's_name',
+                'Activity': 'activity',
+                'Confidence': 'confidence',
+                'Comments': 'comments',
+                'Deposit Movement 1': 'd_h_move1',
+                'Deposit Movement 2': 'd_h_move2',
+                'Deposit Movement 3': 'd_h_move3',
+                'Primary Geologic Unit Involved': 'd_geologic_unit1',
+                'Secondary Geologic Unit Involved': 'd_geologic_unit2',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lsfhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${landslideInventoryWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: landslideInventoryWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const landslideDepositConfig: LayerProps = {
@@ -280,56 +174,24 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideSusceptibilityLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Hazard': 'hazard_symbology_text',
+                'Mapped Scale': 'lssmappedscale',
+                'Critical Angle': 'lsscriticalangle',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lsshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${landslideSusceptibilityWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: landslideSusceptibilityWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const landslideSusceptibilityConfig: LayerProps = {
@@ -472,56 +334,23 @@ const liquefactionWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${liquefactionLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Hazard': 'hazard_symbology_text',
+                'Mapped Scale': 'lqsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'lqshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${liquefactionWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: liquefactionWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 };
 
 // const shakingVectorConfig: LayerProps = {
@@ -534,6 +363,8 @@ const liquefactionWMSConfig: WMSLayerProps = {
 //     },
 // };
 
+
+// TODO: explore refactor to display peak ground acceleration like the imagery layer
 const groundshakingLayerName = 'groundshaking';
 const groundshakingWMSTitle = 'Earthquake Ground Shaking';
 const groundshakingWMSConfig: WMSLayerProps = {
@@ -544,56 +375,13 @@ const groundshakingWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${groundshakingLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Peak Ground Acceleration': 'acc',
+            },
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${groundshakingWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: groundshakingWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const shakingRasterConfig: LayerProps = {
@@ -632,63 +420,31 @@ const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
-    // https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/public/ows?SERVICE=WMS&REQUEST=GetCapabilities
-
     title: qFaultsWMSTitle,
     visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Fault Zone Name': 'faultzone',
+                'Summary': 'summary',
+                'Fault Name': 'faultname',
+                'Section Name': 'sectionname',
+                'Strand Name': 'strandname',
+                'Structure Number': 'faultnum',
+                'Mapped Scale': 'mappedscale',
+                'Dip Direction': 'dipdirection',
+                'Slip Sense': 'slipsense',
+                'Slip Rate': 'sliprate',
+                'Structure Class': 'faultclass',
+                'Structure Age': 'faultage',
+                'Detailed Report': 'usgs_link',
+            },
+
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${qFaultsWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: qFaultsWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <QFaultsPopup graphic={graphic} />
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 };
 
 
@@ -702,56 +458,22 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${surfaceFaultRuptureLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sfrmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sfrhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${surfaceFaultRuptureWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: surfaceFaultRuptureWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 
@@ -806,56 +528,22 @@ const windBlownSandWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${windBlownSandLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'wssmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'wsshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${windBlownSandWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: windBlownSandWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const eolianSusConfig: LayerProps = {
@@ -906,56 +594,22 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${saltTectonicsDeformationLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sdhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sdhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${saltTectonicsDeformationWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: saltTectonicsDeformationWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const tectonicDefConfig: LayerProps = {
@@ -1013,56 +667,22 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${shallowBedrockLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sbpmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sbphazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${shallowBedrockWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: shallowBedrockWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const bedrockPotConfig: LayerProps = {
@@ -1121,56 +741,22 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${rockfallHazardLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'rfhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'rfhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${rockfallHazardWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: rockfallHazardWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const rockfallHazConfig: LayerProps = {
@@ -1228,56 +814,22 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${pipingAndErosionLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'pesmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'peshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${pipingAndErosionWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: pipingAndErosionWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const pipingSusConfig: LayerProps = {
@@ -1330,56 +882,22 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${expansiveSoilRockLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'exsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'exshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${expansiveSoilRockWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: expansiveSoilRockWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const expansiveSoilConfig: LayerProps = {
@@ -1432,56 +950,22 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${shallowGroundwaterLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'sgsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'sgshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${shallowGroundwaterWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: shallowGroundwaterWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const groundwaterSusConfig: LayerProps = {
@@ -1524,7 +1008,6 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
 //     },
 // };
 
-// ALERT: THIS LAYER IS NOT MATCHING THE ARCGIS COUNTERPART. IT HAS MORE DATA
 const radonSusceptibilityLayerName = 'radonsusceptibility';
 const radonSusceptibilityWMSTitle = 'Geologic Radon Susceptibility';
 const radonSusceptibilityWMSConfig: WMSLayerProps = {
@@ -1535,56 +1018,22 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${radonSusceptibilityLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'grsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'grshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${radonSusceptibilityWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: radonSusceptibilityWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const radonSusConfig: LayerProps = {
@@ -1677,56 +1126,22 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${corrosiveSoilRockLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'crsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'crshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${corrosiveSoilRockWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: corrosiveSoilRockWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 const collapsibleSoilLayerName = 'collapsiblesoil';
@@ -1739,56 +1154,22 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${collapsibleSoilLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'cssmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'csshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${collapsibleSoilWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: collapsibleSoilWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const collapsibleSoilConfig: LayerProps = {
@@ -1841,56 +1222,22 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${solubleSoilAndRockLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'slsmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'slshazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${solubleSoilAndRockWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: solubleSoilAndRockWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const solubleSoilConfig: LayerProps = {
@@ -1943,56 +1290,22 @@ const calicheWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${calicheLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'casmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'cashazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${calicheWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: calicheWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const calicheConfig: LayerProps = {
@@ -2085,56 +1398,22 @@ const floodAndDebrisWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${floodAndDebrisLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'flhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'flhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${floodAndDebrisWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: floodAndDebrisWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const floodAndDebrisFlowConfig: LayerProps = {
@@ -2146,60 +1425,26 @@ const earthFissureWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: earthFissureWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${earthFissureLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'efhmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'efhhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${earthFissureWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: earthFissureWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const earthFissureConfig: LayerProps = {
@@ -2252,56 +1497,10 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${erosionHazardZoneLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${erosionHazardZoneWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: erosionHazardZoneWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const erosionZoneConfig: LayerProps = {
@@ -2394,56 +1593,10 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${karstFeaturesLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${karstFeaturesWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: karstFeaturesWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const karstFeaturesConfig: LayerProps = {
@@ -2496,56 +1649,10 @@ const quads24kWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${GEN_GIS_WORKSPACE}:${quads24kLayerName}`,
-            popupEnabled: true,
-            queryable: true,
+            popupEnabled: false,
+            queryable: false,
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${quads24kWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: quads24kWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const quadBoundariesConfig: LayerProps = {
@@ -2584,56 +1691,15 @@ const studyAreasWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${studyAreasLayerName}`,
-            popupEnabled: true,
+            popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Name': 'name',
+                'Report ID': 'repor_id',
+                'Mapped Hazards': 'hazard_name',
+            },
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${studyAreasWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: studyAreasWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const hazardStudyConfig: LayerProps = {
@@ -2698,56 +1764,9 @@ const areasNotMappedWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${areasNotMappedLayerName}`,
-            popupEnabled: true,
-            queryable: true,
+            queryable: false,
         },
     ],
-    fetchFeatureInfoFunction: async (query) => {
-        // Assuming this function is defined within the WMSLayer scope
-        query.info_format = "application/json";
-
-        // Ensure featureInfoUrl is properly defined
-        const featureInfoUrl = `${areasNotMappedWMSConfig.url}/wms?${new URLSearchParams(query).toString()}`;
-
-        try {
-            const response = await fetch(featureInfoUrl);
-
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-
-            const data = await response.json();
-
-            return data.features.map(
-                (feature: Feature) => new Graphic({
-                    attributes: feature.properties,
-                    popupTemplate: {
-                        outFields: ['*'],
-                        title: areasNotMappedWMSTitle,
-                        content: [
-                            new CustomContent({
-                                outFields: ['*'],
-                                creator: (event) => {
-                                    const div = document.createElement('div');
-                                    if (event) {
-                                        // const { graphic } = event;
-                                        const root = createRoot(div);
-                                        root.render(
-                                            <>placeholder</>
-                                        );
-                                    }
-                                    return div;
-                                },
-                            }),
-                        ],
-                    },
-                })
-            );
-        } catch (error) {
-            console.error("Failed to fetch feature info:", error);
-            return [];
-        }
-    }
 }
 
 // const notMappedConfig: LayerProps = {

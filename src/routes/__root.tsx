@@ -19,7 +19,7 @@ const RootComponent = () => {
                     <Outlet />
                 </main>
             </div>
-            <TanStackRouterDevtools />
+            {import.meta.env.MODE !== 'production' && <TanStackRouterDevtools />}
         </>
     );
 };
