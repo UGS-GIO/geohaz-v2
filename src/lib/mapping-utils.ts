@@ -516,3 +516,91 @@ export function createGraphic(lat: number, long: number, view: SceneView | MapVi
 export function removeGraphics(view: SceneView | MapView) {
     view.graphics.removeAll();
 }
+
+
+interface Bbox {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+}
+
+interface CreateBboxProps {
+    mapPoint: __esri.Point;  // Or replace with equivalent Point type of your library
+    resolution?: number;     // Optional: map resolution for adjusting bbox size
+    buffer?: number;         // Optional: buffer size in map units
+}
+
+// Create a bounding box around the clicked map point
+function createBbox({ mapPoint, resolution = 1, buffer = 10 }: CreateBboxProps): Bbox {
+    // Apply buffer and scale it by resolution if needed
+    const scaleFactor = 50; // Scale factor calculated above
+
+    // Apply buffer and scale it by resolution and the calculated scale factor
+    const scaledBuffer = buffer * resolution * scaleFactor;
+
+    const minX = mapPoint.x - scaledBuffer;
+    const minY = mapPoint.y - scaledBuffer;
+    const maxX = mapPoint.x + scaledBuffer;
+    const maxY = mapPoint.y + scaledBuffer;
+
+    return {
+        minX,
+        minY,
+        maxX,
+        maxY,
+    };
+}
+
+interface GetFeatureInfoProps {
+    mapPoint: __esri.Point;  // Replace with your Point type
+    view: __esri.MapView | __esri.SceneView;    // Replace with your MapView type
+    visibleLayers: string[]; // List of visible layers (layer titles or ids)
+}
+
+// Fetch GetFeatureInfo request to WMS server
+export async function fetchGetFeatureInfo({
+    mapPoint,
+    view,
+    visibleLayers,
+}: GetFeatureInfoProps) {
+    if (visibleLayers.length === 0) {
+        console.warn('No visible layers to query.');
+        return null; // Return null if no visible layers
+    }
+
+    // Create a bbox around the clicked map point
+    const bbox = createBbox({ mapPoint, resolution: view.resolution, buffer: 10 });
+    const { minX, minY, maxX, maxY } = bbox;
+
+    // WMS GetFeatureInfo parameters
+    const params = {
+        service: 'WMS',
+        request: 'GetFeatureInfo',
+        version: '1.3.0', // Or '1.1.1' if the server requires
+        layers: visibleLayers.join(','),
+        query_layers: visibleLayers.join(','),
+        info_format: 'application/json',
+        bbox: `${minX},${minY},${maxX},${maxY}`,
+        crs: 'EPSG:3857',
+        i: Math.round(view.width / 2).toString(),
+        j: Math.round(view.height / 2).toString(),
+        width: `${view.width}`,
+        height: `${view.height}`,
+        feature_count: "50", // Limit the number of features returned
+    };
+
+    const queryString = new URLSearchParams(params).toString();
+
+    // Construct the full URL to the GetFeatureInfo endpoint
+    const getFeatureInfoUrl = `https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms?${queryString}`;
+
+    const response = await fetch(getFeatureInfoUrl);
+    if (!response.ok) {
+        throw new Error(`GetFeatureInfo request failed with status ${response.status}`);
+    }
+
+    const featureInfo = await response.json();
+
+    return featureInfo;
+}

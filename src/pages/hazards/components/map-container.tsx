@@ -1,13 +1,14 @@
 import { useRef, useContext, useEffect, useState, useCallback } from "react";
-import MapWidgets from './map-widgets';
+import { MapWidgets } from '@/pages/hazards/components/map-widgets';
 import { MapContext } from '@/context/map-provider';
-import { MapContextMenu } from "./map-context-menu";
+import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
+import { useMapUrlParams } from "@/hooks/use-map-url-params";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
-import useMapUrlParams from "@/hooks/use-map-url-params";
 import { Feature } from "geojson";
 import { RelatedTable } from "@/lib/types/mapping-types";
+import { fetchGetFeatureInfo } from "@/lib/mapping-utils";
 
 export default function ArcGISMap() {
     const mapRef = useRef<HTMLDivElement>(null);
@@ -32,99 +33,9 @@ export default function ArcGISMap() {
         drawerTriggerRef: React.RefObject<HTMLButtonElement>;
     }
 
-    interface Bbox {
-        minX: number;
-        minY: number;
-        maxX: number;
-        maxY: number;
-    }
-
-    interface CreateBboxProps {
-        mapPoint: __esri.Point;  // Or replace with equivalent Point type of your library
-        resolution?: number;     // Optional: map resolution for adjusting bbox size
-        buffer?: number;         // Optional: buffer size in map units
-    }
-
-    // Create a bounding box around the clicked map point
-    function createBbox({ mapPoint, resolution = 1, buffer = 10 }: CreateBboxProps): Bbox {
-        // Apply buffer and scale it by resolution if needed
-        const scaleFactor = 50; // Scale factor calculated above
-
-        // Apply buffer and scale it by resolution and the calculated scale factor
-        const scaledBuffer = buffer * resolution * scaleFactor;
-
-        const minX = mapPoint.x - scaledBuffer;
-        const minY = mapPoint.y - scaledBuffer;
-        const maxX = mapPoint.x + scaledBuffer;
-        const maxY = mapPoint.y + scaledBuffer;
-
-        return {
-            minX,
-            minY,
-            maxX,
-            maxY,
-        };
-    }
-
-    interface GetFeatureInfoProps {
-        mapPoint: __esri.Point;  // Replace with your Point type
-        view: __esri.MapView | __esri.SceneView;    // Replace with your MapView type
-        visibleLayers: string[]; // List of visible layers (layer titles or ids)
-    }
-
-    // Fetch GetFeatureInfo request to WMS server
-    async function fetchGetFeatureInfo({
-        mapPoint,
-        view,
-        visibleLayers,
-    }: GetFeatureInfoProps) {
-        if (visibleLayers.length === 0) {
-            console.warn('No visible layers to query.');
-            return null; // Return null if no visible layers
-        }
-
-        // Create a bbox around the clicked map point
-        const bbox = createBbox({ mapPoint, resolution: view.resolution, buffer: 10 });
-        const { minX, minY, maxX, maxY } = bbox;
-
-        // WMS GetFeatureInfo parameters
-        const params = {
-            service: 'WMS',
-            request: 'GetFeatureInfo',
-            version: '1.3.0', // Or '1.1.1' if the server requires
-            layers: visibleLayers.join(','),
-            query_layers: visibleLayers.join(','),
-            info_format: 'application/json',
-            bbox: `${minX},${minY},${maxX},${maxY}`,
-            crs: 'EPSG:3857',
-            i: Math.round(view.width / 2).toString(),
-            j: Math.round(view.height / 2).toString(),
-            width: `${view.width}`,
-            height: `${view.height}`,
-            feature_count: "50", // Limit the number of features returned
-        };
-
-        const queryString = new URLSearchParams(params).toString();
-
-        // Construct the full URL to the GetFeatureInfo endpoint
-        const getFeatureInfoUrl = `https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms?${queryString}`;
-
-        const response = await fetch(getFeatureInfoUrl);
-        if (!response.ok) {
-            throw new Error(`GetFeatureInfo request failed with status ${response.status}`);
-        }
-
-        const featureInfo = await response.json();
-
-        return featureInfo;
-    }
-
-
     const updatePopupContent = useCallback(
         (newContent: { features: Feature[]; visible: boolean; layerTitle: string, groupLayerTitle: string, popupFields?: Record<string, string>; relatedTables?: RelatedTable[] }[]) => {
             setPopupContent((prevContent) => {
-                console.log('Previous content:', prevContent);
-
                 // Only update if new content is different to avoid unnecessary rerenders
                 if (JSON.stringify(prevContent) !== JSON.stringify(newContent)) {
                     return newContent;
@@ -229,15 +140,7 @@ export default function ArcGISMap() {
         }
     };
 
-
     const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-        // if (isDragging) return; // Prevent click logic if dragging is happening
-
-        // check if the testdrawer is open. if it is, close and reopen with new content
-        // if it isn't, open the testdrawer with the new content
-
-
-
         handleMapClick({ e, view, drawerTriggerRef });
     };
 

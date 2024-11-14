@@ -12,4 +12,4 @@ const MapWidgets: React.FC = () => {
     return null;
 };
 
-export default MapWidgets;
+export { MapWidgets };

@@ -1,6 +1,6 @@
 import { Link } from "@/components/custom/link"
 import { FacebookIcon, InstagramIcon, XIcon, LinkedinIcon, GithubIcon } from "@/assets/social-icons"
-import { MapCoordinates } from "@/pages/hazards/components/map-coordinates"
+import { MapCoordinates } from "@/components/custom/map/map-coordinates"
 import { ShoppingCart } from "lucide-react"
 
 const MapFooter = () => {
