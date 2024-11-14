@@ -2,7 +2,7 @@ import { useCallback, useState, useContext } from "react";
 import { removeGraphics, createGraphic } from "@/lib/mapping-utils";
 import Collection from "@arcgis/core/core/Collection.js";
 import { MapContext } from "@/context/map-provider";
-import layersConfig from "@/data/layers";
+import layersConfig from "@/pages/hazards/data/layers";
 import { GroupLayerProps, LayerProps, RelatedTable, WMSLayerProps } from "@/lib/types/mapping-types";
 
 export const useMapInteractions = () => {
