@@ -1,5 +1,5 @@
 import { useRef, useContext, useEffect, useState, useCallback } from "react";
-import { MapWidgets } from '@/pages/hazards/components/map-widgets';
+import { MapWidgets } from '@/pages/ccus/components/map-widgets';
 import { MapContext } from '@/context/map-provider';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
@@ -9,6 +9,7 @@ import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { Feature } from "geojson";
 import { RelatedTable } from "@/lib/types/mapping-types";
 import { fetchGetFeatureInfo } from "@/lib/mapping-utils";
+import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 
 export default function ArcGISMap() {
     const mapRef = useRef<HTMLDivElement>(null);
@@ -25,6 +26,7 @@ export default function ArcGISMap() {
     const dragThreshold = 5;
     // Get zoom and center from URL params
     const { zoom, center } = useMapUrlParams(view);
+    const layersConfig = useGetLayerConfig();
 
 
     interface HandleMapClickProps {
@@ -51,8 +53,8 @@ export default function ArcGISMap() {
     useEffect(() => {
         if (mapRef.current && loadMap) {
             // Check if zoom and center are valid before loading
-            if (zoom && center) {
-                loadMap(mapRef.current, { zoom, center });
+            if (zoom && center && layersConfig) {
+                loadMap(mapRef.current, { zoom, center }, layersConfig);
             }
         }
     }, [loadMap, mapRef, zoom, center]); // Add zoom and center as dependencies

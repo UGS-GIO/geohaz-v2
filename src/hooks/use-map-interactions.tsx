@@ -2,15 +2,18 @@ import { useCallback, useState, useContext } from "react";
 import { removeGraphics, createGraphic } from "@/lib/mapping-utils";
 import Collection from "@arcgis/core/core/Collection.js";
 import { MapContext } from "@/context/map-provider";
-import layersConfig from "@/pages/hazards/data/layers";
 import { GroupLayerProps, LayerProps, RelatedTable, WMSLayerProps } from "@/lib/types/mapping-types";
+import { useGetLayerConfig } from "./use-get-layer-config";
+
+type VisibleLayer = {
+    visible: boolean;
+    groupLayerTitle: string;
+}
 
 export const useMapInteractions = () => {
-    const [visibleLayers, setVisibleLayers] = useState<Record<string, {
-        visible: boolean;
-        groupLayerTitle: string;
-    }>>();
+    const [visibleLayers, setVisibleLayers] = useState<Record<string, VisibleLayer>>();
     const { view } = useContext(MapContext);
+    const layersConfig = useGetLayerConfig();
 
     type LayerVisibilityMapProps = Record<string, {
         visible: boolean;
@@ -50,11 +53,18 @@ export const useMapInteractions = () => {
         layerConfig,
         mapLayers,
     }: {
-        layerConfig: LayerProps[];
+        layerConfig: LayerProps[] | null;
         mapLayers: __esri.Collection<__esri.Layer>;
     }) {
         const layerVisibilityMap: LayerVisibilityMapProps = {};
 
+        // Early return with empty results if layerConfig is null
+        if (!layerConfig) {
+            return {
+                layerVisibilityMap,
+                filteredWMSLayers: mapLayers.filter(() => false) // Returns empty collection
+            };
+        }
 
         // Step 1: Build the visibility map from layerConfig
         layerConfig.forEach(layer => {
@@ -74,7 +84,6 @@ export const useMapInteractions = () => {
             } else if (isGroupLayer(layer)) {
                 const groupLayer = layer;
                 groupLayer.layers?.forEach(layer => {
-
                     if (isWMSLayer(layer) && layer.sublayers) {
                         layer.sublayers.forEach(sublayer => {
                             if (sublayer.name) {

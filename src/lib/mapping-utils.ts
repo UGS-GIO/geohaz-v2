@@ -1,6 +1,5 @@
 import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
-import layers from '@/pages/hazards/data/layers'
 import { GetResultsHandlerType, GroupLayerProps, LayerConstructor, MapApp, MapImageLayerType, WMSLayerProps } from '@/lib/types/mapping-types'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
@@ -174,12 +173,16 @@ export function init(
     container: HTMLDivElement,
     isMobile: boolean,
     { zoom, center }: { zoom: number, center: [number, number] },
-    initialView?: 'map' | 'scene'
+    layers: LayerProps[],
+    initialView?: 'map' | 'scene',
 ): SceneView | MapView {
     // Destroy the view if it exists
     if (app.view) {
         app.view.destroy();
     }
+
+    console.log('Initializing map with layers:', layers);
+
 
     // Create a new map and view
     const map = createMap();

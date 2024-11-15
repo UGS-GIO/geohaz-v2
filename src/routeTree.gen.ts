@@ -17,6 +17,7 @@ import { Route as rootRoute } from './routes/__root'
 // Create Virtual Routes
 
 const HazardsLazyImport = createFileRoute('/hazards')()
+const CcusLazyImport = createFileRoute('/ccus')()
 
 // Create/Update Routes
 
@@ -26,10 +27,23 @@ const HazardsLazyRoute = HazardsLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/hazards.lazy').then((d) => d.Route))
 
+const CcusLazyRoute = CcusLazyImport.update({
+  id: '/ccus',
+  path: '/ccus',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/ccus.lazy').then((d) => d.Route))
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/ccus': {
+      id: '/ccus'
+      path: '/ccus'
+      fullPath: '/ccus'
+      preLoaderRoute: typeof CcusLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/hazards': {
       id: '/hazards'
       path: '/hazards'
@@ -43,32 +57,37 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
+  '/ccus': typeof CcusLazyRoute
   '/hazards': typeof HazardsLazyRoute
 }
 
 export interface FileRoutesByTo {
+  '/ccus': typeof CcusLazyRoute
   '/hazards': typeof HazardsLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/ccus': typeof CcusLazyRoute
   '/hazards': typeof HazardsLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/hazards'
+  fullPaths: '/ccus' | '/hazards'
   fileRoutesByTo: FileRoutesByTo
-  to: '/hazards'
-  id: '__root__' | '/hazards'
+  to: '/ccus' | '/hazards'
+  id: '__root__' | '/ccus' | '/hazards'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
+  CcusLazyRoute: typeof CcusLazyRoute
   HazardsLazyRoute: typeof HazardsLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  CcusLazyRoute: CcusLazyRoute,
   HazardsLazyRoute: HazardsLazyRoute,
 }
 
@@ -84,8 +103,12 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
+        "/ccus",
         "/hazards"
       ]
+    },
+    "/ccus": {
+      "filePath": "ccus.lazy.tsx"
     },
     "/hazards": {
       "filePath": "hazards.lazy.tsx"

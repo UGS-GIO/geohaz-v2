@@ -2,9 +2,9 @@ import { Layout } from '@/components/custom/layout'
 import { SearchBar } from '@/components/search-bar'
 import ThemeSwitch from '@/components/theme-switch'
 import { TopNav } from '@/components/top-nav'
-import MapContainer from '@/components/custom/map/map-container'
 import { MapFooter } from '@/components/custom/map/map-footer'
 import { cn } from '@/lib/utils'
+import MapContainer from '@/components/custom/map/map-container'
 
 export default function Map() {
   return (
