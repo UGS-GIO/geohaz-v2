@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IconChevronsLeft, IconMenu2, IconX } from '@tabler/icons-react';
 import { Layout } from './custom/layout';
 import { Button } from './custom/button';
@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { useGetSidebarLinks } from '@/hooks/use-get-sidebar-links';
 import { SideLink } from '@/lib/types/sidelink-types';
-import { useGetWebsiteInfo } from '@/hooks/use-get-website-info';
+import { useGetPageInfo } from '@/hooks/use-get-website-info';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> { }
 
@@ -19,8 +19,9 @@ export default function Sidebar({
   const isTransitioning = useRef(false); // Ref to manage transition state
   const [sidebarLinks, setSidebarLinks] = useState<SideLink[] | null>(null);
   const [title, setTitle] = useState<string | undefined>(undefined);
-  const websiteInfo = useGetWebsiteInfo();
+  const pageInfo = useGetPageInfo();
   const sideLinks = useGetSidebarLinks();
+
   /* Make body not scrollable when navBar is opened */
   useEffect(() => {
     if (navOpened) {
@@ -30,15 +31,13 @@ export default function Sidebar({
     }
   }, [navOpened]);
 
-  // useeffect for the sidebarlinks and app title
+  // loading the page specific elements
   useEffect(() => {
     setSidebarLinks(sideLinks);
-    setTitle(websiteInfo?.appTitle);
+    setTitle(pageInfo?.appTitle);
   }, [sideLinks]);
 
-
   const handleMenuClick = () => {
-    // debounce the click event to prevent multiple clicks
     if (isTransitioning.current) return; // Prevent action if a transition is active
     isTransitioning.current = true; // Set the transition flag
     setNavOpened(!navOpened);

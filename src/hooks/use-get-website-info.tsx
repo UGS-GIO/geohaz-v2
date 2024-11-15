@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useGetCurrentPage } from "./use-get-current-page";
+import { useGetCurrentPage } from "@/hooks/use-get-current-page";
 
 interface WebsiteInfo {
     references: React.ReactNode;
@@ -12,15 +12,15 @@ interface WebsiteInfo {
     appTitle: string;
 }
 
-const useGetWebsiteInfo = () => {
+const useGetPageInfo = () => {
     const currentPage = useGetCurrentPage();
     const [info, setInfo] = useState<WebsiteInfo | null>(null);
 
     useEffect(() => {
-        const loadWebsiteInfo = async () => {
+        const loadPageInfo = async () => {
             try {
                 // Dynamically import the config file based on the page
-                const websiteInfo = await import(`@/pages/${currentPage}/data/website-info.tsx`);
+                const websiteInfo = await import(`@/pages/${currentPage}/data/page-info.tsx`);
                 setInfo(websiteInfo);
             } catch (error) {
                 console.error('Error loading sidebar configuration:', error);
@@ -28,10 +28,10 @@ const useGetWebsiteInfo = () => {
             }
         };
 
-        loadWebsiteInfo();
+        loadPageInfo();
     }, [currentPage]);
 
     return info;
 };
 
-export { useGetWebsiteInfo };
+export { useGetPageInfo };
