@@ -1,5 +1,7 @@
 import { Link } from "@/components/custom/link";
 
+const appTitle = 'CCUS Portal';
+
 const references = (
     <div>
         <ul className="list-disc ml-5 space-y-4">
@@ -167,4 +169,4 @@ const dataSourcesShortened = (
     </p>
 )
 
-export { references, acknowledgements, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened };
+export { references, acknowledgements, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle };
