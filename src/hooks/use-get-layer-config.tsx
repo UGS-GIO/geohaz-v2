@@ -22,8 +22,6 @@ const useGetLayerConfig = () => {
         loadConfig();
     }, [page]);
 
-    console.log('Layer Config:', layerConfig);
-
     return layerConfig;
 };
 

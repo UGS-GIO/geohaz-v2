@@ -4,7 +4,7 @@ import ThemeSwitch from '@/components/theme-switch'
 import { TopNav } from '@/components/top-nav'
 import { MapFooter } from '@/components/custom/map/map-footer'
 import { cn } from '@/lib/utils'
-import MapContainer from '@/components/custom/map/map-container'
+import MapContainer from './components/map-container'
 
 export default function Map() {
   return (

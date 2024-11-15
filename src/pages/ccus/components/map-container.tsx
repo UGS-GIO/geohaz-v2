@@ -57,7 +57,7 @@ export default function ArcGISMap() {
                 loadMap(mapRef.current, { zoom, center }, layersConfig);
             }
         }
-    }, [loadMap, mapRef, zoom, center]); // Add zoom and center as dependencies
+    }, [loadMap, mapRef, zoom, center, layersConfig]);
 
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         setStartPos({ x: e.clientX, y: e.clientY });
