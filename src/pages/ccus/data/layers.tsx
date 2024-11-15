@@ -2,6 +2,7 @@ import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
 const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
 const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
+const GEN_GIS_WORKSPACE = 'gen_gis';
 
 // Basin Names WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -16,7 +17,11 @@ const basinNamesWMSConfig: WMSLayerProps = {
             name: `${ENERGY_MINERALS_WORKSPACE}:${basinNamesLayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {},
+            popupFields: {
+                'Name': 'name',
+                'Description': 'description',
+                'Report Link': 'reportlink'
+            },
         },
     ],
 };
@@ -52,7 +57,13 @@ const pipelinesWMSConfig: WMSLayerProps = {
             name: `${ENERGY_MINERALS_WORKSPACE}:${pipelinesLayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {},
+            popupFields: {
+                'Operator': 'operator',
+                'Commodity': 'commodity',
+                'Diameter': 'diameter',
+                'Acronym': 'acronym',
+                'Code Remarks': 'coderemarks'
+            },
         },
     ],
 };
@@ -70,7 +81,45 @@ const sco2WMSConfig: WMSLayerProps = {
             name: `${ENERGY_MINERALS_WORKSPACE}:${sco2LayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {},
+            popupFields: {
+                'Unique ID': 'unique_id',
+                'Basegrid ID': 'basegrid_id',
+                'Name': 'name',
+                'Geo Region': 'geo_region',
+                'Longitude': 'x_lon',
+                'Latitude': 'y_lat',
+                'GIS Number': 'gis_number',
+                'Depth (m)': 'depth_m',
+                'Pressure (MPa)': 'pressure_mpa',
+                'Thickness (m)': 'thickness_m',
+                'Permeability (md)': 'permeability_md',
+                'Porosity': 'porosity',
+                'Temperature Gradient (C/km)': 'temperature_gradient_c_per_km',
+                'Temperature (C)': 'temperature_c',
+                'Area (km^2)': 'area_km2',
+                'Surface Temperature (C)': 'surface_temperature_c',
+                'ROM': 'rom',
+                'Max Injection Rate (MT/yr)': 'max_injection_rate_mt_per_yr',
+                'Cost Model': 'cost_model',
+                'Injection Well Diameter (in)': 'injection_well_diameter_in',
+                'Old O&G Wells': 'old_o_and_g_wells',
+                'Backup Injection Well': 'backup_injection_well',
+                'Above Zone MON': 'above_zone_mon',
+                'In Zone MON': 'in_zone_mon',
+                'Real Discount Rate': 'real_discount_rate',
+                'PISC Length (yrs)': 'pisc_length_yrs',
+                'Injection Period (yrs)': 'injection_period_yrs',
+                'Finance Period (yrs)': 'finance_period_yrs',
+                'Dollar Year': 'dollar_year',
+                'Run CPG': 'run_cpg',
+                'Run Water Sedbasin': 'run_water_sedbasin',
+                'Capacity (MtCO2)': 'capacity_mtco2',
+                'Storage Cost ($/tCO2)': 'storage_cost_doll_per_tco2',
+                'CAPEX (M$)': 'capex_mdoll',
+                'OPEX (M$/yr)': 'opex_mdoll_per_yr',
+                'CRF': 'crf',
+                'Error': 'error',
+            },
         },
     ],
 };
@@ -85,10 +134,14 @@ const riversWMSConfig: WMSLayerProps = {
     visible: true,
     sublayers: [
         {
-            name: `${ENERGY_MINERALS_WORKSPACE}:${riversLayerName}`,
+            name: `${GEN_GIS_WORKSPACE}:${riversLayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {},
+            popupFields: {
+                'Name': 'name',
+                'Description': 'description',
+                'Report Link': 'reportlink'
+            },
         },
     ],
 };

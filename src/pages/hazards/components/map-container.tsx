@@ -160,7 +160,7 @@ export default function ArcGISMap() {
                 <MapWidgets />
                 {/* <div ref={setPopupContainer} className="fixed inset-x-0 flex items-center justify-center"> */}
             </div>
-            <PopupDrawer container={popupContainer} drawerTriggerRef={drawerTriggerRef} popupContent={popupContent} />
+            <PopupDrawer container={popupContainer} drawerTriggerRef={drawerTriggerRef} popupContent={popupContent} popupTitle="Hazards in your area" />
             {/* This div serves as the custom container for the PopupDrawer component.
                 By setting its ref, it means the PopupDrawer is appended to this container
                 instead of the body element. 

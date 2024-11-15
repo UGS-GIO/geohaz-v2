@@ -572,6 +572,11 @@ export async function fetchGetFeatureInfo({
         return null; // Return null if no visible layers
     }
 
+    // log a buch of things to debug
+    console.log("Map point", mapPoint);
+    console.log("View", view);
+    console.log("Visible layers", visibleLayers);
+
     // Create a bbox around the clicked map point
     const bbox = createBbox({ mapPoint, resolution: view.resolution, buffer: 10 });
     const { minX, minY, maxX, maxY } = bbox;
