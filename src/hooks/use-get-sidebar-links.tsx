@@ -7,7 +7,7 @@ const useGetSidebarLinks = () => {
     const [sidebarLinks, setSidebarLinks] = useState<SideLink[] | null>(null);
 
     useEffect(() => {
-        const loadConfig = async () => {
+        const loadSidebarLinks = async () => {
             try {
                 // Dynamically import the config file based on the page
                 const links = await import(`@/pages/${currentPage}/data/sidelinks.tsx`);
@@ -18,7 +18,7 @@ const useGetSidebarLinks = () => {
             }
         };
 
-        loadConfig();
+        loadSidebarLinks();
     }, [currentPage]);
 
     return sidebarLinks;
