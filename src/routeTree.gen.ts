@@ -16,10 +16,17 @@ import { Route as rootRoute } from './routes/__root'
 
 // Create Virtual Routes
 
+const ReportLazyImport = createFileRoute('/report')()
 const HazardsLazyImport = createFileRoute('/hazards')()
 const CcusLazyImport = createFileRoute('/ccus')()
 
 // Create/Update Routes
+
+const ReportLazyRoute = ReportLazyImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/report.lazy').then((d) => d.Route))
 
 const HazardsLazyRoute = HazardsLazyImport.update({
   id: '/hazards',
@@ -51,6 +58,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HazardsLazyImport
       parentRoute: typeof rootRoute
     }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -59,36 +73,41 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/ccus': typeof CcusLazyRoute
   '/hazards': typeof HazardsLazyRoute
+  '/report': typeof ReportLazyRoute
 }
 
 export interface FileRoutesByTo {
   '/ccus': typeof CcusLazyRoute
   '/hazards': typeof HazardsLazyRoute
+  '/report': typeof ReportLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/ccus': typeof CcusLazyRoute
   '/hazards': typeof HazardsLazyRoute
+  '/report': typeof ReportLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/ccus' | '/hazards'
+  fullPaths: '/ccus' | '/hazards' | '/report'
   fileRoutesByTo: FileRoutesByTo
-  to: '/ccus' | '/hazards'
-  id: '__root__' | '/ccus' | '/hazards'
+  to: '/ccus' | '/hazards' | '/report'
+  id: '__root__' | '/ccus' | '/hazards' | '/report'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   CcusLazyRoute: typeof CcusLazyRoute
   HazardsLazyRoute: typeof HazardsLazyRoute
+  ReportLazyRoute: typeof ReportLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   CcusLazyRoute: CcusLazyRoute,
   HazardsLazyRoute: HazardsLazyRoute,
+  ReportLazyRoute: ReportLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -104,7 +123,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/ccus",
-        "/hazards"
+        "/hazards",
+        "/report"
       ]
     },
     "/ccus": {
@@ -112,6 +132,9 @@ export const routeTree = rootRoute
     },
     "/hazards": {
       "filePath": "hazards.lazy.tsx"
+    },
+    "/report": {
+      "filePath": "report.lazy.tsx"
     }
   }
 }
