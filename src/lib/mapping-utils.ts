@@ -526,9 +526,9 @@ interface Bbox {
 }
 
 interface CreateBboxProps {
-    mapPoint: __esri.Point;  // Or replace with equivalent Point type of your library
-    resolution?: number;     // Optional: map resolution for adjusting bbox size
-    buffer?: number;         // Optional: buffer size in map units
+    mapPoint: __esri.Point;
+    resolution?: number;
+    buffer?: number;
 }
 
 // Create a bounding box around the clicked map point
@@ -553,9 +553,9 @@ function createBbox({ mapPoint, resolution = 1, buffer = 10 }: CreateBboxProps):
 }
 
 interface GetFeatureInfoProps {
-    mapPoint: __esri.Point;  // Replace with your Point type
-    view: __esri.MapView | __esri.SceneView;    // Replace with your MapView type
-    visibleLayers: string[]; // List of visible layers (layer titles or ids)
+    mapPoint: __esri.Point;
+    view: __esri.MapView | __esri.SceneView;
+    visibleLayers: string[];
 }
 
 // Fetch GetFeatureInfo request to WMS server
