@@ -4,7 +4,7 @@ import config from '../config';
 import './Hazard.scss';
 import MapSurround from './MapSurround';
 import qffLegend from '../images/qff-legend.jpg';
-import { kebabCase } from '@/components/report/util/util'
+import { kebabCase } from '@/pages/report/report/util/util'
 
 interface HazardProps {
   name: string;

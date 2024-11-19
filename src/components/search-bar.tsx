@@ -16,8 +16,6 @@ function SearchBar() {
   useEffect(() => {
     let searchWidget: __esri.widgetsSearch;
     if (view && searchDivRef.current) {
-      console.log("Creating search widget");
-      console.log("View:", view);
 
       searchWidget = new Search({
         view: view,
@@ -56,16 +54,8 @@ function SearchBar() {
               width: 2,
             }),
           } as __esri.LayerSearchSourceProperties),
-        ],
-
-
-
-
+        ]
       });
-
-      console.log("Search widget:", searchWidget);
-    } else {
-      console.log("View or searchDivRef.current is not available");
     }
 
     return () => {

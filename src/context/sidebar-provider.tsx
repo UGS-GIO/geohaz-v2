@@ -1,5 +1,5 @@
-import { SideLink } from '@/data/sidelinks';
 import useLocalStorage from '@/hooks/use-local-storage';
+import { SideLink } from '@/lib/types/sidelink-types';
 import React, { createContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 
 interface SidebarContextContextProps {
