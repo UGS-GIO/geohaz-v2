@@ -143,8 +143,6 @@ export default function ArcGISMap() {
     };
 
     const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-        console.log("Mouse up", e);
-
         handleMapClick({ e, view, drawerTriggerRef });
     };
 

@@ -12,8 +12,6 @@ type ReusablePopupProps = {
 };
 
 const GenericPopup = ({ feature, relatedTable, popupFields, layout }: ReusablePopupProps) => {
-    console.log("GenericPopup", feature, relatedTable, popupFields, layout);
-
     const relatedTables = relatedTable || [];
     const { data, isLoading, error } = useRelatedTable(relatedTables);
 
@@ -46,14 +44,7 @@ const GenericPopup = ({ feature, relatedTable, popupFields, layout }: ReusablePo
     const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/;
     const featureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
 
-    console.log("featureEntries", featureEntries);
-
-
     const featureContent = featureEntries.map(([label, field]) => {
-        console.log('popupFields', popupFields);
-        console.log('properties', properties);
-        console.log('field', field);
-
         const value = popupFields ? properties[field] : field;
 
         return (

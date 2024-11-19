@@ -181,9 +181,6 @@ export function init(
         app.view.destroy();
     }
 
-    console.log('Initializing map with layers:', layers);
-
-
     // Create a new map and view
     const map = createMap();
 
@@ -571,11 +568,6 @@ export async function fetchGetFeatureInfo({
         console.warn('No visible layers to query.');
         return null; // Return null if no visible layers
     }
-
-    // log a buch of things to debug
-    console.log("Map point", mapPoint);
-    console.log("View", view);
-    console.log("Visible layers", visibleLayers);
 
     // Create a bbox around the clicked map point
     const bbox = createBbox({ mapPoint, resolution: view.resolution, buffer: 10 });
