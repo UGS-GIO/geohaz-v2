@@ -39,7 +39,15 @@ const oilGasFieldsWMSConfig: WMSLayerProps = {
             name: `${ENERGY_MINERALS_WORKSPACE}:${oilGasFieldsLayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {},
+            popupFields: {
+                'Field Name': 'field_name',
+                'Field Number': 'field_number',
+                'Field Type': 'field_type',
+                'Label': 'label',
+                'Producing Formations': 'prod_formations',
+                'Reservoir Rocks': 'reservoir_rocks',
+                'Status': 'status'
+            },
         },
     ],
 };
