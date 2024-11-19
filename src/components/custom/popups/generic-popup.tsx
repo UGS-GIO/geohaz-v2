@@ -46,6 +46,7 @@ const GenericPopup = ({ feature, relatedTable, popupFields, layout }: ReusablePo
 
     const featureContent = featureEntries.map(([label, field]) => {
         const value = popupFields ? properties[field] : field;
+
         return (
             value && (
                 <div key={label} className="flex flex-col">

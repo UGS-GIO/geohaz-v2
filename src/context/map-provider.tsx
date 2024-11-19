@@ -2,11 +2,12 @@ import { createContext, useEffect, useState } from "react";
 import type SceneView from "@arcgis/core/views/SceneView";
 import type MapView from "@arcgis/core/views/MapView";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
+import { LayerProps } from "@/lib/types/mapping-types";
 
 type MapContextProps = {
     view?: SceneView | MapView,
     activeLayers?: __esri.Collection<__esri.Layer>, // add a layers property to the context
-    loadMap?: (container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }) => Promise<void>
+    loadMap?: (container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }, layers: LayerProps[]) => Promise<void>
     setActiveLayers?: (layers: __esri.Collection<__esri.Layer>) => void
     isMobile?: boolean
     setIsMobile?: (isMobile: boolean) => void
@@ -71,10 +72,10 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         setIsMobile(view.widthBreakpoint === "xsmall" || view.heightBreakpoint === "xsmall");
     }, [view]);
 
-    async function loadMap(container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }) {
+    async function loadMap(container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }, layers: LayerProps[]) {
         if (view) return;
         const { init } = await import("@/lib/mapping-utils")
-        setView(init(container, isMobile, { zoom, center }, 'map'));
+        setView(init(container, isMobile, { zoom, center }, layers, 'map'));
     }
 
 

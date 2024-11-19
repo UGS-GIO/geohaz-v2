@@ -1,6 +1,5 @@
 import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
-import layers from '@/data/layers'
 import { GetResultsHandlerType, GroupLayerProps, LayerConstructor, MapApp, MapImageLayerType, WMSLayerProps } from '@/lib/types/mapping-types'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
@@ -174,7 +173,8 @@ export function init(
     container: HTMLDivElement,
     isMobile: boolean,
     { zoom, center }: { zoom: number, center: [number, number] },
-    initialView?: 'map' | 'scene'
+    layers: LayerProps[],
+    initialView?: 'map' | 'scene',
 ): SceneView | MapView {
     // Destroy the view if it exists
     if (app.view) {
@@ -515,4 +515,92 @@ export function createGraphic(lat: number, long: number, view: SceneView | MapVi
 // Remove all graphics from the view
 export function removeGraphics(view: SceneView | MapView) {
     view.graphics.removeAll();
+}
+
+
+interface Bbox {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+}
+
+interface CreateBboxProps {
+    mapPoint: __esri.Point;
+    resolution?: number;
+    buffer?: number;
+}
+
+// Create a bounding box around the clicked map point
+function createBbox({ mapPoint, resolution = 1, buffer = 10 }: CreateBboxProps): Bbox {
+    // Apply buffer and scale it by resolution if needed
+    const scaleFactor = 50; // Scale factor calculated above
+
+    // Apply buffer and scale it by resolution and the calculated scale factor
+    const scaledBuffer = buffer * resolution * scaleFactor;
+
+    const minX = mapPoint.x - scaledBuffer;
+    const minY = mapPoint.y - scaledBuffer;
+    const maxX = mapPoint.x + scaledBuffer;
+    const maxY = mapPoint.y + scaledBuffer;
+
+    return {
+        minX,
+        minY,
+        maxX,
+        maxY,
+    };
+}
+
+interface GetFeatureInfoProps {
+    mapPoint: __esri.Point;
+    view: __esri.MapView | __esri.SceneView;
+    visibleLayers: string[];
+}
+
+// Fetch GetFeatureInfo request to WMS server
+export async function fetchGetFeatureInfo({
+    mapPoint,
+    view,
+    visibleLayers,
+}: GetFeatureInfoProps) {
+    if (visibleLayers.length === 0) {
+        console.warn('No visible layers to query.');
+        return null; // Return null if no visible layers
+    }
+
+    // Create a bbox around the clicked map point
+    const bbox = createBbox({ mapPoint, resolution: view.resolution, buffer: 10 });
+    const { minX, minY, maxX, maxY } = bbox;
+
+    // WMS GetFeatureInfo parameters
+    const params = {
+        service: 'WMS',
+        request: 'GetFeatureInfo',
+        version: '1.3.0', // Or '1.1.1' if the server requires
+        layers: visibleLayers.join(','),
+        query_layers: visibleLayers.join(','),
+        info_format: 'application/json',
+        bbox: `${minX},${minY},${maxX},${maxY}`,
+        crs: 'EPSG:3857',
+        i: Math.round(view.width / 2).toString(),
+        j: Math.round(view.height / 2).toString(),
+        width: `${view.width}`,
+        height: `${view.height}`,
+        feature_count: "50", // Limit the number of features returned
+    };
+
+    const queryString = new URLSearchParams(params).toString();
+
+    // Construct the full URL to the GetFeatureInfo endpoint
+    const getFeatureInfoUrl = `https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms?${queryString}`;
+
+    const response = await fetch(getFeatureInfoUrl);
+    if (!response.ok) {
+        throw new Error(`GetFeatureInfo request failed with status ${response.status}`);
+    }
+
+    const featureInfo = await response.json();
+
+    return featureInfo;
 }

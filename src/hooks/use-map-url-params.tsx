@@ -80,4 +80,4 @@ const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) =>
     return { zoom: mapState.zoom, center: mapState.center as [number, number] };
 };
 
-export default useMapUrlParams;
+export { useMapUrlParams };

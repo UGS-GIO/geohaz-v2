@@ -16,25 +16,53 @@ import { Route as rootRoute } from './routes/__root'
 
 // Create Virtual Routes
 
-const HazardMapLazyImport = createFileRoute('/hazard-map')()
+const ReportLazyImport = createFileRoute('/report')()
+const HazardsLazyImport = createFileRoute('/hazards')()
+const CcusLazyImport = createFileRoute('/ccus')()
 
 // Create/Update Routes
 
-const HazardMapLazyRoute = HazardMapLazyImport.update({
-  id: '/hazard-map',
-  path: '/hazard-map',
+const ReportLazyRoute = ReportLazyImport.update({
+  id: '/report',
+  path: '/report',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/hazard-map.lazy').then((d) => d.Route))
+} as any).lazy(() => import('./routes/report.lazy').then((d) => d.Route))
+
+const HazardsLazyRoute = HazardsLazyImport.update({
+  id: '/hazards',
+  path: '/hazards',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/hazards.lazy').then((d) => d.Route))
+
+const CcusLazyRoute = CcusLazyImport.update({
+  id: '/ccus',
+  path: '/ccus',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/ccus.lazy').then((d) => d.Route))
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/hazard-map': {
-      id: '/hazard-map'
-      path: '/hazard-map'
-      fullPath: '/hazard-map'
-      preLoaderRoute: typeof HazardMapLazyImport
+    '/ccus': {
+      id: '/ccus'
+      path: '/ccus'
+      fullPath: '/ccus'
+      preLoaderRoute: typeof CcusLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/hazards': {
+      id: '/hazards'
+      path: '/hazards'
+      fullPath: '/hazards'
+      preLoaderRoute: typeof HazardsLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportLazyImport
       parentRoute: typeof rootRoute
     }
   }
@@ -43,33 +71,43 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/hazard-map': typeof HazardMapLazyRoute
+  '/ccus': typeof CcusLazyRoute
+  '/hazards': typeof HazardsLazyRoute
+  '/report': typeof ReportLazyRoute
 }
 
 export interface FileRoutesByTo {
-  '/hazard-map': typeof HazardMapLazyRoute
+  '/ccus': typeof CcusLazyRoute
+  '/hazards': typeof HazardsLazyRoute
+  '/report': typeof ReportLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/hazard-map': typeof HazardMapLazyRoute
+  '/ccus': typeof CcusLazyRoute
+  '/hazards': typeof HazardsLazyRoute
+  '/report': typeof ReportLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/hazard-map'
+  fullPaths: '/ccus' | '/hazards' | '/report'
   fileRoutesByTo: FileRoutesByTo
-  to: '/hazard-map'
-  id: '__root__' | '/hazard-map'
+  to: '/ccus' | '/hazards' | '/report'
+  id: '__root__' | '/ccus' | '/hazards' | '/report'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  HazardMapLazyRoute: typeof HazardMapLazyRoute
+  CcusLazyRoute: typeof CcusLazyRoute
+  HazardsLazyRoute: typeof HazardsLazyRoute
+  ReportLazyRoute: typeof ReportLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  HazardMapLazyRoute: HazardMapLazyRoute,
+  CcusLazyRoute: CcusLazyRoute,
+  HazardsLazyRoute: HazardsLazyRoute,
+  ReportLazyRoute: ReportLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -84,11 +122,19 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/hazard-map"
+        "/ccus",
+        "/hazards",
+        "/report"
       ]
     },
-    "/hazard-map": {
-      "filePath": "hazard-map.lazy.tsx"
+    "/ccus": {
+      "filePath": "ccus.lazy.tsx"
+    },
+    "/hazards": {
+      "filePath": "hazards.lazy.tsx"
+    },
+    "/report": {
+      "filePath": "report.lazy.tsx"
     }
   }
 }
