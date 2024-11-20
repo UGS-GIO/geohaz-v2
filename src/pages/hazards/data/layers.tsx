@@ -557,26 +557,26 @@ const calicheWMSConfig: WMSLayerProps = {
     ],
 }
 
-const floodAndDebrisLayerName = 'floodanddebrisflow';
-const floodAndDebrisWMSTitle = 'Flood and Debris-Flow Hazard';
-const floodAndDebrisWMSConfig: WMSLayerProps = {
+const alluvialFanLayerName = 'alluvialfan';
+const alluvialFanWMSTitle = 'Alluvial Fan Susceptibility';
+const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
-    title: floodAndDebrisWMSTitle,
+    title: alluvialFanWMSTitle,
     visible: false,
     sublayers: [
         {
-            name: `${HAZARDS_WORKSPACE}:${floodAndDebrisLayerName}`,
+            name: `${HAZARDS_WORKSPACE}:${alluvialFanLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'flhmappedscale',
+                'Mapped Scale': 'aafmappedscale',
             },
             relatedTables: [
                 {
                     fieldLabel: 'hazard_symbology_text',
                     matchingField: 'Relate_ID',
-                    targetField: 'flhhazardunit',
+                    targetField: 'aafhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     acceptProfile: 'hazards'
                 }
@@ -701,7 +701,7 @@ const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards',
     visible: false,
-    layers: [floodAndDebrisWMSConfig, shallowGroundwaterWMSConfig],
+    layers: [alluvialFanWMSConfig, shallowGroundwaterWMSConfig],
 };
 
 const earthquakesConfig: LayerProps = {
