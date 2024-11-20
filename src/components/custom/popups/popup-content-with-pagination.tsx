@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { Button } from "@/components/ui/button"
-import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, FileTextIcon } from "lucide-react"
 import { GenericPopup } from "./generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
 import { cn } from "@/lib/utils"
+import { useSidebar } from "@/hooks/use-sidebar"
+import ReportGenerator from "@/components/sidebar/report-generator"
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
@@ -76,6 +78,7 @@ function PopupContentWithPagination({ layerContent, onSectionChange
 }: SidebarInsetWithPaginationProps) {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
+    const { setCurrentContent } = useSidebar()
 
     const sectionIds = useMemo(
         () => layerContent.map(layer => `section-${layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle}`),
@@ -146,12 +149,26 @@ function PopupContentWithPagination({ layerContent, onSectionChange
             console.log("TODO: Zoom to feature")
         }
 
+        const handleReportGenerator = () => {
+            console.log("TODO: Report Generator")
+            setCurrentContent({
+                title: 'Report Generator',
+                label: '',
+                icon: <FileTextIcon />,
+                componentPath: '/src/components/sidebar/report-generator',
+                component: ReportGenerator
+            })
+        }
+
         return (
             <div className="scroll-smooth">
                 <div className="space-y-4">
                     {paginatedFeatures.map((feature, idx) => (
                         <div className="border border-secondary p-4 rounded space-y-2" key={idx}>
-                            <div className="flex justify-end">
+                            <div className="flex justify-end gap-2">
+                                <Button onClick={handleReportGenerator} variant={'secondary'}>
+                                    Report Generator
+                                </Button>
                                 <Button onClick={handleZoomToFeature} variant={'secondary'}>
                                     Zoom to Feature
                                 </Button>
