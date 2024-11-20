@@ -4,10 +4,10 @@ import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionT
 import { ExternalLink, Layers as LayersIcon } from 'lucide-react';
 import { Button } from '../custom/button';
 import Layers from '@/components/sidebar/layers';
-import { acknowledgements, dataDisclaimer, dataSources, dataSourcesShortened, mapDetails, mapDetailsShortened, references } from '@/data/website-info';
 import { BackToMenuButton } from '../custom/back-to-menu-button';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerTrigger } from '@/components/ui/drawer';
+import { useGetPageInfo } from '@/hooks/use-get-website-info';
 
 function Info() {
   type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | '';
@@ -18,6 +18,7 @@ function Info() {
   const [isMapDetailsExpanded, setIsMapDetailsExpanded] = useState(false);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
   const drawerTriggerRef = useRef<HTMLButtonElement>(null);
+  const pageInfo = useGetPageInfo()
 
   const toggleMapDetails = () => {
     setIsMapDetailsExpanded(!isMapDetailsExpanded);
@@ -60,11 +61,11 @@ function Info() {
                 </AccordionTrigger>
               </AccordionHeader>
               <AccordionContent>
-                {mapDetails}
+                {pageInfo?.mapDetails}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          {!isMapDetailsExpanded && <div>{mapDetailsShortened}</div>}
+          {!isMapDetailsExpanded && <div>{pageInfo?.mapDetailsShortened}</div>}
         </div>
 
         {/* Data Sources Accordion */}
@@ -78,10 +79,10 @@ function Info() {
                   </div>
                 </AccordionTrigger>
               </AccordionHeader>
-              <AccordionContent>{dataSources}</AccordionContent>
+              <AccordionContent>{pageInfo?.dataSources}</AccordionContent>
             </AccordionItem>
           </Accordion>
-          {!isDataSourcesExpanded && <div>{dataSourcesShortened}</div>}
+          {!isDataSourcesExpanded && <div>{pageInfo?.dataSourcesShortened}</div>}
         </div>
 
         {/* Desktop Modal Buttons */}
@@ -125,9 +126,9 @@ function Info() {
               {modalType === 'acknowledgements' && <DrawerHeader><DrawerTitle>Acknowledgements</DrawerTitle></DrawerHeader>}
             </div>
             <div data-vaul-no-drag className="overflow-y-auto p-4">
-              {modalType === 'disclaimer' && <DrawerDescription>{dataDisclaimer}</DrawerDescription>}
-              {modalType === 'references' && <DrawerDescription>{references}</DrawerDescription>}
-              {modalType === 'acknowledgements' && <DrawerDescription>{acknowledgements}</DrawerDescription>}
+              {modalType === 'disclaimer' && <DrawerDescription>{pageInfo?.dataDisclaimer}</DrawerDescription>}
+              {modalType === 'references' && <DrawerDescription>{pageInfo?.references}</DrawerDescription>}
+              {modalType === 'acknowledgements' && <DrawerDescription>{pageInfo?.acknowledgements}</DrawerDescription>}
             </div>
           </DrawerContent>
         </Drawer>
@@ -143,7 +144,7 @@ function Info() {
                 <DialogHeader>
                   <DialogTitle>Data Disclaimer</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>{dataDisclaimer}</DialogDescription>
+                <DialogDescription>{pageInfo?.dataDisclaimer}</DialogDescription>
               </>
             )}
             {modalType === 'references' && (
@@ -151,7 +152,7 @@ function Info() {
                 <DialogHeader>
                   <DialogTitle>References</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>{references}</DialogDescription>
+                <DialogDescription>{pageInfo?.references}</DialogDescription>
               </>
             )}
             {modalType === 'acknowledgements' && (
@@ -159,7 +160,7 @@ function Info() {
                 <DialogHeader>
                   <DialogTitle>Acknowledgements</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>{acknowledgements}</DialogDescription>
+                <DialogDescription>{pageInfo?.acknowledgements}</DialogDescription>
               </>
             )}
           </DialogContent>

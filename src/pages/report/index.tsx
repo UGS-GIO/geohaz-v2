@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react'
-import ReportApp from '@/components/report/ReportApp'
-import { Aoi } from '@/components/report/types/types';
+import ReportApp from '@/pages/report/report/ReportApp'
+import { Aoi } from '@/pages/report/report/types/types';
 import { useTheme } from '@/context/theme-provider';
 
 export default function Report() {
@@ -11,7 +11,7 @@ export default function Report() {
     useEffect(() => {
         const aoiData = localStorage.getItem('aoi');
         if (!aoiData) {
-            import('@/components/report/testData.json').then((data) => {
+            import('@/pages/report/report/testData.json').then((data) => {
                 setAoi(data.default);
             });
         } else {

@@ -1,29 +1,3 @@
-// const handleMobileViewChange = useCallback(
-//     ({ view }: { view: __esri.MapView | __esri.SceneView }) => {
-//         let watchHandle: __esri.WatchHandle;
-//         view.when(() => {
-//             watchHandle = reactiveUtils.watch(
-//                 () => [view.zoom, view.center],
-//                 () => {
-//                     const xyPoint = {
-//                         x: view.center.longitude.toFixed(3),
-//                         y: view.center.latitude.toFixed(3),
-//                     };
-//                     const convertedCoords = convertCoordinates(xyPoint.x, xyPoint.y);
-//                     setCoordinates(convertedCoords);
-//                     setScale(view.scale);
-//                 }
-//             );
-//         })
-
-//         return () => {
-//             watchHandle.remove();
-//         };
-//     },
-//     [view]
-// );
-
-
 import { Switch } from "@/components/ui/switch";
 import { MapContext } from "@/context/map-provider";
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";

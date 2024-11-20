@@ -19,12 +19,14 @@ interface CombinedSidebarDrawerProps {
     container: HTMLDivElement | null;
     popupContent: PopupContent[];
     drawerTriggerRef: React.RefObject<HTMLButtonElement>;
+    popupTitle: string;
 }
 
 function PopupDrawer({
     container,
     popupContent,
     drawerTriggerRef,
+    popupTitle,
 }: CombinedSidebarDrawerProps) {
     const { isCollapsed } = useSidebar();
     const carouselRef = useRef<HTMLDivElement>(null);
@@ -77,7 +79,7 @@ function PopupDrawer({
 
             <DrawerContent className={cn('max-w-4xl mb-10 z-10 max-h-[85vh] overflow-hidden', isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]')}>
                 <DrawerHeader className="flex justify-between items-center">
-                    <DrawerTitle>Hazards in Your Region</DrawerTitle>
+                    <DrawerTitle>{popupTitle}</DrawerTitle>
                 </DrawerHeader>
 
                 <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden">

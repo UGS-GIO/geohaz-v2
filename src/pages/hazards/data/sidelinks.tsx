@@ -1,6 +1,6 @@
 import { FileText, House, Info as InfoIcon, Layers as LayersIcon, Route, Settings } from 'lucide-react'
-import Info from '../components/sidebar/info'
-import Layers from '../components/sidebar/layers'
+import Info from '@/components/sidebar/info'
+import Layers from '@/components/sidebar/layers'
 import MapConfigurations from '@/components/sidebar/map-configurations'
 import ReportGenerator from '@/components/sidebar/report-generator'
 
