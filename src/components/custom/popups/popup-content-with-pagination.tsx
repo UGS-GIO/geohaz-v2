@@ -150,7 +150,6 @@ function PopupContentWithPagination({ layerContent, onSectionChange
         }
 
         const handleReportGenerator = () => {
-            console.log("TODO: Report Generator")
             setCurrentContent({
                 title: 'Report Generator',
                 label: '',
