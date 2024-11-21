@@ -74,6 +74,8 @@ export default function ArcGISMap() {
 
     const handleMapClick = async ({ e, view, drawerTriggerRef }: HandleMapClickProps) => {
 
+        view?.graphics.removeAll(); // Clear any existing graphics
+
         if (!view || isDragging) return; // Skip click if dragging or no view
 
         if (e.button === 0) {

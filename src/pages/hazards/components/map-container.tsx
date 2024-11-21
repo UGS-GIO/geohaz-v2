@@ -74,6 +74,8 @@ export default function ArcGISMap() {
 
     const handleMapClick = async ({ e, view, drawerTriggerRef }: HandleMapClickProps) => {
 
+        view?.graphics.removeAll(); // Clear any existing graphics
+
         if (!view || isDragging) return; // Skip click if dragging or no view
 
         if (e.button === 0) {
@@ -124,6 +126,9 @@ export default function ArcGISMap() {
 
                 const layerInfoFiltered = layerInfo.filter(layer => layer.features.length > 0);
                 const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
+
+                console.log('layerInfoFiltered', layerInfoFiltered);
+
 
                 if (layerInfoFiltered.length === 0) {
                     // do we want the popup to close if no features are found?

@@ -13,12 +13,14 @@ import Popup from "@arcgis/core/widgets/Popup";
 import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
-import { Feature, FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { createEsriSymbol } from '@/lib/legend/symbol-generator';
 import { Legend } from '@/lib/types/geoserver-types';
 import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
 import Point from "@arcgis/core/geometry/Point.js";
 import { MAP_PIN_ICON } from '@/assets/icons';
+import Polygon from '@arcgis/core/geometry/Polygon';
+import proj4 from 'proj4';
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -604,3 +606,142 @@ export async function fetchGetFeatureInfo({
 
     return featureInfo;
 }
+
+// Define coordinate systems
+proj4.defs("EPSG:26912", "+proj=utm +zone=12 +datum=NAD83 +units=m +no_defs");
+proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
+
+interface HighlightOptions {
+    fillColor?: [number, number, number, number];
+    outlineColor?: [number, number, number, number];
+    outlineWidth?: number;
+    pointSize?: number;
+}
+
+const defaultHighlightOptions: HighlightOptions = {
+    fillColor: [0, 0, 0, 0], // Transparent fill
+    outlineColor: [255, 255, 0, 1],
+    outlineWidth: 2,
+    pointSize: 12
+};
+
+export const convertCoordinates = (coordinates: number[][][]): number[][] => {
+    return coordinates.flatMap(linestring =>
+        linestring.map(point =>
+            proj4("EPSG:26912", "EPSG:4326", point)
+        )
+    );
+};
+
+export const extractCoordinates = (feature: Feature<Geometry, GeoJsonProperties>): number[][][] => {
+    switch (feature.geometry.type) {
+        case 'Point':
+            return [[feature.geometry.coordinates as number[]]];
+        case 'LineString':
+            return [feature.geometry.coordinates as number[][]];
+        case 'MultiLineString':
+            return feature.geometry.coordinates as number[][][];
+        case 'Polygon':
+            return feature.geometry.coordinates;
+        case 'MultiPolygon':
+            return feature.geometry.coordinates.flatMap(polygon => polygon);
+        default:
+            console.warn('Unsupported geometry type');
+            return [];
+    }
+};
+
+export const createHighlightGraphic = (
+    feature: Feature<Geometry, GeoJsonProperties>,
+    options: HighlightOptions = {}
+): Graphic[] => {
+    const mergedOptions = { ...defaultHighlightOptions, ...options };
+    const coordinates = extractCoordinates(feature);
+    const convertedCoordinates = convertCoordinates(coordinates);
+    const graphics: Graphic[] = [];
+
+    switch (feature.geometry.type) {
+        case 'Point':
+            const pointSymbol = {
+                type: 'simple-marker',
+                color: mergedOptions.fillColor,
+                size: mergedOptions.pointSize,
+                outline: {
+                    color: mergedOptions.outlineColor,
+                    width: mergedOptions.outlineWidth
+                }
+            };
+
+            graphics.push(new Graphic({
+                geometry: new Point({
+                    x: convertedCoordinates[0][0],
+                    y: convertedCoordinates[0][1],
+                    spatialReference: { wkid: 4326 }
+                }),
+                symbol: pointSymbol
+            }));
+            break;
+
+        case 'LineString':
+        case 'MultiLineString':
+            coordinates.forEach(lineSegment => {
+                const convertedSegment = convertCoordinates([lineSegment]);
+                const polylineSymbol = {
+                    type: 'simple-line',
+                    color: mergedOptions.outlineColor,
+                    width: mergedOptions.outlineWidth
+                };
+
+                graphics.push(new Graphic({
+                    geometry: new Polyline({
+                        paths: [convertedSegment],
+                        spatialReference: { wkid: 4326 }
+                    }),
+                    symbol: polylineSymbol
+                }));
+            });
+            break;
+
+        case 'Polygon':
+        case 'MultiPolygon':
+            coordinates.forEach(polygonRing => {
+                const convertedRing = convertCoordinates([polygonRing]);
+                const polygonSymbol = {
+                    type: 'simple-fill',
+                    color: mergedOptions.fillColor,
+                    outline: {
+                        color: mergedOptions.outlineColor,
+                        width: mergedOptions.outlineWidth
+                    }
+                };
+
+                graphics.push(new Graphic({
+                    geometry: new Polygon({
+                        rings: [convertedRing],
+                        spatialReference: { wkid: 4326 }
+                    }),
+                    symbol: polygonSymbol
+                }));
+            });
+            break;
+    }
+
+    return graphics;
+};
+
+export const highlightFeature = (
+    feature: Feature<Geometry, GeoJsonProperties>,
+    view: __esri.MapView | __esri.SceneView,
+    options?: HighlightOptions
+) => {
+    // Clear previous highlights
+    view.graphics.removeAll();
+
+    // Create and add new highlight graphics
+    const graphics = createHighlightGraphic(feature, options);
+    graphics.forEach(graphic => view.graphics.add(graphic));
+
+    // Return the converted coordinates for zooming
+    const coordinates = extractCoordinates(feature);
+    return convertCoordinates(coordinates);
+};

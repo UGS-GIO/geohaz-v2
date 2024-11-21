@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { Button } from "@/components/ui/button"
@@ -6,6 +6,15 @@ import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-rea
 import { GenericPopup } from "./generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
 import { cn } from "@/lib/utils"
+import proj4 from 'proj4';
+import { MapContext } from "@/context/map-provider"
+import Graphic from "@arcgis/core/Graphic"
+import Polyline from "@arcgis/core/geometry/Polyline"
+import Point from "@arcgis/core/geometry/Point"
+import Polygon from "@arcgis/core/geometry/Polygon"
+import { highlightFeature, createHighlightGraphic } from '@/lib/mapping-utils';
+
+
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
@@ -76,6 +85,7 @@ function PopupContentWithPagination({ layerContent, onSectionChange
 }: SidebarInsetWithPaginationProps) {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
+    const { view } = useContext(MapContext)
 
     const sectionIds = useMemo(
         () => layerContent.map(layer => `section-${layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle}`),
@@ -140,11 +150,30 @@ function PopupContentWithPagination({ layerContent, onSectionChange
             currentPage * itemsPerPage
         )
 
+        // Determine layout based on number of fields
         const layout = Object.keys(popupFields).length > 5 ? "grid" : "stacked"
 
-        const handleZoomToFeature = () => {
-            console.log("TODO: Zoom to feature")
-        }
+        // Define coordinate systems (do this once, outside the function)
+        proj4.defs("EPSG:26912", "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs");
+        proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
+
+        const handleZoomToFeature = (feature: Feature<Geometry, GeoJsonProperties>) => {
+            console.log('Zooming to feature:', feature);
+
+            // Use the highlight utility
+            const convertedCoordinates = highlightFeature(feature, view!, {
+                fillColor: [0, 0, 0, 0],
+                outlineColor: [255, 255, 0, 1],
+                outlineWidth: 4,
+                pointSize: 12
+            });
+
+            // Zoom to the feature
+            view?.goTo({
+                target: convertedCoordinates,
+                zoom: 15
+            });
+        };
 
         return (
             <div className="scroll-smooth">
@@ -152,7 +181,7 @@ function PopupContentWithPagination({ layerContent, onSectionChange
                     {paginatedFeatures.map((feature, idx) => (
                         <div className="border border-secondary p-4 rounded space-y-2" key={idx}>
                             <div className="flex justify-end">
-                                <Button onClick={handleZoomToFeature} variant={'secondary'}>
+                                <Button onClick={() => handleZoomToFeature(feature)} variant={'secondary'}>
                                     Zoom to Feature
                                 </Button>
                             </div>
