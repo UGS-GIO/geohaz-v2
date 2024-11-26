@@ -40,7 +40,7 @@ function addGraphic(
 
 type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
 
-function GeologicalUnitSearch() {
+function ReportGenerator() {
   const { view } = useContext(MapContext);
   const [activeButton, setActiveButton] = useState<ActiveButtonOptions>();
   const tempGraphicsLayer = useRef<__esri.GraphicsLayer | undefined>(undefined);
@@ -182,4 +182,4 @@ function GeologicalUnitSearch() {
   );
 }
 
-export default GeologicalUnitSearch;
+export default ReportGenerator;

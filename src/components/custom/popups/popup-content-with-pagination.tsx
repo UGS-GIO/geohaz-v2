@@ -6,6 +6,7 @@ import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-rea
 import { GenericPopup } from "./generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
 import { cn } from "@/lib/utils"
+import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
@@ -72,10 +73,10 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
     )
 }
 
-function PopupContentWithPagination({ layerContent, onSectionChange
-}: SidebarInsetWithPaginationProps) {
+const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarInsetWithPaginationProps) => {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
+    const buttons = useGetPopupButtons()
 
     const sectionIds = useMemo(
         () => layerContent.map(layer => `section-${layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle}`),
@@ -151,11 +152,14 @@ function PopupContentWithPagination({ layerContent, onSectionChange
                 <div className="space-y-4">
                     {paginatedFeatures.map((feature, idx) => (
                         <div className="border border-secondary p-4 rounded space-y-2" key={idx}>
-                            <div className="flex justify-end">
-                                <Button onClick={handleZoomToFeature} variant={'secondary'}>
+                            {/* Buttons line */}
+                            <div className="flex justify-end gap-2">
+                                <Button onClick={handleZoomToFeature} variant="secondary">
                                     Zoom to Feature
                                 </Button>
+                                {buttons && buttons.map((button) => button)} {/* Render popup buttons */}
                             </div>
+                            {/* Popup content */}
                             <GenericPopup
                                 feature={feature}
                                 layout={layout}
