@@ -604,11 +604,52 @@ export async function fetchGetFeatureInfo({
 
     const featureInfo = await response.json();
 
-    return featureInfo;
+    // Map features to their corresponding namespace
+    const namespaceMap = visibleLayers.reduce((acc, layer) => {
+        const [namespace, layerName] = layer.split(':'); // Split into namespace and layer name
+        if (namespace && layerName) {
+            acc[layerName] = namespace;
+        }
+        return acc;
+    }, {} as Record<string, string>);
+
+    // Add namespace to each feature in the response
+    const featuresWithNamespace = featureInfo.features.map((feature: any) => {
+        const layerName = feature.id?.split('.')[0]; // Extract layer name from feature ID (e.g., "layerName.123")
+        const namespace = namespaceMap[layerName] || null; // Get namespace or null if not found
+        return {
+            ...feature,
+            namespace, // Add namespace to the feature
+        };
+    });
+
+    return { ...featureInfo, features: featuresWithNamespace };
+}
+
+export async function fetchWfsGeometry({ namespace, featureId }: { namespace: string; featureId: string }) {
+    const baseUrl = 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/wfs'
+    const params = new URLSearchParams({
+        SERVICE: 'WFS',
+        REQUEST: 'GetFeature',
+        VERSION: '2.0.0',
+        TYPENAMES: `${namespace}:${featureId.split('.')[0]}`, // Extract typename from featureId
+        OUTPUTFORMAT: 'application/json',
+        SRSNAME: 'EPSG:26912',
+        FEATUREID: featureId,
+    })
+
+    const url = `${baseUrl}?${params.toString()}`
+
+    const response = await fetch(url)
+    if (!response.ok) {
+        throw new Error(`Failed to fetch WFS feature: ${response.status}`)
+    }
+
+    return response.json()
 }
 
 // Define coordinate systems
-proj4.defs("EPSG:26912", "+proj=utm +zone=12 +datum=NAD83 +units=m +no_defs");
+proj4.defs("EPSG:26912", "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs");
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 
 interface HighlightOptions {
@@ -627,9 +668,21 @@ const defaultHighlightOptions: HighlightOptions = {
 
 export const convertCoordinates = (coordinates: number[][][]): number[][] => {
     return coordinates.flatMap(linestring =>
-        linestring.map(point =>
-            proj4("EPSG:26912", "EPSG:4326", point)
-        )
+        linestring.map(point => {
+            try {
+                // Explicitly convert with more verbose proj4 definition
+                const converted = proj4(
+                    "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
+                    "+proj=longlat +datum=WGS84 +no_defs",
+                    point
+                );
+
+                return converted;
+            } catch (error) {
+                console.error('Conversion error:', error);
+                return point; // fallback
+            }
+        })
     );
 };
 

@@ -8,21 +8,21 @@ import { RelatedTable } from "@/lib/types/mapping-types"
 import { cn } from "@/lib/utils"
 import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
-import Graphic from "@arcgis/core/Graphic"
-import Polyline from "@arcgis/core/geometry/Polyline"
-import Point from "@arcgis/core/geometry/Point"
-import Polygon from "@arcgis/core/geometry/Polygon"
-import { highlightFeature, createHighlightGraphic } from '@/lib/mapping-utils';
+import { highlightFeature, fetchWfsGeometry } from '@/lib/mapping-utils';
 
 
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
+interface ExtendedFeature extends Feature<Geometry, GeoJsonProperties> {
+    namespace: string; // Add the namespace property
+}
+
 interface SidebarInsetWithPaginationProps {
     layerContent: {
         groupLayerTitle: string
         layerTitle: string
-        features: Feature<Geometry, GeoJsonProperties>[]
+        features: ExtendedFeature[]
         popupFields?: Record<string, string>
         relatedTables?: RelatedTable[]
     }[]
@@ -139,7 +139,7 @@ function PopupContentWithPagination({ layerContent, onSectionChange
     }
 
     const renderPaginatedFeatures = (
-        features: Feature<Geometry, GeoJsonProperties>[],
+        features: ExtendedFeature[],
         popupFields: Record<string, string>,
         relatedTables: RelatedTable[],
         layerTitle: string
@@ -157,11 +157,14 @@ function PopupContentWithPagination({ layerContent, onSectionChange
         proj4.defs("EPSG:26912", "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs");
         proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 
-        const handleZoomToFeature = (feature: Feature<Geometry, GeoJsonProperties>) => {
-            console.log('Zooming to feature:', feature);
+        const handleZoomToFeature = async (feature: ExtendedFeature) => {
+            const wfsGeometry = await fetchWfsGeometry({
+                namespace: feature.namespace,
+                featureId: feature.id!.toString()
+            });
 
             // Use the highlight utility
-            const convertedCoordinates = highlightFeature(feature, view!, {
+            const convertedCoordinates = highlightFeature(wfsGeometry.features[0], view!, {
                 fillColor: [0, 0, 0, 0],
                 outlineColor: [255, 255, 0, 1],
                 outlineWidth: 4,
