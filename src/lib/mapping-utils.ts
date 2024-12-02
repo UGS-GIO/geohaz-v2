@@ -666,6 +666,40 @@ const defaultHighlightOptions: HighlightOptions = {
     pointSize: 12
 };
 
+export const convertCoordinate = (point: number[], sourceEPSG: string = "EPSG:26912", targetEPSG: string = "EPSG:4326"): number[] => {
+    try {
+        const converted = proj4(
+            sourceEPSG,
+            targetEPSG,
+            point
+        );
+
+        return converted;
+    } catch (error) {
+        console.error('Coordinate conversion error:', error);
+        return point; // fallback to original point
+    }
+};
+
+export const convertBbox = (bbox: number[], sourceEPSG: string = "EPSG:26912", targetEPSG: string = "EPSG:4326"): number[] => {
+    try {
+        // Convert each corner of the bbox
+        const minXConverted = convertCoordinate([bbox[0], bbox[1]], sourceEPSG, targetEPSG);
+        const maxXConverted = convertCoordinate([bbox[2], bbox[3]], sourceEPSG, targetEPSG);
+
+        // Return in [minX, minY, maxX, maxY] format for target coordinate system
+        return [
+            minXConverted[0],
+            minXConverted[1],
+            maxXConverted[0],
+            maxXConverted[1]
+        ];
+    } catch (error) {
+        console.error('Bbox conversion error:', error);
+        return bbox; // fallback to original bbox
+    }
+};
+
 export const convertCoordinates = (coordinates: number[][][]): number[][] => {
     return coordinates.flatMap(linestring =>
         linestring.map(point => {

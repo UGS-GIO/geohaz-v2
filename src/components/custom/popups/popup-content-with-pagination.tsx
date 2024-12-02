@@ -8,7 +8,8 @@ import { RelatedTable } from "@/lib/types/mapping-types"
 import { cn } from "@/lib/utils"
 import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
-import { highlightFeature, fetchWfsGeometry } from '@/lib/mapping-utils';
+import { highlightFeature, fetchWfsGeometry, convertBbox } from '@/lib/mapping-utils';
+import Extent from "@arcgis/core/geometry/Extent"
 
 
 
@@ -164,18 +165,27 @@ function PopupContentWithPagination({ layerContent, onSectionChange
             });
 
             // Use the highlight utility
-            const convertedCoordinates = highlightFeature(wfsGeometry.features[0], view!, {
+            highlightFeature(wfsGeometry.features[0], view!, {
                 fillColor: [0, 0, 0, 0],
                 outlineColor: [255, 255, 0, 1],
                 outlineWidth: 4,
                 pointSize: 12
             });
 
-            // Zoom to the feature
-            view?.goTo({
-                target: convertedCoordinates,
-                zoom: 15
-            });
+            if (feature.bbox) {
+                const bbox = convertBbox(feature.bbox)
+
+                // Zoom to the feature
+                view?.goTo({
+                    target: new Extent({
+                        xmin: bbox[0],
+                        ymin: bbox[1],
+                        xmax: bbox[2],
+                        ymax: bbox[3],
+                        spatialReference: { wkid: 4326 } // WGS84
+                    })
+                });
+            }
         };
 
         return (
