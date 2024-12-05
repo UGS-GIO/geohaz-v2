@@ -76,6 +76,8 @@ export default function ArcGISMap() {
 
         if (!view || isDragging) return; // Skip click if dragging or no view
 
+        view?.graphics.removeAll(); // Clear any existing graphics
+
         if (e.button === 0) {
             const layers = getVisibleLayers({ view });
             const visibleLayersMap = layers.layerVisibilityMap;

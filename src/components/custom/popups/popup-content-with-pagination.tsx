@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { Button } from "@/components/ui/button"
@@ -6,15 +6,25 @@ import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-rea
 import { GenericPopup } from "./generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
 import { cn } from "@/lib/utils"
+import proj4 from 'proj4';
+import { MapContext } from "@/context/map-provider"
+import { highlightFeature, fetchWfsGeometry, convertBbox } from '@/lib/mapping-utils';
+import Extent from "@arcgis/core/geometry/Extent"
+
+
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
+
+export interface ExtendedFeature extends Feature<Geometry, GeoJsonProperties> {
+    namespace: string; // Add the namespace property
+}
 
 interface SidebarInsetWithPaginationProps {
     layerContent: {
         groupLayerTitle: string
         layerTitle: string
-        features: Feature<Geometry, GeoJsonProperties>[]
+        features: ExtendedFeature[]
         popupFields?: Record<string, string>
         relatedTables?: RelatedTable[]
     }[]
@@ -76,6 +86,7 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
 const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarInsetWithPaginationProps) => {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [paginationStates, setPaginationStates] = useState<{ [layerTitle: string]: number }>({})
+    const { view } = useContext(MapContext)
     const buttons = useGetPopupButtons()
 
     const sectionIds = useMemo(
@@ -130,7 +141,7 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
     }
 
     const renderPaginatedFeatures = (
-        features: Feature<Geometry, GeoJsonProperties>[],
+        features: ExtendedFeature[],
         popupFields: Record<string, string>,
         relatedTables: RelatedTable[],
         layerTitle: string
@@ -141,20 +152,50 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
             currentPage * itemsPerPage
         )
 
+        // Determine layout based on number of fields
         const layout = Object.keys(popupFields).length > 5 ? "grid" : "stacked"
 
-        const handleZoomToFeature = () => {
-            console.log("TODO: Zoom to feature")
-        }
+        // Define coordinate systems (do this once, outside the function)
+        proj4.defs("EPSG:26912", "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs");
+        proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
+
+        const handleZoomToFeature = async (feature: ExtendedFeature) => {
+            const wfsGeometry = await fetchWfsGeometry({
+                namespace: feature.namespace,
+                featureId: feature.id!.toString()
+            });
+
+            // Use the highlight utility
+            highlightFeature(wfsGeometry.features[0], view!, {
+                fillColor: [0, 0, 0, 0],
+                outlineColor: [255, 255, 0, 1],
+                outlineWidth: 4,
+                pointSize: 12
+            });
+
+            if (feature.bbox) {
+                const bbox = convertBbox(feature.bbox)
+
+                // Zoom to the feature
+                view?.goTo({
+                    target: new Extent({
+                        xmin: bbox[0],
+                        ymin: bbox[1],
+                        xmax: bbox[2],
+                        ymax: bbox[3],
+                        spatialReference: { wkid: 4326 } // WGS84
+                    })
+                });
+            }
+        };
 
         return (
             <div className="scroll-smooth">
                 <div className="space-y-4">
                     {paginatedFeatures.map((feature, idx) => (
                         <div className="border border-secondary p-4 rounded space-y-2" key={idx}>
-                            {/* Buttons line */}
                             <div className="flex justify-end gap-2">
-                                <Button onClick={handleZoomToFeature} variant="secondary">
+                                <Button onClick={() => handleZoomToFeature(feature)} variant={'secondary'}>
                                     Zoom to Feature
                                 </Button>
                                 {buttons && buttons.map((button) => button)} {/* Render popup buttons */}
