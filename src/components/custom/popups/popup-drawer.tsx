@@ -6,7 +6,8 @@ import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerT
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/hooks/use-sidebar";
-import { PopupContentWithPagination } from "./popup-content-with-pagination";
+import { ExtendedFeature, PopupContentWithPagination } from "./popup-content-with-pagination";
+import { RelatedTable } from "@/lib/types/mapping-types";
 
 interface PopupContent {
     features: Feature[];
@@ -127,7 +128,7 @@ function PopupDrawer({
                             className={cn(`flex flex-1 flex-col gap-4 p-4 overflow-y-auto select-text`)}
                         >
                             <PopupContentWithPagination
-                                layerContent={layerContent}
+                                layerContent={layerContent as unknown as { groupLayerTitle: string; layerTitle: string; features: ExtendedFeature[]; popupFields?: Record<string, string> | undefined; relatedTables?: RelatedTable[] | undefined; }[]} // TODO: fix this
                                 onSectionChange={onSectionChange}
                             />
                         </div>

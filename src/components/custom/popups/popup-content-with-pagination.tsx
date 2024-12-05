@@ -15,7 +15,7 @@ import Extent from "@arcgis/core/geometry/Extent"
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
-interface ExtendedFeature extends Feature<Geometry, GeoJsonProperties> {
+export interface ExtendedFeature extends Feature<Geometry, GeoJsonProperties> {
     namespace: string; // Add the namespace property
 }
 
