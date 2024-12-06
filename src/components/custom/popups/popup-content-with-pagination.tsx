@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-react"
 import { GenericPopup } from "./generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
-import { cn } from "@/lib/utils"
 import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
 import { highlightFeature, fetchWfsGeometry, convertBbox } from '@/lib/mapping-utils';
@@ -13,6 +12,7 @@ import Extent from "@arcgis/core/geometry/Extent"
 
 
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
+import { Separator } from "@/components/ui/separator"
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
@@ -144,7 +144,8 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
         features: ExtendedFeature[],
         popupFields: Record<string, string>,
         relatedTables: RelatedTable[],
-        layerTitle: string
+        layerTitle: string,
+        groupLayerTitle: string
     ) => {
         const currentPage = paginationStates[layerTitle] || 1
         const paginatedFeatures = features.slice(
@@ -187,19 +188,39 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
                     })
                 });
             }
-        };
+        }
+
+        const PopupButtons = ({ feature }: { feature: ExtendedFeature }) => (
+            <div className="flex justify-start gap-2">
+                <Button onClick={() => handleZoomToFeature(feature)} variant={'secondary'}>
+                    Zoom to Feature
+                </Button>
+                {buttons && buttons.map((button) => button)} {/* Render popup buttons */}
+            </div>
+        )
 
         return (
             <div className="scroll-smooth">
                 <div className="space-y-4">
                     {paginatedFeatures.map((feature, idx) => (
-                        <div className="border border-secondary p-4 rounded space-y-2" key={idx}>
-                            <div className="flex justify-end gap-2">
-                                <Button onClick={() => handleZoomToFeature(feature)} variant={'secondary'}>
-                                    Zoom to Feature
-                                </Button>
-                                {buttons && buttons.map((button) => button)} {/* Render popup buttons */}
+                        <div className="border border-secondary p-4 rounded space-y-2 gap-4" key={idx}>
+                            {/* put the title and pagination here */}
+                            <div className="flex flex-col gap-2">
+                                <h3 className="text-xl font-semibold text-primary">
+                                    {groupLayerTitle}
+                                    {layerTitle && ` - ${layerTitle}`}
+                                </h3>
+                                <PopupPagination
+                                    showPagination={features.length > ITEMS_PER_PAGE_OPTIONS[0]}
+                                    currentPage={paginationStates[layerTitle] || 1}
+                                    totalPages={Math.ceil(features.length / itemsPerPage)}
+                                    handlePageChange={(page) => handlePageChange(layerTitle, page)}
+                                    itemsPerPage={itemsPerPage}
+                                    onItemsPerPageChange={setItemsPerPage}
+                                />
                             </div>
+                            <Separator decorative className="bg-secondary" />
+                            <PopupButtons feature={feature} />
                             {/* Popup content */}
                             <GenericPopup
                                 feature={feature}
@@ -218,41 +239,20 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
         <div className="flex flex-1 flex-col gap-4 px-2 overflow-y-auto select-text h-full scrollable-container">
             {layerContent.map((layer) => {
                 const features = layer.features
-                const title = layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle
-                const sectionId = `section-${title}`
+                // const title = layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle
+                // const sectionId = `section-${title}`
 
                 return (
                     <div key={layer.layerTitle} className="relative">
                         {features.length > 0 && (
                             <div>
-                                <div
-                                    id={sectionId}
-                                    className={cn(
-                                        "bg-background z-10 p-4",
-                                        "border border-primary rounded shadow-sm",
-                                    )}
-                                >
-                                    <div className="flex flex-col gap-2">
-                                        <h3 className="text-xl font-semibold text-primary">
-                                            {layer.groupLayerTitle}
-                                            {layer.layerTitle && ` - ${layer.layerTitle}`}
-                                        </h3>
-                                        <PopupPagination
-                                            showPagination={features.length > ITEMS_PER_PAGE_OPTIONS[0]}
-                                            currentPage={paginationStates[layer.layerTitle] || 1}
-                                            totalPages={Math.ceil(features.length / itemsPerPage)}
-                                            handlePageChange={(page) => handlePageChange(layer.layerTitle, page)}
-                                            itemsPerPage={itemsPerPage}
-                                            onItemsPerPageChange={setItemsPerPage}
-                                        />
-                                    </div>
-                                </div>
                                 <div className="mt-4">
                                     {renderPaginatedFeatures(
                                         features,
                                         layer.popupFields || {},
                                         layer.relatedTables || [],
-                                        layer.layerTitle
+                                        layer.layerTitle,
+                                        layer.groupLayerTitle
                                     )}
                                 </div>
                             </div>
