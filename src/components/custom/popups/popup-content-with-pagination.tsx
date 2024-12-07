@@ -11,6 +11,8 @@ import { highlightFeature, fetchWfsGeometry, convertBbox } from '@/lib/mapping-u
 import Extent from "@arcgis/core/geometry/Extent"
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
+import { Separator } from "@/components/ui/separator"
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
 
@@ -116,59 +118,35 @@ const LayerCard = ({
     )
 
     return (
-        <Card
-            id={`section-${layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle}`}
-            className="w-full"
-        >
-            <CardHeader>
-                <CardTitle>
-                    {layer.groupLayerTitle}
-                    {layer.layerTitle && ` - ${layer.layerTitle}`}
-                </CardTitle>
-                {layer.features.length > ITEMS_PER_PAGE_OPTIONS[0] && (
-                    <PopupPagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        handlePageChange={handlePageChange}
-                        itemsPerPage={itemsPerPage}
-                        onItemsPerPageChange={setItemsPerPage}
-                    />
-                )}
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <div>
+            {layer.features.length > ITEMS_PER_PAGE_OPTIONS[0] && (
+                <PopupPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    handlePageChange={handlePageChange}
+                    itemsPerPage={itemsPerPage}
+                    onItemsPerPageChange={setItemsPerPage}
+                />
+            )}
+            <div className="flex flex-col gap-6">
                 {paginatedFeatures.map((feature, idx) => (
-                    <div
-                        key={idx}
-                        className={`
-                            space-y-4 
-                            p-4 
-                            rounded-lg 
-                            ${idx % 2 === 0 ? 'bg-secondary/10' : 'bg-secondary/5'}
-                            border 
-                            border-secondary/20
-                        `}
-                    >
-                        {/* <div className="space-y-2">
-                            <h4 className="text-lg font-semibold text-foreground">
-                                Feature {idx + 1}
-                                {layer.layerTitle && ` - ${layer.layerTitle}`}
-                            </h4>
-                            <Separator decorative className="bg-secondary" />
-                        </div> */}
-
-                        <PopupButtons feature={feature} />
-
-                        <GenericPopup
-                            feature={feature}
-                            layout={layer.popupFields &&
-                                Object.keys(layer.popupFields).length > 5 ? "grid" : "stacked"}
-                            popupFields={layer.popupFields || {}}
-                            relatedTable={layer.relatedTables}
-                        />
+                    <div key={idx}>
+                        <div className="space-y-4">
+                            <PopupButtons feature={feature} />
+                            <GenericPopup
+                                feature={feature}
+                                layout={layer.popupFields &&
+                                    Object.keys(layer.popupFields).length > 5 ? "grid" : "stacked"}
+                                popupFields={layer.popupFields || {}}
+                                relatedTable={layer.relatedTables}
+                            />
+                        </div>
+                        {/* Add Separator after each feature except the last */}
+                        {idx < paginatedFeatures.length - 1 && <Separator decorative className="bg-secondary mt-4" />}
                     </div>
                 ))}
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     )
 }
 
@@ -177,7 +155,7 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
     const buttons = useGetPopupButtons()
 
     const sectionIds = useMemo(
-        () => layerContent.map(layer => `section-${layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle}`),
+        () => layerContent.map(layer => `section - ${layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle}`),
         [layerContent]
     )
 
@@ -250,15 +228,27 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
     return (
         <div className="flex flex-1 flex-col gap-4 px-2 overflow-y-auto select-text h-full scrollable-container">
             {layerContent.map((layer, layerIndex) => (
-                <LayerCard
-                    key={layerIndex}
-                    layer={layer}
-                    buttons={buttons}
-                    handleZoomToFeature={handleZoomToFeature}
-                />
+                <div key={layerIndex} className="space-y-2">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>
+                                {layer.groupLayerTitle}
+                                {layer.layerTitle && ` - ${layer.layerTitle}`}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <LayerCard
+                                layer={layer}
+                                buttons={buttons}
+                                handleZoomToFeature={handleZoomToFeature}
+                            />
+                        </CardContent>
+                    </Card>
+                </div>
             ))}
         </div>
     )
 }
+
 
 export { PopupContentWithPagination }
