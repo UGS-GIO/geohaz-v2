@@ -11,7 +11,6 @@ import { highlightFeature, fetchWfsGeometry, convertBbox } from '@/lib/mapping-u
 import Extent from "@arcgis/core/geometry/Extent"
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
