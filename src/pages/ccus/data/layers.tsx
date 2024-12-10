@@ -155,19 +155,22 @@ const riversWMSConfig: WMSLayerProps = {
 };
 
 // Seamless Geological Units WMS Layer
-const seamlessGeolunitsLayerName = 'seamlessgeolunits';
-const seamlessGeolunitsWMSTitle = 'Seamless Geological Units (500k)';
-const seamlessGeolunitsWMSConfig: WMSLayerProps = {
+const wellWithTopsLayerName = 'wellswithtops_hascore';
+const wellWithTopsWMSTitle = 'Wells with Tops (Has Core)';
+const wellWithTopsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
-    title: seamlessGeolunitsWMSTitle,
-    visible: false,
+    title: wellWithTopsWMSTitle,
+    visible: true,
     sublayers: [
         {
-            name: `${ENERGY_MINERALS_WORKSPACE}:${seamlessGeolunitsLayerName}`,
+            name: `${ENERGY_MINERALS_WORKSPACE}:${wellWithTopsLayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {},
+            popupFields: {
+                'API': 'api',
+                'Well Name': 'wellname',
+            },
         },
     ],
 };
@@ -194,7 +197,7 @@ const EMPConfig: LayerProps = {
         pipelinesWMSConfig,
         sco2WMSConfig,
         riversWMSConfig,
-        seamlessGeolunitsWMSConfig,
+        wellWithTopsWMSConfig,
         SITLAConfig
     ]
 };
