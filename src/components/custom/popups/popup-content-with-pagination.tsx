@@ -2,7 +2,7 @@ import { useContext, useEffect, useMemo, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { Button } from "@/components/ui/button"
-import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
 import { GenericPopup } from "./generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
 import proj4 from 'proj4';
@@ -108,7 +108,8 @@ const LayerCard = ({
 
     const PopupButtons = ({ feature }: { feature: ExtendedFeature }) => (
         <div className="flex justify-start gap-2">
-            <Button onClick={() => handleZoomToFeature(feature)} variant={'secondary'}>
+            <Button variant="ghost" onClick={() => handleZoomToFeature(feature)} className="flex gap-x-2">
+                <Shrink className="h-5 w-5" />
                 Zoom to Feature
             </Button>
             {buttons && buttons.map((button) => button)}
@@ -143,19 +144,11 @@ const LayerCard = ({
                             space-y-4 
                             p-4 
                             rounded-lg 
-                            ${idx % 2 === 0 ? 'bg-secondary/10' : 'bg-secondary/5'}
+                            bg-border/50
                             border 
                             border-secondary/20
                         `}
                     >
-                        {/* <div className="space-y-2">
-                            <h4 className="text-lg font-semibold text-foreground">
-                                Feature {idx + 1}
-                                {layer.layerTitle && ` - ${layer.layerTitle}`}
-                            </h4>
-                            <Separator decorative className="bg-secondary" />
-                        </div> */}
-
                         <PopupButtons feature={feature} />
 
                         <GenericPopup

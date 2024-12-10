@@ -1,8 +1,6 @@
-// src/pages/hazards/data/popup-buttons.tsx
-
 import { Button } from "@/components/custom/button"
 import ReportGenerator from "@/components/sidebar/report-generator"
-import { FileTextIcon } from "lucide-react"
+import { FileText, FileTextIcon } from "lucide-react"
 import { useSidebar } from "@/hooks/use-sidebar"
 
 // Define ReportGeneratorButton as a React component
@@ -20,7 +18,8 @@ const ReportGeneratorButton: React.FC = () => {
     }
 
     return (
-        <Button onClick={handleReportGenerator} variant="secondary">
+        <Button onClick={handleReportGenerator} variant="ghost" className="flex gap-x-2">
+            <FileText className='stroke-foreground h-5 w-5' />
             Report Generator
         </Button>
     )
