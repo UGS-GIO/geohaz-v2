@@ -21,6 +21,8 @@ import Point from "@arcgis/core/geometry/Point.js";
 import { MAP_PIN_ICON } from '@/assets/icons';
 import Polygon from '@arcgis/core/geometry/Polygon';
 import proj4 from 'proj4';
+import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
+import Extent from '@arcgis/core/geometry/Extent';
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -832,3 +834,31 @@ export const highlightFeature = (
     const coordinates = extractCoordinates(feature);
     return convertCoordinates(coordinates);
 };
+
+export const highlighAndZoomToFeature = async (feature: ExtendedFeature, view: __esri.MapView | __esri.SceneView) => {
+    const wfsGeometry = await fetchWfsGeometry({
+        namespace: feature.namespace,
+        featureId: feature.id!.toString()
+    });
+
+    highlightFeature(wfsGeometry.features[0], view!, {
+        fillColor: [0, 0, 0, 0],
+        outlineColor: [255, 255, 0, 1],
+        outlineWidth: 4,
+        pointSize: 12
+    });
+
+    if (feature.bbox) {
+        const bbox = convertBbox(feature.bbox)
+
+        view?.goTo({
+            target: new Extent({
+                xmin: bbox[0],
+                ymin: bbox[1],
+                xmax: bbox[2],
+                ymax: bbox[3],
+                spatialReference: { wkid: 4326 }
+            })
+        });
+    }
+}
