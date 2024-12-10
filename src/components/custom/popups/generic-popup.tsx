@@ -19,6 +19,7 @@ const GenericPopup = ({ feature, relatedTable, popupFields, layout }: ReusablePo
     if (error) return <p>Error: {String(error)}</p>;
 
     const properties = feature.properties || {};
+    const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/;
 
     const getRelatedValues = (field: string) => {
         if (!data || data.length === 0) return ["No data available"];
@@ -41,48 +42,106 @@ const GenericPopup = ({ feature, relatedTable, popupFields, layout }: ReusablePo
         return matchedValues.length > 0 ? matchedValues : ["N/A"];
     };
 
-    const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/;
+    const renderValue = (value: string) => {
+        if (urlPattern.test(value)) {
+            return (
+                <Button
+                    className="px-0 h-auto whitespace-normal text-left font-normal inline-flex items-start max-w-full"
+                    variant={'link'}
+                    onClick={() => window.open(value, '_blank')}
+                >
+                    <span className="break-all inline-block">{value}</span>
+                    <ExternalLink className="flex-shrink-0 ml-1 mt-1" size={16} />
+                </Button>
+            );
+        }
+        return value ?? "N/A";
+    };
+
     const featureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
 
-    const featureContent = featureEntries.map(([label, field]) => {
-        const value = popupFields ? properties[field] : field;
+    const { urlContent, longTextContent, regularContent } = featureEntries.reduce<{
+        urlContent: JSX.Element[];
+        longTextContent: JSX.Element[];
+        regularContent: JSX.Element[];
+    }>(
+        (acc, [label, field]) => {
+            const value = popupFields ? properties[field] : field;
+            if (!value) return acc;
 
-        return (
-            value && (
+            const content = (
                 <div key={label} className="flex flex-col">
                     <p className="font-bold underline text-primary">{label}</p>
                     <p className="break-words">
-                        {urlPattern.test(value) ? (
-                            <Button className="px-0" variant={'link'} onClick={() => window.open(value, '_blank')}>
-                                {value}&nbsp;<ExternalLink size={16} />
-                            </Button>
-                        ) : (
-                            value ?? "N/A"
-                        )}
+                        {renderValue(value)}
                     </p>
                 </div>
-            )
-        );
-    });
+            );
 
-    const relatedContent = relatedTables.map((table, index) => (
-        <div key={index} className="flex flex-col">
-            <p className="font-bold underline text-primary">
-                {properties[table.fieldLabel]}
-            </p>
-            <p className="break-words">
-                {getRelatedValues(table.targetField).join(", ")}
-            </p>
-        </div>
-    ));
+            if (urlPattern.test(value)) {
+                acc.urlContent.push(content);
+            } else if (String(value).split(/\s+/).length > 20) {
+                acc.longTextContent.push(content);
+            } else {
+                acc.regularContent.push(content);
+            }
 
-    const useGridLayout = layout === "grid" || featureEntries.length > 5;
-    const containerClass = useGridLayout ? "grid grid-cols-2 gap-4" : "space-y-4";
+            return acc;
+        },
+        { urlContent: [], longTextContent: [], regularContent: [] }
+    );
+
+    const { longRelatedContent, regularRelatedContent } = relatedTables.reduce<{
+        longRelatedContent: JSX.Element[];
+        regularRelatedContent: JSX.Element[];
+    }>(
+        (acc, table, index) => {
+            const values = getRelatedValues(table.targetField);
+            const content = (
+                <div key={index} className="flex flex-col">
+                    <p className="font-bold underline text-primary">
+                        {properties[table.fieldLabel]}
+                    </p>
+                    <p className="break-words">
+                        {values.join(", ")}
+                    </p>
+                </div>
+            );
+
+            const totalWords = values.join(", ").split(/\s+/).length;
+            if (totalWords > 20) {
+                acc.longRelatedContent.push(content);
+            } else {
+                acc.regularRelatedContent.push(content);
+            }
+
+            return acc;
+        },
+        { longRelatedContent: [], regularRelatedContent: [] }
+    );
+
+    const useGridLayout = layout === "grid" || regularContent.length > 5;
+    const regularContainerClass = useGridLayout ? "grid grid-cols-2 gap-4" : "space-y-4";
 
     return (
-        <div className={containerClass}>
-            {featureContent}
-            {relatedContent}
+        <div className="space-y-4">
+            {(longTextContent.length > 0 || longRelatedContent.length > 0) && (
+                <div className="space-y-4 col-span-full">
+                    {longTextContent}
+                    {longRelatedContent}
+                </div>
+            )}
+
+            <div className={regularContainerClass}>
+                {regularContent}
+                {regularRelatedContent}
+            </div>
+
+            {urlContent.length > 0 && (
+                <div className="space-y-4 col-span-full">
+                    {urlContent}
+                </div>
+            )}
         </div>
     );
 };
