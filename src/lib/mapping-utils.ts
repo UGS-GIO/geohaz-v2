@@ -13,12 +13,16 @@ import Popup from "@arcgis/core/widgets/Popup";
 import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
-import { Feature, FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { createEsriSymbol } from '@/lib/legend/symbol-generator';
 import { Legend } from '@/lib/types/geoserver-types';
 import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
 import Point from "@arcgis/core/geometry/Point.js";
 import { MAP_PIN_ICON } from '@/assets/icons';
+import Polygon from '@arcgis/core/geometry/Polygon';
+import proj4 from 'proj4';
+import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
+import Extent from '@arcgis/core/geometry/Extent';
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -602,5 +606,270 @@ export async function fetchGetFeatureInfo({
 
     const featureInfo = await response.json();
 
-    return featureInfo;
+    // Map features to their corresponding namespace
+    const namespaceMap = visibleLayers.reduce((acc, layer) => {
+        const [namespace, layerName] = layer.split(':'); // Split into namespace and layer name
+        if (namespace && layerName) {
+            acc[layerName] = namespace;
+        }
+        return acc;
+    }, {} as Record<string, string>);
+
+    // Add namespace to each feature in the response
+    const featuresWithNamespace = featureInfo.features.map((feature: any) => {
+        const layerName = feature.id?.split('.')[0]; // Extract layer name from feature ID (e.g., "layerName.123")
+        const namespace = namespaceMap[layerName] || null; // Get namespace or null if not found
+        return {
+            ...feature,
+            namespace, // Add namespace to the feature
+        };
+    });
+
+    return { ...featureInfo, features: featuresWithNamespace };
+}
+
+export async function fetchWfsGeometry({ namespace, featureId }: { namespace: string; featureId: string }) {
+    const baseUrl = 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/wfs'
+    const params = new URLSearchParams({
+        SERVICE: 'WFS',
+        REQUEST: 'GetFeature',
+        VERSION: '2.0.0',
+        TYPENAMES: `${namespace}:${featureId.split('.')[0]}`, // Extract typename from featureId
+        OUTPUTFORMAT: 'application/json',
+        SRSNAME: 'EPSG:26912',
+        FEATUREID: featureId,
+    })
+
+    const url = `${baseUrl}?${params.toString()}`
+
+    const response = await fetch(url)
+    if (!response.ok) {
+        throw new Error(`Failed to fetch WFS feature: ${response.status}`)
+    }
+
+    return response.json()
+}
+
+// Define coordinate systems
+proj4.defs("EPSG:26912", "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs");
+proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
+
+interface HighlightOptions {
+    fillColor?: [number, number, number, number];
+    outlineColor?: [number, number, number, number];
+    outlineWidth?: number;
+    pointSize?: number;
+}
+
+const defaultHighlightOptions: HighlightOptions = {
+    fillColor: [0, 0, 0, 0], // Transparent fill
+    outlineColor: [255, 255, 0, 1],
+    outlineWidth: 2,
+    pointSize: 12
+};
+
+export const convertCoordinate = (point: number[], sourceEPSG: string = "EPSG:26912", targetEPSG: string = "EPSG:4326"): number[] => {
+    try {
+        const converted = proj4(
+            sourceEPSG,
+            targetEPSG,
+            point
+        );
+
+        return converted;
+    } catch (error) {
+        console.error('Coordinate conversion error:', error);
+        return point; // fallback to original point
+    }
+};
+
+export const convertBbox = (bbox: number[], sourceEPSG: string = "EPSG:26912", targetEPSG: string = "EPSG:4326"): number[] => {
+    try {
+        // Convert each corner of the bbox
+        const minXConverted = convertCoordinate([bbox[0], bbox[1]], sourceEPSG, targetEPSG);
+        const maxXConverted = convertCoordinate([bbox[2], bbox[3]], sourceEPSG, targetEPSG);
+
+        // Return in [minX, minY, maxX, maxY] format for target coordinate system
+        return [
+            minXConverted[0],
+            minXConverted[1],
+            maxXConverted[0],
+            maxXConverted[1]
+        ];
+    } catch (error) {
+        console.error('Bbox conversion error:', error);
+        return bbox; // fallback to original bbox
+    }
+};
+
+export const convertCoordinates = (coordinates: number[][][]): number[][] => {
+    return coordinates.flatMap(linestring =>
+        linestring.map(point => {
+            try {
+                // Explicitly convert with more verbose proj4 definition
+                const converted = proj4(
+                    "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
+                    "+proj=longlat +datum=WGS84 +no_defs",
+                    point
+                );
+
+                return converted;
+            } catch (error) {
+                console.error('Conversion error:', error);
+                return point; // fallback
+            }
+        })
+    );
+};
+
+export const extractCoordinates = (feature: Feature<Geometry, GeoJsonProperties>): number[][][] => {
+    switch (feature.geometry.type) {
+        case 'Point':
+            return [[feature.geometry.coordinates as number[]]];
+        case 'LineString':
+            return [feature.geometry.coordinates as number[][]];
+        case 'MultiLineString':
+            return feature.geometry.coordinates as number[][][];
+        case 'Polygon':
+            return feature.geometry.coordinates;
+        case 'MultiPolygon':
+            return feature.geometry.coordinates.flatMap(polygon => polygon);
+        default:
+            console.warn('Unsupported geometry type');
+            return [];
+    }
+};
+
+export const createHighlightGraphic = (
+    feature: Feature<Geometry, GeoJsonProperties>,
+    options: HighlightOptions = {}
+): Graphic[] => {
+    const mergedOptions = { ...defaultHighlightOptions, ...options };
+    const coordinates = extractCoordinates(feature);
+    const convertedCoordinates = convertCoordinates(coordinates);
+    const graphics: Graphic[] = [];
+
+    switch (feature.geometry.type) {
+        case 'Point':
+            const pointSymbol = {
+                type: 'simple-marker',
+                color: mergedOptions.fillColor,
+                size: mergedOptions.pointSize,
+                outline: {
+                    color: mergedOptions.outlineColor,
+                    width: mergedOptions.outlineWidth
+                }
+            };
+
+            graphics.push(new Graphic({
+                geometry: new Point({
+                    x: convertedCoordinates[0][0],
+                    y: convertedCoordinates[0][1],
+                    spatialReference: { wkid: 4326 }
+                }),
+                symbol: pointSymbol
+            }));
+            break;
+
+        case 'LineString':
+        case 'MultiLineString':
+            coordinates.forEach(lineSegment => {
+                const convertedSegment = convertCoordinates([lineSegment]);
+                const polylineSymbol = {
+                    type: 'simple-line',
+                    color: mergedOptions.outlineColor,
+                    width: mergedOptions.outlineWidth
+                };
+
+                graphics.push(new Graphic({
+                    geometry: new Polyline({
+                        paths: [convertedSegment],
+                        spatialReference: { wkid: 4326 }
+                    }),
+                    symbol: polylineSymbol
+                }));
+            });
+            break;
+
+        case 'Polygon':
+        case 'MultiPolygon':
+            coordinates.forEach(polygonRing => {
+                const convertedRing = convertCoordinates([polygonRing]);
+                const polygonSymbol = {
+                    type: 'simple-fill',
+                    color: mergedOptions.fillColor,
+                    outline: {
+                        color: mergedOptions.outlineColor,
+                        width: mergedOptions.outlineWidth
+                    }
+                };
+
+                graphics.push(new Graphic({
+                    geometry: new Polygon({
+                        rings: [convertedRing],
+                        spatialReference: { wkid: 4326 }
+                    }),
+                    symbol: polygonSymbol
+                }));
+            });
+            break;
+    }
+
+    return graphics;
+};
+
+export const highlightFeature = async (
+    feature: ExtendedFeature,
+    view: __esri.MapView | __esri.SceneView,
+    options?: HighlightOptions
+) => {
+    // If the feature requires WFS geometry fetching
+    let targetFeature: Feature<Geometry, GeoJsonProperties>;
+    if ('namespace' in feature) {
+        const wfsGeometry = await fetchWfsGeometry({
+            namespace: feature.namespace,
+            featureId: feature.id!.toString()
+        });
+        targetFeature = wfsGeometry.features[0];
+    } else {
+        targetFeature = feature as Feature<Geometry, GeoJsonProperties>;
+    }
+
+    // Clear previous highlights
+    view.graphics.removeAll();
+
+    // Create and add new highlight graphics with default or provided options
+    const defaultHighlightOptions: HighlightOptions = {
+        fillColor: [0, 0, 0, 0],
+        outlineColor: [255, 255, 0, 1],
+        outlineWidth: 4,
+        pointSize: 12
+    }
+
+    const highlightOptions = { ...defaultHighlightOptions, ...options };
+    const graphics = createHighlightGraphic(targetFeature, highlightOptions);
+    graphics.forEach(graphic => view.graphics.add(graphic));
+
+    // Return the converted coordinates if needed
+    const coordinates = extractCoordinates(targetFeature);
+    return convertCoordinates(coordinates);
+}
+
+export const zoomToFeature = (
+    feature: ExtendedFeature,
+    view: __esri.MapView | __esri.SceneView
+) => {
+    if (feature.bbox) {
+        const bbox = convertBbox(feature.bbox);
+
+        view?.goTo({
+            target: new Extent({
+                xmin: bbox[0],
+                ymin: bbox[1],
+                xmax: bbox[2],
+                ymax: bbox[3],
+                spatialReference: { wkid: 4326 }
+            })
+        });
+    }
 }

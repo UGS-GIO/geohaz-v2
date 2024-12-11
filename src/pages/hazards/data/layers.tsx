@@ -166,7 +166,7 @@ const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: qFaultsWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
@@ -557,26 +557,26 @@ const calicheWMSConfig: WMSLayerProps = {
     ],
 }
 
-const floodAndDebrisLayerName = 'floodanddebrisflow';
-const floodAndDebrisWMSTitle = 'Flood and Debris-Flow Hazard';
-const floodAndDebrisWMSConfig: WMSLayerProps = {
+const alluvialFanLayerName = 'alluvialfan';
+const alluvialFanWMSTitle = 'Alluvial Fan Susceptibility';
+const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
-    title: floodAndDebrisWMSTitle,
+    title: alluvialFanWMSTitle,
     visible: false,
     sublayers: [
         {
-            name: `${HAZARDS_WORKSPACE}:${floodAndDebrisLayerName}`,
+            name: `${HAZARDS_WORKSPACE}:${alluvialFanLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'flhmappedscale',
+                'Mapped Scale': 'aafmappedscale',
             },
             relatedTables: [
                 {
                     fieldLabel: 'hazard_symbology_text',
                     matchingField: 'Relate_ID',
-                    targetField: 'flhhazardunit',
+                    targetField: 'aafhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     acceptProfile: 'hazards'
                 }
@@ -591,7 +591,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: earthFissureWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${earthFissureLayerName}`,
@@ -667,7 +667,7 @@ const studyAreasWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: studyAreasWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${studyAreasLayerName}`,
@@ -688,7 +688,7 @@ const areasNotMappedWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: areasNotMappedWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${areasNotMappedLayerName}`,
@@ -701,38 +701,38 @@ const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards',
     visible: false,
-    layers: [floodAndDebrisWMSConfig, shallowGroundwaterWMSConfig],
+    layers: [shallowGroundwaterWMSConfig, alluvialFanWMSConfig],
 };
 
 const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
-    visible: true,
-    layers: [groundshakingWMSConfig, liquefactionWMSConfig, surfaceFaultRuptureWMSConfig, qFaultsWMSConfig],
+    visible: false,
+    layers: [qFaultsWMSConfig, surfaceFaultRuptureWMSConfig, liquefactionWMSConfig, groundshakingWMSConfig],
 };
 
 const landslidesConfig: LayerProps = {
     type: 'group',
     title: 'Landslide Hazards',
-    visible: true,
-    layers: [landslideLegacyWMSConfig, landslideSusceptibilityWMSConfig, landslideInventoryWMSConfig, rockfallHazardWMSConfig],
+    visible: false,
+    layers: [rockfallHazardWMSConfig, landslideInventoryWMSConfig, landslideSusceptibilityWMSConfig, landslideLegacyWMSConfig],
 };
 
 const soilHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Problem Soil and Rock Hazards',
-    visible: true,
-    layers: [windBlownSandWMSConfig, solubleSoilAndRockWMSConfig, shallowBedrockWMSConfig, saltTectonicsDeformationWMSConfig, radonSusceptibilityWMSConfig, pipingAndErosionWMSConfig, karstFeaturesWMSConfig, erosionHazardZoneWMSConfig, expansiveSoilRockWMSConfig, earthFissureWMSConfig, corrosiveSoilRockWMSConfig, collapsibleSoilWMSConfig, calicheWMSConfig],
+    visible: false,
+    layers: [calicheWMSConfig, collapsibleSoilWMSConfig, corrosiveSoilRockWMSConfig, earthFissureWMSConfig, expansiveSoilRockWMSConfig, erosionHazardZoneWMSConfig, karstFeaturesWMSConfig, pipingAndErosionWMSConfig, radonSusceptibilityWMSConfig, saltTectonicsDeformationWMSConfig, shallowBedrockWMSConfig, solubleSoilAndRockWMSConfig, windBlownSandWMSConfig],
 };
 
 const layersConfig: LayerProps[] = [
-    quads24kWMSConfig,
-    areasNotMappedWMSConfig,
-    studyAreasWMSConfig,
-    soilHazardsConfig,
-    landslidesConfig,
-    floodHazardsConfig,
     earthquakesConfig,
+    floodHazardsConfig,
+    landslidesConfig,
+    soilHazardsConfig,
+    studyAreasWMSConfig,
+    areasNotMappedWMSConfig,
+    quads24kWMSConfig,
 ];
 
 export default layersConfig;
