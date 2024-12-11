@@ -21,6 +21,8 @@ import Point from "@arcgis/core/geometry/Point.js";
 import { MAP_PIN_ICON } from '@/assets/icons';
 import Polygon from '@arcgis/core/geometry/Polygon';
 import proj4 from 'proj4';
+import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
+import Extent from '@arcgis/core/geometry/Extent';
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -816,19 +818,58 @@ export const createHighlightGraphic = (
     return graphics;
 };
 
-export const highlightFeature = (
-    feature: Feature<Geometry, GeoJsonProperties>,
+export const highlightFeature = async (
+    feature: ExtendedFeature,
     view: __esri.MapView | __esri.SceneView,
     options?: HighlightOptions
 ) => {
+    // If the feature requires WFS geometry fetching
+    let targetFeature: Feature<Geometry, GeoJsonProperties>;
+    if ('namespace' in feature) {
+        const wfsGeometry = await fetchWfsGeometry({
+            namespace: feature.namespace,
+            featureId: feature.id!.toString()
+        });
+        targetFeature = wfsGeometry.features[0];
+    } else {
+        targetFeature = feature as Feature<Geometry, GeoJsonProperties>;
+    }
+
     // Clear previous highlights
     view.graphics.removeAll();
 
-    // Create and add new highlight graphics
-    const graphics = createHighlightGraphic(feature, options);
+    // Create and add new highlight graphics with default or provided options
+    const defaultHighlightOptions: HighlightOptions = {
+        fillColor: [0, 0, 0, 0],
+        outlineColor: [255, 255, 0, 1],
+        outlineWidth: 4,
+        pointSize: 12
+    }
+
+    const highlightOptions = { ...defaultHighlightOptions, ...options };
+    const graphics = createHighlightGraphic(targetFeature, highlightOptions);
     graphics.forEach(graphic => view.graphics.add(graphic));
 
-    // Return the converted coordinates for zooming
-    const coordinates = extractCoordinates(feature);
+    // Return the converted coordinates if needed
+    const coordinates = extractCoordinates(targetFeature);
     return convertCoordinates(coordinates);
-};
+}
+
+export const zoomToFeature = (
+    feature: ExtendedFeature,
+    view: __esri.MapView | __esri.SceneView
+) => {
+    if (feature.bbox) {
+        const bbox = convertBbox(feature.bbox);
+
+        view?.goTo({
+            target: new Extent({
+                xmin: bbox[0],
+                ymin: bbox[1],
+                xmax: bbox[2],
+                ymax: bbox[3],
+                spatialReference: { wkid: 4326 }
+            })
+        });
+    }
+}

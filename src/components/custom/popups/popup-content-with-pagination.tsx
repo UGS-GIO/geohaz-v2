@@ -7,8 +7,7 @@ import { GenericPopup } from "./generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
 import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
-import { highlightFeature, fetchWfsGeometry, convertBbox } from '@/lib/mapping-utils';
-import Extent from "@arcgis/core/geometry/Extent"
+import { highlightFeature, zoomToFeature } from '@/lib/mapping-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -89,6 +88,7 @@ const LayerCard = ({
 }) => {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [currentPage, setCurrentPage] = useState(1)
+    const { view } = useContext(MapContext)
 
     // Calculate total pages based on items per page
     const totalPages = useMemo(() =>
@@ -103,7 +103,18 @@ const LayerCard = ({
     }, [layer.features, currentPage, itemsPerPage])
 
     const handlePageChange = (page: number) => {
+        // Calculate the new paginatedFeatures based on the new page
+        const startIndex = (page - 1) * itemsPerPage
+        const newPaginatedFeatures = layer.features.slice(startIndex, startIndex + itemsPerPage)
+
+        // Set the new page
         setCurrentPage(page)
+
+        // Only highlight to the first feature if items per page is 1
+        if (itemsPerPage === 1 && newPaginatedFeatures.length > 0) {
+            if (!view) return
+            highlightFeature(newPaginatedFeatures[0], view)
+        }
     }
 
     const PopupButtons = ({ feature }: { feature: ExtendedFeature }) => (
@@ -210,31 +221,9 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
     proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 
     const handleZoomToFeature = async (feature: ExtendedFeature) => {
-        const wfsGeometry = await fetchWfsGeometry({
-            namespace: feature.namespace,
-            featureId: feature.id!.toString()
-        });
-
-        highlightFeature(wfsGeometry.features[0], view!, {
-            fillColor: [0, 0, 0, 0],
-            outlineColor: [255, 255, 0, 1],
-            outlineWidth: 4,
-            pointSize: 12
-        });
-
-        if (feature.bbox) {
-            const bbox = convertBbox(feature.bbox)
-
-            view?.goTo({
-                target: new Extent({
-                    xmin: bbox[0],
-                    ymin: bbox[1],
-                    xmax: bbox[2],
-                    ymax: bbox[3],
-                    spatialReference: { wkid: 4326 }
-                })
-            });
-        }
+        if (!view) return
+        highlightFeature(feature, view)
+        zoomToFeature(feature, view)
     }
 
     // If no layers, return null
