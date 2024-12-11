@@ -88,6 +88,7 @@ const LayerCard = ({
 }) => {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [currentPage, setCurrentPage] = useState(1)
+    const { view } = useContext(MapContext)
 
     // Calculate total pages based on items per page
     const totalPages = useMemo(() =>
@@ -109,9 +110,10 @@ const LayerCard = ({
         // Set the new page
         setCurrentPage(page)
 
-        // Only zoom to the first feature if items per page is 1
+        // Only highlight to the first feature if items per page is 1
         if (itemsPerPage === 1 && newPaginatedFeatures.length > 0) {
-            handleZoomToFeature(newPaginatedFeatures[0])
+            if (!view) return
+            highlightFeature(newPaginatedFeatures[0], view)
         }
     }
 
