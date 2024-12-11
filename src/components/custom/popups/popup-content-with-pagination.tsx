@@ -7,7 +7,7 @@ import { GenericPopup } from "./generic-popup"
 import { RelatedTable } from "@/lib/types/mapping-types"
 import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
-import { highlighAndZoomToFeature } from '@/lib/mapping-utils';
+import { highlightFeature, zoomToFeature } from '@/lib/mapping-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -220,7 +220,8 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
 
     const handleZoomToFeature = async (feature: ExtendedFeature) => {
         if (!view) return
-        highlighAndZoomToFeature(feature, view)
+        highlightFeature(feature, view)
+        zoomToFeature(feature, view)
     }
 
     // If no layers, return null

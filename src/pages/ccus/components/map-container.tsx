@@ -8,7 +8,7 @@ import { useMapUrlParams } from "@/hooks/use-map-url-params";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { Feature } from "geojson";
 import { RelatedTable } from "@/lib/types/mapping-types";
-import { fetchGetFeatureInfo, highlighAndZoomToFeature } from "@/lib/mapping-utils";
+import { fetchGetFeatureInfo, highlightFeature } from "@/lib/mapping-utils";
 import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 
 export default function ArcGISMap() {
@@ -124,7 +124,7 @@ export default function ArcGISMap() {
                     })
                 );
 
-                highlighAndZoomToFeature(featureInfo.features[0], view);
+                highlightFeature(featureInfo.features[0], view);
 
                 const layerInfoFiltered = layerInfo.filter(layer => layer.features.length > 0);
                 const drawerState = drawerTriggerRef.current?.getAttribute('data-state');

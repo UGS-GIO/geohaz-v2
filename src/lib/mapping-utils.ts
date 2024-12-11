@@ -818,38 +818,49 @@ export const createHighlightGraphic = (
     return graphics;
 };
 
-export const highlightFeature = (
-    feature: Feature<Geometry, GeoJsonProperties>,
+export const highlightFeature = async (
+    feature: ExtendedFeature,
     view: __esri.MapView | __esri.SceneView,
     options?: HighlightOptions
 ) => {
+    // If the feature requires WFS geometry fetching
+    let targetFeature: Feature<Geometry, GeoJsonProperties>;
+    if ('namespace' in feature) {
+        const wfsGeometry = await fetchWfsGeometry({
+            namespace: feature.namespace,
+            featureId: feature.id!.toString()
+        });
+        targetFeature = wfsGeometry.features[0];
+    } else {
+        targetFeature = feature as Feature<Geometry, GeoJsonProperties>;
+    }
+
     // Clear previous highlights
     view.graphics.removeAll();
 
-    // Create and add new highlight graphics
-    const graphics = createHighlightGraphic(feature, options);
-    graphics.forEach(graphic => view.graphics.add(graphic));
-
-    // Return the converted coordinates for zooming
-    const coordinates = extractCoordinates(feature);
-    return convertCoordinates(coordinates);
-};
-
-export const highlighAndZoomToFeature = async (feature: ExtendedFeature, view: __esri.MapView | __esri.SceneView) => {
-    const wfsGeometry = await fetchWfsGeometry({
-        namespace: feature.namespace,
-        featureId: feature.id!.toString()
-    });
-
-    highlightFeature(wfsGeometry.features[0], view!, {
+    // Create and add new highlight graphics with default or provided options
+    const defaultHighlightOptions: HighlightOptions = {
         fillColor: [0, 0, 0, 0],
         outlineColor: [255, 255, 0, 1],
         outlineWidth: 4,
         pointSize: 12
-    });
+    }
 
+    const highlightOptions = { ...defaultHighlightOptions, ...options };
+    const graphics = createHighlightGraphic(targetFeature, highlightOptions);
+    graphics.forEach(graphic => view.graphics.add(graphic));
+
+    // Return the converted coordinates if needed
+    const coordinates = extractCoordinates(targetFeature);
+    return convertCoordinates(coordinates);
+}
+
+export const zoomToFeature = (
+    feature: ExtendedFeature,
+    view: __esri.MapView | __esri.SceneView
+) => {
     if (feature.bbox) {
-        const bbox = convertBbox(feature.bbox)
+        const bbox = convertBbox(feature.bbox);
 
         view?.goTo({
             target: new Extent({
