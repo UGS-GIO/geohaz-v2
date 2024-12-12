@@ -185,6 +185,9 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
         [layerContent]
     )
 
+    console.log('layerContent', layerContent);
+
+
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
