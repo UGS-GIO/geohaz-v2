@@ -682,21 +682,6 @@ const studyAreasWMSConfig: WMSLayerProps = {
     ],
 }
 
-const areasNotMappedLayerName = 'areasnotmapped';
-const areasNotMappedWMSTitle = 'Areas Not Mapped within Project Areas';
-const areasNotMappedWMSConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: areasNotMappedWMSTitle,
-    visible: true,
-    sublayers: [
-        {
-            name: `${HAZARDS_WORKSPACE}:${areasNotMappedLayerName}`,
-            queryable: false,
-        },
-    ],
-}
-
 const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards',
@@ -731,7 +716,6 @@ const layersConfig: LayerProps[] = [
     landslidesConfig,
     soilHazardsConfig,
     studyAreasWMSConfig,
-    areasNotMappedWMSConfig,
     quads24kWMSConfig,
 ];
 
