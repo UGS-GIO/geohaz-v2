@@ -14,6 +14,8 @@ type CombinedResult = {
 
 // Generalized hook to fetch multiple related tables with dynamic headers
 const useRelatedTable = (configs: RelatedTable[]): CombinedResult => {
+    console.log('relatedTables', configs);
+
     const queryResults: UseQueryResult<RelatedData>[] = useQueries({
         queries: configs.map((config) => ({
             queryKey: ["relatedTable", config.targetField],

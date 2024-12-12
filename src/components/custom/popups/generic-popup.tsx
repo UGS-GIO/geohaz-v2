@@ -15,6 +15,10 @@ const GenericPopup = ({ feature, relatedTable, popupFields, layout }: ReusablePo
     const relatedTables = relatedTable || [];
     const { data, isLoading, error } = useRelatedTable(relatedTables);
 
+    console.log('relatedTables', relatedTables);
+    console.log('dataForRelatedTables', data);
+
+
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error: {String(error)}</p>;
 
@@ -22,6 +26,8 @@ const GenericPopup = ({ feature, relatedTable, popupFields, layout }: ReusablePo
     const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/;
 
     const getRelatedValues = (field: string) => {
+        console.log('properties', properties);
+
         if (!data || data.length === 0) return ["No data available"];
         const matchedValues: string[] = [];
         relatedTables.forEach((table) => {
