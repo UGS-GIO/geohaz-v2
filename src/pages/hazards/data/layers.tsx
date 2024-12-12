@@ -625,6 +625,18 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${erosionHazardZoneLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'erzmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'erzhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
@@ -641,6 +653,18 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${karstFeaturesLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': 'mkfmappedscale',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'mkfhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    acceptProfile: 'hazards'
+                }
+            ]
         },
     ],
 }
