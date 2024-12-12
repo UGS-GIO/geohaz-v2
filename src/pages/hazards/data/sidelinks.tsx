@@ -50,7 +50,7 @@ export const sidelinks: SideLink[] = [
   // },
   {
     title: 'Report Generator',
-    label: 'new!',
+    label: '',
     icon: <FileText className='stroke-foreground' />,
     component: ReportGenerator,
 
@@ -58,7 +58,7 @@ export const sidelinks: SideLink[] = [
   },
   {
     title: 'Utah Geology Homepage',
-    label: 'we can route outside the app by providing an href attribute',
+    label: '',
     href: 'https://geology.utah.gov/',
     icon: <Route className='stroke-foreground' />,
     // This link is external and does not need a component
