@@ -31,7 +31,6 @@ export default {
         ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/2', 'LSS'], // Landslide Susceptibility
         ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/3', 'LSF'], // Landslides
         ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/4', 'LSC'], // Legacy Landslide Compilation
-        ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/5', 'CAS'], // Caliche Susceptibility
         ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/6', 'CSS'], // Collapsible Soil Susceptibility
         ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/7', 'CRS'], // Corrosive Soil and Rock Susceptibility
         ['Utah_Geologic_Hazards_Working_Database_t1_view/FeatureServer/8', 'EFH'], // Earth Fissure Hazard
