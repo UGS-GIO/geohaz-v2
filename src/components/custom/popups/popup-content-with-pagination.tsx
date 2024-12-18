@@ -11,8 +11,7 @@ import { highlightFeature, zoomToFeature } from '@/lib/mapping-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50, Infinity] // 'Infinity' for 'All'
-
+const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50]
 export interface ExtendedFeature extends Feature<Geometry, GeoJsonProperties> {
     namespace: string;
 }
@@ -39,6 +38,10 @@ interface PopupPaginationProps {
 }
 
 const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPage, onItemsPerPageChange }: PopupPaginationProps) => {
+    const handleValueChange = (value: string) => {
+        onItemsPerPageChange(Number(value))
+        handlePageChange(1) // Reset to first page
+    }
     return (
         <div className="flex items-center justify-between w-full">
             <div className="flex-1 text-sm text-muted-foreground">
@@ -47,7 +50,7 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
             <div className="flex items-center space-x-2">
                 <Select
                     value={`${itemsPerPage}`}
-                    onValueChange={(value) => onItemsPerPageChange(value === "Infinity" ? Infinity : Number(value))}
+                    onValueChange={(value) => handleValueChange(value)}
                 >
                     <SelectTrigger>
                         <SelectValue placeholder={itemsPerPage.toString()} />
@@ -55,7 +58,7 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
                     <SelectContent>
                         {ITEMS_PER_PAGE_OPTIONS.map((option) => (
                             <SelectItem key={option} value={`${option}`}>
-                                {option === Infinity ? "All" : option}
+                                {option}
                             </SelectItem>
                         ))}
                     </SelectContent>
