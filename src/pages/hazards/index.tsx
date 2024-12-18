@@ -16,7 +16,7 @@ export default function Map() {
       <Sidebar />
       <main
         id="content"
-        className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-[36rem]'
+        className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-[32rem]'
           } h-full`}
       >
         <Layout>

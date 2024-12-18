@@ -6,7 +6,8 @@ import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerT
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/hooks/use-sidebar";
-import { PopupContentWithPagination } from "./popup-content-with-pagination";
+import { ExtendedFeature, PopupContentWithPagination } from "./popup-content-with-pagination";
+import { RelatedTable } from "@/lib/types/mapping-types";
 
 interface PopupContent {
     features: Feature[];
@@ -36,13 +37,17 @@ function PopupDrawer({
     const layerContent = useMemo(() => popupContent, [popupContent]);
 
     const groupedLayers = useMemo(() => {
-        const layers = layerContent.map((item) => item.layerTitle || item.groupLayerTitle);
+        // Create a flat list of layer titles, prioritizing non-empty layer titles
+        const layers = layerContent.map((item) => item.layerTitle || item.groupLayerTitle)
+            .filter(title => title !== '');
 
-        setActiveLayerTitle(layers[0]);
+        // Always set to the first layer when popupContent changes
+        setActiveLayerTitle(layers[0] || '');
+
         return layerContent.reduce((acc, item) => {
             const { groupLayerTitle, layerTitle } = item;
             if (!acc[groupLayerTitle]) acc[groupLayerTitle] = [];
-            acc[groupLayerTitle].push(layerTitle);
+            if (layerTitle) acc[groupLayerTitle].push(layerTitle);
             return acc;
         }, {} as Record<string, string[]>);
     }, [layerContent]);
@@ -51,6 +56,7 @@ function PopupDrawer({
         const element = document.getElementById(`section-${title}`);
         if (element) {
             element.scrollIntoView({ behavior: "smooth", block: "start" });
+            setActiveLayerTitle(title);
         }
     }, []);
 
@@ -62,14 +68,15 @@ function PopupDrawer({
         // Escape layerTitle for querySelector using CSS.escape
         const escapedLayerTitle = CSS.escape(`layer-${layerTitle}`);
 
-        // - scroll to section with setactiveLayerTitle
+        // Update active layer title
         setActiveLayerTitle(layerTitle);
-        // - center carousel item in carousel
+
+        // Center carousel item
         const carouselItem = document.getElementById(`${escapedLayerTitle}`);
         if (carouselItem) {
             carouselItem.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-    }, [handleCarouselClick]);
+    }, [])
 
     return (
         <Drawer container={container} modal={false}>
@@ -88,7 +95,7 @@ function PopupDrawer({
                             <CarouselContent className="-ml-2 px-4" ref={carouselRef}>
                                 {Object.entries(groupedLayers).map(([groupTitle, layerTitles], groupIdx) => (
                                     <React.Fragment key={`group-${groupIdx}`}>
-                                        {layerTitles[0] === '' ? (
+                                        {layerTitles.length === 0 ? (
                                             <CarouselItem key={`group-${groupIdx}`} className="pl-2 basis-auto" id={`layer-${groupTitle}`}>
                                                 <button
                                                     className={cn("px-3 py-2 text-sm font-bold transition-all text-secondary-foreground", {
@@ -127,7 +134,7 @@ function PopupDrawer({
                             className={cn(`flex flex-1 flex-col gap-4 p-4 overflow-y-auto select-text`)}
                         >
                             <PopupContentWithPagination
-                                layerContent={layerContent}
+                                layerContent={layerContent as unknown as { groupLayerTitle: string; layerTitle: string; features: ExtendedFeature[]; popupFields?: Record<string, string> | undefined; relatedTables?: RelatedTable[] | undefined; }[]} // TODO: fix this
                                 onSectionChange={onSectionChange}
                             />
                         </div>

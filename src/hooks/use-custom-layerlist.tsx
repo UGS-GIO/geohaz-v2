@@ -146,7 +146,7 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
                             className="mx-2"
                         />
                         <AccordionTrigger>
-                            <h3 className={`text-md font-medium text-left ${isTopLevel ? 'text-lg' : ''}`}>{layerTitle}</h3>
+                            <h3 className={`text-md font-medium text-left ${isTopLevel ? 'text-md' : ''}`}>{layerTitle}</h3>
                         </AccordionTrigger>
                     </AccordionHeader>
                     <AccordionContent>
@@ -191,7 +191,7 @@ const useCustomLayerList = () => {
                                             className="mx-2"
                                         />
                                         <AccordionTrigger>
-                                            <h3 className='font-medium text-left text-lg'>{layer.title}</h3>
+                                            <h3 className='font-medium text-left text-md'>{layer.title}</h3>
                                         </AccordionTrigger>
                                     </AccordionHeader>
                                     <AccordionContent>
