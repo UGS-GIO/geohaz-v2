@@ -111,6 +111,9 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const handleZoomToLayer = () => {
         if (currentLayer && currentLayer.fullExtent) {
             // zoom to the layer's full extent
+
+            console.log('currentLayer', currentLayer);
+
             view?.goTo(currentLayer.fullExtent);
 
             // if the layer is in a group, make sure the group (parent) is set to visible
