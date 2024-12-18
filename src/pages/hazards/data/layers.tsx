@@ -529,34 +529,6 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
     ],
 }
 
-const calicheLayerName = 'caliche';
-const calicheWMSTitle = 'Caliche Susceptibility';
-const calicheWMSConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: calicheWMSTitle,
-    visible: false,
-    sublayers: [
-        {
-            name: `${HAZARDS_WORKSPACE}:${calicheLayerName}`,
-            popupEnabled: false,
-            queryable: true,
-            popupFields: {
-                'Mapped Scale': 'casmappedscale',
-            },
-            relatedTables: [
-                {
-                    fieldLabel: 'hazard_symbology_text',
-                    matchingField: 'Relate_ID',
-                    targetField: 'cashazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
-                }
-            ]
-        },
-    ],
-}
-
 const alluvialFanLayerName = 'alluvialfan';
 const alluvialFanWMSTitle = 'Alluvial Fan Susceptibility';
 const alluvialFanWMSConfig: WMSLayerProps = {
@@ -731,7 +703,7 @@ const soilHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Problem Soil and Rock Hazards',
     visible: false,
-    layers: [calicheWMSConfig, collapsibleSoilWMSConfig, corrosiveSoilRockWMSConfig, earthFissureWMSConfig, expansiveSoilRockWMSConfig, erosionHazardZoneWMSConfig, karstFeaturesWMSConfig, pipingAndErosionWMSConfig, radonSusceptibilityWMSConfig, saltTectonicsDeformationWMSConfig, shallowBedrockWMSConfig, solubleSoilAndRockWMSConfig, windBlownSandWMSConfig],
+    layers: [collapsibleSoilWMSConfig, corrosiveSoilRockWMSConfig, earthFissureWMSConfig, expansiveSoilRockWMSConfig, erosionHazardZoneWMSConfig, karstFeaturesWMSConfig, pipingAndErosionWMSConfig, radonSusceptibilityWMSConfig, saltTectonicsDeformationWMSConfig, shallowBedrockWMSConfig, solubleSoilAndRockWMSConfig, windBlownSandWMSConfig],
 };
 
 const layersConfig: LayerProps[] = [
