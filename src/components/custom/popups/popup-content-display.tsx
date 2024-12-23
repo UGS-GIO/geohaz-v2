@@ -23,7 +23,6 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
     const createLink = (value: string, field: string) => {
         const linkConfig = linkFields?.[field];
-        console.log('linkfields', linkFields);
 
         if (linkConfig) {
             const hrefs = linkConfig.transform ? linkConfig.transform(value) : [{ label: value, href: `${linkConfig.baseUrl}${value}` }];
