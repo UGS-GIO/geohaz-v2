@@ -25,8 +25,7 @@ type LinkProps = {
     variant?: VariantProps<typeof linkVariants>['variant']; // Include variant as a prop
 };
 
-const Link = ({ children, variant, ...props }: LinkProps) => {
-    const { className } = props;
+const Link = ({ children, variant, className, ...props }: LinkProps) => {
 
     return (
         <RouterLink

@@ -674,6 +674,24 @@ const studyAreasWMSConfig: WMSLayerProps = {
                 'Report ID': 'repor_id',
                 'Mapped Hazards': 'hazard_name',
             },
+            linkFields: {
+                'repor_id': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        const values = value.split(','); // Split the input value by a comma
+                        const transformedValues = values.map(val => {
+                            const trimmedVal = val.trim();
+                            const href = /^\d+$/.test(trimmedVal)
+                                ? `https://geodata.geology.utah.gov/pages/view.php?ref=${trimmedVal}`
+                                : `https://doi.org/10.34191/${trimmedVal}`;
+                            const label = trimmedVal;
+                            return { label, href };
+                        });
+
+                        return transformedValues;
+                    }
+                }
+            }
         },
     ],
 }

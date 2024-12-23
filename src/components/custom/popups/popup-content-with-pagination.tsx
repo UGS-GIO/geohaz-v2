@@ -3,8 +3,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
-import { GenericPopup } from "./generic-popup"
-import { RelatedTable } from "@/lib/types/mapping-types"
+import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
+import { LinkFields, RelatedTable } from "@/lib/types/mapping-types"
 import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
 import { highlightFeature, zoomToFeature } from '@/lib/mapping-utils';
@@ -16,12 +16,13 @@ export interface ExtendedFeature extends Feature<Geometry, GeoJsonProperties> {
     namespace: string;
 }
 
-interface LayerContentProps {
+export interface LayerContentProps {
     groupLayerTitle: string
     layerTitle: string
     features: ExtendedFeature[]
     popupFields?: Record<string, string>
     relatedTables?: RelatedTable[]
+    linkFields?: LinkFields
 }
 
 interface SidebarInsetWithPaginationProps {
@@ -165,12 +166,11 @@ const LayerCard = ({
                     >
                         <PopupButtons feature={feature} />
 
-                        <GenericPopup
+                        <PopupContentDisplay
+                            layer={layer}
                             feature={feature}
                             layout={layer.popupFields &&
                                 Object.keys(layer.popupFields).length > 5 ? "grid" : "stacked"}
-                            popupFields={layer.popupFields || {}}
-                            relatedTable={layer.relatedTables}
                         />
                     </div>
                 ))}
