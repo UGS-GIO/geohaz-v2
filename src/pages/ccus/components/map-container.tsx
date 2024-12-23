@@ -114,6 +114,7 @@ export default function ArcGISMap() {
                             feature.id?.toString().split('.')[0].includes(key.split(':')[1])
                         ),
                         ...(value.popupFields && { popupFields: value.popupFields }),
+                        ...(value.linkFields && { linkFields: value.linkFields }),
                         ...(value.relatedTables && value.relatedTables.length > 0 && {
                             relatedTables: value.relatedTables.map(table => ({
                                 ...table,

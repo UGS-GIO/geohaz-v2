@@ -18,9 +18,19 @@ interface BaseLayerProps {
     options?: any;
 }
 
+export interface LinkField {
+    baseUrl: string;
+    transform?: (id: any) => string;
+}
+
+export type LinkFields = {
+    [key: string]: LinkField;
+};
+
 type CustomSublayerProps = {
     popupFields?: Record<string, string>; // Maps field labels to attribute names
     relatedTables?: RelatedTable[];
+    linkFields?: LinkFields;
 };
 
 type ExtendedSublayerProperties =

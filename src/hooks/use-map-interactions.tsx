@@ -2,7 +2,7 @@ import { useCallback, useState, useContext } from "react";
 import { removeGraphics, createGraphic } from "@/lib/mapping-utils";
 import Collection from "@arcgis/core/core/Collection.js";
 import { MapContext } from "@/context/map-provider";
-import { GroupLayerProps, LayerProps, RelatedTable, WMSLayerProps } from "@/lib/types/mapping-types";
+import { GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps } from "@/lib/types/mapping-types";
 import { useGetLayerConfig } from "./use-get-layer-config";
 
 type VisibleLayer = {
@@ -22,6 +22,7 @@ export const useMapInteractions = () => {
         popupFields?: Record<string, string>;
         relatedTables?: RelatedTable[];
         queryable?: boolean;
+        linkFields?: LinkFields;
     }>;
 
     type VisibleLayersResult = {
@@ -78,6 +79,7 @@ export const useMapInteractions = () => {
                             popupFields: sublayer.popupFields,
                             relatedTables: sublayer.relatedTables,
                             queryable: sublayer.queryable,
+                            linkFields: sublayer.linkFields,
                         };
                     }
                 });
@@ -94,6 +96,7 @@ export const useMapInteractions = () => {
                                     popupFields: sublayer.popupFields,
                                     relatedTables: sublayer.relatedTables,
                                     queryable: sublayer.queryable,
+                                    linkFields: sublayer.linkFields,
                                 };
                             }
                         });
