@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
-import { PopupContentDisplay } from "@/components/custom/popups/generic-popup"
+import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
 import { LinkFields, RelatedTable } from "@/lib/types/mapping-types"
 import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
