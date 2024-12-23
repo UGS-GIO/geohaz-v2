@@ -20,7 +20,7 @@ interface BaseLayerProps {
 
 export interface LinkField {
     baseUrl: string;
-    transform?: (id: any) => string;
+    transform?: (id: any) => { label: string, href: string }[];
 }
 
 export type LinkFields = {

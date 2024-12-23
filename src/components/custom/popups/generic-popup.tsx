@@ -3,6 +3,7 @@ import { useRelatedTable } from "@/hooks/use-related-table";
 import { Feature, Geometry, GeoJsonProperties } from "geojson";
 import { ExternalLink } from "lucide-react";
 import { LayerContentProps } from "@/components/custom/popups/popup-content-with-pagination";
+import { Link } from "@/components/custom/link";
 
 type PopupContentDisplayProps = {
     layer: LayerContentProps;
@@ -25,18 +26,26 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         console.log('linkfields', linkFields);
 
         if (linkConfig) {
-            const href = linkConfig.transform ? linkConfig.transform(value) : `${linkConfig.baseUrl}${value}`;
+            const hrefs = linkConfig.transform ? linkConfig.transform(value) : [{ label: value, href: `${linkConfig.baseUrl}${value}` }];
+
             return (
-                <Button
-                    className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-start max-w-full"
-                    variant="link"
-                    onClick={() => window.open(href, '_blank')}
-                >
-                    <span className="break-all inline-block">{value}</span>
-                    <ExternalLink className="flex-shrink-0 ml-1 mt-1" size={16} />
-                </Button>
+                <>
+                    {hrefs.map((item, index) => (
+                        <div key={index} className="flex gap-2">
+                            <Link
+                                to={item.href}
+                                className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
+                                variant="primary"
+                            >
+                                <span className="break-all inline-block">{item.label}</span>
+                                <ExternalLink className="flex-shrink-0 ml-1" size={16} />
+                            </Link>
+                        </div>
+                    ))}
+                </>
             );
         }
+
         if (urlPattern.test(value)) {
             return (
                 <Button
@@ -49,6 +58,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                 </Button>
             );
         }
+
         return value ?? "N/A";
     };
 
