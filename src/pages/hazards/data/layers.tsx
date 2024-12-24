@@ -32,15 +32,6 @@ const landslideLegacyWMSConfig: WMSLayerProps = {
                 'Movement Cause': 'movecause',
                 'Notes': 'notes',
             },
-            relatedTables: [
-                {
-                    fieldLabel: 'hazard_symbology_text',
-                    matchingField: 'Relate_ID',
-                    targetField: 'lsfhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
-                }
-            ]
         },
     ],
 }

@@ -1,9 +1,9 @@
 import { RelatedTable } from "@/lib/types/mapping-types";
 import { useQueries, UseQueryResult } from "@tanstack/react-query";
+import { Feature, Geometry, GeoJsonProperties } from "geojson";
 
-// Define the shape of related data
 type RelatedData = {
-    [key: string]: any; // Adjust based on actual response data
+    [key: string]: any;
 };
 
 type CombinedResult = {
@@ -12,13 +12,24 @@ type CombinedResult = {
     error: Error | null;
 };
 
-// Generalized hook to fetch multiple related tables with dynamic headers
-const useRelatedTable = (configs: RelatedTable[]): CombinedResult => {
+const useRelatedTable = (
+    configs: RelatedTable[],
+    feature?: Feature<Geometry, GeoJsonProperties>
+): CombinedResult => {
     const queryResults: UseQueryResult<RelatedData>[] = useQueries({
         queries: configs.map((config) => ({
-            queryKey: ["relatedTable", config.targetField],
+
+            queryKey: ["relatedTable", config.targetField, feature?.properties?.[config.targetField]],
             queryFn: async (): Promise<RelatedData> => {
-                const response = await fetch(config.url, {
+                const targetValue = feature?.properties?.[config.targetField];
+                const queryUrl = targetValue
+                    ? `${config.url}?${config.matchingField}=eq.${targetValue}`
+                    : config.url;
+
+                console.log(queryUrl);
+
+
+                const response = await fetch(queryUrl, {
                     headers: {
                         "Accept-Profile": config.acceptProfile,
                         "Accept": "application/json",
@@ -32,18 +43,18 @@ const useRelatedTable = (configs: RelatedTable[]): CombinedResult => {
                     );
                 }
 
-                return response.json();
+                const data = await response.json();
+                return Array.isArray(data) ? data : [data];
             },
             staleTime: 1000 * 60 * 60, // 1 hour
-            enabled: configs.length > 0,
+            enabled: configs.length > 0 && Boolean(feature?.properties?.[config.targetField]),
         })),
     });
 
-    // Combine results for easier consumption
     const combinedResult: CombinedResult = {
-        data: queryResults.map((results, idx) => idx < 10 ? results.data : undefined),
-        isLoading: queryResults.some((result) => result.isLoading),
-        error: queryResults.find((result) => result.error)?.error || null,
+        data: queryResults.map(result => result.data),
+        isLoading: queryResults.some(result => result.isLoading),
+        error: queryResults.find(result => result.error)?.error || null,
     };
 
     return combinedResult;

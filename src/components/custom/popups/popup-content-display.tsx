@@ -13,7 +13,7 @@ type PopupContentDisplayProps = {
 
 const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProps) => {
     const { relatedTables, popupFields, linkFields } = layer;
-    const { data, isLoading, error } = useRelatedTable(relatedTables || []);
+    const { data, isLoading, error } = useRelatedTable(relatedTables || [], feature);
 
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error: {String(error)}</p>;
