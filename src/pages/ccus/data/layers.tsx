@@ -1,6 +1,7 @@
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
-const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
+export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
+const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
 const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
 const GEN_GIS_WORKSPACE = 'gen_gis';
 
@@ -172,6 +173,39 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     ],
 };
 
+const wellWithTopsLayerName = 'wellswithtops_hascore';
+const wellWithTopsWMSTitle = 'Wells with Tops (Has Core)';
+const wellWithTopsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: wellWithTopsWMSTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${wellWithTopsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'API': 'api',
+                'Well Name': 'wellname',
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'Wells With Related Formation Tops',
+                    matchingField: 'api',
+                    targetField: 'api',
+                    url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore',
+                    acceptProfile: 'emp',
+                    displayFields: [
+                        { field: 'formation_name' },
+                        { field: 'formation_depth' }
+                    ]
+                }
+            ]
+        },
+    ],
+};
+
 // SITLA Land Ownership Layer
 const SITLAConfig: LayerProps = {
     type: 'feature',
@@ -195,6 +229,7 @@ const EMPConfig: LayerProps = {
         sco2WMSConfig,
         riversWMSConfig,
         seamlessGeolunitsWMSConfig,
+        wellWithTopsWMSConfig,
         SITLAConfig
     ]
 };

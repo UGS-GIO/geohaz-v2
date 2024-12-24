@@ -18,16 +18,12 @@ const useRelatedTable = (
 ): CombinedResult => {
     const queryResults: UseQueryResult<RelatedData>[] = useQueries({
         queries: configs.map((config) => ({
-
             queryKey: ["relatedTable", config.targetField, feature?.properties?.[config.targetField]],
             queryFn: async (): Promise<RelatedData> => {
                 const targetValue = feature?.properties?.[config.targetField];
                 const queryUrl = targetValue
                     ? `${config.url}?${config.matchingField}=eq.${targetValue}`
                     : config.url;
-
-                console.log(queryUrl);
-
 
                 const response = await fetch(queryUrl, {
                     headers: {
@@ -44,9 +40,24 @@ const useRelatedTable = (
                 }
 
                 const data = await response.json();
-                return Array.isArray(data) ? data : [data];
+                const processedData = Array.isArray(data) ? data : [data];
+
+                if (config.displayFields) {
+                    return processedData.map(item => {
+                        const displayValues = config.displayFields!.map(df => {
+                            const value = item[df.field];
+                            return df.format ? df.format(value) : value;
+                        });
+                        return {
+                            ...item,
+                            displayValue: displayValues.join(" - ")
+                        };
+                    });
+                }
+
+                return processedData;
             },
-            staleTime: 1000 * 60 * 60, // 1 hour
+            staleTime: 1000 * 60 * 60,
             enabled: configs.length > 0 && Boolean(feature?.properties?.[config.targetField]),
         })),
     });

@@ -68,14 +68,26 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         relatedTables?.forEach((table) => {
             const targetField = properties[table.targetField];
             data.forEach((entry) => {
-                entry?.find((item: Record<string, string>) => {
+                entry?.find((item: Record<string, any>) => {
+                    console.log('item[table.matchingField] === targetField', item[table.matchingField] === targetField);
+                    console.log('table.displayFields', table.displayFields);
+
                     if (item[table.matchingField] === targetField) {
-                        matchedValues.push(item.Description);
+                        if (table.displayFields) {
+                            const values = table.displayFields.map(df => {
+                                console.log('df', df);
+                                console.log('item', item);
+
+
+                                const value = item[df.field];
+                                console.log('value', value);
+
+                                return df.format ? df.format(value) : value;
+                            });
+                            matchedValues.push(values.join(" - "));
+                        }
                     }
                 });
-                if (entry?.[table.matchingField] === field) {
-                    matchedValues.push(entry.Description || "N/A");
-                }
             });
         });
 
@@ -124,7 +136,8 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
             const content = (
                 <div key={index} className="flex flex-col">
                     <p className="font-bold underline text-primary">
-                        {properties[table.fieldLabel]}
+                        {/* can be dynamically accessed in the properties or default to the field label if not found */}
+                        {properties[table.fieldLabel] || table.fieldLabel}
                     </p>
                     <p className="break-words">{values.join(", ")}</p>
                 </div>
