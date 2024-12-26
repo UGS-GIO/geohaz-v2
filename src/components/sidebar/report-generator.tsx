@@ -41,7 +41,7 @@ function addGraphic(
 type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
 
 function ReportGenerator() {
-  const { view } = useContext(MapContext);
+  const { view, setIsSketching } = useContext(MapContext);
   const [activeButton, setActiveButton] = useState<ActiveButtonOptions>();
   const tempGraphicsLayer = useRef<__esri.GraphicsLayer | undefined>(undefined);
   const sketchVM = useRef<__esri.SketchViewModel | undefined>(undefined);
@@ -129,7 +129,24 @@ function ReportGenerator() {
       }
     });
 
-    sketchVM.current.on('create', (event) => addGraphic(event, tempGraphicsLayer.current, setActiveButton));
+    sketchVM.current.on('create', (event) => {
+      if (event.state === "start") {
+        setIsSketching?.(true);
+      }
+
+      if (event.state === "active") {
+        addGraphic(event, tempGraphicsLayer.current, setActiveButton);
+      }
+
+      if (event.state === "complete") {
+        setIsSketching?.(true); // Ensure it remains true immediately after completion
+        requestAnimationFrame(() => {
+          setIsSketching?.(false);
+        });
+      }
+
+      return;
+    });
 
     sketchVM.current.create("polygon", {
       mode: "click"
@@ -143,6 +160,7 @@ function ReportGenerator() {
       tempGraphicsLayer.current?.removeAll();
     }
     setActiveButton(undefined);
+    setIsSketching?.(false);
   };
 
   const buttonText = (buttonName: ActiveButtonOptions, defaultText: string) => {
@@ -161,18 +179,17 @@ function ReportGenerator() {
             The Report Generator is designed to provide a summary of information for small areas. If your area of interest is larger than that, you will see a notification prompting you to select a smaller area.
           </p>
         </div>
-
-        <div className="flex flex-wrap justify-start items-center space-y-2 sm:space-y-0 sm:space-x-12 sm:justify-start">
-          <div className="flex space-x-2">
-            <Button onClick={handleCurrentMapExtentButton} variant="default" className="mb-2 md:mb-0">
+        <div className="space-y-2">
+          <div className="flex flex-wrap justify-start items-center md:space-x-4">
+            <Button onClick={handleCurrentMapExtentButton} variant="default" className="w-full md:w-auto flex-grow mb-2 md:mb-0">
               {buttonText('currentMapExtent', 'Current Map Extent')}
             </Button>
-          </div>
-          <div className="flex-none space-x-2">
-            <Button onClick={handleCustomAreaButton} variant="default">
+            <Button onClick={handleCustomAreaButton} variant="default" className="w-full md:w-auto flex-grow mb-2 md:mb-0">
               {buttonText('customArea', 'Draw Custom Area')}
             </Button>
-            <Button onClick={handleResetButton} variant="secondary">
+          </div>
+          <div className="flex w-full">
+            <Button onClick={handleResetButton} variant="secondary" className="w-full flex-grow mb-2 md:mb-0">
               {buttonText('reset', 'Reset')}
             </Button>
           </div>

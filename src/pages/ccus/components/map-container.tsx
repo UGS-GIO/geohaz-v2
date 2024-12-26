@@ -13,7 +13,7 @@ import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 
 export default function ArcGISMap() {
     const mapRef = useRef<HTMLDivElement>(null);
-    const { loadMap, view } = useContext(MapContext);
+    const { loadMap, view, isSketching } = useContext(MapContext);
     const { coordinates, setCoordinates } = useMapCoordinates();
     const { handleOnContextMenu, getVisibleLayers } = useMapInteractions();
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null);
@@ -74,7 +74,7 @@ export default function ArcGISMap() {
 
     const handleMapClick = async ({ e, view, drawerTriggerRef }: HandleMapClickProps) => {
 
-        if (!view || isDragging) return; // Skip click if dragging or no view
+        if (!view || isDragging || isSketching) return; // Skip click if dragging, sketching or no view
 
         view?.graphics.removeAll(); // Clear any existing graphics
 
