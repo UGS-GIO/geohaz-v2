@@ -26,11 +26,7 @@ const useRelatedTable = (
                     : config.url;
 
                 const response = await fetch(queryUrl, {
-                    headers: {
-                        "Accept-Profile": config.acceptProfile,
-                        "Accept": "application/json",
-                        "Cache-Control": "no-cache",
-                    },
+                    headers: config.headers,
                 });
 
                 if (!response.ok) {

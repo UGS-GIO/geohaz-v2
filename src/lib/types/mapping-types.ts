@@ -132,7 +132,7 @@ export interface RelatedTable {
     matchingField: string;
     targetField: string;
     url: string;
-    acceptProfile: string;
+    headers: Record<string, string>;
     displayFields?: DisplayField[];
 }
 
