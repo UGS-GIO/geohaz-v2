@@ -17,9 +17,9 @@ type BasemapType = {
   type: 'short' | 'long';
 };
 
-const basemapList: BasemapType[] = [
-  { title: 'Streets', basemapStyle: 'streets', isActive: true, type: 'short' },
-  { title: 'Topographic', basemapStyle: 'topo', isActive: false, type: 'short' },
+export const basemapList: BasemapType[] = [
+  { title: 'Topographic', basemapStyle: 'topo', isActive: true, type: 'short' },
+  { title: 'Streets', basemapStyle: 'streets', isActive: false, type: 'short' },
   { title: 'Satellite', basemapStyle: 'satellite', isActive: false, type: 'short' },
   { title: 'Hybrid', basemapStyle: 'hybrid', isActive: false, type: 'short' },
   { title: 'Streets Relief', basemapStyle: 'streets-relief-vector', isActive: false, type: 'long' },
