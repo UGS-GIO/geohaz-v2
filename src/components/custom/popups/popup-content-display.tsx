@@ -61,39 +61,33 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         return value ?? "N/A";
     };
 
-    const getRelatedTableValues = (field: string) => {
-        if (!data?.length) return ["No data available"];
-        const matchedValues: string[] = [];
+    interface LabelValuePair {
+        label: string;
+        value: string | number;
+    }
+
+    const getRelatedTableValues = () => {
+        if (!data?.length) return [[{ label: "No data available", value: "No data available" }]];
+
+        const groupedValues: LabelValuePair[][] = [];
 
         relatedTables?.forEach((table) => {
             const targetField = properties[table.targetField];
+
             data.forEach((entry) => {
-                entry?.find((item: Record<string, any>) => {
-                    console.log('item[table.matchingField] === targetField', item[table.matchingField] === targetField);
-                    console.log('table.displayFields', table.displayFields);
-
-                    if (item[table.matchingField] === targetField) {
-                        if (table.displayFields) {
-                            const values = table.displayFields.map(df => {
-                                console.log('df', df);
-                                console.log('item', item);
-
-
-                                const value = item[df.field];
-                                console.log('value', value);
-
-                                return df.format ? df.format(value) : value;
-                            });
-                            matchedValues.push(values.join(" - "));
-                        }
+                entry?.forEach((item: Record<string, any>) => {
+                    if (item[table.matchingField] === targetField && item.labelValuePairs) {
+                        // Each item's labelValuePairs becomes its own group
+                        groupedValues.push([...item.labelValuePairs]);
                     }
                 });
             });
         });
 
-        return matchedValues.length ? matchedValues : ["N/A"];
+        return groupedValues.length
+            ? groupedValues
+            : [[{ label: "No data available", value: "No data available" }]];
     };
-
     const featureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
 
     const { urlContent, longTextContent, regularContent } = featureEntries.reduce<{
@@ -132,18 +126,33 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         regularRelatedContent: JSX.Element[];
     }>(
         (acc, table, index) => {
-            const values = getRelatedTableValues(table.targetField);
+            const groupedValues = getRelatedTableValues();
+
             const content = (
-                <div key={index} className="flex flex-col">
+                <div key={index} className="flex flex-col space-y-2">
                     <p className="font-bold underline text-primary">
-                        {/* can be dynamically accessed in the properties or default to the field label if not found */}
                         {properties[table.fieldLabel] || table.fieldLabel}
                     </p>
-                    <p className="break-words">{values.join(", ")}</p>
+                    {groupedValues.map((group, groupIdx) => (
+                        <div key={groupIdx} className="flex flex-col">
+                            {group.map((value, valueIdx) => (
+                                <div key={valueIdx} className="flex flex-row gap-x-2">
+                                    {value.label && <span className="font-bold">{value.label}: </span>}
+                                    <span>{value.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
                 </div>
             );
 
-            const totalWords = values.join(", ").split(/\s+/).length;
+            // Calculate total words across all groups
+            const totalWords = groupedValues
+                .flat()
+                .map(v => String(v.value))
+                .join(" ")
+                .split(/\s+/).length;
+
             acc[totalWords > 20 ? 'longRelatedContent' : 'regularRelatedContent'].push(content);
             return acc;
         },

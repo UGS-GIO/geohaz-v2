@@ -139,5 +139,6 @@ export interface RelatedTable {
 
 interface DisplayField {
     field: string;
-    format?: (value: any) => string;
+    label?: string;
+    format?: (value: any) => string; // todo: add format function
 }

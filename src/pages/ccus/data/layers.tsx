@@ -197,8 +197,8 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore',
                     acceptProfile: 'emp',
                     displayFields: [
-                        { field: 'formation_name' },
-                        { field: 'formation_depth' }
+                        { field: 'formation_name', label: 'Formation Name' },
+                        { field: 'formation_depth', label: 'Formation Depth (meters??? verify)' },
                     ]
                 }
             ]

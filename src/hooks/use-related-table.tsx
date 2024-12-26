@@ -44,13 +44,17 @@ const useRelatedTable = (
 
                 if (config.displayFields) {
                     return processedData.map(item => {
-                        const displayValues = config.displayFields!.map(df => {
+                        // Create label-value pairs for each field specified in displayFields
+                        const labelValuePairs = config.displayFields!.map(df => {
                             const value = item[df.field];
-                            return df.format ? df.format(value) : value;
+                            const label = df.label;
+                            return { label: label, value: value };
                         });
+
+                        // Return processed data with label-value pairs
                         return {
                             ...item,
-                            displayValue: displayValues.join(" - ")
+                            labelValuePairs: labelValuePairs,
                         };
                     });
                 }
