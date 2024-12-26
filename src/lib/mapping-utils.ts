@@ -204,12 +204,10 @@ export function init(
     return view;
 }
 
-
-
 // Create a new map
 export const createMap = () => {
     const map = new Map({
-        basemap: basemapList[0].basemapStyle, // Default basemap
+        basemap: basemapList.find(item => item.isActive)?.basemapStyle, // Default basemap
     });
     return map;
 }

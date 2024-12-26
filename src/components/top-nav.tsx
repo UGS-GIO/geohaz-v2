@@ -26,6 +26,15 @@ export const basemapList: BasemapType[] = [
   { title: 'Terrain', basemapStyle: 'terrain', isActive: false, type: 'long' },
 ];
 
+function validateBasemapList(list: BasemapType[]): list is BasemapType[] {
+  const activeCount = list.filter(item => item.isActive).length;
+  return activeCount === 1;
+}
+
+if (!validateBasemapList(basemapList)) {
+  throw new Error('isActive determines the inial basemap. Only one initial basemap can be defined.');
+}
+
 interface TopNavProps extends React.HTMLAttributes<HTMLElement> { }
 
 interface BasemapProps {
