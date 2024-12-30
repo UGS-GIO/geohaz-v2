@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { useSidebar } from "@/hooks/use-sidebar";
 import { ExtendedFeature, PopupContentWithPagination } from "./popup-content-with-pagination";
 import { RelatedTable } from "@/lib/types/mapping-types";
+import useScreenSize from "@/hooks/use-screen-size";
 
 interface PopupContent {
     features: Feature[];
@@ -29,10 +29,10 @@ function PopupDrawer({
     drawerTriggerRef,
     popupTitle,
 }: CombinedSidebarDrawerProps) {
-    const { isCollapsed } = useSidebar();
     const carouselRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [activeLayerTitle, setActiveLayerTitle] = useState<string>("");
+    const screenSize = useScreenSize()
 
     const layerContent = useMemo(() => popupContent, [popupContent]);
 
@@ -84,49 +84,51 @@ function PopupDrawer({
                 <Button ref={drawerTriggerRef} size="sm" className="hidden">Open Drawer</Button>
             </DrawerTrigger>
 
-            <DrawerContent className={cn('max-w-4xl mb-10 z-10 max-h-[85vh] overflow-hidden', isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]')}>
+            <DrawerContent className="z-60 max-h-[85vh] overflow-hidden md:absolute md:right-4 md:max-w-[30vw] md:mb-10 left-auto w-full">
                 <DrawerHeader className="flex justify-between items-center">
                     <DrawerTitle>{popupTitle}</DrawerTitle>
                 </DrawerHeader>
 
                 <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden">
-                    <header className="border-b overflow-hidden h-12">
-                        <Carousel className="w-full h-full relative px-8">
-                            <CarouselContent className="-ml-2 px-4" ref={carouselRef}>
-                                {Object.entries(groupedLayers).map(([groupTitle, layerTitles], groupIdx) => (
-                                    <React.Fragment key={`group-${groupIdx}`}>
-                                        {layerTitles.length === 0 ? (
-                                            <CarouselItem key={`group-${groupIdx}`} className="pl-2 basis-auto" id={`layer-${groupTitle}`}>
-                                                <button
-                                                    className={cn("px-3 py-2 text-sm font-bold transition-all text-secondary-foreground", {
-                                                        'underline text-primary': activeLayerTitle === groupTitle,
-                                                    })}
-                                                    onClick={() => handleCarouselClick(groupTitle)}
-                                                >
-                                                    {groupTitle}
-                                                </button>
-                                            </CarouselItem>
-                                        ) : (
-                                            layerTitles.map((layerTitle, layerIdx) => (
-                                                <CarouselItem key={`layer-${layerIdx}`} className="pl-2 basis-auto" id={`layer-${layerTitle}`}>
+                    {screenSize.height > 1080 &&
+                        <header className="border-b overflow-hidden h-12">
+                            <Carousel className="w-full h-full relative px-8">
+                                <CarouselContent className="-ml-2 px-4" ref={carouselRef}>
+                                    {Object.entries(groupedLayers).map(([groupTitle, layerTitles], groupIdx) => (
+                                        <React.Fragment key={`group-${groupIdx}`}>
+                                            {layerTitles.length === 0 ? (
+                                                <CarouselItem key={`group-${groupIdx}`} className="pl-2 basis-auto" id={`layer-${groupTitle}`}>
                                                     <button
                                                         className={cn("px-3 py-2 text-sm font-bold transition-all text-secondary-foreground", {
-                                                            'underline text-primary': activeLayerTitle === layerTitle,
+                                                            'underline text-primary': activeLayerTitle === groupTitle,
                                                         })}
-                                                        onClick={() => handleCarouselClick(layerTitle)}
+                                                        onClick={() => handleCarouselClick(groupTitle)}
                                                     >
-                                                        {layerTitle}
+                                                        {groupTitle}
                                                     </button>
                                                 </CarouselItem>
-                                            ))
-                                        )}
-                                    </React.Fragment>
-                                ))}
-                            </CarouselContent>
-                            <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2" />
-                            <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2" />
-                        </Carousel>
-                    </header>
+                                            ) : (
+                                                layerTitles.map((layerTitle, layerIdx) => (
+                                                    <CarouselItem key={`layer-${layerIdx}`} className="pl-2 basis-auto" id={`layer-${layerTitle}`}>
+                                                        <button
+                                                            className={cn("px-3 py-2 text-sm font-bold transition-all text-secondary-foreground", {
+                                                                'underline text-primary': activeLayerTitle === layerTitle,
+                                                            })}
+                                                            onClick={() => handleCarouselClick(layerTitle)}
+                                                        >
+                                                            {layerTitle}
+                                                        </button>
+                                                    </CarouselItem>
+                                                ))
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                </CarouselContent>
+                                <CarouselPrevious className="absolute left-1 top-1/2 -translate-y-1/2" />
+                                <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2" />
+                            </Carousel>
+                        </header>
+                    }
 
                     <div className="flex overflow-hidden pt-2">
                         <div
