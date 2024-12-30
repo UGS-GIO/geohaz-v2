@@ -122,7 +122,7 @@ const LayerCard = ({
     }
 
     const PopupButtons = ({ feature }: { feature: ExtendedFeature }) => (
-        <div className="flex justify-start gap-2">
+        <div className="flex flex-wrap justify-start gap-2">
             <Button variant="ghost" onClick={() => handleZoomToFeature(feature)} className="flex gap-x-2">
                 <Shrink className="h-5 w-5" />
                 Zoom to Feature
