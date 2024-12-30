@@ -23,6 +23,7 @@ import Polygon from '@arcgis/core/geometry/Polygon';
 import proj4 from 'proj4';
 import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 import Extent from '@arcgis/core/geometry/Extent';
+import { basemapList } from '@/components/top-nav';
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -203,12 +204,10 @@ export function init(
     return view;
 }
 
-
-
 // Create a new map
 export const createMap = () => {
     const map = new Map({
-        basemap: 'topo-vector',
+        basemap: basemapList.find(item => item.isActive)?.basemapStyle, // Default basemap
     });
     return map;
 }
