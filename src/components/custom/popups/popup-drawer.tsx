@@ -78,13 +78,25 @@ function PopupDrawer({
         }
     }, [])
 
+    const snapPoints = [.3, .65, .80];
+    const [snap, setSnap] = useState<number | string | null>(snapPoints[0]);
+
+
     return (
-        <Drawer container={container} modal={false}>
+        // <Drawer container={container} modal={false}>
+
+        <Drawer
+            container={container}
+            modal={false}
+            snapPoints={snapPoints}
+            activeSnapPoint={snap}
+            setActiveSnapPoint={setSnap}
+        >
             <DrawerTrigger asChild>
                 <Button ref={drawerTriggerRef} size="sm" className="hidden">Open Drawer</Button>
             </DrawerTrigger>
 
-            <DrawerContent className={cn('max-w-4xl mb-10 z-10 max-h-[85vh] overflow-hidden', isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]')}>
+            <DrawerContent className={cn('max-w-4xl mb-10 z-60 max-h-[85vh] overflow-hidden', isCollapsed ? 'md:ml-[15rem]' : 'md:ml-[38rem]')}>
                 <DrawerHeader className="flex justify-between items-center">
                     <DrawerTitle>{popupTitle}</DrawerTitle>
                 </DrawerHeader>
@@ -147,7 +159,7 @@ function PopupDrawer({
                     </DrawerClose>
                 </DrawerFooter>
             </DrawerContent>
-        </Drawer>
+        </Drawer >
     );
 }
 

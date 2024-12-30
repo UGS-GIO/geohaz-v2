@@ -10,6 +10,7 @@ import { Feature } from "geojson";
 import { RelatedTable } from "@/lib/types/mapping-types";
 import { fetchGetFeatureInfo, highlightFeature } from "@/lib/mapping-utils";
 import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
+import { VaulDrawer } from "@/components/custom/popups/vaul-drawer";
 
 export default function ArcGISMap() {
     const mapRef = useRef<HTMLDivElement>(null);
@@ -165,6 +166,7 @@ export default function ArcGISMap() {
                 <MapWidgets />
                 {/* <div ref={setPopupContainer} className="fixed inset-x-0 flex items-center justify-center"> */}
             </div>
+            {/* <VaulDrawer container={popupContainer} drawerTriggerRef={drawerTriggerRef} popupContent={popupContent} popupTitle="Hazards in your area" /> */}
             <PopupDrawer container={popupContainer} drawerTriggerRef={drawerTriggerRef} popupContent={popupContent} popupTitle="Hazards in your area" />
             {/* This div serves as the custom container for the PopupDrawer component.
                 By setting its ref, it means the PopupDrawer is appended to this container
