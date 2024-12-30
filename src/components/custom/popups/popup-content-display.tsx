@@ -13,7 +13,7 @@ type PopupContentDisplayProps = {
 
 const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProps) => {
     const { relatedTables, popupFields, linkFields } = layer;
-    const { data, isLoading, error } = useRelatedTable(relatedTables || []);
+    const { data, isLoading, error } = useRelatedTable(relatedTables || [], feature);
 
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error: {String(error)}</p>;
@@ -61,27 +61,33 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         return value ?? "N/A";
     };
 
-    const getRelatedTableValues = (field: string) => {
-        if (!data?.length) return ["No data available"];
-        const matchedValues: string[] = [];
+    interface LabelValuePair {
+        label: string;
+        value: string | number;
+    }
+
+    const getRelatedTableValues = () => {
+        if (!data?.length) return [[{ label: "No data available", value: "No data available" }]];
+
+        const groupedValues: LabelValuePair[][] = [];
 
         relatedTables?.forEach((table) => {
             const targetField = properties[table.targetField];
+
             data.forEach((entry) => {
-                entry?.find((item: Record<string, string>) => {
-                    if (item[table.matchingField] === targetField) {
-                        matchedValues.push(item.Description);
+                entry?.forEach((item: Record<string, any>) => {
+                    if (item[table.matchingField] === targetField && item.labelValuePairs) {
+                        // Each item's labelValuePairs becomes its own group
+                        groupedValues.push([...item.labelValuePairs]);
                     }
                 });
-                if (entry?.[table.matchingField] === field) {
-                    matchedValues.push(entry.Description || "N/A");
-                }
             });
         });
 
-        return matchedValues.length ? matchedValues : ["N/A"];
+        return groupedValues.length
+            ? groupedValues
+            : [[{ label: "No data available", value: "No data available" }]];
     };
-
     const featureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
 
     const { urlContent, longTextContent, regularContent } = featureEntries.reduce<{
@@ -120,17 +126,33 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         regularRelatedContent: JSX.Element[];
     }>(
         (acc, table, index) => {
-            const values = getRelatedTableValues(table.targetField);
+            const groupedValues = getRelatedTableValues();
+
             const content = (
-                <div key={index} className="flex flex-col">
+                <div key={index} className="flex flex-col space-y-2">
                     <p className="font-bold underline text-primary">
-                        {properties[table.fieldLabel]}
+                        {properties[table.fieldLabel] || table.fieldLabel}
                     </p>
-                    <p className="break-words">{values.join(", ")}</p>
+                    {groupedValues.map((group, groupIdx) => (
+                        <div key={groupIdx} className="flex flex-col">
+                            {group.map((value, valueIdx) => (
+                                <div key={valueIdx} className="flex flex-row gap-x-2">
+                                    {value.label && <span className="font-bold">{value.label}: </span>}
+                                    <span>{value.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
                 </div>
             );
 
-            const totalWords = values.join(", ").split(/\s+/).length;
+            // Calculate total words across all groups
+            const totalWords = groupedValues
+                .flat()
+                .map(v => String(v.value))
+                .join(" ")
+                .split(/\s+/).length;
+
             acc[totalWords > 20 ? 'longRelatedContent' : 'regularRelatedContent'].push(content);
             return acc;
         },

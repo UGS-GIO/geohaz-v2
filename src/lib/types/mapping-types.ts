@@ -127,10 +127,18 @@ export type GetResultsHandlerType = { exactMatch: boolean, location: __esri.Poin
 
 export type GetSuggestionsHandlerType = { exactMatch: boolean, location: __esri.Point, maxResults: number, sourceIndex: number, spatialReference: __esri.SpatialReference, suggestResult: __esri.SuggestResult, view: __esri.MapView | __esri.SceneView }
 
-export type RelatedTable = {
+export interface RelatedTable {
+    fieldLabel: string;
+    matchingField: string;
     targetField: string;
     url: string;
-    acceptProfile: string;
-    matchingField: string;
-    fieldLabel: string;
-};
+    headers: Record<string, string>;
+    displayFields?: DisplayField[];
+}
+
+
+interface DisplayField {
+    field: string;
+    label?: string;
+    format?: (value: any) => string; // todo: add format function
+}

@@ -32,15 +32,6 @@ const landslideLegacyWMSConfig: WMSLayerProps = {
                 'Movement Cause': 'movecause',
                 'Notes': 'notes',
             },
-            relatedTables: [
-                {
-                    fieldLabel: 'hazard_symbology_text',
-                    matchingField: 'Relate_ID',
-                    targetField: 'lsfhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
-                }
-            ]
         },
     ],
 }
@@ -74,7 +65,14 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'lsfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -104,7 +102,14 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'lsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -133,7 +138,14 @@ const liquefactionWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'lqshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -214,7 +226,14 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'sfrhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -242,7 +261,14 @@ const windBlownSandWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'wsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -270,7 +296,14 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'sdhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -298,7 +331,14 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'sbphazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -326,7 +366,14 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'rfhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -354,7 +401,14 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'peshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -382,7 +436,14 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'exshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -410,7 +471,14 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'sgshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -438,7 +506,14 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'grshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -466,7 +541,14 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'crshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -494,7 +576,14 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'csshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -522,7 +611,14 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'slshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -550,7 +646,14 @@ const alluvialFanWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'aafhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -578,7 +681,14 @@ const earthFissureWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'efhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -606,7 +716,14 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'erzhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -634,7 +751,14 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
                     matchingField: 'Relate_ID',
                     targetField: 'mkfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },

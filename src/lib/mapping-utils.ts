@@ -629,7 +629,7 @@ export async function fetchGetFeatureInfo({
 }
 
 export async function fetchWfsGeometry({ namespace, featureId }: { namespace: string; featureId: string }) {
-    const baseUrl = 'https://geoserver225-ffmu3lsepa-uc.a.run.app/geoserver/wfs'
+    const baseUrl = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wfs'
     const params = new URLSearchParams({
         SERVICE: 'WFS',
         REQUEST: 'GetFeature',
