@@ -16,6 +16,8 @@ type MapContextProps = {
     setIsDecimalDegrees: (isDecimalDegrees: boolean) => void
     coordinates: { x: string; y: string }
     setCoordinates: (coords: { x: string; y: string }) => void
+    isSketching?: boolean
+    setIsSketching?: (isSketching: boolean) => void
 }
 
 // type FeatureAttributes = {
@@ -51,6 +53,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "000.000", y: "000.000" });
     const [isMobile, setIsMobile] = useState<boolean>(false);
     const [isDecimalDegrees, setIsDecimalDegrees] = useState<boolean>(true);
+    const [isSketching, setIsSketching] = useState<boolean>(false);
 
     useEffect(() => {
         if (!view) return;
@@ -81,7 +84,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates }}>
+        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates, isSketching, setIsSketching }}>
             {children}
         </MapContext.Provider>
     )
