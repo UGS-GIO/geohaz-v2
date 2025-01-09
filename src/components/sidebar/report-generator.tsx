@@ -106,7 +106,7 @@ function ReportGenerator() {
     } else {
       console.log("Area of interest is too large, try again");
       alert("Area of interest is too large, try a smaller extent.");
-      setActiveButton(undefined);
+      handleResetButton();
     }
   };
 
@@ -140,9 +140,6 @@ function ReportGenerator() {
 
       if (event.state === "complete") {
         setIsSketching?.(true); // Ensure it remains true immediately after completion
-        requestAnimationFrame(() => {
-          setIsSketching?.(false);
-        });
 
         const extent = event.graphic.geometry.extent;
         const areaHeight = extent?.height;
@@ -169,7 +166,7 @@ function ReportGenerator() {
         } else {
           console.log("Area of interest is too large, try again");
           alert("Area of interest is too large, try drawing a smaller area.");
-          setActiveButton(undefined);
+          handleResetButton();
         }
 
       }
@@ -188,7 +185,9 @@ function ReportGenerator() {
       tempGraphicsLayer.current?.removeAll();
     }
     setActiveButton(undefined);
-    setIsSketching?.(false);
+    requestAnimationFrame(() => {
+      setIsSketching?.(false);
+    })
   };
 
   const buttonText = (buttonName: ActiveButtonOptions, defaultText: string) => {
