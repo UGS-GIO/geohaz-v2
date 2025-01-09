@@ -8,12 +8,10 @@ import { BackToMenuButton } from "@/components/custom/back-to-menu-button";
 
 function addGraphic(
   event: __esri.SketchViewModelCreateEvent,
-  // sketchVM: __esri.SketchViewModel | undefined,
   tempGraphicsLayer: __esri.GraphicsLayer | undefined,
   setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>
 ) {
   if (event.state === "complete" && event.graphic) {
-    console.log("addGraphic: Drawing complete");
     tempGraphicsLayer?.remove(event.graphic);
     const drawAOIHeight = event.graphic.geometry.extent.height;
     const drawAOIWidth = event.graphic.geometry.extent.width;
@@ -34,7 +32,7 @@ function addGraphic(
       setActiveButton(undefined);
     }
   } else if (event.state === "start" && event.graphic) {
-    console.log("addGraphic: Drawing started");
+    // console.log("addGraphic: Drawing started");
   }
 }
 
@@ -69,6 +67,7 @@ function ReportGenerator() {
   }, []);
 
   const handleCurrentMapExtentButton = () => {
+    handleResetButton()
     handleActiveButton('currentMapExtent');
 
     const extent = view?.extent;
@@ -107,11 +106,12 @@ function ReportGenerator() {
     } else {
       console.log("Area of interest is too large, try again");
       alert("Area of interest is too large, try a smaller extent.");
-      setActiveButton(undefined);
+      handleResetButton();
     }
   };
 
   const handleCustomAreaButton = () => {
+    handleResetButton()
     handleActiveButton('customArea');
 
     sketchVM.current = new SketchViewModel({
@@ -140,9 +140,35 @@ function ReportGenerator() {
 
       if (event.state === "complete") {
         setIsSketching?.(true); // Ensure it remains true immediately after completion
-        requestAnimationFrame(() => {
-          setIsSketching?.(false);
-        });
+
+        const extent = event.graphic.geometry.extent;
+        const areaHeight = extent?.height;
+        const areaWidth = extent?.width;
+        const geometry = event.graphic.geometry as __esri.Polygon;
+
+        if (areaHeight && areaWidth && areaHeight < 12000 && areaWidth < 18000) {
+
+          const aoi = {
+            spatialReference: {
+              latestWkid: 3857,
+              wkid: 102100
+            },
+            rings: geometry.rings
+          };
+
+          const params = {
+            description: "Test",
+            polygon: aoi,
+          };
+
+          localStorage.setItem('aoi', JSON.stringify(params));
+          window.open('./report');
+        } else {
+          console.log("Area of interest is too large, try again");
+          alert("Area of interest is too large, try drawing a smaller area.");
+          handleResetButton();
+        }
+
       }
 
       return;
@@ -154,13 +180,14 @@ function ReportGenerator() {
   };
 
   const handleResetButton = () => {
-    console.log('Reset Button Clicked');
     sketchVM.current?.cancel();
     if (tempGraphicsLayer.current) {
       tempGraphicsLayer.current?.removeAll();
     }
     setActiveButton(undefined);
-    setIsSketching?.(false);
+    requestAnimationFrame(() => {
+      setIsSketching?.(false);
+    })
   };
 
   const buttonText = (buttonName: ActiveButtonOptions, defaultText: string) => {
