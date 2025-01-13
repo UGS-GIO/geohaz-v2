@@ -85,7 +85,7 @@ function PopupDrawer({
             </DrawerTrigger>
 
             <DrawerContent className="z-60 max-h-[50vh] md:max-h-[85vh] overflow-hidden md:absolute md:right-4 md:max-w-[30vw] md:mb-10 left-auto w-full">
-                <DrawerHeader className="flex justify-between items-center">
+                <DrawerHeader className="flex justify-between items-center py-2 md:py-4">
                     <DrawerTitle>{popupTitle}</DrawerTitle>
                 </DrawerHeader>
 
