@@ -84,7 +84,7 @@ function PopupDrawer({
                 <Button ref={drawerTriggerRef} size="sm" className="hidden">Open Drawer</Button>
             </DrawerTrigger>
 
-            <DrawerContent className="z-60 max-h-[85vh] overflow-hidden md:absolute md:right-4 md:max-w-[30vw] md:mb-10 left-auto w-full">
+            <DrawerContent className="z-60 max-h-[50vh] md:max-h-[85vh] overflow-hidden md:absolute md:right-4 md:max-w-[30vw] md:mb-10 left-auto w-full">
                 <DrawerHeader className="flex justify-between items-center">
                     <DrawerTitle>{popupTitle}</DrawerTitle>
                 </DrawerHeader>
@@ -133,7 +133,7 @@ function PopupDrawer({
                     <div className="flex overflow-hidden pt-2">
                         <div
                             ref={setContainerRef}
-                            className={cn(`flex flex-1 flex-col gap-4 p-4 overflow-y-auto select-text`)}
+                            className={cn(`flex flex-1 flex-col gap-4 p-1 overflow-y-auto select-text`)}
                         >
                             <PopupContentWithPagination
                                 layerContent={layerContent as unknown as { groupLayerTitle: string; layerTitle: string; features: ExtendedFeature[]; popupFields?: Record<string, string> | undefined; relatedTables?: RelatedTable[] | undefined; }[]} // TODO: fix this
