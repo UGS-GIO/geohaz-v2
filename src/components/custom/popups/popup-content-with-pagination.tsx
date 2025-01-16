@@ -125,7 +125,8 @@ const LayerCard = ({
         <div className="flex justify-start gap-2">
             <Button variant="ghost" onClick={() => handleZoomToFeature(feature)} className="flex gap-x-2">
                 <Shrink className="h-5 w-5" />
-                Zoom to Feature
+                <span className="hidden md:flex">Zoom to Feature</span>
+                <span className="md:hidden">Zoom</span>
             </Button>
             {buttons && buttons.map((button) => button)}
         </div>
@@ -136,7 +137,7 @@ const LayerCard = ({
             id={`section-${layer.layerTitle !== '' ? layer.layerTitle : layer.groupLayerTitle}`}
             className="w-full"
         >
-            <CardHeader>
+            <CardHeader className="p-4">
                 <CardTitle>
                     {layer.groupLayerTitle}
                     {layer.layerTitle && ` - ${layer.layerTitle}`}
@@ -151,7 +152,7 @@ const LayerCard = ({
                     />
                 )}
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-2">
                 {paginatedFeatures.map((feature, idx) => (
                     <div
                         key={idx}
