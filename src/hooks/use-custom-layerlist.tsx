@@ -133,12 +133,20 @@ const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: num
     const handleChildLayerToggle = (childLayer: __esri.Layer, checked: boolean) => {
         childLayer.visible = checked;
 
-        // Update select all state based on all child layers
-        const allVisible = layer.layers?.every(layer => layer.visible);
-        setLocalState(prev => ({
-            ...prev,
-            selectAllChecked: !!allVisible
-        }));
+        // If any child layer is being turned on, ensure group layer is also on
+        if (checked) {
+            handleGroupLayerVisibilityToggle(true);
+            setLocalState(prev => ({
+                selectAllChecked: layer.layers?.every(layer => layer.visible) ?? false,
+                groupVisibility: true
+            }));
+        } else {
+            // If a child layer is being turned off, only update select all state
+            setLocalState(prev => ({
+                ...prev,
+                selectAllChecked: false
+            }));
+        }
     };
 
     return (
