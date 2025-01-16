@@ -20,7 +20,8 @@ const ReportGeneratorButton: React.FC = () => {
     return (
         <Button onClick={handleReportGenerator} variant="ghost" className="flex gap-x-2">
             <FileText className='stroke-foreground h-5 w-5' />
-            Report Generator
+            <span className="hidden md:flex">Report Generator</span>
+            <span className="md:hidden">Report</span>
         </Button>
     )
 }
