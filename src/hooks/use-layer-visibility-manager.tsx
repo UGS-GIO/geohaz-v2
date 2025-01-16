@@ -11,6 +11,19 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
     const [layerOpacity, setLayerOpacity] = useState<number>(layer.opacity || 1);
     const { id: layerId } = layer;
 
+    interface LocalState {
+        selectAllChecked: boolean;
+        groupVisibility: boolean;
+    }
+
+    const [localState, setLocalState] = useState<LocalState>(() => {
+        const typedLayer = layer as __esri.GroupLayer;
+        return ({
+            groupVisibility: layer.visible,
+            selectAllChecked: typedLayer.layers?.every(childLayer => childLayer.visible) ?? false
+        })
+    });
+
     useEffect(() => {
         if (activeLayers && layerId) {
             const foundLayer = findLayerById(activeLayers, layerId);
@@ -52,24 +65,49 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
         }
     }, [currentLayer, setGroupLayerVisibility]);
 
-
-    const toggleAllSublayers = useCallback(() => {
+    const handleToggleAll = useCallback((checked: boolean) => {
         if (currentLayer?.type === 'group') {
             const groupLayer = currentLayer as __esri.GroupLayer;
-            const allVisible = groupLayer.layers?.every(layer => layer.visible);
-            const newVisibility = !allVisible;
+            // Update group layer visibility
+            handleGroupLayerVisibilityToggle(checked)
 
-            groupLayer.layers?.forEach((sublayer) => {
-                sublayer.visible = newVisibility;
+            // Turn on/off group layer and all sublayers
+            groupLayer.layers?.forEach(childLayer => {
+                childLayer.visible = checked
             });
 
-            groupLayer.visible = newVisibility;
-            setGroupLayerVisibility(prev => ({
-                ...prev,
-                [groupLayer.id]: newVisibility
-            }));
+            // Update local state
+            setLocalState({
+                groupVisibility: checked,
+                selectAllChecked: checked
+            })
         }
     }, [currentLayer, setGroupLayerVisibility]);
+
+    const handleChildLayerToggle = (childLayer: __esri.Layer, checked: boolean, layer: __esri.GroupLayer
+    ) => {
+        childLayer.visible = checked;
+
+        // If any child layer is being turned on, ensure group layer is also on
+        if (checked) {
+            handleGroupLayerVisibilityToggle(true);
+            setLocalState(() => ({
+                selectAllChecked: layer.layers?.every(layer => layer.visible) ?? false,
+                groupVisibility: true
+            }));
+        } else {
+            // If a child layer is being turned off, only update select all state
+            setLocalState(prev => ({
+                ...prev,
+                selectAllChecked: false
+            }));
+        }
+    };
+
+    const handleGroupVisibilityToggle = (checked: boolean) => {
+        setLocalState(prev => ({ ...prev, groupVisibility: checked }));
+        handleGroupLayerVisibilityToggle(checked);
+    };
 
     return {
         currentLayer,
@@ -78,7 +116,10 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
         updateLayer,
         handleGroupLayerVisibilityToggle,
         groupLayerVisibility,
-        toggleAllSublayers
+        handleToggleAll,
+        handleChildLayerToggle,
+        handleGroupVisibilityToggle,
+        localState
     };
 };
 

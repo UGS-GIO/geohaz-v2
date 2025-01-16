@@ -35,7 +35,7 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
         setLocalVisibility(layer.visible);
     }, [layer.visible, forceUpdate]);
 
-    const handleVisibilityToggle = (checked: boolean) => {
+    const handleChildVisibilityToggle = (checked: boolean) => {
         setLocalVisibility(checked);
         updateLayer(layer => {
             layer.visible = checked;
@@ -77,7 +77,7 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
                     <AccordionHeader>
                         <Checkbox
                             checked={localVisibility}
-                            onCheckedChange={handleVisibilityToggle}
+                            onCheckedChange={handleChildVisibilityToggle}
                             className="mx-2"
                         />
                         <AccordionTrigger>
@@ -102,52 +102,7 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
 };
 
 const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
-    const [localState, setLocalState] = useState(() => ({
-        groupVisibility: layer.visible,
-        selectAllChecked: layer.layers?.every(childLayer => childLayer.visible) ?? false
-    }));
-
-    const { handleGroupLayerVisibilityToggle } = useLayerVisibilityManager(layer);
-
-    const handleGroupToggle = (checked: boolean) => {
-        setLocalState(prev => ({ ...prev, groupVisibility: checked }));
-        handleGroupLayerVisibilityToggle(checked);
-    };
-
-    const handleToggleAll = (checked: boolean) => {
-        // Update group layer visibility
-        handleGroupLayerVisibilityToggle(checked)
-
-        // Turn on/off group layer and all sublayers
-        layer.layers?.forEach(childLayer => {
-            childLayer.visible = checked
-        });
-
-        // Update local state
-        setLocalState({
-            groupVisibility: checked,
-            selectAllChecked: checked
-        })
-    };
-
-    const handleChildLayerToggle = (childLayer: __esri.Layer, checked: boolean) => {
-        childLayer.visible = checked;
-
-        // If any child layer is being turned on, ensure group layer is also on
-        if (checked) {
-            handleGroupLayerVisibilityToggle(true);
-            setLocalState(prev => ({
-                selectAllChecked: layer.layers?.every(layer => layer.visible) ?? false,
-                groupVisibility: true
-            }));
-        } else {
-            // If a child layer is being turned off, only update select all state
-            setLocalState(prev => ({
-                ...prev,
-                selectAllChecked: false
-            }));
-        }
-    };
+    const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState } = useLayerVisibilityManager(layer);
 
     return (
         <div className="mr-2 border border-secondary rounded my-2">
@@ -156,7 +111,7 @@ const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: num
                     <AccordionHeader>
                         <Checkbox
                             checked={localState.groupVisibility}
-                            onCheckedChange={handleGroupToggle}
+                            onCheckedChange={(checked: boolean) => handleGroupVisibilityToggle(checked)}
                             className="mx-2"
                         />
                         <AccordionTrigger>
@@ -167,7 +122,7 @@ const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: num
                         <div className="flex items-center space-x-2 ml-2">
                             <Checkbox
                                 checked={localState.selectAllChecked}
-                                onCheckedChange={handleToggleAll}
+                                onCheckedChange={(checked: boolean) => handleToggleAll(checked)}
                             />
                             <label className="text-sm font-medium italic">Select All</label>
                         </div>
@@ -176,7 +131,7 @@ const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: num
                                 <LayerAccordion
                                     layer={childLayer}
                                     isTopLevel={false}
-                                    onVisibilityChange={(checked) => handleChildLayerToggle(childLayer, checked)}
+                                    onVisibilityChange={(checked) => handleChildLayerToggle(childLayer, checked, layer)}
                                 />
                             </div>
                         ))}
@@ -206,6 +161,10 @@ const useCustomLayerList = () => {
             });
 
             setLayerList(list);
+        }
+
+        return () => {
+            setLayerList(undefined);
         }
     }, [activeLayers]);
 
