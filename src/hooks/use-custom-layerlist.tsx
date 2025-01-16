@@ -115,23 +115,19 @@ const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: num
     };
 
     const handleToggleAll = (checked: boolean) => {
-        if (checked) {
-            // Turn on group layer and all sublayers
-            handleGroupLayerVisibilityToggle(true);
-            layer.layers?.forEach(childLayer => {
-                childLayer.visible = true;
-            });
+        // Update group layer visibility
+        handleGroupLayerVisibilityToggle(checked)
 
-            setLocalState({
-                groupVisibility: true,
-                selectAllChecked: true
-            });
-        } else {
-            setLocalState(prev => ({
-                ...prev,
-                selectAllChecked: false
-            }));
-        }
+        // Turn on/off group layer and all sublayers
+        layer.layers?.forEach(childLayer => {
+            childLayer.visible = checked
+        });
+
+        // Update local state
+        setLocalState({
+            groupVisibility: checked,
+            selectAllChecked: checked
+        })
     };
 
     const handleChildLayerToggle = (childLayer: __esri.Layer, checked: boolean) => {
