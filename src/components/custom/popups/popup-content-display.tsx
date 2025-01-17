@@ -12,20 +12,39 @@ type PopupContentDisplayProps = {
 };
 
 const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProps) => {
-    const { relatedTables, popupFields, linkFields } = layer;
+    const { relatedTables, popupFields, linkFields, colorCodingMap } = layer;
     const { data, isLoading, error } = useRelatedTable(relatedTables || [], feature);
 
+    // Loading and error states
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error: {String(error)}</p>;
 
     const properties = feature.properties || {};
     const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/;
 
+    // Helper function to apply color based on the field value
+    const applyColor = (field: string, value: string | number) => {
+
+        console.log('colorCodingMap', colorCodingMap);
+        console.log('field', field);
+        console.log('value', value);
+        console.log('colorCodingMap[field]', colorCodingMap?.[field]);
+
+        if (colorCodingMap && colorCodingMap[field]) {
+            const colorFunction = colorCodingMap[field];
+
+            return { color: colorFunction(value) };
+        }
+        return {};
+    };
+
     const createLink = (value: string, field: string) => {
         const linkConfig = linkFields?.[field];
 
         if (linkConfig) {
-            const hrefs = linkConfig.transform ? linkConfig.transform(value) : [{ label: value, href: `${linkConfig.baseUrl}${value}` }];
+            const hrefs = linkConfig.transform
+                ? linkConfig.transform(value)
+                : [{ label: value, href: `${linkConfig.baseUrl}${value}` }];
 
             return (
                 <>
@@ -70,7 +89,6 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         if (!data?.length) return [[{ label: "No data available", value: "No data available" }]];
 
         const groupedValues: LabelValuePair[][] = [];
-
         relatedTables?.forEach((table) => {
             const targetField = properties[table.targetField];
 
@@ -88,6 +106,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
             ? groupedValues
             : [[{ label: "No data available", value: "No data available" }]];
     };
+
     const featureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
 
     const { urlContent, longTextContent, regularContent } = featureEntries.reduce<{
@@ -96,11 +115,22 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         regularContent: JSX.Element[];
     }>(
         (acc, [label, field]) => {
+            if (layer.layerTitle === "Basin Names") {
+                // add a mock rank field and give it a random value because it doesn't exist in the data yet
+                if (field === "rank") {
+                    properties[field] = Math.floor(Math.random() * 3) + 1;
+                }
+            }
             const value = popupFields ? properties[field] : field;
+            console.log('value', value);
+
             if (!value) return acc;
 
+            // Apply color if needed
+            const colorStyle = applyColor(field, value);
+
             const content = (
-                <div key={label} className="flex flex-col">
+                <div key={label} className="flex flex-col" style={colorStyle}>
                     <p className="font-bold underline text-primary">{label}</p>
                     <p className="break-words">
                         {createLink(value, field)}

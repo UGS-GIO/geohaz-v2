@@ -115,6 +115,7 @@ export default function ArcGISMap() {
                         ),
                         ...(value.popupFields && { popupFields: value.popupFields }),
                         ...(value.linkFields && { linkFields: value.linkFields }),
+                        ...(value.colorCodingMap && { colorCodingMap: value.colorCodingMap }),
                         ...(value.relatedTables && value.relatedTables.length > 0 && {
                             relatedTables: value.relatedTables.map(table => ({
                                 ...table,
