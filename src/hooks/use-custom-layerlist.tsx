@@ -83,7 +83,7 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions, isLoading: isDescriptionsLoading, error: descriptionsError } = useFetchLayerDescriptions();
 
-    const { refetch: fetchExtent, isLoading: isExtentsLoading, error: extentError } = useLayerExtent(typeNarrowedLayer);
+    const { refetch: fetchExtent } = useLayerExtent(typeNarrowedLayer);
 
     const handleZoomToLayer = async () => {
         try {
