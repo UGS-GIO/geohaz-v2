@@ -83,7 +83,7 @@ const fetchLayerExtent = async (layer: TypeNarrowedLayer): Promise<__esri.Extent
 
         // Extract namespace and layer name
         const layerName = sublayer.name;
-        const [namespace, name] = layerName.split(':');
+        const [namespace, _name] = layerName.split(':');
 
         // Construct GetCapabilities URL with version (1.3.0 is most current)
         const capabilitiesUrl = new URL(layer.url);
