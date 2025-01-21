@@ -7,8 +7,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/custom/button';
-import { IconMenu } from '@tabler/icons-react';
 import { MapContext } from '@/context/map-provider';
+import { BasemapIcon } from '@/assets/basemap-icons';
 
 type BasemapType = {
   title: string;
@@ -77,7 +77,7 @@ function TopNav({ className, ...props }: TopNavProps) {
 
   const mobileTrigger = (
     <Button size="icon" variant="outline">
-      <IconMenu />
+       <BasemapIcon />
     </Button>
   );
   const desktopTrigger = (
