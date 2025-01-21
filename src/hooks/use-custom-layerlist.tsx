@@ -83,35 +83,27 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions, isLoading: isDescriptionsLoading, error: descriptionsError } = useFetchLayerDescriptions();
 
-    const { refetch } = useLayerExtent(typeNarrowedLayer);
+    const { refetch: fetchExtent, data: cachedExtent, isLoading } = useLayerExtent(typeNarrowedLayer);
+
     const handleZoomToLayer = async () => {
         try {
-            // Trigger the refetch manually
-            const { data: extent, isLoading, error } = await refetch();
+            // Only fetch if we don't have cached data
+            const extent = cachedExtent || await fetchExtent().then(result => result.data);
 
             if (isLoading) {
-                // Handle loading state
                 console.log("Loading extent...");
                 return;
             }
 
-            if (error) {
-                // Handle error
-                console.error("Error fetching extent:", error);
-                return;
-            }
-
             if (extent) {
-                // Zoom to the fetched extent
                 const arcgisExtent = new Extent({
                     xmin: extent.xmin,
                     ymin: extent.ymin,
                     xmax: extent.xmax,
                     ymax: extent.ymax,
-                    spatialReference: { wkid: 4326 } // Assuming WGS84
+                    spatialReference: { wkid: 4326 }
                 });
 
-                // Zoom to the fetched extent
                 view?.goTo(arcgisExtent);
 
                 // Make parent group visible if it exists
@@ -130,8 +122,6 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
                     setIsCollapsed(true);
                     setNavOpened(false);
                 }
-            } else {
-                console.log("Extent data not available.");
             }
         } catch (error) {
             console.error("Error in handleZoomToLayer:", error);

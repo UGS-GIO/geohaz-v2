@@ -140,7 +140,8 @@ const useLayerExtent = (layer: TypeNarrowedLayer) => {
     return useQuery({
         queryKey: ['layerExtent', layer.id],
         queryFn: () => fetchLayerExtent(layer),
-        enabled: false, // This prevents the query from running automatically
+        enabled: false, // Prevents automatic fetching
+        staleTime: Infinity, // Keeps the data fresh forever (never marks as stale)
     });
 };
 
