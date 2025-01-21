@@ -83,50 +83,60 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions, isLoading: isDescriptionsLoading, error: descriptionsError } = useFetchLayerDescriptions();
 
-    const { refetch: fetchExtent } = useLayerExtent(typeNarrowedLayer);
-
+    const { refetch, data: extent, isLoading, error } = useLayerExtent(typeNarrowedLayer);
     const handleZoomToLayer = async () => {
         try {
-            // Only fetch extent if we have a URL
-            if (typeNarrowedLayer.url) {
-                const { data: extent } = await fetchExtent();
+            // Trigger the refetch manually
+            const { data: extent, isLoading, error } = await refetch();
 
-                if (extent) {
-                    // Create an extent object that ArcGIS can understand
-                    const arcgisExtent = new Extent({
-                        xmin: extent.xmin,
-                        ymin: extent.ymin,
-                        xmax: extent.xmax,
-                        ymax: extent.ymax,
-                        spatialReference: { wkid: 4326 } // Assuming WGS84
-                    });
+            if (isLoading) {
+                // Handle loading state
+                console.log("Loading extent...");
+                return;
+            }
 
-                    // Zoom to the fetched extent
-                    view?.goTo(arcgisExtent);
+            if (error) {
+                // Handle error
+                console.error("Error fetching extent:", error);
+                return;
+            }
 
-                    // Make parent group visible if it exists
-                    if (currentLayer?.parent) {
-                        const currentGroupLayerParent = currentLayer.parent as __esri.GroupLayer;
-                        handleGroupLayerVisibilityToggle(currentGroupLayerParent.id)(true);
-                    }
+            if (extent) {
+                // Zoom to the fetched extent
+                const arcgisExtent = new Extent({
+                    xmin: extent.xmin,
+                    ymin: extent.ymin,
+                    xmax: extent.xmax,
+                    ymax: extent.ymax,
+                    spatialReference: { wkid: 4326 } // Assuming WGS84
+                });
 
-                    // Make the layer visible
-                    updateLayer(layer => {
-                        layer.visible = true;
-                    });
+                // Zoom to the fetched extent
+                view?.goTo(arcgisExtent);
 
-                    // Handle mobile UI
-                    if (isMobile) {
-                        setIsCollapsed(true);
-                        setNavOpened(false);
-                    }
+                // Make parent group visible if it exists
+                if (currentLayer?.parent) {
+                    const currentGroupLayerParent = currentLayer.parent as __esri.GroupLayer;
+                    handleGroupLayerVisibilityToggle(currentGroupLayerParent.id)(true);
                 }
+
+                // Make the layer visible
+                updateLayer(layer => {
+                    layer.visible = true;
+                });
+
+                // Handle mobile UI
+                if (isMobile) {
+                    setIsCollapsed(true);
+                    setNavOpened(false);
+                }
+            } else {
+                console.log("Extent data not available.");
             }
         } catch (error) {
-            console.error('Error fetching layer extent:', error);
+            console.error("Error in handleZoomToLayer:", error);
         }
     };
-
 
     const updateLayer = (updateFn: (layer: __esri.Layer) => void) => {
         if (currentLayer) {
