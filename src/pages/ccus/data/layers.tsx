@@ -4,6 +4,7 @@ export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.ru
 const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
 const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
 const GEN_GIS_WORKSPACE = 'gen_gis';
+const MAPPING_WORKSPACE = 'mapping';
 
 // Basin Names WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -221,6 +222,26 @@ const SITLAConfig: LayerProps = {
     },
 };
 
+const faultsLayerName = 'faults_m-179dm';
+const faultsWMSTitle = '500k Faults';
+const faultsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: faultsWMSTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${MAPPING_WORKSPACE}:${faultsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Series ID': 'series_id',
+                'Scale': 'scale',
+            },
+        },
+    ],
+};
+
 // Energy and Minerals Group Layer
 const EMPConfig: LayerProps = {
     type: 'group',
@@ -234,7 +255,8 @@ const EMPConfig: LayerProps = {
         riversWMSConfig,
         seamlessGeolunitsWMSConfig,
         wellWithTopsWMSConfig,
-        SITLAConfig
+        SITLAConfig,
+        faultsWMSConfig,
     ]
 };
 
