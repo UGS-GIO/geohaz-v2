@@ -1,87 +1,31 @@
-import { useContext, useEffect, useState, useCallback } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapContext } from '@/context/map-provider';
 import LayerControls from '@/components/custom/layer-controls';
 import { useSidebar } from '@/hooks/use-sidebar';
-import { findLayerById } from '@/lib/mapping-utils';
-import { LayerListContext } from '@/context/layerlist-provider';
 import { useFetchLayerDescriptions } from '@/hooks/use-fetch-layer-descriptions';
-import Extent from '@arcgis/core/geometry/Extent';
+import { Switch } from '@/components/ui/switch';
 import { useLayerExtent } from '@/hooks/use-layer-extent';
-
-const useGroupLayerVisibility = (activeLayers: __esri.Collection<__esri.Layer> | undefined) => {
-    const { groupLayerVisibility, setGroupLayerVisibility } = useContext(LayerListContext);
-
-    // Initialize group layer visibility state based on active layers
-    useEffect(() => {
-        if (activeLayers) {
-            const initialVisibility = activeLayers.reduce((acc, layer) => {
-                if (layer.type === 'group') {
-                    acc[layer.id] = layer.visible;
-                }
-                return acc;
-            }, {} as Record<string, boolean>);
-
-            setGroupLayerVisibility(initialVisibility);
-        }
-    }, [activeLayers]);
-
-    // Memoized handler for toggling visibility
-    const handleGroupLayerVisibilityToggle = useCallback((layerId: string) => {
-        return (newVisibility: boolean) => {
-            setGroupLayerVisibility(prevState => ({
-                ...prevState,
-                [layerId]: newVisibility
-            }));
-
-            const layer = activeLayers?.find(layer => layer.id === layerId);
-            if (layer) {
-                layer.visible = newVisibility;
-            }
-        };
-    }, [activeLayers]);
-
-    return { groupLayerVisibility, handleGroupLayerVisibilityToggle };
-};
-
-const useLayerVisibility = (layer: __esri.Layer) => {
-    const { activeLayers } = useContext(MapContext);
-    const [currentLayer, setCurrentLayer] = useState<__esri.Layer>();
-    const [layerVisibility, setLayerVisibility] = useState<boolean>(layer.visible);
-    const [layerOpacity, setLayerOpacity] = useState<number>(layer.opacity || 1);
-    const { id: layerId } = layer;
-
-    useEffect(() => {
-        if (activeLayers && layerId) {
-            const foundLayer = findLayerById(activeLayers, layerId);
-            if (foundLayer) {
-                setCurrentLayer(foundLayer);
-                setLayerVisibility(foundLayer.visible);
-                setLayerOpacity(foundLayer.opacity || 1);
-            }
-        }
-    }, [activeLayers, layerId]);
-
-    return { currentLayer, layerVisibility, layerOpacity, setLayerVisibility, setLayerOpacity };
-}
+import Extent from '@arcgis/core/geometry/Extent';
+import { useLayerVisibilityManager } from '@/hooks/use-layer-visibility-manager';
 
 export type TypeNarrowedLayer = __esri.FeatureLayer | __esri.MapImageLayer | __esri.WMSLayer
 interface LayerAccordionProps {
     layer: __esri.Layer;
     isTopLevel: boolean;
+    forceUpdate?: boolean;
+    onVisibilityChange?: (checked: boolean) => void;
 }
 
-// Updated LayerAccordion component
-const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
+const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer;
-    const { view, activeLayers } = useContext(MapContext);
+    const { view } = useContext(MapContext);
     const typeNarrowedLayer = layer as TypeNarrowedLayer;
     const isMobile = window.innerWidth < 768;
-    const { currentLayer, layerVisibility, layerOpacity, setLayerVisibility, setLayerOpacity } = useLayerVisibility(layer);
-    const { handleGroupLayerVisibilityToggle } = useGroupLayerVisibility(activeLayers);
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions, isLoading: isDescriptionsLoading, error: descriptionsError } = useFetchLayerDescriptions();
+    const [localVisibility, setLocalVisibility] = useState(layer.visible);
 
     const { refetch: fetchExtent, data: cachedExtent, isLoading } = useLayerExtent(typeNarrowedLayer);
 
@@ -91,7 +35,6 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
             const extent = cachedExtent || await fetchExtent().then(result => result.data);
 
             if (isLoading) {
-                console.log("Loading extent...");
                 return;
             }
 
@@ -108,8 +51,7 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
 
                 // Make parent group visible if it exists
                 if (currentLayer?.parent) {
-                    const currentGroupLayerParent = currentLayer.parent as __esri.GroupLayer;
-                    handleGroupLayerVisibilityToggle(currentGroupLayerParent.id)(true);
+                    handleGroupLayerVisibilityToggle(true);
                 }
 
                 // Make the layer visible
@@ -128,58 +70,30 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
         }
     };
 
-    const updateLayer = (updateFn: (layer: __esri.Layer) => void) => {
-        if (currentLayer) {
-            updateFn(currentLayer);
-            setLayerVisibility(currentLayer.visible);
-            setLayerOpacity(currentLayer.opacity || 1);
-        }
+    const {
+        currentLayer,
+        layerOpacity,
+        updateLayer,
+        handleGroupLayerVisibilityToggle
+    } = useLayerVisibilityManager(layer);
+
+    // Update local visibility when the layer's visibility changes externally
+    useEffect(() => {
+        setLocalVisibility(layer.visible);
+    }, [layer.visible, forceUpdate]);
+
+    const handleChildVisibilityToggle = (checked: boolean) => {
+        setLocalVisibility(checked);
+        updateLayer(layer => {
+            layer.visible = checked;
+        });
+        // Call the onVisibilityChange callback if provided
+        onVisibilityChange?.(checked);
     };
 
-    const handleVisibilityToggle = () =>
-        updateLayer((layer) => {
-            layer.visible = !layer.visible;
-
-            // If the layer has a parent, adjust the parent's visibility accordingly
-            if (layer.parent) {
-                const parentGroupLayer = layer.parent as __esri.GroupLayer;
-
-                // Logic:
-                // - If the parent is *not visible* and we're turning this layer *on*, make the parent visible.
-                // - If the parent is *not visible* and we're turning this layer *off*, leave the parent as is.
-                // - If we're turning this layer *off*, do nothing to the parent layer's visibility.
-                if (!parentGroupLayer.visible && layer.visible) {
-                    handleGroupLayerVisibilityToggle(parentGroupLayer.id)(true);
-                }
-            }
-        });
     const handleOpacityChange = (value: number) => updateLayer(layer => {
         layer.opacity = value / 100;
     });
-
-    // const handleZoomToLayer = () => {
-    //     if (currentLayer && currentLayer.fullExtent) {
-    //         // zoom to the layer's full extent
-    //         view?.goTo(currentLayer.fullExtent);
-
-    //         // if the layer is in a group, make sure the group (parent) is set to visible
-    //         if (currentLayer.parent) {
-    //             const currentGroupLayerParent = currentLayer as __esri.GroupLayer;
-    //             handleGroupLayerVisibilityToggle(currentGroupLayerParent.id)(true);
-    //         }
-
-    //         // update the layer visibility to true
-    //         updateLayer(layer => {
-    //             layer.visible = true;
-    //         });
-
-    //         // if on mobile, collapse the sidebar and close the nav
-    //         if (isMobile) {
-    //             setIsCollapsed(true);
-    //             setNavOpened(false);
-    //         }
-    //     }
-    // };
 
     if (isDescriptionsLoading) return <div>Loading...</div>;
     if (descriptionsError) return <div>Error: {descriptionsError.message}</div>;
@@ -189,11 +103,26 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
             <Accordion type="single" collapsible>
                 <AccordionItem value="item-1">
                     <AccordionHeader>
-                        <Checkbox
-                            checked={layerVisibility}
-                            onClick={handleVisibilityToggle}
-                            className="mx-2"
-                        />
+                        {
+                            isTopLevel && (
+                                // use switch for top level layers
+                                <Switch
+                                    checked={localVisibility}
+                                    onCheckedChange={handleChildVisibilityToggle}
+                                    className="mx-2"
+                                />
+                            )
+                        }
+                        {
+                            !isTopLevel && (
+                                // use checkbox for child layers
+                                <Checkbox
+                                    checked={localVisibility}
+                                    onCheckedChange={handleChildVisibilityToggle}
+                                    className="mx-2"
+                                />
+                            )
+                        }
                         <AccordionTrigger>
                             <h3 className={`text-md font-medium text-left ${isTopLevel ? 'text-md' : ''}`}>{layerTitle}</h3>
                         </AccordionTrigger>
@@ -215,49 +144,63 @@ const LayerAccordion = ({ layer, isTopLevel }: LayerAccordionProps) => {
     );
 };
 
+const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
+
+    const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState, accordionTriggerRef } = useLayerVisibilityManager(layer);
+
+    return (
+        <div className="mr-2 border border-secondary rounded my-2">
+            <Accordion type="multiple">
+                <AccordionItem value={`item-${index}`}>
+                    <AccordionHeader>
+                        <Switch
+                            checked={localState.groupVisibility}
+                            onCheckedChange={handleGroupVisibilityToggle}
+                            className="mx-2"
+                        />
+                        <AccordionTrigger asChild>
+                            <button ref={accordionTriggerRef}>
+                                <h3 className="font-medium text-left text-md">{layer.title}</h3>
+                            </button>
+                        </AccordionTrigger>
+                    </AccordionHeader>
+                    <AccordionContent>
+                        <div className="flex items-center space-x-2 ml-2">
+                            <Checkbox
+                                checked={localState.selectAllChecked}
+                                onCheckedChange={(checked: boolean) => handleToggleAll(checked)}
+                            />
+                            <label className="text-sm font-medium italic">Select All</label>
+                        </div>
+                        {layer.layers?.map((childLayer) => (
+                            <div className="ml-4" key={childLayer.id}>
+                                <LayerAccordion
+                                    layer={childLayer}
+                                    isTopLevel={false}
+                                    onVisibilityChange={(checked) => handleChildLayerToggle(childLayer, checked, layer)}
+                                />
+                            </div>
+                        ))}
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+        </div>
+    );
+};
 
 const useCustomLayerList = () => {
     const { activeLayers } = useContext(MapContext);
     const [layerList, setLayerList] = useState<__esri.Collection<JSX.Element>>();
 
-    // Use the custom hook for managing group layer visibility
-    const { groupLayerVisibility, handleGroupLayerVisibilityToggle } = useGroupLayerVisibility(activeLayers);
-
-    // Effect for updating the layer list
     useEffect(() => {
         if (activeLayers) {
             const list = activeLayers.map((layer, index) => {
                 if (layer.type === 'group') {
-                    const groupLayer = layer as __esri.GroupLayer;
-                    return (
-                        <div className='mr-2 border border-secondary rounded my-2' key={`accordion-${index}`}>
-                            <Accordion type="multiple" >
-                                <AccordionItem value={`item-${index}`}>
-                                    <AccordionHeader>
-                                        <Checkbox
-                                            checked={groupLayerVisibility[groupLayer.id] || false}
-                                            onCheckedChange={handleGroupLayerVisibilityToggle(layer.id)}
-                                            className="mx-2"
-                                        />
-                                        <AccordionTrigger>
-                                            <h3 className='font-medium text-left text-md'>{layer.title}</h3>
-                                        </AccordionTrigger>
-                                    </AccordionHeader>
-                                    <AccordionContent>
-                                        {groupLayer.layers?.map((childLayer) => (
-                                            <div className='ml-4' key={childLayer.id}>
-                                                <LayerAccordion key={childLayer.id} layer={childLayer} isTopLevel={false} />
-                                            </div>
-                                        ))}
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
-                        </div>
-                    );
+                    return <GroupLayerItem key={layer.id} layer={layer as __esri.GroupLayer} index={index} />;
                 }
 
                 return (
-                    <div className='mr-2 my-2 border border-secondary rounded' key={`layer-${layer.id}`}>
+                    <div className='mr-2 my-2 border border-secondary rounded' key={layer.id}>
                         <LayerAccordion layer={layer} isTopLevel={true} />
                     </div>
                 );
@@ -265,7 +208,11 @@ const useCustomLayerList = () => {
 
             setLayerList(list);
         }
-    }, [activeLayers, groupLayerVisibility, handleGroupLayerVisibilityToggle]);
+
+        return () => {
+            setLayerList(undefined);
+        }
+    }, [activeLayers]);
 
     return layerList;
 };
