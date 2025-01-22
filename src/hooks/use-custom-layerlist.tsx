@@ -35,7 +35,6 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
             const extent = cachedExtent || await fetchExtent().then(result => result.data);
 
             if (isLoading) {
-                console.log("Loading extent...");
                 return;
             }
 
