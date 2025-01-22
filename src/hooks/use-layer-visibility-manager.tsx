@@ -1,7 +1,7 @@
 import { LayerListContext } from "@/context/layerlist-provider";
 import { MapContext } from "@/context/map-provider";
 import { findLayerById } from "@/lib/mapping-utils";
-import { useContext, useState, useEffect, useCallback } from "react";
+import { useContext, useState, useEffect, useCallback, useRef, RefObject } from "react";
 
 const useLayerVisibilityManager = (layer: __esri.Layer) => {
     const { activeLayers } = useContext(MapContext);
@@ -10,6 +10,7 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
     const [layerVisibility, setLayerVisibility] = useState<boolean>(layer.visible);
     const [layerOpacity, setLayerOpacity] = useState<number>(layer.opacity || 1);
     const { id: layerId } = layer;
+    const accordionTriggerRef = useRef<HTMLButtonElement>(null);
 
     interface LocalState {
         selectAllChecked: boolean;
@@ -52,7 +53,7 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
         }
     }, [currentLayer, setGroupLayerVisibility]);
 
-    const handleGroupLayerVisibilityToggle = useCallback((newVisibility: boolean) => {
+    const handleGroupLayerVisibilityToggle = useCallback((newVisibility: boolean, accordionTriggerRef?: RefObject<HTMLButtonElement>) => {
 
         if (currentLayer?.type === 'group') {
             const groupLayer = currentLayer as __esri.GroupLayer;
@@ -62,6 +63,13 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
                 ...prev,
                 [groupLayer.id]: newVisibility
             }));
+
+            if (accordionTriggerRef) {
+                const accordionState = accordionTriggerRef.current?.getAttribute('data-state');
+                if (accordionState === 'closed' && newVisibility === true) { // open the accordion if it's closed
+                    accordionTriggerRef.current?.click();
+                }
+            }
         }
     }, [currentLayer, setGroupLayerVisibility]);
 
@@ -106,7 +114,7 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
 
     const handleGroupVisibilityToggle = (checked: boolean) => {
         setLocalState(prev => ({ ...prev, groupVisibility: checked }));
-        handleGroupLayerVisibilityToggle(checked);
+        handleGroupLayerVisibilityToggle(checked, accordionTriggerRef);
     };
 
     return {
@@ -119,7 +127,8 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
         handleToggleAll,
         handleChildLayerToggle,
         handleGroupVisibilityToggle,
-        localState
+        localState,
+        accordionTriggerRef
     };
 };
 

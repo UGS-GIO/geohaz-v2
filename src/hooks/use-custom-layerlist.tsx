@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapContext } from '@/context/map-provider';
@@ -6,6 +6,8 @@ import LayerControls from '@/components/custom/layer-controls';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { useFetchLayerDescriptions } from './use-fetch-layer-descriptions';
 import { useLayerVisibilityManager } from './use-layer-visibility-manager';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 
 interface LayerAccordionProps {
     layer: __esri.Layer;
@@ -75,11 +77,26 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
             <Accordion type="single" collapsible>
                 <AccordionItem value="item-1">
                     <AccordionHeader>
-                        <Checkbox
-                            checked={localVisibility}
-                            onCheckedChange={handleChildVisibilityToggle}
-                            className="mx-2"
-                        />
+                        {
+                            isTopLevel && (
+                                // use switch for top level layers
+                                <Switch
+                                    checked={localVisibility}
+                                    onCheckedChange={handleChildVisibilityToggle}
+                                    className="mx-2"
+                                />
+                            )
+                        }
+                        {
+                            !isTopLevel && (
+                                // use checkbox for child layers
+                                <Checkbox
+                                    checked={localVisibility}
+                                    onCheckedChange={handleChildVisibilityToggle}
+                                    className="mx-2"
+                                />
+                            )
+                        }
                         <AccordionTrigger>
                             <h3 className={`text-md font-medium text-left ${isTopLevel ? 'text-md' : ''}`}>{layerTitle}</h3>
                         </AccordionTrigger>
@@ -102,20 +119,23 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
 };
 
 const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
-    const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState } = useLayerVisibilityManager(layer);
+
+    const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState, accordionTriggerRef } = useLayerVisibilityManager(layer);
 
     return (
         <div className="mr-2 border border-secondary rounded my-2">
             <Accordion type="multiple">
                 <AccordionItem value={`item-${index}`}>
                     <AccordionHeader>
-                        <Checkbox
+                        <Switch
                             checked={localState.groupVisibility}
-                            onCheckedChange={(checked: boolean) => handleGroupVisibilityToggle(checked)}
+                            onCheckedChange={handleGroupVisibilityToggle}
                             className="mx-2"
                         />
-                        <AccordionTrigger>
-                            <h3 className="font-medium text-left text-md">{layer.title}</h3>
+                        <AccordionTrigger asChild>
+                            <button ref={accordionTriggerRef}>
+                                <h3 className="font-medium text-left text-md">{layer.title}</h3>
+                            </button>
                         </AccordionTrigger>
                     </AccordionHeader>
                     <AccordionContent>
