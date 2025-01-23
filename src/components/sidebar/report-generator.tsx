@@ -5,6 +5,8 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Layer from "@arcgis/core/layers/Layer";
 import { Button } from '@/components/custom/button';
 import { BackToMenuButton } from "@/components/custom/back-to-menu-button";
+import { useSidebar } from "@/hooks/use-sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function addGraphic(
   event: __esri.SketchViewModelCreateEvent,
@@ -43,6 +45,8 @@ function ReportGenerator() {
   const [activeButton, setActiveButton] = useState<ActiveButtonOptions>();
   const tempGraphicsLayer = useRef<__esri.GraphicsLayer | undefined>(undefined);
   const sketchVM = useRef<__esri.SketchViewModel | undefined>(undefined);
+  const { setNavOpened } = useSidebar();
+  const isMobile = useIsMobile();
 
   const handleActiveButton = (buttonName: ActiveButtonOptions) => {
     setActiveButton(buttonName);
@@ -113,6 +117,7 @@ function ReportGenerator() {
   const handleCustomAreaButton = () => {
     handleResetButton()
     handleActiveButton('customArea');
+    if (isMobile) setNavOpened(false); // Close the sidebar on mobile so user can see the map
 
     sketchVM.current = new SketchViewModel({
       view: view,
