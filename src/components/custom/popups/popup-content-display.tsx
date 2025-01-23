@@ -24,12 +24,6 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
     // Helper function to apply color based on the field value
     const applyColor = (field: string, value: string | number) => {
-
-        console.log('colorCodingMap', colorCodingMap);
-        console.log('field', field);
-        console.log('value', value);
-        console.log('colorCodingMap[field]', colorCodingMap?.[field]);
-
         if (colorCodingMap && colorCodingMap[field]) {
             const colorFunction = colorCodingMap[field];
 
@@ -115,14 +109,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         regularContent: JSX.Element[];
     }>(
         (acc, [label, field]) => {
-            if (layer.layerTitle === "Basin Names") {
-                // add a mock rank field and give it a random value because it doesn't exist in the data yet
-                if (field === "rank") {
-                    properties[field] = Math.floor(Math.random() * 3) + 1;
-                }
-            }
             const value = popupFields ? properties[field] : field;
-            console.log('value', value);
 
             if (!value) return acc;
 

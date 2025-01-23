@@ -5,9 +5,9 @@ const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-ce
 const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
 const GEN_GIS_WORKSPACE = 'gen_gis';
 
-// Basin Names WMS Layer
+// GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
-const basinNamesWMSTitle = 'Basin Names';
+const basinNamesWMSTitle = 'GeoRegions';
 const basinNamesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
