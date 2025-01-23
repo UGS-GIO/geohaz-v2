@@ -57,7 +57,7 @@ const oilGasFieldsWMSConfig: WMSLayerProps = {
                 'Field Type': 'field_type',
                 'Label': 'label',
                 'Producing Formations': 'prod_formations',
-                'Reservoir Rocks': 'reservoir_rocks',
+                'Reservoir Age': 'reservoir_rocks',
                 'Status': 'status'
             },
         },
