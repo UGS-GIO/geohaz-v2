@@ -79,7 +79,7 @@ const pipelinesWMSConfig: WMSLayerProps = {
 
 // SCO2 WMS Layer
 const sco2LayerName = 'sco2_draft_13aug24';
-const sco2WMSTitle = 'SCO2';
+const sco2WMSTitle = 'Storage Resource Estimates';
 const sco2WMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -91,15 +91,16 @@ const sco2WMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Formation': 'name',
                 'Storage Resource Estimate': 'capacity_mtco2',
                 'Storage Cost ($/tCO2)': 'storage_cost_doll_per_tco2',
+                'Formation': 'name',
                 'Thickness (m)': 'thickness_m',
+                'Depth (m)': 'depth_m',
                 'Permeability (md)': 'permeability_md',
                 'Porosity': 'porosity',
-                'Temperature Gradient (C/km)': 'temperature_gradient_c_per_km',
+                'Pressure (MPa)': 'pressure_mpa',
                 'Temperature (C)': 'temperature_c',
-                'Depth (m)': 'depth_m',
+                'Temperature Gradient (C/km)': 'temperature_gradient_c_per_km',
             },
         },
     ],
