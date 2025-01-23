@@ -39,12 +39,6 @@ export default function Nav({
 }: NavProps) {
   const { currentContent, setCurrentContent } = useSidebar()
 
-  useEffect(() => {
-    if (isCollapsed) {
-      setCurrentContent(null)
-    }
-  }, [isCollapsed, setCurrentContent])
-
   const renderLink = (link: SideLink) => {
     const key = `${link.title}`
 
