@@ -7,7 +7,7 @@ import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapUrlParams } from "@/hooks/use-map-url-params";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { Feature } from "geojson";
-import { RelatedTable } from "@/lib/types/mapping-types";
+import { ColorCodingRecordFunction, LinkField, RasterSource, RelatedTable } from "@/lib/types/mapping-types";
 import { fetchGetFeatureInfo, highlightFeature } from "@/lib/mapping-utils";
 import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 
@@ -95,6 +95,20 @@ export default function ArcGISMap() {
                 visibleLayers: keys,
             });
 
+            const fetchRasterValue = async (rasterSource: RasterSource, mapPoint: __esri.Point) => { // Fetch raster value from geoserver url supplied by RasterSource object
+                console.log('Fetching raster value');
+
+                const { latitude, longitude } = mapPoint;
+                console.log(`Fetching raster value for ${latitude}, ${longitude}`);
+
+                const url = `${rasterSource.url}wms`;
+                const response = await fetch(url, {
+                    headers: rasterSource.headers,
+                });
+                const data = await response.json();
+                return data.results[0]?.value;
+            }
+
             // Update popup content with the new feature info
             if (featureInfo) {
                 const layerInfo = Object.entries(visibleLayersMap).map(
@@ -105,25 +119,33 @@ export default function ArcGISMap() {
                         features: Feature[];
                         popupFields?: Record<string, string>;
                         relatedTables?: RelatedTable[];
-                    } => ({
-                        visible: value.visible,
-                        layerTitle: value.layerTitle,
-                        groupLayerTitle: value.groupLayerTitle,
-                        features: featureInfo.features.filter((feature: Feature) =>
-                            feature.id?.toString().includes(key.split(':')[0]) ||
-                            feature.id?.toString().split('.')[0].includes(key.split(':')[1])
-                        ),
-                        ...(value.popupFields && { popupFields: value.popupFields }),
-                        ...(value.linkFields && { linkFields: value.linkFields }),
-                        ...(value.colorCodingMap && { colorCodingMap: value.colorCodingMap }),
-                        ...(value.relatedTables && value.relatedTables.length > 0 && {
-                            relatedTables: value.relatedTables.map(table => ({
-                                ...table,
-                                matchingField: table.matchingField || "",  // Default value if missing
-                                fieldLabel: table.fieldLabel || ""         // Default value if missing
-                            }))
-                        }),
-                    })
+                        linkFields?: Record<string, LinkField>;
+                        colorCodingMap?: ColorCodingRecordFunction;
+                        rasterSource?: Promise<string>;
+                    } => {
+
+                        return {
+                            visible: value.visible,
+                            layerTitle: value.layerTitle,
+                            groupLayerTitle: value.groupLayerTitle,
+                            features: featureInfo.features.filter((feature: Feature) =>
+                                feature.id?.toString().includes(key.split(':')[0]) ||
+                                feature.id?.toString().split('.')[0].includes(key.split(':')[1])
+                            ),
+                            ...(value.popupFields && { popupFields: value.popupFields }),
+                            ...(value.linkFields && { linkFields: value.linkFields }),
+                            ...(value.colorCodingMap && { colorCodingMap: value.colorCodingMap }),
+                            ...(value.relatedTables && value.relatedTables.length > 0 && {
+                                relatedTables: value.relatedTables.map(table => ({
+                                    ...table,
+                                    matchingField: table.matchingField || "",  // Default value if missing
+                                    fieldLabel: table.fieldLabel || ""         // Default value if missing
+                                }))
+                            }),
+                            // get the url for the raster source and make a fetch request to get the raster value
+                            ...(value.rasterSource && { rasterSource: fetchRasterValue(value.rasterSource, mapPoint) }),
+                        }
+                    }
                 );
 
                 highlightFeature(featureInfo.features[0], view);

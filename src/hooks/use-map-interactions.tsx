@@ -2,7 +2,7 @@ import { useCallback, useState, useContext } from "react";
 import { removeGraphics, createGraphic } from "@/lib/mapping-utils";
 import Collection from "@arcgis/core/core/Collection.js";
 import { MapContext } from "@/context/map-provider";
-import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps } from "@/lib/types/mapping-types";
+import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps, RasterSource } from "@/lib/types/mapping-types";
 import { useGetLayerConfig } from "./use-get-layer-config";
 
 type VisibleLayer = {
@@ -24,6 +24,7 @@ export const useMapInteractions = () => {
         queryable?: boolean;
         linkFields?: LinkFields;
         colorCodingMap?: ColorCodingRecordFunction;
+        rasterSource?: RasterSource;
     }>;
 
     type VisibleLayersResult = {
@@ -82,6 +83,7 @@ export const useMapInteractions = () => {
                             queryable: sublayer.queryable,
                             linkFields: sublayer.linkFields,
                             colorCodingMap: sublayer.colorCodingMap,
+                            rasterSource: sublayer.rasterSource,
                         };
                     }
                 });
@@ -100,6 +102,7 @@ export const useMapInteractions = () => {
                                     queryable: sublayer.queryable,
                                     linkFields: sublayer.linkFields,
                                     colorCodingMap: sublayer.colorCodingMap,
+                                    rasterSource: sublayer.rasterSource,
                                 };
                             }
                         });

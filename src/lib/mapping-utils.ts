@@ -1,6 +1,6 @@
 import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
-import { GetResultsHandlerType, GroupLayerProps, LayerConstructor, MapApp, MapImageLayerType, WMSLayerProps } from '@/lib/types/mapping-types'
+import { GetResultsHandlerType, GroupLayerProps, LayerConstructor, MapApp, MapImageLayerType, RasterSource, WMSLayerProps } from '@/lib/types/mapping-types'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
 import Map from '@arcgis/core/Map'
@@ -625,6 +625,20 @@ export async function fetchGetFeatureInfo({
     });
 
     return { ...featureInfo, features: featuresWithNamespace };
+}
+
+export const fetchRasterValue = async (rasterSource: RasterSource, mapPoint: __esri.Point) => { // Fetch raster value from geoserver url supplied by RasterSource object
+    console.log('Fetching raster value');
+
+    const { latitude, longitude } = mapPoint;
+    console.log(`Fetching raster value for ${latitude}, ${longitude}`);
+
+    const url = `${rasterSource.url}wms`;
+    const response = await fetch(url, {
+        headers: rasterSource.headers,
+    });
+    const data = await response.json();
+    return data.results[0]?.value;
 }
 
 export async function fetchWfsGeometry({ namespace, featureId }: { namespace: string; featureId: string }) {

@@ -28,12 +28,20 @@ export type LinkFields = {
 };
 
 export type ColorCodingRecordFunction = Record<string, (value: string | number) => string>;
+export interface RasterSource {
+    url: string;
+    headers?: Record<string, string>;
+    valueField?: string;  // Field name for the raster value in the response
+    valueLabel?: string;  // Label to display for the raster value
+}
+
 
 type CustomSublayerProps = {
     popupFields?: Record<string, string>; // Maps field labels to attribute names
     relatedTables?: RelatedTable[];
     linkFields?: LinkFields;
     colorCodingMap?: ColorCodingRecordFunction; // Maps field names to color coding functions
+    rasterSource?: RasterSource;
 };
 
 type ExtendedSublayerProperties =

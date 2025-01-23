@@ -159,7 +159,7 @@ const groundshakingWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: groundshakingWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${groundshakingLayerName}`,
@@ -168,6 +168,16 @@ const groundshakingWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Peak Ground Acceleration': 'acc',
             },
+            rasterSource: {
+                url: `${PROD_GEOSERVER_URL}wms`,
+                headers: {
+                    "Accept": "application/json",
+                    "Cache-Control": "no-cache",
+                },
+                valueField: "value",  // The field in the response containing the raster value
+                valueLabel: "Peak Ground Acceleration (g)",  // How you want to label the value in the popup
+            }
+
         },
     ],
 }
@@ -830,7 +840,7 @@ const floodHazardsConfig: LayerProps = {
 const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
-    visible: false,
+    visible: true,
     layers: [qFaultsWMSConfig, surfaceFaultRuptureWMSConfig, liquefactionWMSConfig, groundshakingWMSConfig],
 };
 
