@@ -6,9 +6,9 @@ const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
 const GEN_GIS_WORKSPACE = 'gen_gis';
 const MAPPING_WORKSPACE = 'mapping';
 
-// Basin Names WMS Layer
+// GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
-const basinNamesWMSTitle = 'Basin Names';
+const basinNamesWMSTitle = 'GeoRegions';
 const basinNamesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -22,8 +22,18 @@ const basinNamesWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Name': 'name',
                 'Description': 'description',
-                'Report Link': 'reportlink'
+                'Report Link': 'reportlink',
+                'Rank': 'rank', // this doesn't exist in the data yet but it will need to drive color coded styling
             },
+            colorCodingMap: {
+                'rank': (value: string | number) => {
+                    const rank = typeof value === 'number' ? value : parseInt(value, 10);
+                    if (rank === 1) return "#FF0000"; // Red
+                    if (rank === 2) return "#FFFF00"; // Yellow
+                    if (rank === 3) return "#00FF00"; // Green
+                    return "#808080"; // Gray
+                }
+            }
         },
     ],
 };

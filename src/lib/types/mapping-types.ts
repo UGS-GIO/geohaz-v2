@@ -27,10 +27,13 @@ export type LinkFields = {
     [key: string]: LinkField;
 };
 
+export type ColorCodingRecordFunction = Record<string, (value: string | number) => string>;
+
 type CustomSublayerProps = {
     popupFields?: Record<string, string>; // Maps field labels to attribute names
     relatedTables?: RelatedTable[];
     linkFields?: LinkFields;
+    colorCodingMap?: ColorCodingRecordFunction; // Maps field names to color coding functions
 };
 
 type ExtendedSublayerProperties =
