@@ -53,11 +53,9 @@ const oilGasFieldsWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Field Name': 'field_name',
-                'Field Number': 'field_number',
                 'Field Type': 'field_type',
-                'Label': 'label',
                 'Producing Formations': 'prod_formations',
-                'Reservoir Rocks': 'reservoir_rocks',
+                'Reservoir Age': 'reservoir_rocks',
                 'Status': 'status'
             },
         },
