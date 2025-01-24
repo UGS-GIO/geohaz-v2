@@ -628,23 +628,23 @@ export async function fetchGetFeatureInfo({
 }
 
 export const fetchRasterValue = async (rasterSource: RasterSource, mapPoint: __esri.Point) => { // Fetch raster value from geoserver url supplied by RasterSource object
-    console.log('Fetching raster value', rasterSource);
 
     const { latitude, longitude } = mapPoint;
-    console.log(`Fetching raster value for ${latitude}, ${longitude}`);
 
     const params = new URLSearchParams({
         service: 'WMS',
         request: 'GetFeatureInfo',
-        version: '1.3.0',
-        layers: rasterSource.url,
-        query_layers: rasterSource.url,
+        version: '1.1.1',
+        layers: rasterSource.layerName.split('_').join(' '),
+        query_layers: rasterSource.layerName.split('_').join(' '),
         info_format: 'application/json',
-        x: Math.round(mapPoint.x).toString(),
-        y: Math.round(mapPoint.y).toString(),
-        width: '1',
-        height: '1',
-        crs: 'EPSG:3857',
+
+        x: '50',
+        y: '50',
+        width: '50',
+        height: '50',
+        crs: 'EPSG:4326',
+        bbox: `${longitude - 0.0001},${latitude - 0.0001},${longitude + 0.0001},${latitude + 0.0001}`,
     });
 
     const url = `${rasterSource.url}?${params.toString()}`;

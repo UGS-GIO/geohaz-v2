@@ -30,6 +30,7 @@ export type LinkFields = {
 export type ColorCodingRecordFunction = Record<string, (value: string | number) => string>;
 export interface RasterSource {
     url: string;
+    layerName: string;   // Name of the layer in the WMS service including the workspace
     headers?: Record<string, string>;
     valueField?: string;  // Field name for the raster value in the response
     valueLabel?: string;  // Label to display for the raster value

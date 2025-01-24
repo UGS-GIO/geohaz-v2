@@ -1,6 +1,7 @@
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
 const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
+const DEV_GEOSERVER_URL = 'https://geoserver225-739651155779.us-central1.run.app/geoserver/';
 const HAZARDS_WORKSPACE = 'hazards';
 const GEN_GIS_WORKSPACE = 'gen_gis';
 const UNIT_DESCRIPTIONS_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/unit_descriptions';
@@ -169,13 +170,14 @@ const groundshakingWMSConfig: WMSLayerProps = {
                 'Peak Ground Acceleration': 'acc',
             },
             rasterSource: {
-                url: `${PROD_GEOSERVER_URL}wms`,
+                url: `${DEV_GEOSERVER_URL}wms`,
                 headers: {
                     "Accept": "application/json",
                     "Cache-Control": "no-cache",
                 },
-                valueField: "value",  // The field in the response containing the raster value
-                valueLabel: "Peak Ground Acceleration (g)",  // How you want to label the value in the popup
+                layerName: `${HAZARDS_WORKSPACE}:earthquake_groundshaking`,
+                valueField: "GRAY_INDEX",
+                valueLabel: "Gray Index",
             }
 
         },
