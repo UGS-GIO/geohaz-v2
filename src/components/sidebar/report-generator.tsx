@@ -5,11 +5,15 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Layer from "@arcgis/core/layers/Layer";
 import { Button } from '@/components/custom/button';
 import { BackToMenuButton } from "@/components/custom/back-to-menu-button";
+import { useSidebar } from "@/hooks/use-sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 function addGraphic(
   event: __esri.SketchViewModelCreateEvent,
   tempGraphicsLayer: __esri.GraphicsLayer | undefined,
-  setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>
+  setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>,
+  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   if (event.state === "complete" && event.graphic) {
     tempGraphicsLayer?.remove(event.graphic);
@@ -27,8 +31,7 @@ function addGraphic(
       window.open("./report");
       setActiveButton(undefined);
     } else {
-      console.log("Area of interest is too large, try again");
-      alert("Area of interest is too large, try a smaller area.");
+      setModalOpen(true);
       setActiveButton(undefined);
     }
   } else if (event.state === "start" && event.graphic) {
@@ -43,6 +46,9 @@ function ReportGenerator() {
   const [activeButton, setActiveButton] = useState<ActiveButtonOptions>();
   const tempGraphicsLayer = useRef<__esri.GraphicsLayer | undefined>(undefined);
   const sketchVM = useRef<__esri.SketchViewModel | undefined>(undefined);
+  const { setNavOpened } = useSidebar();
+  const isMobile = useIsMobile();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleActiveButton = (buttonName: ActiveButtonOptions) => {
     setActiveButton(buttonName);
@@ -104,8 +110,7 @@ function ReportGenerator() {
       localStorage.setItem('aoi', JSON.stringify(params));
       window.open('./report');
     } else {
-      console.log("Area of interest is too large, try again");
-      alert("Area of interest is too large, try a smaller extent.");
+      setModalOpen(true);
       handleResetButton();
     }
   };
@@ -113,6 +118,7 @@ function ReportGenerator() {
   const handleCustomAreaButton = () => {
     handleResetButton()
     handleActiveButton('customArea');
+    if (isMobile) setNavOpened(false); // Close the sidebar on mobile so user can see the map
 
     sketchVM.current = new SketchViewModel({
       view: view,
@@ -135,7 +141,7 @@ function ReportGenerator() {
       }
 
       if (event.state === "active") {
-        addGraphic(event, tempGraphicsLayer.current, setActiveButton);
+        addGraphic(event, tempGraphicsLayer.current, setActiveButton, setModalOpen);
       }
 
       if (event.state === "complete") {
@@ -165,8 +171,7 @@ function ReportGenerator() {
           window.open('./report');
         } else {
           console.log("Area of interest is too large, try again");
-          alert("Area of interest is too large, try drawing a smaller area.");
-          handleResetButton();
+          setModalOpen(true);
         }
 
       }
@@ -188,12 +193,22 @@ function ReportGenerator() {
     requestAnimationFrame(() => {
       setIsSketching?.(false);
     })
+    if (modalOpen) setModalOpen(false);
   };
 
   const buttonText = (buttonName: ActiveButtonOptions, defaultText: string) => {
     return (
       activeButton === buttonName ? `✓ ${defaultText}` : defaultText
     );
+  }
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
+  const handleResetDrawing = () => {
+    setIsSketching?.(true);
+    handleCustomAreaButton();
   }
 
   return (
@@ -222,6 +237,29 @@ function ReportGenerator() {
           </div>
         </div>
       </div>
+      <Dialog open={modalOpen} onOpenChange={handleCloseModal}>
+        <DialogTrigger asChild>
+          <div className="hidden"></div>
+        </DialogTrigger>
+        <DialogContent className="w-4/5">
+          <DialogHeader>
+            <DialogTitle>Area too large</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            The map area is too large. Please draw a smaller custom area or zoom in.
+            <div className="flex flex-row space-x-2 mt-4 justify-end">
+              <Button onClick={handleResetDrawing} variant="default" >
+                Create a new area
+              </Button>
+              <Button onClick={handleResetButton} variant="secondary" >
+                Close
+              </Button>
+            </div>
+          </DialogDescription>
+          <DialogClose />
+
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
