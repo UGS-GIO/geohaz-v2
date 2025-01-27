@@ -4,7 +4,7 @@ import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
-import { ColorCodingRecordFunction, LinkFields, RelatedTable } from "@/lib/types/mapping-types"
+import { ColorCodingRecordFunction, FieldConfig, LinkFields, RelatedTable } from "@/lib/types/mapping-types"
 import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
 import { highlightFeature, zoomToFeature } from '@/lib/mapping-utils';
@@ -20,7 +20,7 @@ export interface LayerContentProps {
     groupLayerTitle: string
     layerTitle: string
     features: ExtendedFeature[]
-    popupFields?: Record<string, string>
+    popupFields?: Record<string, FieldConfig>
     relatedTables?: RelatedTable[]
     linkFields?: LinkFields
     colorCodingMap?: ColorCodingRecordFunction
