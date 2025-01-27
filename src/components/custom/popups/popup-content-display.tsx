@@ -20,7 +20,7 @@ const isNumberField = (field: FieldConfig): field is NumberFieldConfig =>
 // Utility function to format numbers with significant figures
 const formatWithSigFigs = (value: number, decimalPlaces: number): string => {
     if (isNaN(value)) return 'N/A';
-    return Number(value.toPrecision(decimalPlaces)).toString();
+    return Number(value.toFixed(decimalPlaces)).toString();
 };
 
 // Default transforms based on field configuration
