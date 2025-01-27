@@ -2,7 +2,7 @@ import * as React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Feature } from "geojson";
 import { Button } from "@/components/ui/button";
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { ExtendedFeature, PopupContentWithPagination } from "./popup-content-with-pagination";
@@ -89,6 +89,7 @@ function PopupDrawer({
                     <DrawerTitle>{popupTitle}</DrawerTitle>
                 </DrawerHeader>
 
+                <DrawerDescription className="hidden" /> {/* present but hidden to resolve console warning */}
                 <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden">
                     {screenSize.height > 1080 &&
                         <header className="border-b overflow-hidden h-12">
