@@ -8,7 +8,7 @@ import { useMapUrlParams } from "@/hooks/use-map-url-params";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { Feature } from "geojson";
 import { RelatedTable } from "@/lib/types/mapping-types";
-import { fetchGetFeatureInfo, fetchRasterValue, highlightFeature } from "@/lib/mapping-utils";
+import { fetchWMSFeatureInfo, highlightFeature } from "@/lib/mapping-utils";
 import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 
 export default function ArcGISMap() {
@@ -89,41 +89,47 @@ export default function ArcGISMap() {
                 .filter(([_, layerInfo]) => layerInfo.visible && layerInfo.queryable)
                 .map(([key]) => key);
 
-            const featureInfo = await fetchGetFeatureInfo({
+            const featureInfo = await fetchWMSFeatureInfo({
                 mapPoint,
                 view,
-                visibleLayers: keys,
+                layers: keys,
+                url: 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms'
             });
 
             // Update popup content with the new feature info
             if (featureInfo) {
-                const layerInfo = Object.entries(visibleLayersMap).map(
-                    ([key, value]): {
-                        groupLayerTitle: string;
-                        layerTitle: string;
-                        visible: boolean;
-                        features: Feature[];
-                        popupFields?: Record<string, string>;
-                        relatedTables?: RelatedTable[];
-                    } => ({
-                        visible: value.visible,
-                        layerTitle: value.layerTitle,
-                        groupLayerTitle: value.groupLayerTitle,
-                        features: featureInfo.features.filter((feature: Feature) =>
-                            feature.id?.toString().includes(key.split(':')[0]) ||
-                            feature.id?.toString().split('.')[0].includes(key.split(':')[1])
-                        ),
-                        ...(value.popupFields && { popupFields: value.popupFields }),
-                        ...(value.linkFields && { linkFields: value.linkFields }),
-                        ...(value.colorCodingMap && { colorCodingMap: value.colorCodingMap }),
-                        ...(value.relatedTables && value.relatedTables.length > 0 && {
-                            relatedTables: value.relatedTables.map(table => ({
-                                ...table,
-                                matchingField: table.matchingField || "",  // Default value if missing
-                                fieldLabel: table.fieldLabel || ""         // Default value if missing
-                            }))
-                        }),
-                        ...(value.rasterSource && { rasterSource: fetchRasterValue(value.rasterSource, mapPoint) }),
+                const layerInfo = await Promise.all(
+                    Object.entries(visibleLayersMap).map(async ([key, value]): Promise<any> => {
+                        const baseLayerInfo: any = {
+                            visible: value.visible,
+                            layerTitle: value.layerTitle,
+                            groupLayerTitle: value.groupLayerTitle,
+                            features: featureInfo.features.filter((feature: Feature) =>
+                                feature.id?.toString().includes(key.split(':')[0]) ||
+                                feature.id?.toString().split('.')[0].includes(key.split(':')[1])
+                            ),
+                            ...(value.popupFields && { popupFields: value.popupFields }),
+                            ...(value.linkFields && { linkFields: value.linkFields }),
+                            ...(value.colorCodingMap && { colorCodingMap: value.colorCodingMap }),
+                            ...(value.relatedTables && value.relatedTables.length > 0 && {
+                                relatedTables: value.relatedTables.map(table => ({
+                                    ...table,
+                                    matchingField: table.matchingField || "",  // Default value if missing
+                                    fieldLabel: table.fieldLabel || ""         // Default value if missing
+                                }))
+                            }),
+                        };
+                        if (value.rasterSource) {
+                            // Await the rasterSource promise
+                            baseLayerInfo.rasterSource = await fetchWMSFeatureInfo({
+                                mapPoint,
+                                view,
+                                layers: new Array(value.rasterSource.layerName.split('_').join(' ')),
+                                url: value.rasterSource.url,
+                            });
+                        }
+
+                        return baseLayerInfo;
                     })
                 );
 

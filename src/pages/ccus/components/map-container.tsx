@@ -7,8 +7,8 @@ import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapUrlParams } from "@/hooks/use-map-url-params";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { Feature } from "geojson";
-import { ColorCodingRecordFunction, LinkField, RasterSource, RelatedTable } from "@/lib/types/mapping-types";
-import { fetchGetFeatureInfo, highlightFeature } from "@/lib/mapping-utils";
+import { RelatedTable } from "@/lib/types/mapping-types";
+import { fetchWMSFeatureInfo, highlightFeature } from "@/lib/mapping-utils";
 import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 
 export default function ArcGISMap() {
@@ -89,42 +89,18 @@ export default function ArcGISMap() {
                 .filter(([_, layerInfo]) => layerInfo.visible && layerInfo.queryable)
                 .map(([key]) => key);
 
-            const featureInfo = await fetchGetFeatureInfo({
+            const featureInfo = await fetchWMSFeatureInfo({
                 mapPoint,
                 view,
-                visibleLayers: keys,
+                layers: keys,
+                url: 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms?'
             });
-
-            const fetchRasterValue = async (rasterSource: RasterSource, mapPoint: __esri.Point) => { // Fetch raster value from geoserver url supplied by RasterSource object
-                console.log('Fetching raster value');
-
-                const { latitude, longitude } = mapPoint;
-                console.log(`Fetching raster value for ${latitude}, ${longitude}`);
-
-                const url = `${rasterSource.url}wms`;
-                const response = await fetch(url, {
-                    headers: rasterSource.headers,
-                });
-                const data = await response.json();
-                return data.results[0]?.value;
-            }
 
             // Update popup content with the new feature info
             if (featureInfo) {
-                const layerInfo = Object.entries(visibleLayersMap).map(
-                    ([key, value]): {
-                        groupLayerTitle: string;
-                        layerTitle: string;
-                        visible: boolean;
-                        features: Feature[];
-                        popupFields?: Record<string, string>;
-                        relatedTables?: RelatedTable[];
-                        linkFields?: Record<string, LinkField>;
-                        colorCodingMap?: ColorCodingRecordFunction;
-                        rasterSource?: Promise<string>;
-                    } => {
-
-                        return {
+                const layerInfo = await Promise.all(
+                    Object.entries(visibleLayersMap).map(async ([key, value]): Promise<any> => {
+                        const baseLayerInfo: any = {
                             visible: value.visible,
                             layerTitle: value.layerTitle,
                             groupLayerTitle: value.groupLayerTitle,
@@ -142,10 +118,19 @@ export default function ArcGISMap() {
                                     fieldLabel: table.fieldLabel || ""         // Default value if missing
                                 }))
                             }),
-                            // get the url for the raster source and make a fetch request to get the raster value
-                            ...(value.rasterSource && { rasterSource: fetchRasterValue(value.rasterSource, mapPoint) }),
+                        };
+                        if (value.rasterSource) {
+                            // Await the rasterSource promise
+                            baseLayerInfo.rasterSource = await fetchWMSFeatureInfo({
+                                mapPoint,
+                                view,
+                                layers: new Array(value.rasterSource.layerName.split('_').join(' ')),
+                                url: value.rasterSource.url,
+                            });
                         }
-                    }
+
+                        return baseLayerInfo;
+                    })
                 );
 
                 highlightFeature(featureInfo.features[0], view);
