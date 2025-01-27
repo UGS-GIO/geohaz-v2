@@ -7,7 +7,7 @@ import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapUrlParams } from "@/hooks/use-map-url-params";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { Feature } from "geojson";
-import { RelatedTable } from "@/lib/types/mapping-types";
+import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
 import { fetchGetFeatureInfo, highlightFeature } from "@/lib/mapping-utils";
 import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 
@@ -36,7 +36,7 @@ export default function ArcGISMap() {
     }
 
     const updatePopupContent = useCallback(
-        (newContent: { features: Feature[]; visible: boolean; layerTitle: string, groupLayerTitle: string, popupFields?: Record<string, string>; relatedTables?: RelatedTable[] }[]) => {
+        (newContent: { features: Feature[]; visible: boolean; layerTitle: string, groupLayerTitle: string, popupFields?: Record<string, FieldConfig>; relatedTables?: RelatedTable[] }[]) => {
             setPopupContent((prevContent) => {
                 // Only update if new content is different to avoid unnecessary rerenders
                 if (JSON.stringify(prevContent) !== JSON.stringify(newContent)) {
@@ -103,7 +103,7 @@ export default function ArcGISMap() {
                         layerTitle: string;
                         visible: boolean;
                         features: Feature[];
-                        popupFields?: Record<string, string>;
+                        popupFields?: Record<string, FieldConfig>;
                         relatedTables?: RelatedTable[];
                     } => ({
                         visible: value.visible,
