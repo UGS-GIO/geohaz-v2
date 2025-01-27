@@ -186,7 +186,7 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     visible: true,
     sublayers: [
         {
-            name: `${ENERGY_MINERALS_WORKSPACE}:${seamlessGeolunitsLayerName}`,
+            name: `${MAPPING_WORKSPACE}:${seamlessGeolunitsLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {},
