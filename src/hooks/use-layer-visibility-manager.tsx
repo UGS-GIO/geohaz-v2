@@ -69,6 +69,9 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
                 if (accordionState === 'closed' && newVisibility === true) { // open the accordion if it's closed
                     accordionTriggerRef.current?.click();
                 }
+                if (accordionState === 'open' && !groupLayer.layers?.some(layer => layer.visible) && newVisibility === false) { // close the accordion if it's open and no child layers are visible
+                    accordionTriggerRef.current?.click();
+                }
             }
         }
     }, [currentLayer, setGroupLayerVisibility]);
