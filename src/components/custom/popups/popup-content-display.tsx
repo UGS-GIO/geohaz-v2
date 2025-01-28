@@ -64,33 +64,38 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
     // Extract raster value if it exists
     const getRasterValue = () => {
         if (!rasterSource) return null;
+        const valueField = rasterSource.valueField;
 
         // Handle full FeatureCollection response
         if ('type' in rasterSource && rasterSource.type === 'FeatureCollection') {
-            return rasterSource.features[0]?.properties?.GRAY_INDEX;
+            const value = rasterSource.features[0]?.properties?.[valueField];
+            return value;
         }
 
         // Handle features array response
         if (Array.isArray(rasterSource.features)) {
-            return rasterSource.features[0]?.properties?.GRAY_INDEX;
+            const value = rasterSource.features[0]?.properties?.[valueField];
+            return value;
         }
 
         return null;
     };
 
     const rasterValue = getRasterValue();
+    const transformedRasterValue = rasterSource?.transform ? rasterSource.transform(rasterValue) : 'No data'
 
     // Loading and error states
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error: {String(error)}</p>;
 
     // If we only have raster data and no feature
-    if (!feature && rasterValue !== null) {
+    if (!feature && rasterValue !== null && rasterSource !== undefined) {
+        let value = rasterSource.transform ? rasterSource.transform(rasterValue) : rasterSource.features[0]?.properties?.[rasterSource.valueField];
         return (
             <div className="space-y-4">
                 <div className="flex flex-col">
-                    <p className="font-bold underline text-primary">Raster Value</p>
-                    <p className="break-words">{rasterValue?.toFixed(4) ?? "No data"}</p>
+                    <p className="font-bold underline text-primary">{rasterSource?.valueLabel}</p>
+                    <p className="break-words">{value}</p>
                 </div>
             </div>
         );
@@ -182,7 +187,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
     const baseFeatureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
     const featureEntries = rasterValue !== null
-        ? [...baseFeatureEntries, ['Raster Value', rasterValue.toFixed(4)]]
+        ? [...baseFeatureEntries, [`${rasterSource?.valueLabel}`, rasterValue]]
         : baseFeatureEntries;
 
     const { urlContent, longTextContent, regularContent } = featureEntries.reduce<{
@@ -194,8 +199,8 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
             const fieldConfig = popupFields ? field : { field, type: 'string' as const };
 
             // Special handling for raster value
-            const value = label === 'Raster Value'
-                ? rasterValue
+            const value = label === `${rasterSource?.valueLabel}`
+                ? rasterSource?.transform ? rasterSource.transform(rasterValue) : rasterValue
                 : properties[fieldConfig.field];
 
             const processedValue = processFieldValue(fieldConfig, value);

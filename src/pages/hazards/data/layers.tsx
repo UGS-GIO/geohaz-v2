@@ -166,10 +166,7 @@ const groundshakingWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Peak Ground Acceleration': {
-                    field: 'acc',
-                    type: 'number'
-                },
+                // empty in favor or using the rasterSource
             },
             rasterSource: {
                 url: `${PROD_GEOSERVER_URL}wms`,
@@ -179,7 +176,8 @@ const groundshakingWMSConfig: WMSLayerProps = {
                 },
                 layerName: `${HAZARDS_WORKSPACE}:earthquake_groundshaking`,
                 valueField: "GRAY_INDEX",
-                valueLabel: "Gray Index",
+                valueLabel: "Peak Ground Acceleration",
+                transform: (value: number) => `${value} g`,
             }
 
         },

@@ -119,14 +119,20 @@ export default function ArcGISMap() {
                                 }))
                             }),
                         };
+                        // expand rasterSource to use the featureinfo and the rasterSource values from the layer config file
                         if (value.rasterSource) {
-                            // Await the rasterSource promise
-                            baseLayerInfo.rasterSource = await fetchWMSFeatureInfo({
+                            // Fetch the WMS feature info
+                            const featureInfo = await fetchWMSFeatureInfo({
                                 mapPoint,
                                 view,
                                 layers: new Array(value.rasterSource.layerName),
                                 url: value.rasterSource.url,
                             });
+                            // Assign all properties including the fetched feature info
+                            baseLayerInfo.rasterSource = {
+                                ...value.rasterSource,
+                                ...featureInfo
+                            };
                         }
 
                         return baseLayerInfo;

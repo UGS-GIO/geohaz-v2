@@ -31,11 +31,13 @@ export type ColorCodingRecordFunction = Record<string, (value: string | number) 
 export interface RasterSource {
     url: string;
     layerName: string;   // Name of the layer in the WMS service including the workspace
+    valueField: string;  // Field name for the raster value in the response
+    valueLabel: string;  // Label to display for the raster value
     headers?: Record<string, string>;
-    valueField?: string;  // Field name for the raster value in the response
-    valueLabel?: string;  // Label to display for the raster value
+    transform?: (value: number) => string;
 }
 
+export type RasterValueMetadata = Pick<RasterSource, 'valueField' | 'valueLabel' | 'transform'>;
 
 // Base configuration that applies to all field types
 interface BaseFieldConfig {
