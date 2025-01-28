@@ -4,12 +4,58 @@ import { Feature, Geometry, GeoJsonProperties } from "geojson";
 import { ExternalLink } from "lucide-react";
 import { LayerContentProps } from "@/components/custom/popups/popup-content-with-pagination";
 import { Link } from "@/components/custom/link";
+import { FieldConfig, NumberFieldConfig } from "@/lib/types/mapping-types";
 
 type PopupContentDisplayProps = {
     layer: LayerContentProps;
     feature?: Feature<Geometry, GeoJsonProperties>;
     layout?: "grid" | "stacked";
 };
+
+
+// Type guard for number fields
+const isNumberField = (field: FieldConfig): field is NumberFieldConfig =>
+    field.type === 'number';
+
+// Utility function to format numbers with significant figures
+const formatWithSigFigs = (value: number, decimalPlaces: number): string => {
+    if (isNaN(value)) return 'N/A';
+    return Number(value.toFixed(decimalPlaces)).toString();
+};
+
+// Default transforms based on field configuration
+const getDefaultTransform = (config: NumberFieldConfig): ((value: number) => string) => {
+    return (value: number) => {
+        let formatted = config.decimalPlaces
+            ? formatWithSigFigs(value, config.decimalPlaces)
+            : value.toString();
+
+        if (config.unit) {
+            formatted += ` ${config.unit}`;
+        }
+
+        return formatted;
+    };
+};
+
+// Process field value with type safety
+const processFieldValue = (field: FieldConfig, value: unknown): string => {
+    if (isNumberField(field)) {
+        const numberValue = Number(value);
+        if (field.transform) {
+            return field.transform(numberValue);
+        }
+        return getDefaultTransform(field)(numberValue);
+    }
+
+    // String field
+    if (field.transform) {
+        return field.transform(String(value));
+    }
+
+    return String(value);
+};
+
 
 const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProps) => {
     const { relatedTables, popupFields, linkFields, colorCodingMap, rasterSource } = layer;
@@ -145,25 +191,29 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         regularContent: JSX.Element[];
     }>(
         (acc, [label, field]) => {
-            const value = label === 'Raster Value' ? field : (popupFields ? properties[field] : field);
+            const fieldConfig = popupFields ? field : { field, type: 'string' as const };
 
-            if (value === undefined || value === null) return acc;
+            // Special handling for raster value
+            const value = label === 'Raster Value'
+                ? rasterValue
+                : properties[fieldConfig.field];
 
-            // Apply color if needed
-            const colorStyle = applyColor(field, value);
+            const processedValue = processFieldValue(fieldConfig, value);
+
+            if (!processedValue && processedValue !== '0') return acc;
 
             const content = (
-                <div key={label} className="flex flex-col" style={colorStyle}>
+                <div key={label} className="flex flex-col" style={applyColor(fieldConfig.field, processedValue)}>
                     <p className="font-bold underline text-primary">{label}</p>
                     <p className="break-words">
-                        {typeof value === 'string' ? createLink(value, field) : value}
+                        {createLink(processedValue, fieldConfig.field)}
                     </p>
                 </div>
             );
 
-            if (typeof value === 'string' && (urlPattern.test(value) || linkFields?.[field])) {
+            if (urlPattern.test(processedValue) || linkFields?.[fieldConfig.field]) {
                 acc.urlContent.push(content);
-            } else if (typeof value === 'string' && value.split(/\s+/).length > 20) {
+            } else if (String(processedValue).split(/\s+/).length > 20) {
                 acc.longTextContent.push(content);
             } else {
                 acc.regularContent.push(content);

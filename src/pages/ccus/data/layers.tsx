@@ -20,10 +20,13 @@ const basinNamesWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Name': 'name',
-                'Description': 'description',
-                'Report Link': 'reportlink',
-                'Rank': 'rank', // this doesn't exist in the data yet but it will need to drive color coded styling
+                'Name': { field: 'name', type: 'string' },
+                'Description': { field: 'description', type: 'string' },
+                'Report Link': { field: 'reportlink', type: 'string' },
+                'Rank': {
+                    field: 'rank',
+                    type: 'number'
+                }
             },
             colorCodingMap: {
                 'rank': (value: string | number) => {
@@ -52,13 +55,11 @@ const oilGasFieldsWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Field Name': 'field_name',
-                'Field Number': 'field_number',
-                'Field Type': 'field_type',
-                'Label': 'label',
-                'Producing Formations': 'prod_formations',
-                'Reservoir Rocks': 'reservoir_rocks',
-                'Status': 'status'
+                'Field Name': { field: 'field_name', type: 'string' },
+                'Field Type': { field: 'field_type', type: 'string' },
+                'Producing Formations': { field: 'prod_formations', type: 'string' },
+                'Reservoir Age': { field: 'reservoir_rocks', type: 'string' },
+                'Status': { field: 'status', type: 'string' }
             },
         },
     ],
@@ -78,11 +79,11 @@ const pipelinesWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Operator': 'operator',
-                'Commodity': 'commodity',
-                'Diameter': 'diameter',
-                'Acronym': 'acronym',
-                'Code Remarks': 'coderemarks'
+                'Operator': { field: 'operator', type: 'string' },
+                'Commodity': { field: 'commodity', type: 'string' },
+                'Diameter': { field: 'diameter', type: 'number', },
+                'Acronym': { field: 'acronym', type: 'string' },
+                'Code Remarks': { field: 'coderemarks', type: 'string' }
             },
         },
     ],
@@ -102,16 +103,52 @@ const sco2WMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Storage Resource Estimate': 'capacity_mtco2',
-                'Storage Cost ($/tCO2)': 'storage_cost_doll_per_tco2',
-                'Formation': 'name',
-                'Thickness (m)': 'thickness_m',
-                'Depth (m)': 'depth_m',
-                'Permeability (md)': 'permeability_md',
-                'Porosity': 'porosity',
-                'Pressure (MPa)': 'pressure_mpa',
-                'Temperature (C)': 'temperature_c',
-                'Temperature Gradient (C/km)': 'temperature_gradient_c_per_km',
+                'Storage Resource Estimate': {
+                    field: 'capacity_mtco2',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Storage Cost ($/tCO2)': {
+                    field: 'storage_cost_doll_per_tco2',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Formation': { field: 'name', type: 'string' },
+                'Thickness (m)': {
+                    field: 'thickness_m',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Depth (m)': {
+                    field: 'depth_m',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Permeability (md)': {
+                    field: 'permeability_md',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Porosity': {
+                    field: 'porosity',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Pressure (MPa)': {
+                    field: 'pressure_mpa',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Temperature (C)': {
+                    field: 'temperature_c',
+                    type: 'number',
+                    decimalPlaces: 1,
+                },
+                'Temperature Gradient (C/km)': {
+                    field: 'temperature_gradient_c_per_km',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
             },
         },
     ],
@@ -131,9 +168,9 @@ const riversWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Name': 'name',
-                'Description': 'description',
-                'Report Link': 'reportlink'
+                'Name': { field: 'name', type: 'string' },
+                'Description': { field: 'description', type: 'string' },
+                'Report Link': { field: 'reportlink', type: 'string' }
             },
         },
     ],
@@ -146,10 +183,10 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: seamlessGeolunitsWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
-            name: `${ENERGY_MINERALS_WORKSPACE}:${seamlessGeolunitsLayerName}`,
+            name: `${MAPPING_WORKSPACE}:${seamlessGeolunitsLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {},
@@ -170,8 +207,8 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'API': 'api',
-                'Well Name': 'wellname',
+                'API': { field: 'api', type: 'string' },
+                'Well Name': { field: 'wellname', type: 'string' }
             },
             relatedTables: [
                 {
@@ -218,8 +255,13 @@ const faultsWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Series ID': 'series_id',
-                'Scale': 'scale',
+                'Series ID': { field: 'series_id', type: 'string' },
+                'Scale': {
+                    field: 'scale',
+                    type: 'number',
+                    // example way of using transform
+                    // transform: (value) => value.toFixed(2)
+                }
             },
         },
     ],

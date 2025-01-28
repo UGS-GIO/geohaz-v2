@@ -37,8 +37,32 @@ export interface RasterSource {
 }
 
 
+// Base configuration that applies to all field types
+interface BaseFieldConfig {
+    label?: string;
+    field: string;
+    type: 'string' | 'number';
+}
+
+// String-specific field configuration
+interface StringFieldConfig extends BaseFieldConfig {
+    type: 'string';
+    transform?: (value: string) => string;
+}
+
+// Number-specific field configuration
+export interface NumberFieldConfig extends BaseFieldConfig {
+    type: 'number';
+    decimalPlaces?: number;
+    unit?: string;
+    transform?: (value: number) => string;
+}
+
+// Union type of all possible field configurations
+export type FieldConfig = StringFieldConfig | NumberFieldConfig;
+
 type CustomSublayerProps = {
-    popupFields?: Record<string, string>; // Maps field labels to attribute names
+    popupFields?: Record<string, FieldConfig>; // Maps field labels to attribute names
     relatedTables?: RelatedTable[];
     linkFields?: LinkFields;
     colorCodingMap?: ColorCodingRecordFunction; // Maps field names to color coding functions

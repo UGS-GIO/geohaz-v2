@@ -2,11 +2,11 @@ import * as React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Feature } from "geojson";
 import { Button } from "@/components/ui/button";
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { ExtendedFeature, PopupContentWithPagination } from "./popup-content-with-pagination";
-import { RelatedTable } from "@/lib/types/mapping-types";
+import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
 import useScreenSize from "@/hooks/use-screen-size";
 
 interface PopupContent {
@@ -89,6 +89,7 @@ function PopupDrawer({
                     <DrawerTitle>{popupTitle}</DrawerTitle>
                 </DrawerHeader>
 
+                <DrawerDescription className="hidden" /> {/* present but hidden to resolve console warning */}
                 <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden">
                     {screenSize.height > 1080 &&
                         <header className="border-b overflow-hidden h-12">
@@ -136,7 +137,7 @@ function PopupDrawer({
                             className={cn(`flex flex-1 flex-col gap-4 p-1 overflow-y-auto select-text`)}
                         >
                             <PopupContentWithPagination
-                                layerContent={layerContent as unknown as { groupLayerTitle: string; layerTitle: string; features: ExtendedFeature[]; popupFields?: Record<string, string> | undefined; relatedTables?: RelatedTable[] | undefined; }[]} // TODO: fix this
+                                layerContent={layerContent as unknown as { groupLayerTitle: string; layerTitle: string; features: ExtendedFeature[]; popupFields?: Record<string, FieldConfig> | undefined; relatedTables?: RelatedTable[] | undefined; }[]} // TODO: fix this
                                 onSectionChange={onSectionChange}
                             />
                         </div>
