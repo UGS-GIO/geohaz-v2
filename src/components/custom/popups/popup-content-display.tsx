@@ -82,7 +82,6 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
     };
 
     const rasterValue = getRasterValue();
-    const transformedRasterValue = rasterSource?.transform ? rasterSource.transform(rasterValue) : 'No data'
 
     // Loading and error states
     if (isLoading) return <p>Loading...</p>;
