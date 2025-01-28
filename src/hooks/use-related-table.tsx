@@ -88,7 +88,7 @@ const useRelatedTable = (
             enabled: Boolean(feature) &&
                 (config.targetField ? Boolean(feature?.properties?.[config.targetField]) : true),
             retry: 2, // Retry failed queries twice
-            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+            retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
         })),
     });
 
