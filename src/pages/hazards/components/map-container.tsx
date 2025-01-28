@@ -124,7 +124,7 @@ export default function ArcGISMap() {
                             baseLayerInfo.rasterSource = await fetchWMSFeatureInfo({
                                 mapPoint,
                                 view,
-                                layers: new Array(value.rasterSource.layerName.split('_').join(' ')),
+                                layers: new Array(value.rasterSource.layerName),
                                 url: value.rasterSource.url,
                             });
                         }
