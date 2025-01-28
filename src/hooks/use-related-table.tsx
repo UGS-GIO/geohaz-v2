@@ -6,64 +6,94 @@ type RelatedData = {
     [key: string]: any;
 };
 
+interface LabelValuePair {
+    label: string;
+    value: any;
+}
+
+interface ProcessedRelatedData extends RelatedData {
+    labelValuePairs?: LabelValuePair[];
+}
+
 type CombinedResult = {
-    data: (RelatedData | undefined)[];
+    data: ProcessedRelatedData[][];
     isLoading: boolean;
     error: Error | null;
 };
 
 const useRelatedTable = (
     configs: RelatedTable[],
-    feature?: Feature<Geometry, GeoJsonProperties>
+    feature: Feature<Geometry, GeoJsonProperties> | null
 ): CombinedResult => {
-    const queryResults: UseQueryResult<RelatedData>[] = useQueries({
+    // Early return if no configs or feature is null
+    if (configs.length === 0) {
+        return {
+            data: [],
+            isLoading: false,
+            error: null
+        };
+    }
+
+    const queryResults: UseQueryResult<ProcessedRelatedData[]>[] = useQueries({
         queries: configs.map((config) => ({
             queryKey: ["relatedTable", config.targetField, feature?.properties?.[config.targetField]],
-            queryFn: async (): Promise<RelatedData> => {
-                const targetValue = feature?.properties?.[config.targetField];
-                const queryUrl = targetValue
-                    ? `${config.url}?${config.matchingField}=eq.${targetValue}`
-                    : config.url;
+            queryFn: async (): Promise<ProcessedRelatedData[]> => {
+                try {
+                    const targetValue = feature?.properties?.[config.targetField];
 
-                const response = await fetch(queryUrl, {
-                    headers: config.headers,
-                });
+                    // If no target value and it's required, return empty array
+                    if (!targetValue && config.targetField) {
+                        return [];
+                    }
 
-                if (!response.ok) {
-                    throw new Error(
-                        `Failed to fetch related table for ${config.targetField}: ${response.statusText}`
-                    );
-                }
+                    const queryUrl = targetValue
+                        ? `${config.url}?${config.matchingField}=eq.${targetValue}`
+                        : config.url;
 
-                const data = await response.json();
-                const processedData = Array.isArray(data) ? data : [data];
-
-                if (config.displayFields) {
-                    return processedData.map(item => {
-                        // Create label-value pairs for each field specified in displayFields
-                        const labelValuePairs = config.displayFields!.map(df => {
-                            const value = item[df.field];
-                            const label = df.label;
-                            return { label: label, value: value };
-                        });
-
-                        // Return processed data with label-value pairs
-                        return {
-                            ...item,
-                            labelValuePairs: labelValuePairs,
-                        };
+                    const response = await fetch(queryUrl, {
+                        headers: config.headers,
                     });
-                }
 
-                return processedData;
+                    if (!response.ok) {
+                        throw new Error(
+                            `Failed to fetch related table for ${config.targetField}: ${response.statusText}`
+                        );
+                    }
+
+                    const data = await response.json();
+                    const rawData = Array.isArray(data) ? data : [data];
+
+                    if (config.displayFields) {
+                        return rawData.map(item => {
+                            // Create label-value pairs for each field specified in displayFields
+                            const labelValuePairs = config.displayFields!.map(df => ({
+                                label: df.label,
+                                value: item[df.field] ?? 'N/A'
+                            }));
+
+                            return {
+                                ...item,
+                                labelValuePairs,
+                            };
+                        });
+                    }
+
+                    return rawData;
+                } catch (error) {
+                    console.error(`Error fetching related table for ${config.targetField}:`, error);
+                    throw error;
+                }
             },
-            staleTime: 1000 * 60 * 60,
-            enabled: configs.length > 0 && Boolean(feature?.properties?.[config.targetField]),
+            staleTime: 1000 * 60 * 60, // 1 hour
+            enabled: Boolean(feature) &&
+                (config.targetField ? Boolean(feature?.properties?.[config.targetField]) : true),
+            retry: 2, // Retry failed queries twice
+            retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
         })),
     });
 
     const combinedResult: CombinedResult = {
-        data: queryResults.map(result => result.data),
+        data: queryResults.map(result => result.data ?? []),
         isLoading: queryResults.some(result => result.isLoading),
         error: queryResults.find(result => result.error)?.error || null,
     };

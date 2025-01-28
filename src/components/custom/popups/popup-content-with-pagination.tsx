@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Feature, Geometry, GeoJsonProperties } from "geojson"
+import { Feature, Geometry, GeoJsonProperties, FeatureCollection } from "geojson"
 import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
@@ -24,6 +24,7 @@ export interface LayerContentProps {
     relatedTables?: RelatedTable[]
     linkFields?: LinkFields
     colorCodingMap?: ColorCodingRecordFunction
+    rasterSource?: FeatureCollection
 }
 
 interface SidebarInsetWithPaginationProps {
@@ -158,13 +159,13 @@ const LayerCard = ({
                     <div
                         key={idx}
                         className={`
-                            space-y-4 
-                            p-4 
-                            rounded-lg 
-                            bg-border/50
-                            border 
-                            border-secondary/20
-                        `}
+                                space-y-4 
+                                p-4 
+                                rounded-lg 
+                                bg-border/50
+                                border 
+                                border-secondary/20
+                            `}
                     >
                         <PopupButtons feature={feature} />
 

@@ -8,7 +8,7 @@ import { FieldConfig, NumberFieldConfig } from "@/lib/types/mapping-types";
 
 type PopupContentDisplayProps = {
     layer: LayerContentProps;
-    feature: Feature<Geometry, GeoJsonProperties>;
+    feature?: Feature<Geometry, GeoJsonProperties>;
     layout?: "grid" | "stacked";
 };
 
@@ -58,12 +58,46 @@ const processFieldValue = (field: FieldConfig, value: unknown): string => {
 
 
 const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProps) => {
-    const { relatedTables, popupFields, linkFields, colorCodingMap } = layer;
-    const { data, isLoading, error } = useRelatedTable(relatedTables || [], feature);
+    const { relatedTables, popupFields, linkFields, colorCodingMap, rasterSource } = layer;
+    const { data, isLoading, error } = useRelatedTable(relatedTables || [], feature || null);
+
+    // Extract raster value if it exists
+    const getRasterValue = () => {
+        if (!rasterSource) return null;
+
+        // Handle full FeatureCollection response
+        if ('type' in rasterSource && rasterSource.type === 'FeatureCollection') {
+            return rasterSource.features[0]?.properties?.GRAY_INDEX;
+        }
+
+        // Handle features array response
+        if (Array.isArray(rasterSource.features)) {
+            return rasterSource.features[0]?.properties?.GRAY_INDEX;
+        }
+
+        return null;
+    };
+
+    const rasterValue = getRasterValue();
 
     // Loading and error states
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error: {String(error)}</p>;
+
+    // If we only have raster data and no feature
+    if (!feature && rasterValue !== null) {
+        return (
+            <div className="space-y-4">
+                <div className="flex flex-col">
+                    <p className="font-bold underline text-primary">Raster Value</p>
+                    <p className="break-words">{rasterValue?.toFixed(4) ?? "No data"}</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Return null if no feature and no raster value
+    if (!feature) return null;
 
     const properties = feature.properties || {};
     const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/;
@@ -72,7 +106,6 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
     const applyColor = (field: string, value: string | number) => {
         if (colorCodingMap && colorCodingMap[field]) {
             const colorFunction = colorCodingMap[field];
-
             return { color: colorFunction(value) };
         }
         return {};
@@ -89,11 +122,11 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
             return (
                 <>
                     {hrefs.map((item, index) => (
-                        <div key={index} className="flex gap-2">
+                        <div key={`${item.href}-${index}`} className="flex gap-2">
                             <Link
                                 to={item.href}
                                 className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
-                                variant="primary"
+                                variant='primary'
                             >
                                 <span className="break-all inline-block">{item.label}</span>
                                 <ExternalLink className="flex-shrink-0 ml-1" size={16} />
@@ -147,7 +180,10 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
             : [[{ label: "No data available", value: "No data available" }]];
     };
 
-    const featureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
+    const baseFeatureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
+    const featureEntries = rasterValue !== null
+        ? [...baseFeatureEntries, ['Raster Value', rasterValue.toFixed(4)]]
+        : baseFeatureEntries;
 
     const { urlContent, longTextContent, regularContent } = featureEntries.reduce<{
         urlContent: JSX.Element[];
@@ -156,7 +192,13 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
     }>(
         (acc, [label, field]) => {
             const fieldConfig = popupFields ? field : { field, type: 'string' as const };
-            const processedValue = processFieldValue(fieldConfig, properties[fieldConfig.field]);
+
+            // Special handling for raster value
+            const value = label === 'Raster Value'
+                ? rasterValue
+                : properties[fieldConfig.field];
+
+            const processedValue = processFieldValue(fieldConfig, value);
 
             if (!processedValue && processedValue !== '0') return acc;
 
@@ -182,43 +224,38 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         { urlContent: [], longTextContent: [], regularContent: [] }
     );
 
-    const { longRelatedContent, regularRelatedContent } = (relatedTables || []).reduce<{
-        longRelatedContent: JSX.Element[];
-        regularRelatedContent: JSX.Element[];
-    }>(
-        (acc, table, index) => {
-            const groupedValues = getRelatedTableValues();
+    type ContentProps = { longRelatedContent: JSX.Element[]; regularRelatedContent: JSX.Element[] };
+    const { longRelatedContent, regularRelatedContent } = (relatedTables || []).reduce<ContentProps>((acc, table, index) => {
+        const groupedValues = getRelatedTableValues();
 
-            const content = (
-                <div key={index} className="flex flex-col space-y-2">
-                    <p className="font-bold underline text-primary">
-                        {properties[table.fieldLabel] || table.fieldLabel}
-                    </p>
-                    {groupedValues.map((group, groupIdx) => (
-                        <div key={groupIdx} className="flex flex-col">
-                            {group.map((value, valueIdx) => (
-                                <div key={valueIdx} className="flex flex-row gap-x-2">
-                                    {value.label && <span className="font-bold">{value.label}: </span>}
-                                    <span>{value.value}</span>
-                                </div>
-                            ))}
-                        </div>
-                    ))}
-                </div>
-            );
+        const content = (
+            <div key={index} className="flex flex-col space-y-2">
+                <p className="font-bold underline text-primary">
+                    {properties[table.fieldLabel] || table.fieldLabel}
+                </p>
+                {groupedValues.map((group, groupIdx) => (
+                    <div key={groupIdx} className="flex flex-col">
+                        {group.map((value, valueIdx) => (
+                            <div key={valueIdx} className="flex flex-row gap-x-2">
+                                {value.label && <span className="font-bold">{value.label}: </span>}
+                                <span>{value.value}</span>
+                            </div>
+                        ))}
+                    </div>
+                ))}
+            </div>
+        );
 
-            // Calculate total words across all groups
-            const totalWords = groupedValues
-                .flat()
-                .map(v => String(v.value))
-                .join(" ")
-                .split(/\s+/).length;
+        // Calculate total words across all groups
+        const totalWords = groupedValues
+            .flat()
+            .map(v => String(v.value))
+            .join(" ")
+            .split(/\s+/).length;
 
-            acc[totalWords > 20 ? 'longRelatedContent' : 'regularRelatedContent'].push(content);
-            return acc;
-        },
-        { longRelatedContent: [], regularRelatedContent: [] }
-    );
+        acc[totalWords > 20 ? 'longRelatedContent' : 'regularRelatedContent'].push(content);
+        return acc;
+    }, { longRelatedContent: [], regularRelatedContent: [] });
 
     const useGridLayout = layout === "grid" || regularContent.length > 5;
 
