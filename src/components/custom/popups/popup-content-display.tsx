@@ -201,6 +201,16 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         ? [...baseFeatureEntries, [`${rasterSource?.valueLabel}`, rasterValue]]
         : baseFeatureEntries;
 
+    const shouldDisplayValue = (value: string): boolean => {
+        // Cases where we don't want to display the value:
+        const isEmptyOrWhitespace = value.trim() === '';
+        const isNullOrUndefined = value === 'null' || value === 'undefined';
+
+        // We want to display the value if it's not empty/whitespace/null/undefined
+        // This naturally handles '0' as a valid value to display
+        return !isEmptyOrWhitespace && !isNullOrUndefined;
+    };
+
     const { urlContent, longTextContent, regularContent } = featureEntries.reduce<{
         urlContent: JSX.Element[];
         longTextContent: JSX.Element[];
@@ -214,19 +224,16 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                 ? rasterSource?.transform ? rasterSource.transform(rasterValue) : rasterValue
                 : properties[fieldConfig.field];
 
-            if (properties[fieldConfig.field] === null) {
+            if (value === null || value === ' ') {
                 return acc;
             }
 
-            console.log('value', value);
-
-
             const processedValue = processFieldValue(fieldConfig, value);
 
-            if (!processedValue && processedValue !== '0' && processedValue === ' ') return acc;
-
-            console.log({ processedValue });
-
+            // Skip if the value shouldn't be displayed
+            if (!shouldDisplayValue(processedValue)) {
+                return acc;
+            }
 
             const content = (
                 <div key={label} className="flex flex-col" style={applyColor(fieldConfig.field, processedValue)}>
@@ -237,6 +244,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                 </div>
             );
 
+            // Categorize the content based on its type
             if (urlPattern.test(processedValue) || linkFields?.[fieldConfig.field]) {
                 acc.urlContent.push(content);
             } else if (String(processedValue).split(/\s+/).length > 20) {
