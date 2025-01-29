@@ -125,23 +125,35 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
             return (
                 <>
-                    {hrefs.map((item, index) => (
-                        <div key={`${item.href}-${index}`} className="flex gap-2">
-                            <Link
-                                to={item.href}
-                                className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
-                                variant='primary'
-                            >
-                                <span className="break-all inline-block">{item.label}</span>
-                                <ExternalLink className="flex-shrink-0 ml-1" size={16} />
-                            </Link>
-                        </div>
-                    ))}
+                    {hrefs.map((item, index) => {
+
+                        console.log(item);
+
+
+                        if (item.href === null) {
+                            return null;
+                        }
+
+                        return (
+                            <div key={`${item.href}-${index}`} className="flex gap-2">
+                                <Link
+                                    to={item.href}
+                                    className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
+                                    variant='primary'
+                                >
+                                    <span className="break-all inline-block">{item.label}</span>
+                                    <ExternalLink className="flex-shrink-0 ml-1" size={16} />
+                                </Link>
+                            </div>
+                        )
+                    })}
                 </>
             );
         }
 
         if (urlPattern.test(value)) {
+            console.log(value);
+
             return (
                 <Button
                     className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-start max-w-full"
@@ -201,6 +213,11 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
             const value = label === `${rasterSource?.valueLabel}`
                 ? rasterSource?.transform ? rasterSource.transform(rasterValue) : rasterValue
                 : properties[fieldConfig.field];
+
+            if (properties[fieldConfig.field] === null) {
+                return acc;
+            }
+
 
             const processedValue = processFieldValue(fieldConfig, value);
 
