@@ -61,7 +61,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'lsfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -98,7 +98,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'lsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -134,7 +134,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'lqshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -233,7 +233,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'sfrhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -266,7 +266,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
             popupFields: { 'Mapped Scale': { field: 'wssmappedscale', type: 'string' } },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'wsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -301,7 +301,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'sdhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -336,7 +336,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'sbphazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -371,7 +371,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'rfhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -406,7 +406,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'peshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -441,7 +441,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'exshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -477,7 +477,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'sgshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -512,7 +512,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'grshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -547,7 +547,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'crshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -582,7 +582,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'csshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -617,7 +617,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'slshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -652,7 +652,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'aafhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -687,7 +687,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'efhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -722,7 +722,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'erzhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -757,7 +757,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'mkfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
@@ -806,7 +806,7 @@ const studyAreasWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Name': { field: 'name', type: 'string' },
                 'Report ID': { field: 'repor_id', type: 'string' },
-                'Mapped Hazards': { field: 'mapped_hazards', type: 'string' },
+                'Mapped Hazards': { field: 'hazard_name', type: 'string' },
             },
             linkFields: {
                 'repor_id': {

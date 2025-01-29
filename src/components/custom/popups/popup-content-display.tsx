@@ -218,10 +218,15 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                 return acc;
             }
 
+            console.log('value', value);
+
 
             const processedValue = processFieldValue(fieldConfig, value);
 
-            if (!processedValue && processedValue !== '0') return acc;
+            if (!processedValue && processedValue !== '0' && processedValue === ' ') return acc;
+
+            console.log({ processedValue });
+
 
             const content = (
                 <div key={label} className="flex flex-col" style={applyColor(fieldConfig.field, processedValue)}>
