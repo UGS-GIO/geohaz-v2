@@ -28,6 +28,16 @@ export type LinkFields = {
 };
 
 export type ColorCodingRecordFunction = Record<string, (value: string | number) => string>;
+export interface RasterSource {
+    url: string;
+    layerName: string;   // Name of the layer in the WMS service including the workspace
+    valueField: string;  // Field name for the raster value in the response
+    valueLabel: string;  // Label to display for the raster value
+    headers?: Record<string, string>;
+    transform?: (value: number) => string;
+}
+
+export type RasterValueMetadata = Pick<RasterSource, 'valueField' | 'valueLabel' | 'transform'>;
 
 // Base configuration that applies to all field types
 interface BaseFieldConfig {
@@ -58,6 +68,7 @@ type CustomSublayerProps = {
     relatedTables?: RelatedTable[];
     linkFields?: LinkFields;
     colorCodingMap?: ColorCodingRecordFunction; // Maps field names to color coding functions
+    rasterSource?: RasterSource;
 };
 
 type ExtendedSublayerProperties =

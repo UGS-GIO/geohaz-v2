@@ -555,76 +555,106 @@ function createBbox({ mapPoint, resolution = 1, buffer = 10 }: CreateBboxProps):
     };
 }
 
-interface GetFeatureInfoProps {
+interface WMSQueryProps {
     mapPoint: __esri.Point;
     view: __esri.MapView | __esri.SceneView;
-    visibleLayers: string[];
+    layers: string[];
+    url: string;
+    version?: '1.1.1' | '1.3.0';
+    headers?: Record<string, string>;
+    infoFormat?: string;
+    buffer?: number;
+    featureCount?: number;
 }
 
-// Fetch GetFeatureInfo request to WMS server
-export async function fetchGetFeatureInfo({
+export async function fetchWMSFeatureInfo({
     mapPoint,
     view,
-    visibleLayers,
-}: GetFeatureInfoProps) {
-    if (visibleLayers.length === 0) {
-        console.warn('No visible layers to query.');
-        return null; // Return null if no visible layers
+    layers,
+    url,
+    version = '1.3.0',
+    headers = {},
+    infoFormat = 'application/json',
+    buffer = 10,
+    featureCount = 50
+}: WMSQueryProps) {
+    if (layers.length === 0) {
+        console.warn('No layers specified to query.');
+        return null;
     }
 
-    // Create a bbox around the clicked map point
-    const bbox = createBbox({ mapPoint, resolution: view.resolution, buffer: 10 });
+    const bbox = createBbox({
+        mapPoint,
+        resolution: view.resolution,
+        buffer
+    });
+
     const { minX, minY, maxX, maxY } = bbox;
 
-    // WMS GetFeatureInfo parameters
-    const params = {
-        service: 'WMS',
-        request: 'GetFeatureInfo',
-        version: '1.3.0', // Or '1.1.1' if the server requires
-        layers: visibleLayers.join(','),
-        query_layers: visibleLayers.join(','),
-        info_format: 'application/json',
-        bbox: `${minX},${minY},${maxX},${maxY}`,
-        crs: 'EPSG:3857',
-        i: Math.round(view.width / 2).toString(),
-        j: Math.round(view.height / 2).toString(),
-        width: `${view.width}`,
-        height: `${view.height}`,
-        feature_count: "50", // Limit the number of features returned
-    };
+    // Different versions handle coordinates differently
+    const bboxString = version === '1.1.1'
+        ? `${minY},${minX},${maxY},${maxX}` // 1.1.0 uses lat,lon order
+        : `${minX},${minY},${maxX},${maxY}`; // 1.3.1 uses lon,lat order
 
-    const queryString = new URLSearchParams(params).toString();
+    const params = new URLSearchParams();
 
-    // Construct the full URL to the GetFeatureInfo endpoint
-    const getFeatureInfoUrl = `https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms?${queryString}`;
+    // Add base parameters
+    params.set('service', 'WMS');
+    params.set('request', 'GetFeatureInfo');
+    params.set('version', version);
+    params.set('layers', layers.join(','));
+    params.set('query_layers', layers.join(','));
+    params.set('info_format', infoFormat);
+    params.set('bbox', bboxString);
+    params.set('crs', 'EPSG:3857');
+    params.set('width', view.width.toString());
+    params.set('height', view.height.toString());
+    params.set('feature_count', featureCount.toString());
 
-    const response = await fetch(getFeatureInfoUrl);
+    // Add version-specific pixel coordinates
+    if (version === '1.3.0') {
+        params.set('i', Math.round(view.width / 2).toString());
+        params.set('j', Math.round(view.height / 2).toString());
+    } else {
+        params.set('x', Math.round(view.width / 2).toString());
+        params.set('y', Math.round(view.height / 2).toString());
+    }
+
+    const response = await fetch(`${url}?${params.toString()}`, { headers });
+
     if (!response.ok) {
         throw new Error(`GetFeatureInfo request failed with status ${response.status}`);
     }
 
-    const featureInfo = await response.json();
+    const data = await response.json();
 
-    // Map features to their corresponding namespace
-    const namespaceMap = visibleLayers.reduce((acc, layer) => {
-        const [namespace, layerName] = layer.split(':'); // Split into namespace and layer name
-        if (namespace && layerName) {
-            acc[layerName] = namespace;
-        }
-        return acc;
-    }, {} as Record<string, string>);
+    // Handle both raster and vector responses
+    if (data.results) {
+        // Raster response
+        return data.results[0]?.value;
+    } else if (data.features) {
+        // Vector response - add namespaces
+        const namespaceMap = layers.reduce((acc, layer) => {
+            const [namespace, layerName] = layer.split(':');
+            if (namespace && layerName) {
+                acc[layerName] = namespace;
+            }
+            return acc;
+        }, {} as Record<string, string>);
 
-    // Add namespace to each feature in the response
-    const featuresWithNamespace = featureInfo.features.map((feature: any) => {
-        const layerName = feature.id?.split('.')[0]; // Extract layer name from feature ID (e.g., "layerName.123")
-        const namespace = namespaceMap[layerName] || null; // Get namespace or null if not found
-        return {
-            ...feature,
-            namespace, // Add namespace to the feature
-        };
-    });
+        const featuresWithNamespace = data.features.map((feature: any) => {
+            const layerName = feature.id?.split('.')[0];
+            const namespace = namespaceMap[layerName] || null;
+            return {
+                ...feature,
+                namespace,
+            };
+        });
 
-    return { ...featureInfo, features: featuresWithNamespace };
+        return { ...data, features: featuresWithNamespace };
+    }
+
+    return data;
 }
 
 export async function fetchWfsGeometry({ namespace, featureId }: { namespace: string; featureId: string }) {

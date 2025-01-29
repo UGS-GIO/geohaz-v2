@@ -159,18 +159,27 @@ const groundshakingWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: groundshakingWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${groundshakingLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Peak Ground Acceleration': {
-                    field: 'acc',
-                    type: 'number'
+                // empty in favor or using the rasterSource
+            },
+            rasterSource: {
+                url: `${PROD_GEOSERVER_URL}wms`,
+                headers: {
+                    "Accept": "application/json",
+                    "Cache-Control": "no-cache",
                 },
+                layerName: `${HAZARDS_WORKSPACE}:earthquake_groundshaking`,
+                valueField: "GRAY_INDEX",
+                valueLabel: "Peak Ground Acceleration",
+                transform: (value: number) => `${value} g`,
             }
+
         },
     ],
 }
@@ -788,7 +797,7 @@ const studyAreasWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: studyAreasWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${studyAreasLayerName}`,
@@ -831,7 +840,7 @@ const floodHazardsConfig: LayerProps = {
 const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
-    visible: true,
+    visible: false,
     layers: [qFaultsWMSConfig, surfaceFaultRuptureWMSConfig, liquefactionWMSConfig, groundshakingWMSConfig],
 };
 
