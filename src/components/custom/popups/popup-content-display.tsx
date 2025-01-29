@@ -125,23 +125,35 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
             return (
                 <>
-                    {hrefs.map((item, index) => (
-                        <div key={`${item.href}-${index}`} className="flex gap-2">
-                            <Link
-                                to={item.href}
-                                className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
-                                variant='primary'
-                            >
-                                <span className="break-all inline-block">{item.label}</span>
-                                <ExternalLink className="flex-shrink-0 ml-1" size={16} />
-                            </Link>
-                        </div>
-                    ))}
+                    {hrefs.map((item, index) => {
+
+                        console.log(item);
+
+
+                        if (item.href === null) {
+                            return null;
+                        }
+
+                        return (
+                            <div key={`${item.href}-${index}`} className="flex gap-2">
+                                <Link
+                                    to={item.href}
+                                    className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
+                                    variant='primary'
+                                >
+                                    <span className="break-all inline-block">{item.label}</span>
+                                    <ExternalLink className="flex-shrink-0 ml-1" size={16} />
+                                </Link>
+                            </div>
+                        )
+                    })}
                 </>
             );
         }
 
         if (urlPattern.test(value)) {
+            console.log(value);
+
             return (
                 <Button
                     className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-start max-w-full"
@@ -189,6 +201,16 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         ? [...baseFeatureEntries, [`${rasterSource?.valueLabel}`, rasterValue]]
         : baseFeatureEntries;
 
+    const shouldDisplayValue = (value: string): boolean => {
+        // Cases where we don't want to display the value:
+        const isEmptyOrWhitespace = value.trim() === '';
+        const isNullOrUndefined = value === 'null' || value === 'undefined';
+
+        // We want to display the value if it's not empty/whitespace/null/undefined
+        // This naturally handles '0' as a valid value to display
+        return !isEmptyOrWhitespace && !isNullOrUndefined;
+    };
+
     const { urlContent, longTextContent, regularContent } = featureEntries.reduce<{
         urlContent: JSX.Element[];
         longTextContent: JSX.Element[];
@@ -202,9 +224,16 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                 ? rasterSource?.transform ? rasterSource.transform(rasterValue) : rasterValue
                 : properties[fieldConfig.field];
 
+            if (value === null || value === ' ') {
+                return acc;
+            }
+
             const processedValue = processFieldValue(fieldConfig, value);
 
-            if (!processedValue && processedValue !== '0') return acc;
+            // Skip if the value shouldn't be displayed
+            if (!shouldDisplayValue(processedValue)) {
+                return acc;
+            }
 
             const content = (
                 <div key={label} className="flex flex-col" style={applyColor(fieldConfig.field, processedValue)}>
@@ -215,6 +244,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                 </div>
             );
 
+            // Categorize the content based on its type
             if (urlPattern.test(processedValue) || linkFields?.[fieldConfig.field]) {
                 acc.urlContent.push(content);
             } else if (String(processedValue).split(/\s+/).length > 20) {
