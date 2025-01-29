@@ -68,7 +68,9 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
         if (isSymbolizerWithPolygon(symbolizer)) {
             if ('fill' in symbolizer.Polygon) {
                 fillColorWithOpacity = handleFillSymbolizer(symbolizer.Polygon);
-            } else if ('stroke' in symbolizer.Polygon) {
+            }
+
+            if ('stroke' in symbolizer.Polygon) {
                 const strokeSymbolizer = handleStrokeSymbolizer(symbolizer.Polygon);
                 strokeColorWithOpacity = strokeSymbolizer.strokeColorWithOpacity;
                 strokeWidth = strokeSymbolizer.strokeWidth;

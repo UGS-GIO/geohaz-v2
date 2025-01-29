@@ -27,7 +27,11 @@ const LayerControls: React.FC<LayerControlsProps> = ({
     layerId,
     url
 }) => {
-    const cleanDescription = DOMPurify.sanitize(description, { USE_PROFILES: { html: true } });
+    const cleanDescription = DOMPurify.sanitize(description, {
+        USE_PROFILES: { html: true },
+        ALLOWED_ATTR: ['target', 'href'],
+        ADD_ATTR: ['target']
+    });
     const legendTriggerButtonRef = useRef<HTMLButtonElement>(null);
     const infoTriggerButtonRef = useRef<HTMLButtonElement>(null);
     const [openAccordion, setOpenAccordion] = useState<string | null>(null);

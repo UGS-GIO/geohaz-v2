@@ -16,7 +16,7 @@ import {
 } from './ui/tooltip'
 import { cn } from '@/lib/utils'
 import useCheckActiveNav from '@/hooks/use-check-active-nav'
-import { Suspense, useEffect } from 'react'
+import { Suspense } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { LoadingSpinner } from './custom/loading-spinner'
 import { useSidebar } from '@/hooks/use-sidebar'
@@ -38,12 +38,6 @@ export default function Nav({
   className,
 }: NavProps) {
   const { currentContent, setCurrentContent } = useSidebar()
-
-  useEffect(() => {
-    if (isCollapsed) {
-      setCurrentContent(null)
-    }
-  }, [isCollapsed, setCurrentContent])
 
   const renderLink = (link: SideLink) => {
     const key = `${link.title}`

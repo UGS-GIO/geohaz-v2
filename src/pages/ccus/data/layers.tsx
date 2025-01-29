@@ -1,12 +1,14 @@
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
-const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
+export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
+const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
 const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
 const GEN_GIS_WORKSPACE = 'gen_gis';
+const MAPPING_WORKSPACE = 'mapping';
 
-// Basin Names WMS Layer
+// GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
-const basinNamesWMSTitle = 'Basin Names';
+const basinNamesWMSTitle = 'GeoRegions';
 const basinNamesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -18,10 +20,23 @@ const basinNamesWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Name': 'name',
-                'Description': 'description',
-                'Report Link': 'reportlink'
+                'Name': { field: 'name', type: 'string' },
+                'Description': { field: 'description', type: 'string' },
+                'Report Link': { field: 'reportlink', type: 'string' },
+                'Rank': {
+                    field: 'rank',
+                    type: 'number'
+                }
             },
+            colorCodingMap: {
+                'rank': (value: string | number) => {
+                    const rank = typeof value === 'number' ? value : parseInt(value, 10);
+                    if (rank === 1) return "#FF0000"; // Red
+                    if (rank === 2) return "#FFFF00"; // Yellow
+                    if (rank === 3) return "#00FF00"; // Green
+                    return "#808080"; // Gray
+                }
+            }
         },
     ],
 };
@@ -40,13 +55,11 @@ const oilGasFieldsWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Field Name': 'field_name',
-                'Field Number': 'field_number',
-                'Field Type': 'field_type',
-                'Label': 'label',
-                'Producing Formations': 'prod_formations',
-                'Reservoir Rocks': 'reservoir_rocks',
-                'Status': 'status'
+                'Field Name': { field: 'field_name', type: 'string' },
+                'Field Type': { field: 'field_type', type: 'string' },
+                'Producing Formations': { field: 'prod_formations', type: 'string' },
+                'Reservoir Age': { field: 'reservoir_rocks', type: 'string' },
+                'Status': { field: 'status', type: 'string' }
             },
         },
     ],
@@ -66,11 +79,11 @@ const pipelinesWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Operator': 'operator',
-                'Commodity': 'commodity',
-                'Diameter': 'diameter',
-                'Acronym': 'acronym',
-                'Code Remarks': 'coderemarks'
+                'Operator': { field: 'operator', type: 'string' },
+                'Commodity': { field: 'commodity', type: 'string' },
+                'Diameter': { field: 'diameter', type: 'number', },
+                'Acronym': { field: 'acronym', type: 'string' },
+                'Code Remarks': { field: 'coderemarks', type: 'string' }
             },
         },
     ],
@@ -78,7 +91,7 @@ const pipelinesWMSConfig: WMSLayerProps = {
 
 // SCO2 WMS Layer
 const sco2LayerName = 'sco2_draft_13aug24';
-const sco2WMSTitle = 'SCO2';
+const sco2WMSTitle = 'Storage Resource Estimates';
 const sco2WMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -90,43 +103,52 @@ const sco2WMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Unique ID': 'unique_id',
-                'Basegrid ID': 'basegrid_id',
-                'Name': 'name',
-                'Geo Region': 'geo_region',
-                'Longitude': 'x_lon',
-                'Latitude': 'y_lat',
-                'GIS Number': 'gis_number',
-                'Depth (m)': 'depth_m',
-                'Pressure (MPa)': 'pressure_mpa',
-                'Thickness (m)': 'thickness_m',
-                'Permeability (md)': 'permeability_md',
-                'Porosity': 'porosity',
-                'Temperature Gradient (C/km)': 'temperature_gradient_c_per_km',
-                'Temperature (C)': 'temperature_c',
-                'Area (km^2)': 'area_km2',
-                'Surface Temperature (C)': 'surface_temperature_c',
-                'ROM': 'rom',
-                'Max Injection Rate (MT/yr)': 'max_injection_rate_mt_per_yr',
-                'Cost Model': 'cost_model',
-                'Injection Well Diameter (in)': 'injection_well_diameter_in',
-                'Old O&G Wells': 'old_o_and_g_wells',
-                'Backup Injection Well': 'backup_injection_well',
-                'Above Zone MON': 'above_zone_mon',
-                'In Zone MON': 'in_zone_mon',
-                'Real Discount Rate': 'real_discount_rate',
-                'PISC Length (yrs)': 'pisc_length_yrs',
-                'Injection Period (yrs)': 'injection_period_yrs',
-                'Finance Period (yrs)': 'finance_period_yrs',
-                'Dollar Year': 'dollar_year',
-                'Run CPG': 'run_cpg',
-                'Run Water Sedbasin': 'run_water_sedbasin',
-                'Capacity (MtCO2)': 'capacity_mtco2',
-                'Storage Cost ($/tCO2)': 'storage_cost_doll_per_tco2',
-                'CAPEX (M$)': 'capex_mdoll',
-                'OPEX (M$/yr)': 'opex_mdoll_per_yr',
-                'CRF': 'crf',
-                'Error': 'error',
+                'Storage Resource Estimate': {
+                    field: 'capacity_mtco2',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Storage Cost ($/tCO2)': {
+                    field: 'storage_cost_doll_per_tco2',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Formation': { field: 'name', type: 'string' },
+                'Thickness (m)': {
+                    field: 'thickness_m',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Depth (m)': {
+                    field: 'depth_m',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Permeability (md)': {
+                    field: 'permeability_md',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Porosity': {
+                    field: 'porosity',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Pressure (MPa)': {
+                    field: 'pressure_mpa',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
+                'Temperature (C)': {
+                    field: 'temperature_c',
+                    type: 'number',
+                    decimalPlaces: 1,
+                },
+                'Temperature Gradient (C/km)': {
+                    field: 'temperature_gradient_c_per_km',
+                    type: 'number',
+                    decimalPlaces: 2,
+                },
             },
         },
     ],
@@ -146,9 +168,9 @@ const riversWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Name': 'name',
-                'Description': 'description',
-                'Report Link': 'reportlink'
+                'Name': { field: 'name', type: 'string' },
+                'Description': { field: 'description', type: 'string' },
+                'Report Link': { field: 'reportlink', type: 'string' }
             },
         },
     ],
@@ -161,13 +183,50 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: seamlessGeolunitsWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
-            name: `${ENERGY_MINERALS_WORKSPACE}:${seamlessGeolunitsLayerName}`,
+            name: `${MAPPING_WORKSPACE}:${seamlessGeolunitsLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {},
+        },
+    ],
+};
+
+const wellWithTopsLayerName = 'wellswithtops_hascore';
+const wellWithTopsWMSTitle = 'Wells with Tops (Has Core)';
+const wellWithTopsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: wellWithTopsWMSTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${wellWithTopsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'API': { field: 'api', type: 'string' },
+                'Well Name': { field: 'wellname', type: 'string' }
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'Wells With Related Formation Tops',
+                    matchingField: 'api',
+                    targetField: 'api',
+                    url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore',
+                    headers: {
+                        "Accept-Profile": 'emp',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'formation_name', label: 'Formation Name' },
+                        { field: 'formation_depth', label: 'Formation Depth (meters??? verify)' },
+                    ]
+                }
+            ]
         },
     ],
 };
@@ -183,6 +242,31 @@ const SITLAConfig: LayerProps = {
     },
 };
 
+const faultsLayerName = 'faults_m-179dm';
+const faultsWMSTitle = '500k Faults';
+const faultsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: faultsWMSTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${MAPPING_WORKSPACE}:${faultsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Series ID': { field: 'series_id', type: 'string' },
+                'Scale': {
+                    field: 'scale',
+                    type: 'number',
+                    // example way of using transform
+                    // transform: (value) => value.toFixed(2)
+                }
+            },
+        },
+    ],
+};
+
 // Energy and Minerals Group Layer
 const EMPConfig: LayerProps = {
     type: 'group',
@@ -195,7 +279,9 @@ const EMPConfig: LayerProps = {
         sco2WMSConfig,
         riversWMSConfig,
         seamlessGeolunitsWMSConfig,
-        SITLAConfig
+        wellWithTopsWMSConfig,
+        SITLAConfig,
+        faultsWMSConfig,
     ]
 };
 

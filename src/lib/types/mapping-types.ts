@@ -18,9 +18,57 @@ interface BaseLayerProps {
     options?: any;
 }
 
+export interface LinkField {
+    baseUrl: string;
+    transform?: (id: any) => { label: string, href: string }[];
+}
+
+export type LinkFields = {
+    [key: string]: LinkField;
+};
+
+export type ColorCodingRecordFunction = Record<string, (value: string | number) => string>;
+export interface RasterSource {
+    url: string;
+    layerName: string;   // Name of the layer in the WMS service including the workspace
+    valueField: string;  // Field name for the raster value in the response
+    valueLabel: string;  // Label to display for the raster value
+    headers?: Record<string, string>;
+    transform?: (value: number) => string;
+}
+
+export type RasterValueMetadata = Pick<RasterSource, 'valueField' | 'valueLabel' | 'transform'>;
+
+// Base configuration that applies to all field types
+interface BaseFieldConfig {
+    label?: string;
+    field: string;
+    type: 'string' | 'number';
+}
+
+// String-specific field configuration
+interface StringFieldConfig extends BaseFieldConfig {
+    type: 'string';
+    transform?: (value: string) => string;
+}
+
+// Number-specific field configuration
+export interface NumberFieldConfig extends BaseFieldConfig {
+    type: 'number';
+    decimalPlaces?: number;
+    unit?: string;
+    transform?: (value: number) => string;
+}
+
+// Union type of all possible field configurations
+export type FieldConfig = StringFieldConfig | NumberFieldConfig;
+
 type CustomSublayerProps = {
-    popupFields?: Record<string, string>; // Maps field labels to attribute names
+    popupFields?: Record<string, FieldConfig>; // Maps field labels to attribute names
     relatedTables?: RelatedTable[];
+    linkFields?: LinkFields;
+    colorCodingMap?: ColorCodingRecordFunction; // Maps field names to color coding functions
+    rasterSource?: RasterSource;
 };
 
 type ExtendedSublayerProperties =
@@ -117,10 +165,18 @@ export type GetResultsHandlerType = { exactMatch: boolean, location: __esri.Poin
 
 export type GetSuggestionsHandlerType = { exactMatch: boolean, location: __esri.Point, maxResults: number, sourceIndex: number, spatialReference: __esri.SpatialReference, suggestResult: __esri.SuggestResult, view: __esri.MapView | __esri.SceneView }
 
-export type RelatedTable = {
+export interface RelatedTable {
+    fieldLabel: string;
+    matchingField: string;
     targetField: string;
     url: string;
-    acceptProfile: string;
-    matchingField: string;
-    fieldLabel: string;
-};
+    headers: Record<string, string>;
+    displayFields?: DisplayField[];
+}
+
+
+interface DisplayField {
+    field: string;
+    label?: string;
+    format?: (value: any) => string; // todo: add format function
+}

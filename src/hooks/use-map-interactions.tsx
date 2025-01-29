@@ -2,7 +2,7 @@ import { useCallback, useState, useContext } from "react";
 import { removeGraphics, createGraphic } from "@/lib/mapping-utils";
 import Collection from "@arcgis/core/core/Collection.js";
 import { MapContext } from "@/context/map-provider";
-import { GroupLayerProps, LayerProps, RelatedTable, WMSLayerProps } from "@/lib/types/mapping-types";
+import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
 import { useGetLayerConfig } from "./use-get-layer-config";
 
 type VisibleLayer = {
@@ -19,9 +19,12 @@ export const useMapInteractions = () => {
         visible: boolean;
         groupLayerTitle: string,
         layerTitle: string;
-        popupFields?: Record<string, string>;
+        popupFields?: Record<string, FieldConfig>;
         relatedTables?: RelatedTable[];
         queryable?: boolean;
+        linkFields?: LinkFields;
+        colorCodingMap?: ColorCodingRecordFunction;
+        rasterSource?: RasterSource;
     }>;
 
     type VisibleLayersResult = {
@@ -78,6 +81,9 @@ export const useMapInteractions = () => {
                             popupFields: sublayer.popupFields,
                             relatedTables: sublayer.relatedTables,
                             queryable: sublayer.queryable,
+                            linkFields: sublayer.linkFields,
+                            colorCodingMap: sublayer.colorCodingMap,
+                            rasterSource: sublayer.rasterSource,
                         };
                     }
                 });
@@ -94,6 +100,9 @@ export const useMapInteractions = () => {
                                     popupFields: sublayer.popupFields,
                                     relatedTables: sublayer.relatedTables,
                                     queryable: sublayer.queryable,
+                                    linkFields: sublayer.linkFields,
+                                    colorCodingMap: sublayer.colorCodingMap,
+                                    rasterSource: sublayer.rasterSource,
                                 };
                             }
                         });

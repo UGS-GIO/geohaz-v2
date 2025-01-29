@@ -18,29 +18,20 @@ const landslideLegacyWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'State Landslide ID': 'statelsid',
-                'Landslide Unit': 'lsunit',
-                'Movement Type': 'movetype',
-                'Historical': 'historical',
-                'Geologic Unit': 'geolunit',
-                'Map Scale': 'mapscale',
-                'Map Name': 'mapname',
-                'Pub Date': 'pubdate',
-                'Author(s)': 'author_s',
-                'Affiliated Unit': 'affunit',
-                'Movement Unit': 'moveunit',
-                'Movement Cause': 'movecause',
-                'Notes': 'notes',
+                'State Landslide ID': { field: 'statelsid', type: 'string' },
+                'Landslide Unit': { field: 'lsunit', type: 'string' },
+                'Movement Type': { field: 'movetype', type: 'string' },
+                'Historical': { field: 'historical', type: 'string' },
+                'Geologic Unit': { field: 'geolunit', type: 'string' },
+                'Map Scale': { field: 'mapscale', type: 'string' },
+                'Map Name': { field: 'mapname', type: 'string' },
+                'Pub Date': { field: 'pubdate', type: 'string' },
+                'Author(s)': { field: 'author_s', type: 'string' },
+                'Affiliated Unit': { field: 'affunit', type: 'string' },
+                'Movement Unit': { field: 'moveunit', type: 'string' },
+                'Movement Cause': { field: 'movecause', type: 'string' },
+                'Notes': { field: 'notes', type: 'string' },
             },
-            relatedTables: [
-                {
-                    fieldLabel: 'hazard_symbology_text',
-                    matchingField: 'Relate_ID',
-                    targetField: 'lsfhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
-                }
-            ]
         },
     ],
 }
@@ -58,23 +49,30 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Name': 's_name',
-                'Activity': 'activity',
-                'Confidence': 'confidence',
-                'Comments': 'comments',
-                'Deposit Movement 1': 'd_h_move1',
-                'Deposit Movement 2': 'd_h_move2',
-                'Deposit Movement 3': 'd_h_move3',
-                'Primary Geologic Unit Involved': 'd_geologic_unit1',
-                'Secondary Geologic Unit Involved': 'd_geologic_unit2',
+                'Name': { field: 's_name', type: 'string' },
+                'Activity': { field: 'activity', type: 'string' },
+                'Confidence': { field: 'confidence', type: 'string' },
+                'Comments': { field: 'comments', type: 'string' },
+                'Deposit Movement 1': { field: 'd_h_move1', type: 'string' },
+                'Deposit Movement 2': { field: 'd_h_move2', type: 'string' },
+                'Deposit Movement 3': { field: 'd_h_move3', type: 'string' },
+                'Primary Geologic Unit Involved': { field: 'd_geologic_unit1', type: 'string' },
+                'Secondary Geologic Unit Involved': { field: 'd_geologic_unit2', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'lsfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -94,17 +92,24 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Hazard': 'hazard_symbology_text',
-                'Mapped Scale': 'lssmappedscale',
-                'Critical Angle': 'lsscriticalangle',
+                'Hazard': { field: 'hazard_symbology_text', type: 'string' },
+                'Mapped Scale': { field: 'lssmappedscale', type: 'string' },
+                'Critical Angle': { field: 'lsscriticalangle', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'lsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -124,16 +129,23 @@ const liquefactionWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Hazard': 'hazard_symbology_text',
-                'Mapped Scale': 'lqsmappedscale',
+                'Hazard': { field: 'hazard_symbology_text', type: 'string' },
+                'Mapped Scale': { field: 'lqsmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'lqshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -154,8 +166,20 @@ const groundshakingWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Peak Ground Acceleration': 'acc',
+                // empty in favor or using the rasterSource
             },
+            rasterSource: {
+                url: `${PROD_GEOSERVER_URL}wms`,
+                headers: {
+                    "Accept": "application/json",
+                    "Cache-Control": "no-cache",
+                },
+                layerName: `${HAZARDS_WORKSPACE}:earthquake_groundshaking`,
+                valueField: "GRAY_INDEX",
+                valueLabel: "Peak Ground Acceleration",
+                transform: (value: number) => `${value} g`,
+            }
+
         },
     ],
 }
@@ -166,28 +190,27 @@ const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: qFaultsWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Fault Zone Name': 'faultzone',
-                'Summary': 'summary',
-                'Fault Name': 'faultname',
-                'Section Name': 'sectionname',
-                'Strand Name': 'strandname',
-                'Structure Number': 'faultnum',
-                'Mapped Scale': 'mappedscale',
-                'Dip Direction': 'dipdirection',
-                'Slip Sense': 'slipsense',
-                'Slip Rate': 'sliprate',
-                'Structure Class': 'faultclass',
-                'Structure Age': 'faultage',
-                'Detailed Report': 'usgs_link',
-            },
-
+                'Fault Zone Name': { field: 'faultzone', type: 'string' },
+                'Summary': { field: 'summary', type: 'string' },
+                'Fault Name': { field: 'faultname', type: 'string' },
+                'Section Name': { field: 'sectionname', type: 'string' },
+                'Strand Name': { field: 'strandname', type: 'string' },
+                'Structure Number': { field: 'faultnum', type: 'string' },
+                'Mapped Scale': { field: 'mappedscale', type: 'string' },
+                'Dip Direction': { field: 'dipdirection', type: 'string' },
+                'Slip Sense': { field: 'slipsense', type: 'string' },
+                'Slip Rate': { field: 'sliprate', type: 'string' },
+                'Structure Class': { field: 'faultclass', type: 'string' },
+                'Structure Age': { field: 'faultage', type: 'string' },
+                'Detailed Report': { field: 'usgs_link', type: 'string' },
+            }
         },
     ],
 };
@@ -206,15 +229,22 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'sfrmappedscale',
+                'Mapped Scale': { field: 'sfrmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'sfrhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -233,16 +263,21 @@ const windBlownSandWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${windBlownSandLayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {
-                'Mapped Scale': 'wssmappedscale',
-            },
+            popupFields: { 'Mapped Scale': { field: 'wssmappedscale', type: 'string' } },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'wsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -262,15 +297,22 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'sdhmappedscale',
+                'Mapped Scale': { field: 'sdhmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'sdhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -290,15 +332,22 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'sbpmappedscale',
+                'Mapped Scale': { field: 'sbpmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'sbphazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -318,15 +367,22 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'rfhmappedscale',
+                'Mapped Scale': { field: 'rfhmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'rfhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -346,15 +402,22 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'pesmappedscale',
+                'Mapped Scale': { field: 'pesmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'peshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -374,15 +437,22 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'exsmappedscale',
+                'Mapped Scale': { field: 'exsmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'exshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -401,16 +471,24 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${shallowGroundwaterLayerName}`,
             popupEnabled: false,
             queryable: true,
+            // new popup fields
             popupFields: {
-                'Mapped Scale': 'sgsmappedscale',
+                'Mapped Scale': { field: 'sgsmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'sgshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -430,15 +508,22 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'grsmappedscale',
+                'Mapped Scale': { field: 'grsmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'grshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -458,15 +543,22 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'crsmappedscale',
+                'Mapped Scale': { field: 'crsmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'crshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -486,15 +578,22 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'cssmappedscale',
+                'Mapped Scale': { field: 'cssmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'csshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -514,71 +613,57 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'slsmappedscale',
+                'Mapped Scale': { field: 'slsmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'slshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
     ],
 }
 
-const calicheLayerName = 'caliche';
-const calicheWMSTitle = 'Caliche Susceptibility';
-const calicheWMSConfig: WMSLayerProps = {
+const alluvialFanLayerName = 'alluvialfan';
+const alluvialFanWMSTitle = 'Alluvial Fan Susceptibility';
+const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
-    title: calicheWMSTitle,
+    title: alluvialFanWMSTitle,
     visible: false,
     sublayers: [
         {
-            name: `${HAZARDS_WORKSPACE}:${calicheLayerName}`,
+            name: `${HAZARDS_WORKSPACE}:${alluvialFanLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'casmappedscale',
+                'Mapped Scale': { field: 'aafmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
-                    targetField: 'cashazardunit',
+                    targetField: 'aafhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
-                }
-            ]
-        },
-    ],
-}
-
-const floodAndDebrisLayerName = 'floodanddebrisflow';
-const floodAndDebrisWMSTitle = 'Flood and Debris-Flow Hazard';
-const floodAndDebrisWMSConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: floodAndDebrisWMSTitle,
-    visible: false,
-    sublayers: [
-        {
-            name: `${HAZARDS_WORKSPACE}:${floodAndDebrisLayerName}`,
-            popupEnabled: false,
-            queryable: true,
-            popupFields: {
-                'Mapped Scale': 'flhmappedscale',
-            },
-            relatedTables: [
-                {
-                    fieldLabel: 'hazard_symbology_text',
-                    matchingField: 'Relate_ID',
-                    targetField: 'flhhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -591,22 +676,29 @@ const earthFissureWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: earthFissureWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${earthFissureLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Mapped Scale': 'efhmappedscale',
+                'Mapped Scale': { field: 'efhmappedscale', type: 'string' },
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
+                    fieldLabel: '',
                     matchingField: 'Relate_ID',
                     targetField: 'efhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
-                    acceptProfile: 'hazards'
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
                 }
             ]
         },
@@ -625,6 +717,25 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${erosionHazardZoneLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': { field: 'erzmappedscale', type: 'string' },
+            },
+            relatedTables: [
+                {
+                    fieldLabel: '',
+                    matchingField: 'Relate_ID',
+                    targetField: 'erzhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
+                }
+            ]
         },
     ],
 }
@@ -641,6 +752,25 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
             name: `${HAZARDS_WORKSPACE}:${karstFeaturesLayerName}`,
             popupEnabled: false,
             queryable: true,
+            popupFields: {
+                'Mapped Scale': { field: 'mkfmappedscale', type: 'string' },
+            },
+            relatedTables: [
+                {
+                    fieldLabel: '',
+                    matchingField: 'Relate_ID',
+                    targetField: 'mkfhazardunit',
+                    url: UNIT_DESCRIPTIONS_URL,
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'Description' }
+                    ]
+                }
+            ]
         },
     ],
 }
@@ -667,32 +797,35 @@ const studyAreasWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: studyAreasWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${studyAreasLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Name': 'name',
-                'Report ID': 'repor_id',
-                'Mapped Hazards': 'hazard_name',
+                'Name': { field: 'name', type: 'string' },
+                'Report ID': { field: 'repor_id', type: 'string' },
+                'Mapped Hazards': { field: 'hazard_name', type: 'string' },
             },
-        },
-    ],
-}
+            linkFields: {
+                'repor_id': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        const values = value.split(','); // Split the input value by a comma
+                        const transformedValues = values.map(val => {
+                            const trimmedVal = val.trim();
+                            const href = /^\d+$/.test(trimmedVal)
+                                ? `https://geodata.geology.utah.gov/pages/view.php?ref=${trimmedVal}`
+                                : `https://doi.org/10.34191/${trimmedVal}`;
+                            const label = trimmedVal;
+                            return { label, href };
+                        });
 
-const areasNotMappedLayerName = 'areasnotmapped';
-const areasNotMappedWMSTitle = 'Areas Not Mapped within Project Areas';
-const areasNotMappedWMSConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: areasNotMappedWMSTitle,
-    visible: false,
-    sublayers: [
-        {
-            name: `${HAZARDS_WORKSPACE}:${areasNotMappedLayerName}`,
-            queryable: false,
+                        return transformedValues;
+                    }
+                }
+            }
         },
     ],
 }
@@ -701,38 +834,37 @@ const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards',
     visible: false,
-    layers: [floodAndDebrisWMSConfig, shallowGroundwaterWMSConfig],
+    layers: [shallowGroundwaterWMSConfig, alluvialFanWMSConfig],
 };
 
 const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
-    visible: true,
-    layers: [groundshakingWMSConfig, liquefactionWMSConfig, surfaceFaultRuptureWMSConfig, qFaultsWMSConfig],
+    visible: false,
+    layers: [qFaultsWMSConfig, surfaceFaultRuptureWMSConfig, liquefactionWMSConfig, groundshakingWMSConfig],
 };
 
 const landslidesConfig: LayerProps = {
     type: 'group',
     title: 'Landslide Hazards',
-    visible: true,
-    layers: [landslideLegacyWMSConfig, landslideSusceptibilityWMSConfig, landslideInventoryWMSConfig, rockfallHazardWMSConfig],
+    visible: false,
+    layers: [rockfallHazardWMSConfig, landslideInventoryWMSConfig, landslideSusceptibilityWMSConfig, landslideLegacyWMSConfig],
 };
 
 const soilHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Problem Soil and Rock Hazards',
-    visible: true,
-    layers: [windBlownSandWMSConfig, solubleSoilAndRockWMSConfig, shallowBedrockWMSConfig, saltTectonicsDeformationWMSConfig, radonSusceptibilityWMSConfig, pipingAndErosionWMSConfig, karstFeaturesWMSConfig, erosionHazardZoneWMSConfig, expansiveSoilRockWMSConfig, earthFissureWMSConfig, corrosiveSoilRockWMSConfig, collapsibleSoilWMSConfig, calicheWMSConfig],
+    visible: false,
+    layers: [collapsibleSoilWMSConfig, corrosiveSoilRockWMSConfig, earthFissureWMSConfig, expansiveSoilRockWMSConfig, erosionHazardZoneWMSConfig, karstFeaturesWMSConfig, pipingAndErosionWMSConfig, radonSusceptibilityWMSConfig, saltTectonicsDeformationWMSConfig, shallowBedrockWMSConfig, solubleSoilAndRockWMSConfig, windBlownSandWMSConfig],
 };
 
 const layersConfig: LayerProps[] = [
-    quads24kWMSConfig,
-    areasNotMappedWMSConfig,
-    studyAreasWMSConfig,
-    soilHazardsConfig,
-    landslidesConfig,
-    floodHazardsConfig,
     earthquakesConfig,
+    floodHazardsConfig,
+    landslidesConfig,
+    soilHazardsConfig,
+    studyAreasWMSConfig,
+    quads24kWMSConfig,
 ];
 
 export default layersConfig;

@@ -1,4 +1,4 @@
-import { FileText, House, Info as InfoIcon, Layers as LayersIcon, Route, Settings } from 'lucide-react'
+import { ExternalLink, FileText, House, Info as InfoIcon, Layers as LayersIcon, Settings } from 'lucide-react'
 import Info from '@/components/sidebar/info'
 import Layers from '@/components/sidebar/layers'
 import MapConfigurations from '@/components/sidebar/map-configurations'
@@ -50,7 +50,7 @@ export const sidelinks: SideLink[] = [
   // },
   {
     title: 'Report Generator',
-    label: 'new!',
+    label: '',
     icon: <FileText className='stroke-foreground' />,
     component: ReportGenerator,
 
@@ -58,9 +58,9 @@ export const sidelinks: SideLink[] = [
   },
   {
     title: 'Utah Geology Homepage',
-    label: 'we can route outside the app by providing an href attribute',
+    label: '',
     href: 'https://geology.utah.gov/',
-    icon: <Route className='stroke-foreground' />,
+    icon: <ExternalLink className='stroke-foreground' />,
     // This link is external and does not need a component
   }
 ];

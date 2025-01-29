@@ -7,8 +7,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/custom/button';
-import { IconMenu } from '@tabler/icons-react';
 import { MapContext } from '@/context/map-provider';
+import { BasemapIcon } from '@/assets/basemap-icons';
 
 type BasemapType = {
   title: string;
@@ -17,14 +17,23 @@ type BasemapType = {
   type: 'short' | 'long';
 };
 
-const basemapList: BasemapType[] = [
-  { title: 'Streets', basemapStyle: 'streets', isActive: true, type: 'short' },
-  { title: 'Topographic', basemapStyle: 'topo', isActive: false, type: 'short' },
+export const basemapList: BasemapType[] = [
+  { title: 'Topographic', basemapStyle: 'topo', isActive: true, type: 'short' },
+  { title: 'Streets', basemapStyle: 'streets', isActive: false, type: 'short' },
   { title: 'Satellite', basemapStyle: 'satellite', isActive: false, type: 'short' },
   { title: 'Hybrid', basemapStyle: 'hybrid', isActive: false, type: 'short' },
   { title: 'Streets Relief', basemapStyle: 'streets-relief-vector', isActive: false, type: 'long' },
   { title: 'Terrain', basemapStyle: 'terrain', isActive: false, type: 'long' },
 ];
+
+function validateBasemapList(list: BasemapType[]): list is BasemapType[] {
+  const activeCount = list.filter(item => item.isActive).length;
+  return activeCount === 1;
+}
+
+if (!validateBasemapList(basemapList)) {
+  throw new Error('isActive determines the inial basemap. Only one initial basemap can be defined.');
+}
 
 interface TopNavProps extends React.HTMLAttributes<HTMLElement> { }
 
@@ -77,7 +86,7 @@ function TopNav({ className, ...props }: TopNavProps) {
 
   const mobileTrigger = (
     <Button size="icon" variant="outline">
-      <IconMenu />
+       <BasemapIcon />
     </Button>
   );
   const desktopTrigger = (

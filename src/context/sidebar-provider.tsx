@@ -1,5 +1,7 @@
+import Info from '@/components/sidebar/info';
 import useLocalStorage from '@/hooks/use-local-storage';
 import { SideLink } from '@/lib/types/sidelink-types';
+import { InfoIcon } from 'lucide-react';
 import React, { createContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 
 interface SidebarContextContextProps {
@@ -21,7 +23,14 @@ export const SidebarContext = createContext<SidebarContextContextProps>({
 });
 
 export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [currentContent, setCurrentContent] = useState<SideLink | null>(null);
+
+    const [currentContent, setCurrentContent] = useState<SideLink | null>({
+        title: 'Info',
+        label: '',
+        icon: <InfoIcon className='stroke-foreground' />,
+        component: Info,
+        componentPath: 'src/components/sidebar/info.tsx',
+    });
     const [isCollapsed, setIsCollapsed] = useLocalStorage({
         key: 'collapsed-sidebar',
         defaultValue: false,

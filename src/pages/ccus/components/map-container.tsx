@@ -7,13 +7,13 @@ import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapUrlParams } from "@/hooks/use-map-url-params";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { Feature } from "geojson";
-import { RelatedTable } from "@/lib/types/mapping-types";
-import { fetchGetFeatureInfo } from "@/lib/mapping-utils";
+import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
+import { fetchWMSFeatureInfo, highlightFeature } from "@/lib/mapping-utils";
 import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 
 export default function ArcGISMap() {
     const mapRef = useRef<HTMLDivElement>(null);
-    const { loadMap, view } = useContext(MapContext);
+    const { loadMap, view, isSketching } = useContext(MapContext);
     const { coordinates, setCoordinates } = useMapCoordinates();
     const { handleOnContextMenu, getVisibleLayers } = useMapInteractions();
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null);
@@ -36,7 +36,7 @@ export default function ArcGISMap() {
     }
 
     const updatePopupContent = useCallback(
-        (newContent: { features: Feature[]; visible: boolean; layerTitle: string, groupLayerTitle: string, popupFields?: Record<string, string>; relatedTables?: RelatedTable[] }[]) => {
+        (newContent: { features: Feature[]; visible: boolean; layerTitle: string, groupLayerTitle: string, popupFields?: Record<string, FieldConfig>; relatedTables?: RelatedTable[] }[]) => {
             setPopupContent((prevContent) => {
                 // Only update if new content is different to avoid unnecessary rerenders
                 if (JSON.stringify(prevContent) !== JSON.stringify(newContent)) {
@@ -74,7 +74,9 @@ export default function ArcGISMap() {
 
     const handleMapClick = async ({ e, view, drawerTriggerRef }: HandleMapClickProps) => {
 
-        if (!view || isDragging) return; // Skip click if dragging or no view
+        if (!view || isDragging || isSketching) return; // Skip click if dragging, sketching or no view
+
+        view?.graphics.removeAll(); // Clear any existing graphics
 
         if (e.button === 0) {
             const layers = getVisibleLayers({ view });
@@ -87,40 +89,51 @@ export default function ArcGISMap() {
                 .filter(([_, layerInfo]) => layerInfo.visible && layerInfo.queryable)
                 .map(([key]) => key);
 
-            const featureInfo = await fetchGetFeatureInfo({
+            const featureInfo = await fetchWMSFeatureInfo({
                 mapPoint,
                 view,
-                visibleLayers: keys,
+                layers: keys,
+                url: 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms'
             });
 
             // Update popup content with the new feature info
             if (featureInfo) {
-                const layerInfo = Object.entries(visibleLayersMap).map(
-                    ([key, value]): {
-                        groupLayerTitle: string;
-                        layerTitle: string;
-                        visible: boolean;
-                        features: Feature[];
-                        popupFields?: Record<string, string>;
-                        relatedTables?: RelatedTable[];
-                    } => ({
-                        visible: value.visible,
-                        layerTitle: value.layerTitle,
-                        groupLayerTitle: value.groupLayerTitle,
-                        features: featureInfo.features.filter((feature: Feature) =>
-                            feature.id?.toString().includes(key.split(':')[0]) ||
-                            feature.id?.toString().split('.')[0].includes(key.split(':')[1])
-                        ),
-                        ...(value.popupFields && { popupFields: value.popupFields }),
-                        ...(value.relatedTables && value.relatedTables.length > 0 && {
-                            relatedTables: value.relatedTables.map(table => ({
-                                ...table,
-                                matchingField: table.matchingField || "",  // Default value if missing
-                                fieldLabel: table.fieldLabel || ""         // Default value if missing
-                            }))
-                        }),
+                const layerInfo = await Promise.all(
+                    Object.entries(visibleLayersMap).map(async ([key, value]): Promise<any> => {
+                        const baseLayerInfo: any = {
+                            visible: value.visible,
+                            layerTitle: value.layerTitle,
+                            groupLayerTitle: value.groupLayerTitle,
+                            features: featureInfo.features.filter((feature: Feature) =>
+                                feature.id?.toString().includes(key.split(':')[0]) ||
+                                feature.id?.toString().split('.')[0].includes(key.split(':')[1])
+                            ),
+                            ...(value.popupFields && { popupFields: value.popupFields }),
+                            ...(value.linkFields && { linkFields: value.linkFields }),
+                            ...(value.colorCodingMap && { colorCodingMap: value.colorCodingMap }),
+                            ...(value.relatedTables && value.relatedTables.length > 0 && {
+                                relatedTables: value.relatedTables.map(table => ({
+                                    ...table,
+                                    matchingField: table.matchingField || "",  // Default value if missing
+                                    fieldLabel: table.fieldLabel || ""         // Default value if missing
+                                }))
+                            }),
+                        };
+                        if (value.rasterSource) {
+                            // Await the rasterSource promise
+                            baseLayerInfo.rasterSource = await fetchWMSFeatureInfo({
+                                mapPoint,
+                                view,
+                                layers: new Array(value.rasterSource.layerName),
+                                url: value.rasterSource.url,
+                            });
+                        }
+
+                        return baseLayerInfo;
                     })
                 );
+
+                highlightFeature(featureInfo.features[0], view);
 
                 const layerInfoFiltered = layerInfo.filter(layer => layer.features.length > 0);
                 const drawerState = drawerTriggerRef.current?.getAttribute('data-state');

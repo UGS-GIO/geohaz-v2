@@ -5,15 +5,17 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Layer from "@arcgis/core/layers/Layer";
 import { Button } from '@/components/custom/button';
 import { BackToMenuButton } from "@/components/custom/back-to-menu-button";
+import { useSidebar } from "@/hooks/use-sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 function addGraphic(
   event: __esri.SketchViewModelCreateEvent,
-  // sketchVM: __esri.SketchViewModel | undefined,
   tempGraphicsLayer: __esri.GraphicsLayer | undefined,
-  setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>
+  setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>,
+  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) {
   if (event.state === "complete" && event.graphic) {
-    console.log("addGraphic: Drawing complete");
     tempGraphicsLayer?.remove(event.graphic);
     const drawAOIHeight = event.graphic.geometry.extent.height;
     const drawAOIWidth = event.graphic.geometry.extent.width;
@@ -29,22 +31,24 @@ function addGraphic(
       window.open("./report");
       setActiveButton(undefined);
     } else {
-      console.log("Area of interest is too large, try again");
-      alert("Area of interest is too large, try a smaller area.");
+      setModalOpen(true);
       setActiveButton(undefined);
     }
   } else if (event.state === "start" && event.graphic) {
-    console.log("addGraphic: Drawing started");
+    // console.log("addGraphic: Drawing started");
   }
 }
 
 type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
 
-function GeologicalUnitSearch() {
-  const { view } = useContext(MapContext);
+function ReportGenerator() {
+  const { view, setIsSketching } = useContext(MapContext);
   const [activeButton, setActiveButton] = useState<ActiveButtonOptions>();
   const tempGraphicsLayer = useRef<__esri.GraphicsLayer | undefined>(undefined);
   const sketchVM = useRef<__esri.SketchViewModel | undefined>(undefined);
+  const { setNavOpened } = useSidebar();
+  const isMobile = useIsMobile();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleActiveButton = (buttonName: ActiveButtonOptions) => {
     setActiveButton(buttonName);
@@ -69,6 +73,7 @@ function GeologicalUnitSearch() {
   }, []);
 
   const handleCurrentMapExtentButton = () => {
+    handleResetButton()
     handleActiveButton('currentMapExtent');
 
     const extent = view?.extent;
@@ -105,14 +110,15 @@ function GeologicalUnitSearch() {
       localStorage.setItem('aoi', JSON.stringify(params));
       window.open('./report');
     } else {
-      console.log("Area of interest is too large, try again");
-      alert("Area of interest is too large, try a smaller extent.");
-      setActiveButton(undefined);
+      setModalOpen(true);
+      handleResetButton();
     }
   };
 
   const handleCustomAreaButton = () => {
+    handleResetButton()
     handleActiveButton('customArea');
+    if (isMobile) setNavOpened(false); // Close the sidebar on mobile so user can see the map
 
     sketchVM.current = new SketchViewModel({
       view: view,
@@ -129,7 +135,49 @@ function GeologicalUnitSearch() {
       }
     });
 
-    sketchVM.current.on('create', (event) => addGraphic(event, tempGraphicsLayer.current, setActiveButton));
+    sketchVM.current.on('create', (event) => {
+      if (event.state === "start") {
+        setIsSketching?.(true);
+      }
+
+      if (event.state === "active") {
+        addGraphic(event, tempGraphicsLayer.current, setActiveButton, setModalOpen);
+      }
+
+      if (event.state === "complete") {
+        setIsSketching?.(true); // Ensure it remains true immediately after completion
+
+        const extent = event.graphic.geometry.extent;
+        const areaHeight = extent?.height;
+        const areaWidth = extent?.width;
+        const geometry = event.graphic.geometry as __esri.Polygon;
+
+        if (areaHeight && areaWidth && areaHeight < 12000 && areaWidth < 18000) {
+
+          const aoi = {
+            spatialReference: {
+              latestWkid: 3857,
+              wkid: 102100
+            },
+            rings: geometry.rings
+          };
+
+          const params = {
+            description: "Test",
+            polygon: aoi,
+          };
+
+          localStorage.setItem('aoi', JSON.stringify(params));
+          window.open('./report');
+        } else {
+          console.log("Area of interest is too large, try again");
+          setModalOpen(true);
+        }
+
+      }
+
+      return;
+    });
 
     sketchVM.current.create("polygon", {
       mode: "click"
@@ -137,18 +185,30 @@ function GeologicalUnitSearch() {
   };
 
   const handleResetButton = () => {
-    console.log('Reset Button Clicked');
     sketchVM.current?.cancel();
     if (tempGraphicsLayer.current) {
       tempGraphicsLayer.current?.removeAll();
     }
     setActiveButton(undefined);
+    requestAnimationFrame(() => {
+      setIsSketching?.(false);
+    })
+    if (modalOpen) setModalOpen(false);
   };
 
   const buttonText = (buttonName: ActiveButtonOptions, defaultText: string) => {
     return (
       activeButton === buttonName ? `✓ ${defaultText}` : defaultText
     );
+  }
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
+  const handleResetDrawing = () => {
+    setIsSketching?.(true);
+    handleCustomAreaButton();
   }
 
   return (
@@ -161,25 +221,47 @@ function GeologicalUnitSearch() {
             The Report Generator is designed to provide a summary of information for small areas. If your area of interest is larger than that, you will see a notification prompting you to select a smaller area.
           </p>
         </div>
-
-        <div className="flex flex-wrap justify-start items-center space-y-2 sm:space-y-0 sm:space-x-12 sm:justify-start">
-          <div className="flex space-x-2">
-            <Button onClick={handleCurrentMapExtentButton} variant="default" className="mb-2 md:mb-0">
+        <div className="space-y-2">
+          <div className="flex flex-wrap justify-start items-center md:space-x-4">
+            <Button onClick={handleCurrentMapExtentButton} variant="default" className="w-full md:w-auto flex-grow mb-2 md:mb-0">
               {buttonText('currentMapExtent', 'Current Map Extent')}
             </Button>
-          </div>
-          <div className="flex-none space-x-2">
-            <Button onClick={handleCustomAreaButton} variant="default">
+            <Button onClick={handleCustomAreaButton} variant="default" className="w-full md:w-auto flex-grow mb-2 md:mb-0">
               {buttonText('customArea', 'Draw Custom Area')}
             </Button>
-            <Button onClick={handleResetButton} variant="secondary">
+          </div>
+          <div className="flex w-full">
+            <Button onClick={handleResetButton} variant="secondary" className="w-full flex-grow mb-2 md:mb-0">
               {buttonText('reset', 'Reset')}
             </Button>
           </div>
         </div>
       </div>
+      <Dialog open={modalOpen} onOpenChange={handleCloseModal}>
+        <DialogTrigger asChild>
+          <div className="hidden"></div>
+        </DialogTrigger>
+        <DialogContent className="w-4/5">
+          <DialogHeader>
+            <DialogTitle>Area too large</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            The map area is too large. Please draw a smaller custom area or zoom in.
+            <div className="flex flex-row space-x-2 mt-4 justify-end">
+              <Button onClick={handleResetDrawing} variant="default" >
+                Create a new area
+              </Button>
+              <Button onClick={handleResetButton} variant="secondary" >
+                Close
+              </Button>
+            </div>
+          </DialogDescription>
+          <DialogClose />
+
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-export default GeologicalUnitSearch;
+export default ReportGenerator;
