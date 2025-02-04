@@ -93,7 +93,7 @@ const references = (
                 Hiscock, A.I., Kleber, E.J., Jänecke, S.U., McDonald, G.N., Oaks, R.Q., Jr., and Rittenour, T., 2024, Fault trace mapping and surface-fault-rupture special study zone delineation of the East and West Cache fault zones and other regional faults, Utah: Utah Geological Report of Investigation 286, 27 p., 1 appendix,&nbsp;
                 <Link to="https://doi.org/10.34191/RI-286">
                     RI-286
-                </Link>
+                </Link>.
             </li>
         </ul>
     </div>
