@@ -160,6 +160,7 @@ const groundshakingWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: groundshakingWMSTitle,
     visible: false,
+    opacity: 0.5,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${groundshakingLayerName}`,
