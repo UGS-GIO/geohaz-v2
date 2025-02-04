@@ -28,12 +28,6 @@ import { getHazardCodeFromUnitCode } from '../util/util';
 //     });
 // }
 
-
-export interface AreaOfInterest {
-    rings: number[][][];
-    spatialReference: SpatialReference;
-}
-
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const fetchWithRetry = async <T>(url: string, outputFormatter: (response: JsonResponse) => T): Promise<T> => {
@@ -90,7 +84,7 @@ const retryPolicy = <T>(url: string, outputFormatter: (response: JsonResponse) =
     return fetchWithRetry(url, outputFormatter);
 }
 
-export const queryUnitsAsync = async (meta: string[], aoi: AreaOfInterest) => {
+export const queryUnitsAsync = async (meta: string[], aoi: string) => {
 
     let [url] = meta
     const [, hazard] = meta;
@@ -103,7 +97,7 @@ export const queryUnitsAsync = async (meta: string[], aoi: AreaOfInterest) => {
 
     const parameters = {
         geometryType: 'esriGeometryPolygon',
-        geometry: JSON.stringify(aoi),
+        geometry: aoi,
         returnGeometry: false,
         outFields: hazardField,
         f: 'json'

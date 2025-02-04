@@ -8,32 +8,10 @@ import { BackToMenuButton } from "@/components/custom/back-to-menu-button";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useNavigate } from '@tanstack/react-router';
+import Polygon from "@arcgis/core/geometry/Polygon";
 
-function addGraphic(
-  event: __esri.SketchViewModelCreateEvent,
-  tempGraphicsLayer: __esri.GraphicsLayer | undefined,
-  setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>,
-  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>
-) {
-  if (event.state === "complete" && event.graphic) {
-    tempGraphicsLayer?.remove(event.graphic);
-    const drawAOIHeight = event.graphic.geometry.extent.height;
-    const drawAOIWidth = event.graphic.geometry.extent.width;
-    const aoi = event.graphic.geometry.toJSON();
 
-    if (drawAOIHeight < 12000 && drawAOIWidth < 18000) {
-
-      localStorage.setItem("aoi", JSON.stringify(aoi));
-      window.open("./hazards/report");
-      setActiveButton(undefined);
-    } else {
-      setModalOpen(true);
-      setActiveButton(undefined);
-    }
-  } else if (event.state === "start" && event.graphic) {
-    // console.log("addGraphic: Drawing started");
-  }
-}
 
 type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
 
@@ -45,6 +23,38 @@ function ReportGenerator() {
   const { setNavOpened } = useSidebar();
   const isMobile = useIsMobile();
   const [modalOpen, setModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleNavigate = (aoi: __esri.Geometry) => {
+    const aoiString = JSON.stringify(aoi);
+    // Navigate to the report page with the aoi parameter
+    navigate({ to: '/hazards/report/' + aoiString, params: { aoi: aoiString } });
+  };
+
+  function addGraphic(
+    event: __esri.SketchViewModelCreateEvent,
+    tempGraphicsLayer: __esri.GraphicsLayer | undefined,
+    setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>,
+    setModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  ) {
+    if (event.state === "complete" && event.graphic) {
+      tempGraphicsLayer?.remove(event.graphic);
+      const drawAOIHeight = event.graphic.geometry.extent.height;
+      const drawAOIWidth = event.graphic.geometry.extent.width;
+      const aoi = event.graphic.geometry;
+
+      if (drawAOIHeight < 12000 && drawAOIWidth < 18000) {
+
+        handleNavigate(aoi);
+        setActiveButton(undefined);
+      } else {
+        setModalOpen(true);
+        setActiveButton(undefined);
+      }
+    } else if (event.state === "start" && event.graphic) {
+      // console.log("addGraphic: Drawing started");
+    }
+  }
 
   const handleActiveButton = (buttonName: ActiveButtonOptions) => {
     setActiveButton(buttonName);
@@ -90,16 +100,13 @@ function ReportGenerator() {
         [xMaxi, yMaxi]
       ];
 
-      const aoi = {
+      const aoi = new Polygon({
         spatialReference: {
-          latestWkid: 3857,
           wkid: 102100
         },
         rings: [newRings]
-      };
-
-      localStorage.setItem('aoi', JSON.stringify(aoi));
-      window.open('./hazards/report');
+      });
+      handleNavigate(aoi);
     } else {
       setModalOpen(true);
       handleResetButton();
@@ -145,16 +152,13 @@ function ReportGenerator() {
 
         if (areaHeight && areaWidth && areaHeight < 12000 && areaWidth < 18000) {
 
-          const aoi = {
+          const aoi = new Polygon({
             spatialReference: {
-              latestWkid: 3857,
               wkid: 102100
             },
             rings: geometry.rings
-          };
-
-          localStorage.setItem('aoi', JSON.stringify(aoi));
-          window.open('./hazards/report');
+          });
+          handleNavigate(aoi);
         } else {
           console.log("Area of interest is too large, try again");
           setModalOpen(true);

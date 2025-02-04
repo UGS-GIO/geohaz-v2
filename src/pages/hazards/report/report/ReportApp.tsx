@@ -31,13 +31,13 @@ import ProgressBar from './reportParts/ProgressBar';
 // import AerialFeature from './reportParts/AerialFeature';
 import ErrorPage from './reportParts/ErrorPage';
 import { ProgressContext } from './contexts/ProgressContext';
-import { HazardText, HazardUnitProps, Polygon } from './types/types';
+import { HazardText, HazardUnitProps } from './types/types';
 
 
 // export const ProgressContext = createContext();
 // console.log(`using web map: ${config.webMaps.hazard}`);
 
-function ReportApp(polygon: Polygon) {
+function ReportApp({ polygon }: { polygon: string }) {
   const [groupToHazardMap, setGroupToHazardMap] = useState<{ [key: string]: string[] }>({});
   const [hazardToUnitMap, setHazardToUnitMap] = useState<Record<string, HazardUnitProps[]>>({});
   const [hazardIntroText, setHazardIntroText] = useState<HazardText[]>([])
