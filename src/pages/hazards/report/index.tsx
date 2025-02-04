@@ -1,21 +1,21 @@
 import { Suspense, useEffect, useState } from 'react'
-import ReportApp from '@/pages/report/report/ReportApp'
-import { Aoi } from '@/pages/report/report/types/types';
+import ReportApp from '@/pages/hazards/report/report/ReportApp'
 import { useTheme } from '@/context/theme-provider';
+import { Route } from '@/routes/hazards/report/$aoi.lazy';
 
 export default function Report() {
 
-    const [aoi, setAoi] = useState<Aoi | null>(null);
+    const { aoi } = Route.useParams();
+    const [aoiState, setAoiState] = useState<{ rings: number[][][]; spatialReference: { wkid: number; }; } | null>(null);  // Initially null
     const { setOverrideTheme } = useTheme()
 
     useEffect(() => {
-        const aoiData = localStorage.getItem('aoi');
-        if (!aoiData) {
-            import('@/pages/report/report/testData.json').then((data) => {
-                setAoi(data.default);
+        if (!aoiState) {
+            import('@/pages/hazards/report/report/testData.json').then((data) => {
+                setAoiState(data.default);
             });
         } else {
-            setAoi(JSON.parse(aoiData));
+            setAoiState(aoi as unknown as { rings: number[][][]; spatialReference: { wkid: number; }; });
         }
     }, []);
 
@@ -49,7 +49,7 @@ export default function Report() {
 
     return (
         <Suspense fallback={<div>Loading Report...</div>}>
-            <ReportApp {...aoi} />
+            <ReportApp polygon={aoi} />
         </Suspense>
     )
 

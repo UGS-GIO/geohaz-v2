@@ -9,7 +9,6 @@ import Graphic from "@arcgis/core/Graphic.js";
 import ScaleBar from "@arcgis/core/widgets/ScaleBar.js";
 // import getModules from '../esriModules';
 import './HazardMap.scss';
-import { Polygon as PolygonType } from '../types/types';
 import { ProgressContext } from '../contexts/ProgressContext';
 import { HazardMapContext } from '../contexts/HazardMapContext';
 
@@ -18,7 +17,7 @@ interface VisualAssets {
 }
 
 interface HazardMapProps {
-  aoi: PolygonType;
+  aoi: string;
   queriesWithResults: string[][];
   children?: ReactNode;
 }
@@ -39,7 +38,7 @@ let view: MapView;
 let scaleBar: any;
 
 const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) => {
-  // // console.log('HazardMap.render', { aoi, queriesWithResults });
+  // console.log('HazardMap.render', { aoi, queriesWithResults });
   const [visualAssets, setVisualAssets] = useState<Partial<VisualAssets>>({});
   const [mapLoading, setMapLoading] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -62,7 +61,9 @@ const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) =>
       width: 4
     };
 
-    const polygon = new Polygon(aoi);
+    const parsedAoi = JSON.parse(aoi);
+    const polygon = new Polygon(parsedAoi);
+
     const polylineGraphic = new Graphic({
       geometry: polygon,
       symbol: polylineSymbol

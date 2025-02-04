@@ -31,13 +31,13 @@ import ProgressBar from './reportParts/ProgressBar';
 // import AerialFeature from './reportParts/AerialFeature';
 import ErrorPage from './reportParts/ErrorPage';
 import { ProgressContext } from './contexts/ProgressContext';
-import { Aoi, HazardText, HazardUnitProps } from './types/types';
+import { HazardText, HazardUnitProps } from './types/types';
 
 
 // export const ProgressContext = createContext();
 // console.log(`using web map: ${config.webMaps.hazard}`);
 
-function ReportApp(props: Aoi) {
+function ReportApp({ polygon }: { polygon: string }) {
   const [groupToHazardMap, setGroupToHazardMap] = useState<{ [key: string]: string[] }>({});
   const [hazardToUnitMap, setHazardToUnitMap] = useState<Record<string, HazardUnitProps[]>>({});
   const [hazardIntroText, setHazardIntroText] = useState<HazardText[]>([])
@@ -98,7 +98,7 @@ function ReportApp(props: Aoi) {
 
         registerProgressItem(joinedFeatureClass);
 
-        return queryUnitsAsync(featureClassMap, props.polygon).then(data => {
+        return queryUnitsAsync(featureClassMap, polygon).then(data => {
           setProgressItemAsComplete(joinedFeatureClass);
 
           return data;
@@ -203,13 +203,13 @@ function ReportApp(props: Aoi) {
       // setAerialFeatures(aerialFeatures);
     };
 
-    if (props.polygon) {
+    if (polygon) {
       getData().then(null, (error) => {
         console.warn(error);
         setError(error);
       });
     }
-  }, [props.polygon, registerProgressItem, setProgressItemAsComplete]);
+  }, [polygon, registerProgressItem, setProgressItemAsComplete]);
 
   return (!pageError ? (
     <div className='m-4 overflow-y-auto'>
@@ -221,7 +221,7 @@ function ReportApp(props: Aoi) {
           </div>
         </ProgressBar>
         <div className="app__container">
-          <HazardMap aoi={props.polygon} queriesWithResults={queriesWithResults}>
+          <HazardMap aoi={polygon} queriesWithResults={queriesWithResults}>
             {/* <CoverPage aoiDescription={props.description} {...reportTextMap} /> */}
             <CoverPage {...reportTextMap} />
             <SummaryPage {...reportTextMap}
