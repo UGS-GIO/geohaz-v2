@@ -190,7 +190,7 @@ const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: qFaultsWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
@@ -840,7 +840,7 @@ const floodHazardsConfig: LayerProps = {
 const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
-    visible: false,
+    visible: true,
     layers: [qFaultsWMSConfig, surfaceFaultRuptureWMSConfig, liquefactionWMSConfig, groundshakingWMSConfig],
 };
 
