@@ -1,11 +1,11 @@
 import { Suspense, useEffect, useState } from 'react'
 import ReportApp from '@/pages/hazards/report/report/ReportApp'
-import { Aoi } from '@/pages/hazards/report/report/types/types';
+import { Polygon } from '@/pages/hazards/report/report/types/types';
 import { useTheme } from '@/context/theme-provider';
 
 export default function Report() {
 
-    const [aoi, setAoi] = useState<Aoi | null>(null);
+    const [aoi, setAoi] = useState<Polygon | null>(null);
     const { setOverrideTheme } = useTheme()
 
     useEffect(() => {

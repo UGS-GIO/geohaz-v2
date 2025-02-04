@@ -22,12 +22,8 @@ function addGraphic(
     const aoi = event.graphic.geometry.toJSON();
 
     if (drawAOIHeight < 12000 && drawAOIWidth < 18000) {
-      const params = {
-        description: "Test",
-        polygon: aoi,
-      };
 
-      localStorage.setItem("aoi", JSON.stringify(params));
+      localStorage.setItem("aoi", JSON.stringify(aoi));
       window.open("./hazards/report");
       setActiveButton(undefined);
     } else {
@@ -102,12 +98,7 @@ function ReportGenerator() {
         rings: [newRings]
       };
 
-      const params = {
-        description: "Test",
-        polygon: aoi,
-      };
-
-      localStorage.setItem('aoi', JSON.stringify(params));
+      localStorage.setItem('aoi', JSON.stringify(aoi));
       window.open('./hazards/report');
     } else {
       setModalOpen(true);
@@ -162,12 +153,7 @@ function ReportGenerator() {
             rings: geometry.rings
           };
 
-          const params = {
-            description: "Test",
-            polygon: aoi,
-          };
-
-          localStorage.setItem('aoi', JSON.stringify(params));
+          localStorage.setItem('aoi', JSON.stringify(aoi));
           window.open('./hazards/report');
         } else {
           console.log("Area of interest is too large, try again");
