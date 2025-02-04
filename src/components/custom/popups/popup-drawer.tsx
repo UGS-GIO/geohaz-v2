@@ -89,7 +89,7 @@ function PopupDrawer({
 
             <DrawerContent className="z-60 max-h-[50vh] md:max-h-[85vh] overflow-hidden md:absolute md:right-4 md:max-w-[30vw] md:mb-10 left-auto w-full">
                 <DrawerHeader className="flex justify-between items-center py-2 md:py-4 relative">
-                    <DrawerTitle className="flex-1 pr-10">{popupTitle + 'testing an artifically long title'}</DrawerTitle>
+                    <DrawerTitle className="flex-1 pr-10">{popupTitle}</DrawerTitle>
                     {!isMobile && (
                         <DrawerClose asChild>
                             <Button variant="outline" className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center">
