@@ -28,7 +28,7 @@ function addGraphic(
       };
 
       localStorage.setItem("aoi", JSON.stringify(params));
-      window.open("./report");
+      window.open("./hazards/report");
       setActiveButton(undefined);
     } else {
       setModalOpen(true);
@@ -108,7 +108,7 @@ function ReportGenerator() {
       };
 
       localStorage.setItem('aoi', JSON.stringify(params));
-      window.open('./report');
+      window.open('./hazards/report');
     } else {
       setModalOpen(true);
       handleResetButton();
@@ -168,7 +168,7 @@ function ReportGenerator() {
           };
 
           localStorage.setItem('aoi', JSON.stringify(params));
-          window.open('./report');
+          window.open('./hazards/report');
         } else {
           console.log("Area of interest is too large, try again");
           setModalOpen(true);

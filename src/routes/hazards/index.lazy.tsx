@@ -1,6 +1,6 @@
 import Map from '@/pages/hazards'
 import { createLazyFileRoute } from '@tanstack/react-router'
 
-export const Route = createLazyFileRoute('/hazards')({
+export const Route = createLazyFileRoute('/hazards/')({
   component: () => <Map />,
 })
