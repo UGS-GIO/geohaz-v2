@@ -636,7 +636,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
 }
 
 const alluvialFanLayerName = 'alluvialfan';
-const alluvialFanWMSTitle = 'Alluvial Fan Susceptibility';
+const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility';
 const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
