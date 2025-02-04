@@ -321,6 +321,7 @@ export function NavLinkIcon({
 
   return link.href ? (
     <Link
+      target='_blank'
       to={link.href}
       className={cn(
         buttonVariants({
