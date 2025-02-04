@@ -26,6 +26,7 @@ function ReportGenerator() {
   const handleNavigate = (aoi: __esri.Geometry) => {
     const aoiString = JSON.stringify(aoi);
     // Navigate to the report page with the aoi parameter
+    handleReset();
     window.open('/hazards/report/' + aoiString, '_blank');
   };
 
@@ -77,7 +78,7 @@ function ReportGenerator() {
   }, []);
 
   const handleCurrentMapExtentButton = () => {
-    handleResetButton()
+    handleReset()
     handleActiveButton('currentMapExtent');
 
     const extent = view?.extent;
@@ -107,12 +108,12 @@ function ReportGenerator() {
       handleNavigate(aoi);
     } else {
       setModalOpen(true);
-      handleResetButton();
+      handleReset();
     }
   };
 
   const handleCustomAreaButton = () => {
-    handleResetButton()
+    handleReset()
     handleActiveButton('customArea');
     if (isMobile) setNavOpened(false); // Close the sidebar on mobile so user can see the map
 
@@ -133,6 +134,18 @@ function ReportGenerator() {
 
     sketchVM.current.on('create', (event) => {
       if (event.state === "start") {
+        if (isMobile) {
+          const completeButton = document.createElement("button");
+          // onclick to complete the sketch
+          completeButton.onclick = () => {
+            sketchVM.current?.complete();
+          };
+          completeButton.innerHTML = "Complete";
+          completeButton.id = "complete-button";
+          completeButton.classList.add("esri-widget-button", "esri-widget", "esri-interactive", "p-2", "bg-background");
+
+          view?.ui.add(completeButton, "top-right");
+        }
         setIsSketching?.(true);
       }
 
@@ -142,6 +155,7 @@ function ReportGenerator() {
 
       if (event.state === "complete") {
         setIsSketching?.(true); // Ensure it remains true immediately after completion
+        view?.ui.remove(view?.ui.find("complete-button"));
 
         const extent = event.graphic.geometry.extent;
         const areaHeight = extent?.height;
@@ -172,7 +186,7 @@ function ReportGenerator() {
     });
   };
 
-  const handleResetButton = () => {
+  const handleReset = () => {
     sketchVM.current?.cancel();
     if (tempGraphicsLayer.current) {
       tempGraphicsLayer.current?.removeAll();
@@ -219,7 +233,7 @@ function ReportGenerator() {
             </Button>
           </div>
           <div className="flex w-full">
-            <Button onClick={handleResetButton} variant="secondary" className="w-full flex-grow mb-2 md:mb-0">
+            <Button onClick={handleReset} variant="secondary" className="w-full flex-grow mb-2 md:mb-0">
               {buttonText('reset', 'Reset')}
             </Button>
           </div>
@@ -239,7 +253,7 @@ function ReportGenerator() {
               <Button onClick={handleResetDrawing} variant="default" >
                 Create a new area
               </Button>
-              <Button onClick={handleResetButton} variant="secondary" >
+              <Button onClick={handleReset} variant="secondary" >
                 Close
               </Button>
             </div>
