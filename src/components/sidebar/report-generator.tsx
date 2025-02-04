@@ -8,7 +8,6 @@ import { BackToMenuButton } from "@/components/custom/back-to-menu-button";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useNavigate } from '@tanstack/react-router';
 import Polygon from "@arcgis/core/geometry/Polygon";
 
 
@@ -23,12 +22,11 @@ function ReportGenerator() {
   const { setNavOpened } = useSidebar();
   const isMobile = useIsMobile();
   const [modalOpen, setModalOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleNavigate = (aoi: __esri.Geometry) => {
     const aoiString = JSON.stringify(aoi);
     // Navigate to the report page with the aoi parameter
-    navigate({ to: '/hazards/report/' + aoiString, params: { aoi: aoiString } });
+    window.open('/hazards/report/' + aoiString, '_blank');
   };
 
   function addGraphic(
