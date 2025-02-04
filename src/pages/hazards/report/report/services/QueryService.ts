@@ -1,7 +1,7 @@
 import config from '../config';
 import querystring from 'query-string';
 // import polly from 'polly-js';
-import { SpatialReference, JsonResponse } from '../types/types';
+import { JsonResponse } from '../types/types';
 import { getHazardCodeFromUnitCode } from '../util/util';
 
 // const retryPolicy = (url, outputFormatter = response => response) => {
