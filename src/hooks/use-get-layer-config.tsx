@@ -11,7 +11,6 @@ const useGetLayerConfig = () => {
             try {
                 // Dynamically import the config file based on the page
                 const config = await import(`@/pages/${currentPage}/data/layers.tsx`);
-                console.log('config:', config.default);
 
                 // Reverse the main layers so the map displays them in the correct order
                 const reversedConfig = [...config.default].reverse();

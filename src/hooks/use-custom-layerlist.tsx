@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { useLayerExtent } from '@/hooks/use-layer-extent';
 import Extent from '@arcgis/core/geometry/Extent';
 import { useLayerVisibilityManager } from '@/hooks/use-layer-visibility-manager';
+import Collection from '@arcgis/core/core/Collection';
 
 export type TypeNarrowedLayer = __esri.FeatureLayer | __esri.MapImageLayer | __esri.WMSLayer
 interface LayerAccordionProps {
@@ -208,7 +209,7 @@ const useCustomLayerList = () => {
                 );
             });
 
-            setLayerList(list);
+            setLayerList(new Collection(list));
         }
 
         return () => {
