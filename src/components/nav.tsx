@@ -178,6 +178,7 @@ function NavLink({
 
   return href ? (
     <Link
+      target='_blank'
       to={href}
       className={cn(
         buttonVariants({
