@@ -2,12 +2,14 @@ import * as React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Feature } from "geojson";
 import { Button } from "@/components/ui/button";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { ExtendedFeature, PopupContentWithPagination } from "./popup-content-with-pagination";
 import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
 import useScreenSize from "@/hooks/use-screen-size";
+import { XIcon } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PopupContent {
     features: Feature[];
@@ -33,6 +35,7 @@ function PopupDrawer({
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [activeLayerTitle, setActiveLayerTitle] = useState<string>("");
     const screenSize = useScreenSize()
+    const isMobile = useIsMobile();
 
     const layerContent = useMemo(() => popupContent, [popupContent]);
 
@@ -85,12 +88,19 @@ function PopupDrawer({
             </DrawerTrigger>
 
             <DrawerContent className="z-60 max-h-[50vh] md:max-h-[85vh] overflow-hidden md:absolute md:right-4 md:max-w-[30vw] md:mb-10 left-auto w-full">
-                <DrawerHeader className="flex justify-between items-center py-2 md:py-4">
-                    <DrawerTitle>{popupTitle}</DrawerTitle>
+                <DrawerHeader className="flex justify-between items-center py-2 md:py-4 relative">
+                    <DrawerTitle className="flex-1 pr-10">{popupTitle}</DrawerTitle>
+                    {!isMobile && (
+                        <DrawerClose asChild>
+                            <Button variant="outline" className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center">
+                                <XIcon />
+                            </Button>
+                        </DrawerClose>
+                    )}
                 </DrawerHeader>
 
                 <DrawerDescription className="hidden" /> {/* present but hidden to resolve console warning */}
-                <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden">
+                <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden mb-6">
                     {screenSize.height > 1080 &&
                         <header className="border-b overflow-hidden h-12">
                             <Carousel className="w-full h-full relative px-8">
@@ -143,12 +153,6 @@ function PopupDrawer({
                         </div>
                     </div>
                 </div>
-
-                <DrawerFooter>
-                    <DrawerClose asChild>
-                        <Button variant="outline">Close</Button>
-                    </DrawerClose>
-                </DrawerFooter>
             </DrawerContent>
         </Drawer>
     );

@@ -126,10 +126,6 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
             return (
                 <>
                     {hrefs.map((item, index) => {
-
-                        console.log(item);
-
-
                         if (item.href === null) {
                             return null;
                         }
@@ -152,8 +148,6 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         }
 
         if (urlPattern.test(value)) {
-            console.log(value);
-
             return (
                 <Button
                     className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-start max-w-full"
