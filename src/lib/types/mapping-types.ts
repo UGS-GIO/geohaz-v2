@@ -16,6 +16,7 @@ interface BaseLayerProps {
     title?: string;
     visible?: boolean;
     options?: any;
+    opacity?: number;
 }
 
 export interface LinkField {

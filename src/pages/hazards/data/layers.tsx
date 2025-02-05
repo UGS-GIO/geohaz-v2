@@ -160,6 +160,7 @@ const groundshakingWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: groundshakingWMSTitle,
     visible: false,
+    opacity: 0.5,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${groundshakingLayerName}`,
@@ -190,7 +191,7 @@ const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: qFaultsWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
@@ -636,7 +637,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
 }
 
 const alluvialFanLayerName = 'alluvialfan';
-const alluvialFanWMSTitle = 'Alluvial Fan Susceptibility';
+const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility';
 const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -840,7 +841,7 @@ const floodHazardsConfig: LayerProps = {
 const earthquakesConfig: LayerProps = {
     type: 'group',
     title: 'Earthquake Hazards',
-    visible: false,
+    visible: true,
     layers: [qFaultsWMSConfig, surfaceFaultRuptureWMSConfig, liquefactionWMSConfig, groundshakingWMSConfig],
 };
 

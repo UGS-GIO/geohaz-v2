@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { useLayerExtent } from '@/hooks/use-layer-extent';
 import Extent from '@arcgis/core/geometry/Extent';
 import { useLayerVisibilityManager } from '@/hooks/use-layer-visibility-manager';
+import Collection from '@arcgis/core/core/Collection';
 
 export type TypeNarrowedLayer = __esri.FeatureLayer | __esri.MapImageLayer | __esri.WMSLayer
 interface LayerAccordionProps {
@@ -147,6 +148,7 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
 const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
 
     const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState, accordionTriggerRef } = useLayerVisibilityManager(layer);
+    const invertedChildLayers = [...layer.layers].reverse(); // inverse the order of the layers to match the order in the map
 
     return (
         <div className="mr-2 border border-secondary rounded my-2">
@@ -172,7 +174,7 @@ const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: num
                             />
                             <label className="text-sm font-medium italic">Select All</label>
                         </div>
-                        {layer.layers?.map((childLayer) => (
+                        {invertedChildLayers?.map((childLayer) => (
                             <div className="ml-4" key={childLayer.id}>
                                 <LayerAccordion
                                     layer={childLayer}
@@ -194,7 +196,8 @@ const useCustomLayerList = () => {
 
     useEffect(() => {
         if (activeLayers) {
-            const list = activeLayers.map((layer, index) => {
+            const invertedGroupLayers = [...activeLayers].reverse(); // inverse the order of the layers to match the order in the map
+            const list = invertedGroupLayers.map((layer, index) => {
                 if (layer.type === 'group') {
                     return <GroupLayerItem key={layer.id} layer={layer as __esri.GroupLayer} index={index} />;
                 }
@@ -206,7 +209,7 @@ const useCustomLayerList = () => {
                 );
             });
 
-            setLayerList(list);
+            setLayerList(new Collection(list));
         }
 
         return () => {

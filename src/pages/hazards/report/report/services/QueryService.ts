@@ -1,7 +1,7 @@
 import config from '../config';
 import querystring from 'query-string';
 // import polly from 'polly-js';
-import { SpatialReference, JsonResponse } from '../types/types';
+import { JsonResponse } from '../types/types';
 import { getHazardCodeFromUnitCode } from '../util/util';
 
 // const retryPolicy = (url, outputFormatter = response => response) => {
@@ -27,12 +27,6 @@ import { getHazardCodeFromUnitCode } from '../util/util';
 //         return outputFormatter(responseJson);
 //     });
 // }
-
-
-export interface AreaOfInterest {
-    rings: number[][][];
-    spatialReference: SpatialReference;
-}
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -90,7 +84,7 @@ const retryPolicy = <T>(url: string, outputFormatter: (response: JsonResponse) =
     return fetchWithRetry(url, outputFormatter);
 }
 
-export const queryUnitsAsync = async (meta: string[], aoi: AreaOfInterest) => {
+export const queryUnitsAsync = async (meta: string[], aoi: string) => {
 
     let [url] = meta
     const [, hazard] = meta;
@@ -103,7 +97,7 @@ export const queryUnitsAsync = async (meta: string[], aoi: AreaOfInterest) => {
 
     const parameters = {
         geometryType: 'esriGeometryPolygon',
-        geometry: JSON.stringify(aoi),
+        geometry: aoi,
         returnGeometry: false,
         outFields: hazardField,
         f: 'json'

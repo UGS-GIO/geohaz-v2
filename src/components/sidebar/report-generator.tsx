@@ -8,36 +8,9 @@ import { BackToMenuButton } from "@/components/custom/back-to-menu-button";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import Polygon from "@arcgis/core/geometry/Polygon";
 
-function addGraphic(
-  event: __esri.SketchViewModelCreateEvent,
-  tempGraphicsLayer: __esri.GraphicsLayer | undefined,
-  setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>,
-  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>
-) {
-  if (event.state === "complete" && event.graphic) {
-    tempGraphicsLayer?.remove(event.graphic);
-    const drawAOIHeight = event.graphic.geometry.extent.height;
-    const drawAOIWidth = event.graphic.geometry.extent.width;
-    const aoi = event.graphic.geometry.toJSON();
 
-    if (drawAOIHeight < 12000 && drawAOIWidth < 18000) {
-      const params = {
-        description: "Test",
-        polygon: aoi,
-      };
-
-      localStorage.setItem("aoi", JSON.stringify(params));
-      window.open("./report");
-      setActiveButton(undefined);
-    } else {
-      setModalOpen(true);
-      setActiveButton(undefined);
-    }
-  } else if (event.state === "start" && event.graphic) {
-    // console.log("addGraphic: Drawing started");
-  }
-}
 
 type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
 
@@ -49,6 +22,38 @@ function ReportGenerator() {
   const { setNavOpened } = useSidebar();
   const isMobile = useIsMobile();
   const [modalOpen, setModalOpen] = useState(false);
+
+  const handleNavigate = (aoi: __esri.Geometry) => {
+    const aoiString = JSON.stringify(aoi);
+    // Navigate to the report page with the aoi parameter
+    handleReset();
+    window.open('/hazards/report/' + aoiString, '_blank');
+  };
+
+  function addGraphic(
+    event: __esri.SketchViewModelCreateEvent,
+    tempGraphicsLayer: __esri.GraphicsLayer | undefined,
+    setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>,
+    setModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+  ) {
+    if (event.state === "complete" && event.graphic) {
+      tempGraphicsLayer?.remove(event.graphic);
+      const drawAOIHeight = event.graphic.geometry.extent.height;
+      const drawAOIWidth = event.graphic.geometry.extent.width;
+      const aoi = event.graphic.geometry;
+
+      if (drawAOIHeight < 12000 && drawAOIWidth < 18000) {
+
+        handleNavigate(aoi);
+        setActiveButton(undefined);
+      } else {
+        setModalOpen(true);
+        setActiveButton(undefined);
+      }
+    } else if (event.state === "start" && event.graphic) {
+      // console.log("addGraphic: Drawing started");
+    }
+  }
 
   const handleActiveButton = (buttonName: ActiveButtonOptions) => {
     setActiveButton(buttonName);
@@ -73,7 +78,7 @@ function ReportGenerator() {
   }, []);
 
   const handleCurrentMapExtentButton = () => {
-    handleResetButton()
+    handleReset()
     handleActiveButton('currentMapExtent');
 
     const extent = view?.extent;
@@ -94,29 +99,21 @@ function ReportGenerator() {
         [xMaxi, yMaxi]
       ];
 
-      const aoi = {
+      const aoi = new Polygon({
         spatialReference: {
-          latestWkid: 3857,
           wkid: 102100
         },
         rings: [newRings]
-      };
-
-      const params = {
-        description: "Test",
-        polygon: aoi,
-      };
-
-      localStorage.setItem('aoi', JSON.stringify(params));
-      window.open('./report');
+      });
+      handleNavigate(aoi);
     } else {
       setModalOpen(true);
-      handleResetButton();
+      handleReset();
     }
   };
 
   const handleCustomAreaButton = () => {
-    handleResetButton()
+    handleReset()
     handleActiveButton('customArea');
     if (isMobile) setNavOpened(false); // Close the sidebar on mobile so user can see the map
 
@@ -137,6 +134,18 @@ function ReportGenerator() {
 
     sketchVM.current.on('create', (event) => {
       if (event.state === "start") {
+        if (isMobile) {
+          const completeButton = document.createElement("button");
+          // onclick to complete the sketch
+          completeButton.onclick = () => {
+            sketchVM.current?.complete();
+          };
+          completeButton.innerHTML = "Complete";
+          completeButton.id = "complete-button";
+          completeButton.classList.add("esri-widget-button", "esri-widget", "esri-interactive", "p-2", "bg-background");
+
+          view?.ui.add(completeButton, "top-right");
+        }
         setIsSketching?.(true);
       }
 
@@ -146,6 +155,7 @@ function ReportGenerator() {
 
       if (event.state === "complete") {
         setIsSketching?.(true); // Ensure it remains true immediately after completion
+        view?.ui.remove(view?.ui.find("complete-button"));
 
         const extent = event.graphic.geometry.extent;
         const areaHeight = extent?.height;
@@ -154,21 +164,13 @@ function ReportGenerator() {
 
         if (areaHeight && areaWidth && areaHeight < 12000 && areaWidth < 18000) {
 
-          const aoi = {
+          const aoi = new Polygon({
             spatialReference: {
-              latestWkid: 3857,
               wkid: 102100
             },
             rings: geometry.rings
-          };
-
-          const params = {
-            description: "Test",
-            polygon: aoi,
-          };
-
-          localStorage.setItem('aoi', JSON.stringify(params));
-          window.open('./report');
+          });
+          handleNavigate(aoi);
         } else {
           console.log("Area of interest is too large, try again");
           setModalOpen(true);
@@ -184,7 +186,7 @@ function ReportGenerator() {
     });
   };
 
-  const handleResetButton = () => {
+  const handleReset = () => {
     sketchVM.current?.cancel();
     if (tempGraphicsLayer.current) {
       tempGraphicsLayer.current?.removeAll();
@@ -231,7 +233,7 @@ function ReportGenerator() {
             </Button>
           </div>
           <div className="flex w-full">
-            <Button onClick={handleResetButton} variant="secondary" className="w-full flex-grow mb-2 md:mb-0">
+            <Button onClick={handleReset} variant="secondary" className="w-full flex-grow mb-2 md:mb-0">
               {buttonText('reset', 'Reset')}
             </Button>
           </div>
@@ -251,7 +253,7 @@ function ReportGenerator() {
               <Button onClick={handleResetDrawing} variant="default" >
                 Create a new area
               </Button>
-              <Button onClick={handleResetButton} variant="secondary" >
+              <Button onClick={handleReset} variant="secondary" >
                 Close
               </Button>
             </div>
