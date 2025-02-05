@@ -178,6 +178,7 @@ function NavLink({
 
   return href ? (
     <Link
+      target='_blank'
       to={href}
       className={cn(
         buttonVariants({
@@ -320,6 +321,7 @@ export function NavLinkIcon({
 
   return link.href ? (
     <Link
+      target='_blank'
       to={link.href}
       className={cn(
         buttonVariants({
