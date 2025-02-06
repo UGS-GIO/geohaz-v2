@@ -54,7 +54,7 @@ const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) =>
     // Create a div element for the map and set its size
     const mapDiv = document.createElement('div');
 
-    // manually set map width and height so when we take a screenshot it is the correct scale
+    // manually set map width and height so when we take a screenshot it matches the map div size
     mapDiv.style.width = `${MAP_WIDTH}px`;
     mapDiv.style.height = `${MAP_HEIGHT}px`;
     document.body.appendChild(mapDiv);
