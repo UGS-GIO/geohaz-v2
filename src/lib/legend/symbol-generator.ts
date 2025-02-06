@@ -20,12 +20,43 @@ export function createLineSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
         "stroke-dasharray": strokeDasharray,
     } = lineSymbolizer;
 
+    /**
+     * The following code addresses the issue of mapping dasharray patterns to ArcGIS SimpleLineSymbol styles.
+     * Because the SLD spec uses dasharray patterns that are not directly supported by the ArcGIS JS API,
+     * the code maps the dasharray patterns to the closest supported style in ArcGIS JS API.
+     * If new patterns are needed, they need to be added to the map below.
+     */
+
+    type LineSymbolStyle = "solid" | "dash" | "dash-dot" | "dot" | "long-dash" | "long-dash-dot" | "long-dash-dot-dot" | "none" | "short-dash" | "short-dash-dot" | "short-dash-dot-dot" | "short-dot";
+
+
+    // Explicitly typing the dashMap to be a Record with string keys and string values
+    const dashMap: Record<string, LineSymbolStyle> = {
+        '8.0,2.0': 'short-dash',
+        '3.0,3.0': 'short-dot',
+        '4.0,4.0': 'long-dash',
+        '1.0,1.0': 'dot',
+        // Add more patterns as needed
+    };
+
+    // Function to map dasharray to the style using the lookup object
+    function mapDashArrayToStyle(dasharray: string[]): LineSymbolStyle {
+        // Create a key by joining the dasharray values (which now include decimals)
+        const dashKey = dasharray.join(',');
+
+        // Return the corresponding style from the object, or default to 'solid' if not found
+        return dashMap[dashKey] || 'solid';
+    }
+
+    // Map the dash array to one of the GeoServer styles
+    const style = strokeDasharray ? mapDashArrayToStyle(strokeDasharray) : 'solid';
+
     return new SimpleLineSymbol({
         color: stroke,
         width: strokeWidth,
         cap: strokeLinecap,
         join: strokeLinejoin,
-        style: strokeDasharray ? "dash" : "solid",
+        style: style,  // Use the mapped style here
         miterLimit: 2,
     });
 }

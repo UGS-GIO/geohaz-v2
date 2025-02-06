@@ -57,7 +57,7 @@ export interface StrokeSymbolizer {
     "stroke-opacity": string,
     "stroke-linecap": LineCap,
     "stroke-linejoin": LineJoin,
-    "stroke-dasharray": string,
+    "stroke-dasharray": string[],
     "stroke-dashoffset": string
 }
 
