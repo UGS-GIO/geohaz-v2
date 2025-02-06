@@ -37,6 +37,9 @@ let map: any;
 let view: MapView;
 let scaleBar: any;
 
+const MAP_WIDTH = 2316;
+const MAP_HEIGHT = 1431;
+
 const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) => {
   // console.log('HazardMap.render', { aoi, queriesWithResults });
   const [visualAssets, setVisualAssets] = useState<Partial<VisualAssets>>({});
@@ -46,19 +49,20 @@ const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) =>
 
 
   const createMap = async () => {
-    // // console.log('HazardMap.createMap');
-
     setMapLoading(true);
 
-    // const { WebMap, MapView, Polygon, Graphic, ScaleBar } = await getModules();
-
+    // Create a div element for the map and set its size
     const mapDiv = document.createElement('div');
+
+    // manually set map width and height so when we take a screenshot it is the correct scale
+    mapDiv.style.width = `${MAP_WIDTH}px`;
+    mapDiv.style.height = `${MAP_HEIGHT}px`;
     document.body.appendChild(mapDiv);
 
     const polylineSymbol = {
       type: 'simple-line',
       color: '#f012be',
-      width: 4
+      width: 12
     };
 
     const parsedAoi = JSON.parse(aoi);
@@ -94,6 +98,7 @@ const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) =>
       const expandedExtent = extent.expand(3);
       view.extent = expandedExtent;
     });
+
     const remainder = view.scale % config.scaleMultiple;
     view.scale += config.scaleMultiple - remainder;
 
@@ -233,7 +238,7 @@ const getScreenshot = async function (url?: string, hazardCode?: string) {
 
   // map width is 8.5" - 0.78" (default print margins for Chrome on macOS) * 300 dpi
   // height is golden ratio
-  const screenshot = await view.takeScreenshot({ width: 2316, height: 1431 });
+  const screenshot = await view.takeScreenshot({ width: MAP_WIDTH, height: MAP_HEIGHT });
   // cache scale bar dom since it could be different for different maps
   scaleBar.renderNow();
   const scaleBarDom = scaleBar.container.cloneNode(true);
