@@ -24,6 +24,7 @@ export function createLineSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
      * The following code addresses the issue of mapping dasharray patterns to ArcGIS SimpleLineSymbol styles.
      * Because the SLD spec uses dasharray patterns that are not directly supported by the ArcGIS JS API,
      * the code maps the dasharray patterns to the closest supported style in ArcGIS JS API.
+     * See the style options at: https://developers.arcgis.com/javascript/latest/api-reference/esri-symbols-SimpleLineSymbol.html?#style
      * If new patterns are needed, they need to be added to the map below.
      */
 
