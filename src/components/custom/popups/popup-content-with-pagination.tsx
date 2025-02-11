@@ -119,6 +119,7 @@ const LayerCard = ({
         // Only highlight to the first feature if items per page is 1
         if (itemsPerPage === 1 && newPaginatedFeatures.length > 0) {
             if (!view) return
+            view.graphics.removeAll() // Clear existing highlights before adding new one
             highlightFeature(newPaginatedFeatures[0], view)
         }
     }
@@ -228,6 +229,7 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
 
     const handleZoomToFeature = async (feature: ExtendedFeature) => {
         if (!view) return
+        view.graphics.removeAll() // Clear existing highlights before adding new one
         highlightFeature(feature, view)
         zoomToFeature(feature, view)
     }
@@ -235,11 +237,13 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
     // If no layers, return null
     if (layerContent.length === 0) return null;
 
+    const contentKey = useMemo(() => Date.now(), [layerContent])
+
     return (
         <div className="flex flex-1 flex-col gap-4 px-2 overflow-y-auto select-text h-full scrollable-container">
-            {layerContent.map((layer, layerIndex) => (
+            {layerContent.map((layer) => (
                 <LayerCard
-                    key={layerIndex}
+                    key={`${contentKey}-${layer.groupLayerTitle}-${layer.layerTitle}`}
                     layer={layer}
                     buttons={buttons}
                     handleZoomToFeature={handleZoomToFeature}
@@ -249,4 +253,4 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
     )
 }
 
-export { PopupContentWithPagination }
+export { PopupContentWithPagination };
