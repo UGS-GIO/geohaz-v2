@@ -96,8 +96,6 @@ export default function ArcGISMap() {
                 layers: keys,
                 url: 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms'
             });
-            console.log('featureInfo', featureInfo);
-
 
             // Update popup content with the new feature info
             if (featureInfo) {
@@ -153,7 +151,6 @@ export default function ArcGISMap() {
                     // drawerState === 'open' && drawerTriggerRef.current?.click();
                     return
                 }
-                console.log('updatePopupContent', layerInfoFiltered);
 
                 updatePopupContent(layerInfoFiltered);
                 if (drawerState === 'open') {
