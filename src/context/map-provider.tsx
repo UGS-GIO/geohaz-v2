@@ -3,35 +3,25 @@ import type SceneView from "@arcgis/core/views/SceneView";
 import type MapView from "@arcgis/core/views/MapView";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import { LayerProps } from "@/lib/types/mapping-types";
+import { init } from "@/lib/mapping-utils";
+
+type ViewType = 'map' | 'scene';
 
 type MapContextProps = {
     view?: SceneView | MapView,
-    activeLayers?: __esri.Collection<__esri.Layer>, // add a layers property to the context
-    loadMap?: (container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }, layers: LayerProps[]) => Promise<void>
-    setActiveLayers?: (layers: __esri.Collection<__esri.Layer>) => void
-    isMobile?: boolean
-    setIsMobile?: (isMobile: boolean) => void
-    layerDescriptions?: Record<string, string>
-    isDecimalDegrees: boolean
-    setIsDecimalDegrees: (isDecimalDegrees: boolean) => void
-    coordinates: { x: string; y: string }
-    setCoordinates: (coords: { x: string; y: string }) => void
-    isSketching?: boolean
+    activeLayers?: __esri.Collection<__esri.Layer>,
+    loadMap?: (container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }, layers: LayerProps[], viewType: ViewType) => Promise<void>,
+    setActiveLayers?: (layers: __esri.Collection<__esri.Layer>) => void,
+    isMobile?: boolean,
+    setIsMobile?: (isMobile: boolean) => void,
+    layerDescriptions?: Record<string, string>,
+    isDecimalDegrees: boolean,
+    setIsDecimalDegrees: (isDecimalDegrees: boolean) => void,
+    coordinates: { x: string; y: string },
+    setCoordinates: (coords: { x: string; y: string }) => void,
+    isSketching?: boolean,
     setIsSketching?: (isSketching: boolean) => void
 }
-
-// type FeatureAttributes = {
-//     title: string;
-//     content: string;
-// };
-
-// type Feature = {
-//     attributes: FeatureAttributes;
-// };
-
-// type LayerDescriptionResponse = {
-//     features: Feature[];
-// };
 
 export const MapContext = createContext<MapContextProps>({
     coordinates: { x: "000.000", y: "000.000" },
@@ -75,13 +65,13 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         setIsMobile(view.widthBreakpoint === "xsmall" || view.heightBreakpoint === "xsmall");
     }, [view]);
 
-    async function loadMap(container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }, layers: LayerProps[]) {
+
+    async function loadMap(container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }, layers: LayerProps[], viewType: ViewType) {
         if (view) return;
-        const { init } = await import("@/lib/mapping-utils")
-        setView(init(container, isMobile, { zoom, center }, layers, 'map'));
+
+        // Initialize the map with the appropriate view type
+        setView(init(container, isMobile, { zoom, center }, layers, viewType)); // default to map view, todo: add scene view capability
     }
-
-
 
     return (
         <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates, isSketching, setIsSketching }}>

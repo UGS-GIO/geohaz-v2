@@ -1,10 +1,10 @@
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
 export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
-const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
-const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
-const GEN_GIS_WORKSPACE = 'gen_gis';
-const MAPPING_WORKSPACE = 'mapping';
+export const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
+export const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
+export const GEN_GIS_WORKSPACE = 'gen_gis';
+export const MAPPING_WORKSPACE = 'mapping';
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -194,7 +194,7 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     ],
 };
 
-const wellWithTopsLayerName = 'wellswithtops_hascore';
+export const wellWithTopsLayerName = 'wellswithtops_hascore';
 const wellWithTopsWMSTitle = 'Wells with Tops (Has Core)';
 const wellWithTopsWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -273,15 +273,15 @@ const EMPConfig: LayerProps = {
     title: 'Energy and Minerals',
     visible: true,
     layers: [
-        basinNamesWMSConfig,
-        oilGasFieldsWMSConfig,
-        pipelinesWMSConfig,
-        sco2WMSConfig,
-        riversWMSConfig,
-        seamlessGeolunitsWMSConfig,
+        // basinNamesWMSConfig,
+        // oilGasFieldsWMSConfig,
+        // pipelinesWMSConfig,
+        // sco2WMSConfig,
+        // riversWMSConfig,
+        // seamlessGeolunitsWMSConfig,
         wellWithTopsWMSConfig,
-        SITLAConfig,
-        faultsWMSConfig,
+        // SITLAConfig,
+        // faultsWMSConfig,
     ]
 };
 

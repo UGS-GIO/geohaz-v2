@@ -1,5 +1,5 @@
 import { Button } from "@/components/custom/button"
-import ReportGenerator from "@/components/sidebar/report-generator"
+import ReportGenerator from "@/pages/hazards/components/sidebar/report-generator"
 import { FileText, FileTextIcon } from "lucide-react"
 import { useSidebar } from "@/hooks/use-sidebar"
 

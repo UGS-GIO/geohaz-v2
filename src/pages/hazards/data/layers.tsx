@@ -1,8 +1,9 @@
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
-const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
-const HAZARDS_WORKSPACE = 'hazards';
-const GEN_GIS_WORKSPACE = 'gen_gis';
+export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
+export const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
+export const HAZARDS_WORKSPACE = 'hazards';
+export const GEN_GIS_WORKSPACE = 'gen_gis';
 const UNIT_DESCRIPTIONS_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/unit_descriptions';
 
 const landslideLegacyLayerName = 'landslidelegacy';
@@ -185,7 +186,7 @@ const groundshakingWMSConfig: WMSLayerProps = {
     ],
 }
 
-const qFaultsLayerName = 'quaternaryfaults';
+export const qFaultsLayerName = 'quaternaryfaults';
 const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -211,7 +212,8 @@ const qFaultsWMSConfig: WMSLayerProps = {
                 'Structure Class': { field: 'faultclass', type: 'string' },
                 'Structure Age': { field: 'faultage', type: 'string' },
                 'Detailed Report': { field: 'usgs_link', type: 'string' },
-            }
+            },
+            schema: 'hazards'
         },
     ],
 };
