@@ -55,12 +55,5 @@ export const sidelinks: SideLink[] = [
     component: ReportGenerator,
 
 
-  },
-  {
-    title: 'Utah Geology Homepage',
-    label: '',
-    href: 'https://geology.utah.gov/',
-    icon: <ExternalLink className='stroke-foreground' />,
-    // This link is external and does not need a component
   }
 ];
