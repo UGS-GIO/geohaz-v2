@@ -36,15 +36,16 @@ export default function ArcGISMap() {
     }
 
     const updatePopupContent = useCallback(
-        (newContent: { features: Feature[]; visible: boolean; layerTitle: string, groupLayerTitle: string, popupFields?: Record<string, FieldConfig>; relatedTables?: RelatedTable[] }[]) => {
-            setPopupContent((prevContent) => {
-                // Only update if new content is different to avoid unnecessary rerenders
-                if (JSON.stringify(prevContent) !== JSON.stringify(newContent)) {
-                    return newContent;
-                }
-
-                return prevContent; // No state update if content is identical
-            });
+        (newContent: {
+            features: Feature[];
+            visible: boolean;
+            layerTitle: string;
+            groupLayerTitle: string;
+            popupFields?: Record<string, FieldConfig>;
+            relatedTables?: RelatedTable[]
+        }[]) => {
+            // Always update state to trigger rerender and reset dependent state
+            setPopupContent([...newContent]);
         },
         [setPopupContent]
     );
@@ -95,6 +96,8 @@ export default function ArcGISMap() {
                 layers: keys,
                 url: 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms'
             });
+            console.log('featureInfo', featureInfo);
+
 
             // Update popup content with the new feature info
             if (featureInfo) {
@@ -150,6 +153,8 @@ export default function ArcGISMap() {
                     // drawerState === 'open' && drawerTriggerRef.current?.click();
                     return
                 }
+                console.log('updatePopupContent', layerInfoFiltered);
+
                 updatePopupContent(layerInfoFiltered);
                 if (drawerState === 'open') {
                     drawerTriggerRef.current?.click(); // Close drawer first

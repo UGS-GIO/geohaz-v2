@@ -147,6 +147,7 @@ function PopupDrawer({
                             className={cn(`flex flex-1 flex-col gap-4 p-1 overflow-y-auto select-text`)}
                         >
                             <PopupContentWithPagination
+                                key={JSON.stringify(layerContent)}
                                 layerContent={layerContent as unknown as { groupLayerTitle: string; layerTitle: string; features: ExtendedFeature[]; popupFields?: Record<string, FieldConfig> | undefined; relatedTables?: RelatedTable[] | undefined; }[]} // TODO: fix this
                                 onSectionChange={onSectionChange}
                             />
