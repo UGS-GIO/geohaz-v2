@@ -146,13 +146,13 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
 };
 
 const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
-
     const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState, accordionTriggerRef } = useLayerVisibilityManager(layer);
     const invertedChildLayers = [...layer.layers].reverse(); // inverse the order of the layers to match the order in the map
+    const defaultValues = [`${localState.groupVisibility ? `item-${index}` : ''}`]; // if group is visible, expand the accordion
 
     return (
         <div className="mr-2 border border-secondary rounded my-2">
-            <Accordion type="multiple">
+            <Accordion type="multiple" defaultValue={defaultValues}>
                 <AccordionItem value={`item-${index}`}>
                     <AccordionHeader>
                         <Switch
@@ -189,6 +189,7 @@ const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: num
         </div>
     );
 };
+
 
 const useCustomLayerList = () => {
     const { activeLayers } = useContext(MapContext);
