@@ -137,6 +137,7 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
                             handleZoomToLayer={handleZoomToLayer}
                             layerId={layerId}
                             url={typeNarrowedLayer.url}
+                            openLegend={true}
                         />
                     </AccordionContent>
                 </AccordionItem>

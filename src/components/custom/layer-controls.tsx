@@ -16,6 +16,7 @@ interface LayerControlsProps {
     description: string;
     layerId: string;
     url: string;
+    openLegend?: boolean;
 }
 
 const LayerControls: React.FC<LayerControlsProps> = ({
@@ -25,7 +26,8 @@ const LayerControls: React.FC<LayerControlsProps> = ({
     description,
     title,
     layerId,
-    url
+    url,
+    openLegend
 }) => {
     const cleanDescription = DOMPurify.sanitize(description, {
         USE_PROFILES: { html: true },
@@ -147,6 +149,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
                 <LegendAccordion
                     layerId={layerId}
                     url={url}
+                    openLegend={openLegend}
                     triggerBtn={
                         <button ref={legendTriggerButtonRef} className="hidden">
                             Open Dialog
