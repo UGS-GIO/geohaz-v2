@@ -36,7 +36,7 @@ const LayerControls: React.FC<LayerControlsProps> = ({
     });
     const legendTriggerButtonRef = useRef<HTMLButtonElement>(null);
     const infoTriggerButtonRef = useRef<HTMLButtonElement>(null);
-    const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+    const [openAccordion, setOpenAccordion] = useState<string | null>(openLegend ? 'legend' : null);
     const [infoPressed, setInfoPressed] = useState(false);
     const [legendPressed, setLegendPressed] = useState(false);
 
