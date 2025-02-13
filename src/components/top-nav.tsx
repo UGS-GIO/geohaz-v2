@@ -9,12 +9,20 @@ import {
 import { Button } from '@/components/custom/button';
 import { MapContext } from '@/context/map-provider';
 import { BasemapIcon } from '@/assets/basemap-icons';
+import Basemap from "@arcgis/core/Basemap.js";
 
 type BasemapType = {
   title: string;
   basemapStyle: string;
   isActive: boolean;
   type: 'short' | 'long';
+  customBasemap?: __esri.Basemap;
+};
+
+const topoBasemapOptions = {
+  portalItem: {
+    id: "7378ae8b471940cb9f9d114b67cd09b8" // ESRI Topographic (Vector) basemap with contours
+  }
 };
 
 export const basemapList: BasemapType[] = [
@@ -23,6 +31,7 @@ export const basemapList: BasemapType[] = [
   { title: 'Satellite', basemapStyle: 'satellite', isActive: false, type: 'short' },
   { title: 'Hybrid', basemapStyle: 'hybrid', isActive: false, type: 'short' },
   { title: 'Terrain', basemapStyle: 'terrain', isActive: false, type: 'long' },
+  { title: 'Topographic', basemapStyle: 'topo-with-countours', isActive: false, type: 'long', customBasemap: new Basemap(topoBasemapOptions) },
 ];
 
 function validateBasemapList(list: BasemapType[]): list is BasemapType[] {
@@ -31,7 +40,7 @@ function validateBasemapList(list: BasemapType[]): list is BasemapType[] {
 }
 
 if (!validateBasemapList(basemapList)) {
-  throw new Error('isActive determines the inial basemap. Only one initial basemap can be defined.');
+  throw new Error('isActive determines the initial basemap. Only one initial basemap can be defined.');
 }
 
 interface TopNavProps extends React.HTMLAttributes<HTMLElement> { }
@@ -39,7 +48,7 @@ interface TopNavProps extends React.HTMLAttributes<HTMLElement> { }
 interface BasemapProps {
   links: BasemapType[];
   trigger: React.ReactNode | string;
-  onBasemapChange: (basemapStyle: string) => void;
+  onBasemapChange: (basemapStyle: string, customBasemap?: __esri.Basemap) => void;
 }
 
 const BasemapDropdown = ({ links, trigger, onBasemapChange }: BasemapProps) => {
@@ -47,12 +56,12 @@ const BasemapDropdown = ({ links, trigger, onBasemapChange }: BasemapProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="start">
-        {links.map(({ title, basemapStyle, isActive }) => (
+        {links.map(({ title, basemapStyle, isActive, customBasemap }) => (
           <DropdownMenuItem key={`${title}-${basemapStyle}`} asChild>
             <Button
               variant="ghost"
               className={cn('w-full justify-start', !isActive ? 'text-muted-foreground' : 'underline')}
-              onClick={() => onBasemapChange(basemapStyle)}
+              onClick={() => onBasemapChange(basemapStyle, customBasemap)}
             >
               {title}
             </Button>
@@ -67,15 +76,22 @@ function TopNav({ className, ...props }: TopNavProps) {
   const { view } = useContext(MapContext);
   const [basemaps, setBasemaps] = useState(basemapList);
 
-  const handleBasemapChange = (basemapStyle: string) => {
+  const handleBasemapChange = (basemapStyle: string, customBasemap?: __esri.Basemap) => {
     if (!view) return;
-    view.map.basemap = basemapStyle as unknown as __esri.Basemap;
+
+    if (customBasemap) {
+      // If it's a custom basemap, set it directly
+      view.map.basemap = customBasemap;
+    } else {
+      // If it's a standard basemap, set it by basemapStyle that is a string but will map to a basemap ('topo', 'streets', etc.)
+      view.map.basemap = basemapStyle as unknown as __esri.Basemap;
+    }
 
     // Update the active status across all basemaps
     setBasemaps((prevBasemaps) =>
       prevBasemaps.map((basemap) => ({
         ...basemap,
-        isActive: basemap.basemapStyle === basemapStyle,
+        isActive: basemap.basemapStyle === basemapStyle || basemap.customBasemap === customBasemap,
       }))
     );
   };
