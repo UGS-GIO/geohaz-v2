@@ -265,7 +265,6 @@ function ReportGenerator() {
       handleNavigate(aoi);
     } else {
       setActiveDialog('areaTooLarge');
-      handleReset();
     }
   };
 
