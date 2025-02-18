@@ -40,10 +40,8 @@ function ReportGenerator() {
     // Create new map container
     const mapDiv = document.createElement('div');
     mapDiv.id = 'screenshotMapDiv';
-    // mapDiv.style.position = 'absolute';
-    // mapDiv.style.left = '-9999px';
-    mapDiv.style.width = '2316px';
-    mapDiv.style.height = '1431px';
+    mapDiv.style.width = '50vw';
+    mapDiv.style.height = '50vh';
     document.body.appendChild(mapDiv);
 
     const polylineSymbol = {
@@ -101,7 +99,7 @@ function ReportGenerator() {
       duration: 0
     });
 
-    // Give a small delay for final rendering
+    // Wait for rendering to complete
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     const cleanup = () => {
@@ -112,7 +110,6 @@ function ReportGenerator() {
     return { view: screenshotView, cleanup };
   };
 
-
   const getScreenshot = async (geometry: __esri.Geometry) => {
     try {
       console.log('Initializing map and view for screenshot...');
@@ -120,14 +117,19 @@ function ReportGenerator() {
       const aoi = JSON.stringify(geometry);
       const { view: screenshotView, cleanup } = await createMap(aoi);
 
+      // Dynamically get the width and height of the map container
+      const mapDiv = document.getElementById('screenshotMapDiv');
+      const width = mapDiv?.offsetWidth || 0;
+      const height = mapDiv?.offsetHeight || 0;
+
+      // Capture the screenshot with dynamic width and height
       const screenshot = await screenshotView.takeScreenshot({
-        width: 2316,
-        height: 1431,
+        width: width,
+        height: height,
         format: "png"
       });
 
       console.log('Screenshot captured!');
-
 
       // Clean up
       cleanup();
@@ -419,25 +421,26 @@ function ReportGenerator() {
 
       {/* Confirmation Dialog */}
       <Dialog open={activeDialog === 'confirmation'} onOpenChange={handleCloseDialog}>
-        <DialogContent className="w-4/5">
+        <DialogContent className="w-3/5">
           <DialogHeader>
-            <DialogTitle>Generate Report</DialogTitle>
+            <DialogTitle>Generate report for the selected area?</DialogTitle>
           </DialogHeader>
-          {/* <DialogDescription> */}
-          Generate report for the selected area?
-          <img src={screenshot} alt="map" />
-          <div className="flex flex-row space-x-2 mt-4 justify-end">
-            <Button onClick={handleConfirmNavigation} variant="default">
-              Generate Report
-            </Button>
-            <Button onClick={handleCopyLink} variant="secondary">
-              Copy Link
-            </Button>
-            <Button onClick={handleCloseDialog} variant="secondary">
-              Cancel
-            </Button>
+          <div>
+            <div className="flex justify-center">
+              <img src={screenshot} alt="map" className="rounded-md" />
+            </div>
+            <div className="flex flex-row space-x-2 mt-4 justify-end">
+              <Button onClick={handleConfirmNavigation} variant="default">
+                Generate Report
+              </Button>
+              <Button onClick={handleCopyLink} variant="secondary">
+                Copy Link
+              </Button>
+              <Button onClick={handleCloseDialog} variant="secondary">
+                Cancel
+              </Button>
+            </div>
           </div>
-          {/* </DialogDescription> */}
           <DialogClose />
         </DialogContent>
       </Dialog>
