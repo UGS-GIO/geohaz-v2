@@ -399,7 +399,7 @@ function ReportGenerator() {
 
       {/* Area Too Large Dialog */}
       <Dialog open={activeDialog === 'areaTooLarge'} onOpenChange={handleCloseDialog}>
-        <DialogContent className="w-4/5">
+        <DialogContent className="w-full sm:w-4/5">
           <DialogHeader>
             <DialogTitle>Area too large</DialogTitle>
           </DialogHeader>
@@ -420,13 +420,17 @@ function ReportGenerator() {
 
       {/* Confirmation Dialog */}
       <Dialog open={activeDialog === 'confirmation'} onOpenChange={handleCloseDialog}>
-        <DialogContent className="w-3/5">
+        <DialogContent className="w-full sm:w-3/5">
           <DialogHeader>
             <DialogTitle>Generate report for the selected area?</DialogTitle>
           </DialogHeader>
           <div>
             <div className="flex justify-center">
-              <img src={screenshot} alt="map" className="rounded-md" />
+              <img
+                src={screenshot}
+                alt="map"
+                className="rounded-md w-full max-w-full h-auto"
+              />
             </div>
             <div className="flex flex-row space-x-2 mt-4 justify-end">
               <Button onClick={handleConfirmNavigation} variant="default">
