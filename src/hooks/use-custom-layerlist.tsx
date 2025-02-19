@@ -90,12 +90,6 @@ const ChildLayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChang
             layer.visible = checked;
         });
 
-        if (checked && accordionValue === "") { // Expand the accordion if the layer is checked
-            setAccordionValue("item-1");
-        } else if (!checked && accordionValue === "item-1") { // Collapse the accordion if the layer is unchecked
-            setAccordionValue("");
-        }
-
         // Call the onVisibilityChange callback if provided
         onVisibilityChange?.(checked);
     };

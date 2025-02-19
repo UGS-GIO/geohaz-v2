@@ -79,21 +79,18 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
     const handleToggleAll = useCallback((checked: boolean) => {
         if (currentLayer?.type === 'group') {
             const groupLayer = currentLayer as __esri.GroupLayer;
-            // Update group layer visibility
-            handleGroupLayerVisibilityToggle(checked)
-
-            // Turn on/off group layer and all sublayers
+            // Only update child layers' visibility, but not the group visibility
             groupLayer.layers?.forEach(childLayer => {
-                childLayer.visible = checked
+                childLayer.visible = checked;
             });
 
-            // Update local state
-            setLocalState({
-                groupVisibility: checked,
-                selectAllChecked: checked
-            })
+            // Update select all state without modifying group visibility
+            setLocalState(prev => ({
+                ...prev,
+                selectAllChecked: checked // Only update select all state
+            }));
         }
-    }, [currentLayer, setGroupLayerVisibility]);
+    }, [currentLayer]);
 
     const handleChildLayerToggle = (childLayer: __esri.Layer, checked: boolean, layer: __esri.GroupLayer
     ) => {
