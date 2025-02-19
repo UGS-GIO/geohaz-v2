@@ -1,7 +1,7 @@
 import { LayerListContext } from "@/context/layerlist-provider";
 import { MapContext } from "@/context/map-provider";
 import { findLayerById } from "@/lib/mapping-utils";
-import { useContext, useState, useEffect, useCallback, useRef, RefObject } from "react";
+import { useContext, useState, useEffect, useCallback, useRef } from "react";
 
 const useLayerVisibilityManager = (layer: __esri.Layer) => {
     const { activeLayers } = useContext(MapContext);
