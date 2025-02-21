@@ -19,14 +19,15 @@ interface LayerAccordionProps {
     onVisibilityChange?: (checked: boolean) => void;
 }
 
-const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: LayerAccordionProps) => {
+const ChildLayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: LayerAccordionProps) => {
     const { id: layerId, title: layerTitle } = layer;
     const { view } = useContext(MapContext);
     const typeNarrowedLayer = layer as TypeNarrowedLayer;
     const isMobile = window.innerWidth < 768;
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions, isLoading: isDescriptionsLoading, error: descriptionsError } = useFetchLayerDescriptions();
-    const [localVisibility, setLocalVisibility] = useState(layer.visible);
+    const [childLayerVisibility, setChildLayerVisibility] = useState(layer.visible);
+    const [accordionValue, setAccordionValue] = useState<string>("");
 
     const { refetch: fetchExtent, data: cachedExtent, isLoading } = useLayerExtent(typeNarrowedLayer);
 
@@ -80,14 +81,21 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
 
     // Update local visibility when the layer's visibility changes externally
     useEffect(() => {
-        setLocalVisibility(layer.visible);
+        setChildLayerVisibility(layer.visible);
     }, [layer.visible, forceUpdate]);
 
     const handleChildVisibilityToggle = (checked: boolean) => {
-        setLocalVisibility(checked);
+        setChildLayerVisibility(checked);
         updateLayer(layer => {
             layer.visible = checked;
         });
+
+        if (checked && accordionValue === "") { // Expand the accordion if the layer is checked
+            setAccordionValue("item-1");
+        } else if (!checked && accordionValue === "item-1") { // Collapse the accordion if the layer is unchecked
+            setAccordionValue("");
+        }
+
         // Call the onVisibilityChange callback if provided
         onVisibilityChange?.(checked);
     };
@@ -96,19 +104,28 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
         layer.opacity = value / 100;
     });
 
+    const handleAccordionChange = (value: string) => {
+        setAccordionValue(value);
+    };
+
     if (isDescriptionsLoading) return <div>Loading...</div>;
     if (descriptionsError) return <div>Error: {descriptionsError.message}</div>;
 
     return (
         <div key={layerId}>
-            <Accordion type="single" collapsible>
+            <Accordion
+                type="single"
+                collapsible
+                value={accordionValue}
+                onValueChange={handleAccordionChange}
+            >
                 <AccordionItem value="item-1">
                     <AccordionHeader>
                         {
                             isTopLevel && (
                                 // use switch for top level layers
                                 <Switch
-                                    checked={localVisibility}
+                                    checked={childLayerVisibility}
                                     onCheckedChange={handleChildVisibilityToggle}
                                     className="mx-2"
                                 />
@@ -118,7 +135,7 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
                             !isTopLevel && (
                                 // use checkbox for child layers
                                 <Checkbox
-                                    checked={localVisibility}
+                                    checked={childLayerVisibility}
                                     onCheckedChange={handleChildVisibilityToggle}
                                     className="mx-2"
                                 />
@@ -137,22 +154,23 @@ const LayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChange }: 
                             handleZoomToLayer={handleZoomToLayer}
                             layerId={layerId}
                             url={typeNarrowedLayer.url}
+                            openLegend={true}
                         />
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
-        </div>
+        </div >
     );
 };
 
-const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
-
+const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
     const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState, accordionTriggerRef } = useLayerVisibilityManager(layer);
     const invertedChildLayers = [...layer.layers].reverse(); // inverse the order of the layers to match the order in the map
+    const defaultValues = [`${localState.groupVisibility ? `item-${index}` : ''}`]; // if group is visible, expand the accordion
 
     return (
         <div className="mr-2 border border-secondary rounded my-2">
-            <Accordion type="multiple">
+            <Accordion type="multiple" defaultValue={defaultValues}>
                 <AccordionItem value={`item-${index}`}>
                     <AccordionHeader>
                         <Switch
@@ -176,7 +194,7 @@ const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: num
                         </div>
                         {invertedChildLayers?.map((childLayer) => (
                             <div className="ml-4" key={childLayer.id}>
-                                <LayerAccordion
+                                <ChildLayerAccordion
                                     layer={childLayer}
                                     isTopLevel={false}
                                     onVisibilityChange={(checked) => handleChildLayerToggle(childLayer, checked, layer)}
@@ -190,6 +208,7 @@ const GroupLayerItem = ({ layer, index }: { layer: __esri.GroupLayer; index: num
     );
 };
 
+
 const useCustomLayerList = () => {
     const { activeLayers } = useContext(MapContext);
     const [layerList, setLayerList] = useState<__esri.Collection<JSX.Element>>();
@@ -197,24 +216,30 @@ const useCustomLayerList = () => {
     useEffect(() => {
         if (activeLayers) {
             const invertedGroupLayers = [...activeLayers].reverse(); // inverse the order of the layers to match the order in the map
-            const list = invertedGroupLayers.map((layer, index) => {
-                if (layer.type === 'group') {
-                    return <GroupLayerItem key={layer.id} layer={layer as __esri.GroupLayer} index={index} />;
-                }
 
-                return (
-                    <div className='mr-2 my-2 border border-secondary rounded' key={layer.id}>
-                        <LayerAccordion layer={layer} isTopLevel={true} />
-                    </div>
-                );
-            });
+            const list = invertedGroupLayers
+                .filter(layer => {
+                    // Exclude dynamic sketch-related layers
+                    return !(layer.type === 'graphics');
+                })
+                .map((layer, index) => {
+                    if (layer.type === 'group') {
+                        return <GroupLayerAccordion key={layer.id} layer={layer as __esri.GroupLayer} index={index} />;
+                    }
+
+                    return (
+                        <div className='mr-2 my-2 border border-secondary rounded' key={layer.id}>
+                            <ChildLayerAccordion layer={layer} isTopLevel={true} />
+                        </div>
+                    );
+                });
 
             setLayerList(new Collection(list));
         }
 
         return () => {
             setLayerList(undefined);
-        }
+        };
     }, [activeLayers]);
 
     return layerList;

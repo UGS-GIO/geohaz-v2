@@ -8,6 +8,7 @@ import { useSidebar } from '@/hooks/use-sidebar';
 import { useGetSidebarLinks } from '@/hooks/use-get-sidebar-links';
 import { SideLink } from '@/lib/types/sidelink-types';
 import { useGetPageInfo } from '@/hooks/use-get-website-info';
+import { Link } from '@/components/custom/link';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> { }
 
@@ -71,11 +72,13 @@ export default function Sidebar({
           className='z-50 flex justify-between px-4 py-3 shadow-sm md:px-4'
         >
           <div className={`flex items-center ${!isCollapsed ? 'gap-2' : ''}`}>
-            <img
-              src='/logo_main.png'
-              alt='Utah Geological Survey Logo'
-              className={`transition-all ${isCollapsed ? 'h-6 w-6' : 'h-8 w-[1.75rem]'}`}
-            />
+            <Link to="https://geology.utah.gov/" className="cursor-pointer">
+              <img
+                src='/logo_main.png'
+                alt='Utah Geological Survey Logo'
+                className={`transition-all ${isCollapsed ? 'h-6 w-6' : 'h-8 w-[1.75rem]'}`}
+              />
+            </Link>
             <div
               className={`flex flex-col justify-end truncate ${isCollapsed ? 'invisible w-0' : 'visible w-auto'
                 }`}

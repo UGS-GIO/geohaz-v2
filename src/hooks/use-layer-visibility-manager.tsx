@@ -1,7 +1,7 @@
 import { LayerListContext } from "@/context/layerlist-provider";
 import { MapContext } from "@/context/map-provider";
 import { findLayerById } from "@/lib/mapping-utils";
-import { useContext, useState, useEffect, useCallback, useRef, RefObject } from "react";
+import { useContext, useState, useEffect, useCallback, useRef } from "react";
 
 const useLayerVisibilityManager = (layer: __esri.Layer) => {
     const { activeLayers } = useContext(MapContext);
@@ -53,7 +53,7 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
         }
     }, [currentLayer, setGroupLayerVisibility]);
 
-    const handleGroupLayerVisibilityToggle = useCallback((newVisibility: boolean, accordionTriggerRef?: RefObject<HTMLButtonElement>) => {
+    const handleGroupLayerVisibilityToggle = useCallback((newVisibility: boolean) => {
 
         if (currentLayer?.type === 'group') {
             const groupLayer = currentLayer as __esri.GroupLayer;
@@ -63,37 +63,24 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
                 ...prev,
                 [groupLayer.id]: newVisibility
             }));
-
-            if (accordionTriggerRef) {
-                const accordionState = accordionTriggerRef.current?.getAttribute('data-state');
-                if (accordionState === 'closed' && newVisibility === true) { // open the accordion if it's closed
-                    accordionTriggerRef.current?.click();
-                }
-                if (accordionState === 'open' && !groupLayer.layers?.some(layer => layer.visible) && newVisibility === false) { // close the accordion if it's open and no child layers are visible
-                    accordionTriggerRef.current?.click();
-                }
-            }
         }
     }, [currentLayer, setGroupLayerVisibility]);
 
     const handleToggleAll = useCallback((checked: boolean) => {
         if (currentLayer?.type === 'group') {
             const groupLayer = currentLayer as __esri.GroupLayer;
-            // Update group layer visibility
-            handleGroupLayerVisibilityToggle(checked)
-
-            // Turn on/off group layer and all sublayers
+            // Only update child layers' visibility, but not the group visibility
             groupLayer.layers?.forEach(childLayer => {
-                childLayer.visible = checked
+                childLayer.visible = checked;
             });
 
-            // Update local state
-            setLocalState({
-                groupVisibility: checked,
-                selectAllChecked: checked
-            })
+            // Update select all state without modifying group visibility
+            setLocalState(prev => ({
+                ...prev,
+                selectAllChecked: checked // Only update select all state
+            }));
         }
-    }, [currentLayer, setGroupLayerVisibility]);
+    }, [currentLayer]);
 
     const handleChildLayerToggle = (childLayer: __esri.Layer, checked: boolean, layer: __esri.GroupLayer
     ) => {
@@ -117,7 +104,7 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
 
     const handleGroupVisibilityToggle = (checked: boolean) => {
         setLocalState(prev => ({ ...prev, groupVisibility: checked }));
-        handleGroupLayerVisibilityToggle(checked, accordionTriggerRef);
+        handleGroupLayerVisibilityToggle(checked);
     };
 
     return {
