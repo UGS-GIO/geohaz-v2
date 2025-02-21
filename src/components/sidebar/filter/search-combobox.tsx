@@ -40,7 +40,7 @@ interface SearchComboboxProps<T> {
 function SearchCombobox<T>({
     config,
     onSearchSelect,
-    onFeatureSelect,
+    // onFeatureSelect,
 }: SearchComboboxProps<T>) {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState('');

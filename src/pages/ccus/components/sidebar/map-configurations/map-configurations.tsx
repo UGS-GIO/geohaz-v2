@@ -15,23 +15,23 @@ function MapConfigurations() {
     }
   };
   // Fault search configuration
-  const searchConfig1 = {
-    postgrest: {
-      url: PROD_POSTGREST_URL,
-      functionName: "search_fault_data",
-      searchTermParam: "search_term",
-      searchKeyParam: "search_key",
-      displayField: "concatnames"
-    },
-    geoserver: {
-      url: PROD_GEOSERVER_URL,
-      workspace: ENERGY_MINERALS_WORKSPACE,
-      layer: wellWithTopsLayerName,
-      filterField: "hascore"
-    },
-    placeholder: "Search wells...",
-    // buttonWidth: "w-[350px]"
-  };
+  // const searchConfig1 = {
+  //   postgrest: {
+  //     url: PROD_POSTGREST_URL,
+  //     functionName: "search_fault_data",
+  //     searchTermParam: "search_term",
+  //     searchKeyParam: "search_key",
+  //     displayField: "concatnames"
+  //   },
+  //   geoserver: {
+  //     url: PROD_GEOSERVER_URL,
+  //     workspace: ENERGY_MINERALS_WORKSPACE,
+  //     layer: wellWithTopsLayerName,
+  //     filterField: "hascore"
+  //   },
+  //   placeholder: "Search wells...",
+  //   // buttonWidth: "w-[350px]"
+  // };
 
   const searchConfig = [
     {
