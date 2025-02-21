@@ -1,40 +1,98 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { LayerProps } from "@/lib/types/mapping-types";
 import { useGetCurrentPage } from "./use-get-current-page";
 
-const useGetLayerConfig = () => {
+export interface LayerOrderConfig {
+    layerName: string;
+    position: 'start' | 'end' | number;
+}
+
+const useGetLayerConfig = (layerOrderConfigs?: LayerOrderConfig[]) => {
     const currentPage = useGetCurrentPage();
     const [layerConfig, setLayerConfig] = useState<LayerProps[] | null>(null);
+
+    // Memoize the layerOrderConfigs to prevent unnecessary re-renders
+    const memoizedLayerOrderConfigs = useMemo(() => layerOrderConfigs, [JSON.stringify(layerOrderConfigs)]);
 
     useEffect(() => {
         const loadConfig = async () => {
             try {
-                // Dynamically import the config file based on the page
                 const config = await import(`@/pages/${currentPage}/data/layers.tsx`);
+                let processedConfig = [...config.default];
 
-                // Reverse the main layers so the map displays them in the correct order
-                const reversedConfig = [...config.default].reverse();
+                // Function to find a layer by name in a nested structure
+                const findLayerByName = (layers: LayerProps[], name: string): { layer: LayerProps; parent: LayerProps[] | null } | null => {
+                    for (const layer of layers) {
+                        if (layer.title === name) {
+                            return { layer, parent: layers };
+                        }
 
-                // Reverse the child layers (if any) for same reason to display them in the correct order
-                const reversedLayersWithChildren = reversedConfig.map(layer => {
-                    if (layer.layers) {
-                        // If the layer has a 'layers' property (child layers), reverse them as well
+                        // Check in group layers
+                        if ('layers' in layer && Array.isArray(layer.layers)) {
+                            const result = findLayerByName(layer.layers, name);
+                            if (result) return result;
+                        }
+                    }
+                    return null;
+                };
+
+                // If we have layer order configurations, process them
+                if (memoizedLayerOrderConfigs && memoizedLayerOrderConfigs.length > 0) {
+                    const layersToReorder = new Map<string, { layer: LayerProps; parent: LayerProps[] | null }>();
+
+                    // First, find and remove all layers that need to be reordered
+                    memoizedLayerOrderConfigs.forEach(config => {
+                        const result = findLayerByName(processedConfig, config.layerName);
+                        if (result) {
+                            layersToReorder.set(config.layerName, result);
+                            if (result.parent) {
+                                const index = result.parent.indexOf(result.layer);
+                                if (index !== -1) {
+                                    result.parent.splice(index, 1);
+                                }
+                            }
+                        }
+                    });
+
+                    // Then, insert layers at their specified positions in the root config
+                    memoizedLayerOrderConfigs.forEach(orderConfig => {
+                        const layerInfo = layersToReorder.get(orderConfig.layerName);
+                        if (layerInfo) {
+                            if (orderConfig.position === 'start') {
+                                processedConfig.unshift(layerInfo.layer);
+                            } else if (orderConfig.position === 'end') {
+                                processedConfig.push(layerInfo.layer);
+                            } else if (typeof orderConfig.position === 'number') {
+                                const insertIndex = Math.min(
+                                    Math.max(0, orderConfig.position),
+                                    processedConfig.length
+                                );
+                                processedConfig.splice(insertIndex, 0, layerInfo.layer);
+                            }
+                        }
+                    });
+                }
+
+                // Function to reverse nested structures
+                const reverseNestedStructures = (layer: LayerProps): LayerProps => {
+                    if ('layers' in layer && Array.isArray(layer.layers)) {
                         return {
                             ...layer,
-                            layers: [...layer.layers].reverse()  // Reverse the child layers
+                            layers: [...layer.layers].reverse().map(reverseNestedStructures)
                         };
-                    } else if (layer.sublayers) {
-                        // If it's a WMS or similar layer with 'sublayers', reverse them
+                    } else if ('sublayers' in layer && Array.isArray(layer.sublayers)) {
                         return {
                             ...layer,
-                            sublayers: [...layer.sublayers].reverse()  // Reverse the sublayers
+                            sublayers: [...layer.sublayers].reverse()
                         };
                     }
                     return layer;
-                });
+                };
 
-                // Set the reversed config (both main layers and child layers)
-                setLayerConfig(reversedLayersWithChildren);
+                // Reverse the main config and all nested structures
+                const reversedConfig = processedConfig.reverse().map(reverseNestedStructures);
+
+                setLayerConfig(reversedConfig);
             } catch (error) {
                 console.error('Error loading layer configuration:', error);
                 setLayerConfig(null);
@@ -42,7 +100,7 @@ const useGetLayerConfig = () => {
         };
 
         loadConfig();
-    }, [currentPage]);
+    }, [currentPage, memoizedLayerOrderConfigs]); // Added memoizedLayerOrderConfigs to dependencies
 
     return layerConfig;
 };

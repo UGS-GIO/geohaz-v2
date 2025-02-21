@@ -99,7 +99,7 @@ function PopupDrawer({
                     )}
                 </DrawerHeader>
 
-                <DrawerDescription className="hidden" /> {/* present but hidden to resolve console warning */}
+                {/* <DrawerDescription className="hidden" /> present but hidden to resolve console warning */}
                 <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden mb-6">
                     {screenSize.height > 1080 &&
                         <header className="border-b overflow-hidden h-12">
