@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
 import { SearchCombobox } from '@/components/sidebar/filter/search-combobox';
-import { ENERGY_MINERALS_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL, wellWithTopsLayerName } from '@/pages/ccus/data/layers';
+// import { ENERGY_MINERALS_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL, wellWithTopsLayerName } from '@/pages/ccus/data/layers';
+import { PROD_POSTGREST_URL, wellWithTopsLayerName } from '@/pages/ccus/data/layers';
 
 function MapConfigurations() {
   const { setIsDecimalDegrees, locationCoordinateFormat } = useMapCoordinates();
