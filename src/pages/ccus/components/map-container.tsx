@@ -54,7 +54,7 @@ export default function ArcGISMap() {
         if (mapRef.current && loadMap) {
             // Check if zoom and center are valid before loading
             if (zoom && center && layersConfig) {
-                loadMap(mapRef.current, { zoom, center }, layersConfig);
+                loadMap(mapRef.current, { zoom, center }, layersConfig, 'map');
             }
         }
     }, [loadMap, mapRef, zoom, center, layersConfig]);
@@ -118,6 +118,7 @@ export default function ArcGISMap() {
                                     fieldLabel: table.fieldLabel || ""         // Default value if missing
                                 }))
                             }),
+                            ...(value.schema && { schema: value.schema }),
                         };
                         if (value.rasterSource) {
                             // Await the rasterSource promise

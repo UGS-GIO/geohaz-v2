@@ -25,6 +25,7 @@ export const useMapInteractions = () => {
         linkFields?: LinkFields;
         colorCodingMap?: ColorCodingRecordFunction;
         rasterSource?: RasterSource;
+        schema?: string;
     }>;
 
     type VisibleLayersResult = {
@@ -84,6 +85,7 @@ export const useMapInteractions = () => {
                             linkFields: sublayer.linkFields,
                             colorCodingMap: sublayer.colorCodingMap,
                             rasterSource: sublayer.rasterSource,
+                            schema: sublayer.schema,
                         };
                     }
                 });
@@ -103,6 +105,7 @@ export const useMapInteractions = () => {
                                     linkFields: sublayer.linkFields,
                                     colorCodingMap: sublayer.colorCodingMap,
                                     rasterSource: sublayer.rasterSource,
+                                    schema: sublayer.schema,
                                 };
                             }
                         });
