@@ -1,12 +1,12 @@
 import { MapWidgets } from '@/pages/ccus/components/map-widgets';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
-import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
 import { useMapContainer } from "@/hooks/use-map-container";
+import { LayerOrderConfig } from '@/hooks/use-get-layer-config';
 
 export default function ArcGISMap() {
     const layerOrderConfigs: LayerOrderConfig[] = [
-        { layerName: "Mapped Areas", position: "end" },
+        { layerName: "_global_", reverse: true }, // The layerName doesn't matter when using reverse because we're reversing the entire structure
     ];
 
     const {

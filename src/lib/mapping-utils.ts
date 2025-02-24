@@ -24,6 +24,7 @@ import proj4 from 'proj4';
 import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 import Extent from '@arcgis/core/geometry/Extent';
 import { basemapList } from '@/components/top-nav';
+import { LayerOrderConfig } from '@/hooks/use-get-layer-config';
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -346,32 +347,41 @@ export function setPopupAlignment(view: SceneView | MapView) {
     });
 }
 
-export interface LayerOrderConfig {
-    layerName: string;
-    position: "start" | "end" | number;
-}
-
 // Reorder layers based on the specified order config. this is useful for reordering layers in the popup
 export const reorderLayers = (layerInfo: any[], layerOrderConfigs: LayerOrderConfig[]) => {
+    // Check if we need to reverse the entire layer order
+    const shouldReverseAll = layerOrderConfigs.some(config => config.reverse === true);
 
-    // First, create an object to map layer names to their desired positions
+    // First create a working copy that we can manipulate
+    let result = [...layerInfo];
+
+    // If reverse is requested, reverse the entire array first
+    if (shouldReverseAll) {
+        result = result.reverse();
+    }
+
+    // Create a map for specific layer positioning
     const layerPositions: Record<string, number> = {};
 
     // Loop through layerOrderConfigs and assign positions
     layerOrderConfigs.forEach(config => {
+        // Skip the reverse config since we already handled it
+        if (config.reverse === true) return;
+
         if (config.position === 'start') {
-            layerPositions[config.layerName] = -Infinity; // Move to the front
+            layerPositions[config.layerName.toLowerCase()] = -Infinity; // Move to the front
         } else if (config.position === 'end') {
-            layerPositions[config.layerName] = Infinity;  // Move to the back
+            layerPositions[config.layerName.toLowerCase()] = Infinity;  // Move to the back
+        } else if (typeof config.position === 'number') {
+            layerPositions[config.layerName.toLowerCase()] = config.position;
         }
     });
 
-    // Now, sort the layers based on these positions
-    return layerInfo.sort((a, b) => {
-        // Determine the title to use for layer A (considering empty layerTitle)
-        const aLayerTitle = a.layerTitle.trim() || a.groupLayerTitle.trim() || "Unnamed Layer";
-        // Determine the title to use for layer B
-        const bLayerTitle = b.layerTitle.trim() || b.groupLayerTitle.trim() || "Unnamed Layer";
+    // Now, sort the layers based on the positions
+    return result.sort((a, b) => {
+        // Handle null/undefined safely with optional chaining and nullish coalescing
+        const aLayerTitle = (a.layerTitle?.trim() || a.groupLayerTitle?.trim() || "Unnamed Layer").toLowerCase();
+        const bLayerTitle = (b.layerTitle?.trim() || b.groupLayerTitle?.trim() || "Unnamed Layer").toLowerCase();
 
         // Get positions from the layerPositions map (default to 0 if not found)
         const aPosition = layerPositions[aLayerTitle] ?? 0;

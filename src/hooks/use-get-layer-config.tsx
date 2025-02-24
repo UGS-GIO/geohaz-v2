@@ -4,7 +4,8 @@ import { useGetCurrentPage } from "./use-get-current-page";
 
 export interface LayerOrderConfig {
     layerName: string;
-    position: 'start' | 'end' | number;
+    position?: "start" | "end" | number;
+    reverse?: boolean;
 }
 
 const useGetLayerConfig = (layerOrderConfigs?: LayerOrderConfig[]) => {
