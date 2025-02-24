@@ -810,7 +810,7 @@ const quads24kWMSConfig: WMSLayerProps = {
     ],
 }
 
-const studyAreasLayerName = 'studyareas';
+const studyAreasLayerName = 'studyareas_current';
 const studyAreasWMSTitle = 'Mapped Areas';
 const studyAreasWMSConfig: WMSLayerProps = {
     type: 'wms',
