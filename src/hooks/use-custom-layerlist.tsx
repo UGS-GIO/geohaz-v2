@@ -165,7 +165,7 @@ const ChildLayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChang
 
 const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
     const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState, accordionTriggerRef } = useLayerVisibilityManager(layer);
-    const invertedChildLayers = [...layer.layers].reverse(); // inverse the order of the layers to match the order in the map
+    const childLayers = [...layer.layers];
     const defaultValues = [`${localState.groupVisibility ? `item-${index}` : ''}`]; // if group is visible, expand the accordion
 
     return (
@@ -192,7 +192,7 @@ const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index
                             />
                             <label className="text-sm font-medium italic">Select All</label>
                         </div>
-                        {invertedChildLayers?.map((childLayer) => (
+                        {childLayers?.map((childLayer) => (
                             <div className="ml-4" key={childLayer.id}>
                                 <ChildLayerAccordion
                                     layer={childLayer}
@@ -215,9 +215,9 @@ const useCustomLayerList = () => {
 
     useEffect(() => {
         if (activeLayers) {
-            const invertedGroupLayers = [...activeLayers].reverse(); // inverse the order of the layers to match the order in the map
+            const groupLayers = [...activeLayers];
 
-            const list = invertedGroupLayers
+            const list = groupLayers
                 .filter(layer => {
                     // Exclude dynamic sketch-related layers
                     return !(layer.type === 'graphics');
