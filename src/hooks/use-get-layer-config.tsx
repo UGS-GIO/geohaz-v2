@@ -27,22 +27,6 @@ const useGetLayerConfig = (layerOrderConfigs?: LayerOrderConfig[]) => {
         return null;
     };
 
-    // Function to reverse nested structures
-    const nestedStructures = (layer: LayerProps): LayerProps => {
-        if ('layers' in layer && Array.isArray(layer.layers)) {
-            return {
-                ...layer,
-                layers: [...layer.layers].map(nestedStructures)
-            };
-        } else if ('sublayers' in layer && Array.isArray(layer.sublayers)) {
-            return {
-                ...layer,
-                sublayers: [...layer.sublayers]
-            };
-        }
-        return layer;
-    };
-
     // Memoize the layerOrderConfigs to prevent unnecessary re-renders
     const memoizedLayerOrderConfigs = useMemo(() => layerOrderConfigs, [JSON.stringify(layerOrderConfigs)]);
 
@@ -89,10 +73,7 @@ const useGetLayerConfig = (layerOrderConfigs?: LayerOrderConfig[]) => {
                     });
                 }
 
-                // Reverse the main config and all nested structures
-                const nestedConfig = processedConfig.map(nestedStructures);
-
-                setLayerConfig(nestedConfig);
+                setLayerConfig(processedConfig);
             } catch (error) {
                 console.error('Error loading layer configuration:', error);
                 setLayerConfig(null);
