@@ -112,8 +112,6 @@ function ReportGenerator() {
 
   const getScreenshot = async (geometry: __esri.Geometry) => {
     try {
-      console.log('Initializing map and view for screenshot...');
-
       const aoi = JSON.stringify(geometry);
       const { view: screenshotView, cleanup } = await createMap(aoi);
 
@@ -128,8 +126,6 @@ function ReportGenerator() {
         height: height,
         format: "png"
       });
-
-      console.log('Screenshot captured!');
 
       // Clean up
       cleanup();
@@ -146,10 +142,6 @@ function ReportGenerator() {
   const handleNavigate = async (aoi: __esri.Geometry) => {
     setPendingAoi(aoi);
     const screenshotDataUrl = await getScreenshot(aoi);
-    console.log('aoi', aoi);
-
-    console.log('screenshotDataUrl', screenshotDataUrl);
-
 
     if (screenshotDataUrl) {
       setScreenshot(screenshotDataUrl);
@@ -328,7 +320,6 @@ function ReportGenerator() {
           });
           handleNavigate(aoi);
         } else {
-          console.log("Area of interest is too large, try again");
           setActiveDialog('areaTooLarge');
         }
 
@@ -363,6 +354,7 @@ function ReportGenerator() {
   const handleCloseDialog = () => {
     setActiveDialog(null);
     setPendingAoi(null);
+    handleReset();
   }
 
   const handleResetDrawing = () => {
