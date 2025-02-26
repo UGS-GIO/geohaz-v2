@@ -165,7 +165,7 @@ const ChildLayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChang
 
 const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
     const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState, accordionTriggerRef } = useLayerVisibilityManager(layer);
-    const childLayers = [...layer.layers];
+    const invertedChildLayers = [...layer.layers].reverse(); // inverse the order of the layers to match the order in the map
     const defaultValues = [`${localState.groupVisibility ? `item-${index}` : ''}`]; // if group is visible, expand the accordion
 
     return (
@@ -192,7 +192,7 @@ const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index
                             />
                             <label className="text-sm font-medium italic">Select All</label>
                         </div>
-                        {childLayers?.map((childLayer) => (
+                        {invertedChildLayers?.map((childLayer) => (
                             <div className="ml-4" key={childLayer.id}>
                                 <ChildLayerAccordion
                                     layer={childLayer}
@@ -200,7 +200,7 @@ const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index
                                     onVisibilityChange={(checked) => handleChildLayerToggle(childLayer, checked, layer)}
                                 />
                             </div>
-                        )).reverse()} {/* Reverse the order of child layers to match drawing order */}
+                        ))}
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
@@ -215,17 +215,14 @@ const useCustomLayerList = () => {
 
     useEffect(() => {
         if (activeLayers) {
-            const groupLayers = [...activeLayers];
+            const invertedGroupLayers = [...activeLayers].reverse(); // inverse the order of the layers to match the order in the map
 
-            const list = groupLayers
+            const list = invertedGroupLayers
                 .filter(layer => {
                     // Exclude dynamic sketch-related layers
                     return !(layer.type === 'graphics');
                 })
-                .reverse() // Reverse the order of layers to match drawing order
                 .map((layer, index) => {
-                    console.log('layer', layer);
-
                     if (layer.type === 'group') {
                         return <GroupLayerAccordion key={layer.id} layer={layer as __esri.GroupLayer} index={index} />;
                     }
