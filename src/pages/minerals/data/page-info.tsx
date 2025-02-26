@@ -121,9 +121,17 @@ const mapDetails = (
         <p>
             This web map application was created by the Utah Geological Survey (UGS) in cooperation with the U.S. Bureau of Land Management (BLM) to show mineral resource information in Utah. Use the links below to download the map data.
         </p>
-        <h2 className="text-xl font-bold">
-            Layer Information
-        </h2>
+    </div>
+)
+
+const mapDetailsShortened = (
+    <p className='text-left text-sm mx-2 font-normal'>
+        This web map application was created by the Utah Geological Survey (UGS) in cooperation with the U.S. Bureau of Land Management (BLM) to show mineral resource information in Utah. Use the links below to download the map data.
+    </p>
+)
+
+const dataSources = (
+    <div className='mx-2 space-y-2'>
         <p>
             <strong>
                 Utah Mineral Occurance System (UMOS) (<Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-757/ofr-757.zip">data</Link>, <Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-757/ofr-757.pdf">report</Link>)
@@ -163,20 +171,6 @@ const mapDetails = (
         </p>
         <p className="pl-4">
             Mineral resource assessment reports of BLM Wilderness Study Areas prepared by the U.S. Bureau of Mines.
-        </p>
-    </div>
-)
-
-const mapDetailsShortened = (
-    <p className='text-left text-sm mx-2 font-normal'>
-        This web map application was created by the Utah Geological Survey (UGS) in cooperation with the U.S. Bureau of Land Management (BLM) to show mineral resource information in Utah. Use the links below to download the map data.
-    </p>
-)
-
-const dataSources = (
-    <div className='mx-2 space-y-2'>
-        <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae laudantium repellat amet saepe voluptate velit neque molestiae atque vero facilis minima, dicta maxime expedita animi natus quos quod rerum ipsum.
         </p>
     </div>
 )
