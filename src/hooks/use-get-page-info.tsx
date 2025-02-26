@@ -21,6 +21,8 @@ const useGetPageInfo = () => {
             try {
                 // Dynamically import the config file based on the page
                 const websiteInfo = await import(`@/pages/${currentPage}/data/page-info.tsx`);
+                console.log('websiteInfo:', websiteInfo);
+
                 setInfo(websiteInfo);
             } catch (error) {
                 console.error('Error loading sidebar configuration:', error);

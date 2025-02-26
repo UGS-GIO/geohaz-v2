@@ -7,7 +7,7 @@ import Layers from '@/components/sidebar/layers';
 import { BackToMenuButton } from '../custom/back-to-menu-button';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerTrigger } from '@/components/ui/drawer';
-import { useGetPageInfo } from '@/hooks/use-get-website-info';
+import { useGetPageInfo } from '@/hooks/use-get-page-info';
 
 function Info() {
   type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | '';
