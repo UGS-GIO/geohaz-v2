@@ -147,7 +147,7 @@ const mapDetails = (
         <p>
             Hazard map layers can be enabled using the group toggle buttons and layer checkboxes. Select features on the map to view detailed information about hazard susceptibilities. Create summary reports for individual areas by using the Report Generator tool.
         </p>
-        <p>
+        <p className="italic">
             Please note that most hazards have been mapped within specific study areas and not comprehensively statewide. Therefore, the absence of data in a particular location does not indicate the absence of geologic hazards.
         </p>
         <p>
@@ -170,7 +170,7 @@ const dataSources = (
         <p>
             The data exists as an attributed GIS feature class available for download: <Link to="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip">GIS Data</Link>
         </p>
-        <p>
+        <p className="font-bold">
             Database Updated February 2025
         </p>
         <p>
