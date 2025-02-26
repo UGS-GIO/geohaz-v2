@@ -254,8 +254,8 @@ export const createView = (
 
 // Dynamically add layers to the map
 export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
-    // Add layers to the map
-    layers.forEach((layer: LayerProps) => {
+    // Add layers to the map in reverse order to maintain the correct drawing order
+    layers.reverse().forEach((layer: LayerProps) => {
         const createdLayer = createLayer(layer) as __esri.Layer;
         if (createdLayer) {
             map.add(createdLayer)
@@ -296,7 +296,8 @@ function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
 export const createLayer = (layer: LayerProps) => {
     if (layer.type === 'group') {
         const typedLayer = layer as GroupLayerProps;
-        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined) as __esri.CollectionProperties<__esri.LayerProperties> | undefined;
+        // Recursively create group layers and reverse the order
+        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined).reverse() as __esri.CollectionProperties<__esri.LayerProperties> | undefined;
         return new GroupLayer({
             title: layer.title,
             visible: layer.visible,
