@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import Graphic from "@arcgis/core/Graphic";
+import { Link } from "@/components/custom/link";
 
 
 type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
@@ -368,8 +369,8 @@ function ReportGenerator() {
       <div className="p-4 space-y-4">
         <div>
           <h3 className="text-lg font-medium mb-2">Report Generator</h3>
-          <p>
-            The Report Generator is designed to provide a summary of information for small areas. If your area of interest is larger than that, you will see a notification prompting you to select a smaller area.
+          <p className="text-sm">
+            The Report Generator is designed to provide a summary of geologic hazard information for small areas. Use the current map extent or create a custom area and double-click to finish the drawing. If your area of interest is too large, you will be prompted to select a smaller area.
           </p>
         </div>
         <div className="space-y-2">
@@ -387,6 +388,9 @@ function ReportGenerator() {
             </Button>
           </div>
         </div>
+        <p className="text-sm italic">
+          These summary reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. See your local city or county building department for details on these investigations and <Link to="https://ugspub.nr.utah.gov/publications/circular/c-122.pdf">UGS Circular 122</Link> for more information.
+        </p>
       </div>
 
       {/* Area Too Large Dialog */}
