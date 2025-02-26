@@ -200,7 +200,7 @@ const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index
                                     onVisibilityChange={(checked) => handleChildLayerToggle(childLayer, checked, layer)}
                                 />
                             </div>
-                        ))}
+                        )).reverse()} {/* Reverse the order of child layers to match drawing order */}
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
@@ -222,8 +222,10 @@ const useCustomLayerList = () => {
                     // Exclude dynamic sketch-related layers
                     return !(layer.type === 'graphics');
                 })
-                .reverse()
+                .reverse() // Reverse the order of layers to match drawing order
                 .map((layer, index) => {
+                    console.log('layer', layer);
+
                     if (layer.type === 'group') {
                         return <GroupLayerAccordion key={layer.id} layer={layer as __esri.GroupLayer} index={index} />;
                     }
