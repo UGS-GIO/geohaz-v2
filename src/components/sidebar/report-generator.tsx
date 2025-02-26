@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import Graphic from "@arcgis/core/Graphic";
+import { Link } from "@/components/custom/link";
 
 
 type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
@@ -112,8 +113,6 @@ function ReportGenerator() {
 
   const getScreenshot = async (geometry: __esri.Geometry) => {
     try {
-      console.log('Initializing map and view for screenshot...');
-
       const aoi = JSON.stringify(geometry);
       const { view: screenshotView, cleanup } = await createMap(aoi);
 
@@ -128,8 +127,6 @@ function ReportGenerator() {
         height: height,
         format: "png"
       });
-
-      console.log('Screenshot captured!');
 
       // Clean up
       cleanup();
@@ -146,10 +143,6 @@ function ReportGenerator() {
   const handleNavigate = async (aoi: __esri.Geometry) => {
     setPendingAoi(aoi);
     const screenshotDataUrl = await getScreenshot(aoi);
-    console.log('aoi', aoi);
-
-    console.log('screenshotDataUrl', screenshotDataUrl);
-
 
     if (screenshotDataUrl) {
       setScreenshot(screenshotDataUrl);
@@ -328,7 +321,6 @@ function ReportGenerator() {
           });
           handleNavigate(aoi);
         } else {
-          console.log("Area of interest is too large, try again");
           setActiveDialog('areaTooLarge');
         }
 
@@ -363,6 +355,7 @@ function ReportGenerator() {
   const handleCloseDialog = () => {
     setActiveDialog(null);
     setPendingAoi(null);
+    handleReset();
   }
 
   const handleResetDrawing = () => {
@@ -376,8 +369,8 @@ function ReportGenerator() {
       <div className="p-4 space-y-4">
         <div>
           <h3 className="text-lg font-medium mb-2">Report Generator</h3>
-          <p>
-            The Report Generator is designed to provide a summary of information for small areas. If your area of interest is larger than that, you will see a notification prompting you to select a smaller area.
+          <p className="text-sm">
+            The Report Generator is designed to provide a summary of geologic hazard information for small areas. Use the current map extent or create a custom area and double-click to finish the drawing. If your area of interest is too large, you will be prompted to select a smaller area.
           </p>
         </div>
         <div className="space-y-2">
@@ -395,6 +388,9 @@ function ReportGenerator() {
             </Button>
           </div>
         </div>
+        <p className="text-sm italic">
+          These summary reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. See your local city or county building department for details on these investigations and <Link to="https://ugspub.nr.utah.gov/publications/circular/c-122.pdf">UGS Circular 122</Link> for more information.
+        </p>
       </div>
 
       {/* Area Too Large Dialog */}
