@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { useGetSidebarLinks } from '@/hooks/use-get-sidebar-links';
 import { SideLink } from '@/lib/types/sidelink-types';
-import { useGetPageInfo } from '@/hooks/use-get-website-info';
+import { useGetPageInfo } from '@/hooks/use-get-page-info';
 import { Link } from '@/components/custom/link';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> { }
