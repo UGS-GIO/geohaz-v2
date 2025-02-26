@@ -1,6 +1,6 @@
 import { Link } from "@/components/custom/link";
 
-const appTitle = 'Mineral Reources Portal';
+const appTitle = 'Utah Mineral Resources: Metals and Industrial Minerals';
 
 const references = (
     <div>
@@ -107,13 +107,10 @@ const acknowledgements = (
 const dataDisclaimer = (
     <div className="space-y-2">
         <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
+            Although this product represents the work of professional scientists, the Utah Department of Natural Resources, Utah Geological Survey and U.S. Department of the Interior, U.S. Bureau of Land Management make no warranty, expressed or implied, regarding its suitability for any particular use. The Utah Department of Natural Resources, Utah Geological Survey, and U.S. Department of the Interior, U.S. Bureau of Land Management shall not be liable under any circumstances for any direct, indirect, special, incidental, or consequential damages with respect to claims by users of this product. The Utah Geological Survey and U.S. Bureau of Land Management do not guarantee accuracy or completeness of the data. The views and conclusions contained in this document are those of the authors and should not be interpreted as necessarily representing the official policies, either expressed or implied, of the U.S. Government. Persons or agencies using these data specifically agree not to misrepresent the data, nor to imply that changes they made were approved by the Utah Geological Survey, and should indicate the data source and any modifications made on plots, digital copies, derivative products, and in metadata. The authors' determinations of resource potential DO NOT imply a determination of locatability for claim-staking purposes. The authors' determinations of resource potential also DO NOT imply potential for development of mineral resources.
         </p>
         <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
-        </p>
-        <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
+            The Utah Geological Survey presents U.S. Bureau of Mines Mineral Land Assessments as a public service and has no role in the production or approval of these reports. The Utah Department of Natural Resources, Utah Geological Survey makes no warranty, expressed or implied, regarding the suitability of these reports for a particular purpose and shall not be liable under any circumstances for any direct, indirect, special, incidental, or consequential damages with respect to claims by users of this product.
         </p>
     </div>
 );
@@ -121,26 +118,57 @@ const dataDisclaimer = (
 const mapDetails = (
     <div className='mx-2 space-y-2'>
         <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
+            This web map application was created by the Utah Geological Survey (UGS) in cooperation with the U.S. Bureau of Land Management (BLM) to show mineral resource information in Utah. Use the links below to download the map data.
+        </p>
+        <h2 className="text-xl font-bold">
+            Layer Information
+        </h2>
+        <p>
+            <strong>
+                Utah Mineral Occurance System (UMOS) (<Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-757/ofr-757.zip">data</Link>, <Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-757/ofr-757.pdf">report</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            A database of mineral occurrences, prospects, mines, and mineral resources in the state of Utah.
         </p>
         <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
+            <strong>
+                Critical Mineral Occurrences (<Link to="https://ugspub.nr.utah.gov/publications/circular/c-135.pdf">publication</Link>, <Link to="https://geology.utah.gov/apps/blm_mineral/appfiles/Utah_Critical_Minerals.gdb.zip">current GIS data</Link>, <Link to="https://geology.utah.gov/apps/blm_mineral/appfiles/Utah_CriticalMinerals.gdb.zip">old GIS data</Link>)
+            </strong>
         </p>
-        <p className="font-bold">
-            Database Updated May 2020
-        </p>
-        <p className="font-bold">
-            Related Information
+        <p className="pl-4">
+            Locations in Utah with critical mineral potential and of known critical mineral occurrences. Definition of critical mineral is based on the <Link to="https://www.federalregister.gov/documents/2022/02/24/2022-04027/2022-final-list-of-critical-minerals">2022 list published by the U.S. Geological Survey.</Link>.
         </p>
         <p>
-            For more information, see <Link to="https://geology.utah.gov/hazards/">https://geology.utah.gov/hazards/</Link> or contact the UGS.
+            <strong>
+                Mining Districts (<Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-695.pdf">publication</Link>, <Link to="https://geology.utah.gov/apps/blm_mineral/appfiles/Mining_Districts_20190116gdb.zip">GIS data</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Locations of Utah’s mining districts with summaries of relevant information for each district.
+        </p>
+        <p>
+            <strong>
+                Industrial Mineral Resource Potential (<Link to="https://ugspub.nr.utah.gov/publications/circular/c-135.pdf">publication</Link>, <Link to="https://geology.utah.gov/apps/blm_mineral/appfiles/Utah_IM_GIS.zip">download</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Resource potential for various locatable industrial mineral commodities.
+        </p>
+        <p>
+            <strong>
+                U.S. Bureau of Mines Wilderness Study Area (WSA) Mineral Land Assessment
+            </strong>
+        </p>
+        <p className="pl-4">
+            Mineral resource assessment reports of BLM Wilderness Study Areas prepared by the U.S. Bureau of Mines.
         </p>
     </div>
 )
 
 const mapDetailsShortened = (
     <p className='text-left text-sm mx-2 font-normal'>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis esse dolorem quam officiis...
+        This web map application was created by the Utah Geological Survey (UGS) in cooperation with the U.S. Bureau of Land Management (BLM) to show mineral resource information in Utah. Use the links below to download the map data.
     </p>
 )
 

@@ -83,7 +83,7 @@ export default function Sidebar({
               className={`flex flex-col justify-end truncate ${isCollapsed ? 'invisible w-0' : 'visible w-auto'
                 }`}
             >
-              <span className='font-medium'>{title}</span>
+              <span className='font-medium text-wrap'>{title}</span>
               <span className='text-sm'>Utah Geological Survey</span>
             </div>
           </div>
