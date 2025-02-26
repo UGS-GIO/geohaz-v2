@@ -1,4 +1,4 @@
-import { MapWidgets } from '@/pages/mineral_resources/components/map-widgets';
+import { MapWidgets } from '@/pages/minerals/components/map-widgets';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
