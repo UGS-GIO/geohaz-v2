@@ -222,6 +222,7 @@ const useCustomLayerList = () => {
                     // Exclude dynamic sketch-related layers
                     return !(layer.type === 'graphics');
                 })
+                .reverse()
                 .map((layer, index) => {
                     if (layer.type === 'group') {
                         return <GroupLayerAccordion key={layer.id} layer={layer as __esri.GroupLayer} index={index} />;

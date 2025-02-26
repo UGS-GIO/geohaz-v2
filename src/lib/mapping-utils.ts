@@ -255,7 +255,7 @@ export const createView = (
 // Dynamically add layers to the map
 export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
     // Add layers to the map
-    layers.forEach((layer: LayerProps) => {
+    layers.reverse().forEach((layer: LayerProps) => {
         const createdLayer = createLayer(layer) as __esri.Layer;
         if (createdLayer) {
             map.add(createdLayer)
