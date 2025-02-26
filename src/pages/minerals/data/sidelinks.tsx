@@ -41,11 +41,4 @@ export const sidelinks: SideLink[] = [
     icon: <Settings className='stroke-foreground' />,
     component: MapConfigurations, // Direct component reference
   },
-  {
-    title: 'Learn More',
-    label: '',
-    href: 'https://geology.utah.gov/energy-minerals/ccus/',
-    icon: <ExternalLink className='stroke-foreground' />,
-    // This link is external and does not need a component
-  }
 ];
