@@ -6,7 +6,6 @@ import { useMapContainer } from "@/hooks/use-map-container";
 
 export default function ArcGISMap() {
     const layerOrderConfigs: LayerOrderConfig[] = [
-        { layerName: "Mapped Areas", position: "end" },
     ];
 
     const {
