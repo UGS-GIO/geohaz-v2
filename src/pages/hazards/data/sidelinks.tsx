@@ -58,6 +58,6 @@ export const sidelinks: SideLink[] = [
     title: 'Feedback',
     label: '',
     href: 'https://forms.gle/RnwEi6a92grdqqFk9',
-    icon: <MessageSquare />,
+    icon: <MessageSquare className='text-ring' />,
   }
 ];
