@@ -11,7 +11,7 @@ function SearchBar() {
   const { view } = useContext(MapContext);
   const searchDivRef = useRef<HTMLDivElement | null>(null);
 
-  const qFaultsUrl = 'https://pgfeatureserv-souochdo6a-wm.a.run.app/functions/postgisftw.search_fault_data/items.json';
+  const qFaultsUrl = 'https://pgfeatureserv-180294536482.us-west3.run.app/functions/postgisftw.search_fault_data/items.json';
 
   useEffect(() => {
     let searchWidget: __esri.widgetsSearch;
