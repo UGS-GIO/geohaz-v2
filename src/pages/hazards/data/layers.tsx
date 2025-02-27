@@ -64,7 +64,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'lsfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -102,7 +102,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'lsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -139,7 +139,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'lqshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -240,7 +240,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sfrhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -274,7 +274,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'wsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -310,7 +310,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sdhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -346,7 +346,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sbphazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -382,7 +382,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'rfhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -418,7 +418,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'peshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -454,7 +454,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'exshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -491,7 +491,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sgshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -527,7 +527,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'grshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -563,7 +563,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'crshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -599,7 +599,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'csshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -635,7 +635,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'slshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -671,7 +671,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'aafhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -706,7 +706,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'efhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -742,7 +742,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'erzhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -777,7 +777,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'mkfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
