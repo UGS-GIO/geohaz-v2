@@ -227,7 +227,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     ]
                 },
                 {
-                    fieldLabel: 'LAS Related Table',
+                    fieldLabel: 'LAS File Information',
                     matchingField: 'display_api',
                     targetField: 'api',
                     logicalOperator: 'ilike',
@@ -238,11 +238,8 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'display_county', label: 'County' },
                         { field: 'display_description', label: 'Description' },
                         { field: 'display_field_name', label: 'Field Name' },
-                        { field: 'display_operator', label: 'Operator' },
-                        { field: 'display_well_name', label: 'Well Name' },
                         { field: 'display_well_status', label: 'Well Status' },
                         { field: 'display_well_type', label: 'Well Type' }
                     ]
