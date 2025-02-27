@@ -16,6 +16,7 @@ import { Route as rootRoute } from './routes/__root'
 
 // Create Virtual Routes
 
+const MineralsIndexLazyImport = createFileRoute('/minerals/')()
 const HazardsIndexLazyImport = createFileRoute('/hazards/')()
 const CcusIndexLazyImport = createFileRoute('/ccus/')()
 const HazardsReportNewreportLazyImport = createFileRoute(
@@ -27,6 +28,14 @@ const HazardsReportNewreportIndexLazyImport = createFileRoute(
 )()
 
 // Create/Update Routes
+
+const MineralsIndexLazyRoute = MineralsIndexLazyImport.update({
+  id: '/minerals/',
+  path: '/minerals/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./routes/minerals/index.lazy').then((d) => d.Route),
+)
 
 const HazardsIndexLazyRoute = HazardsIndexLazyImport.update({
   id: '/hazards/',
@@ -85,6 +94,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HazardsIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/minerals/': {
+      id: '/minerals/'
+      path: '/minerals'
+      fullPath: '/minerals'
+      preLoaderRoute: typeof MineralsIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/hazards/report/$aoi': {
       id: '/hazards/report/$aoi'
       path: '/hazards/report/$aoi'
@@ -116,9 +132,9 @@ interface HazardsReportNewreportLazyRouteChildren {
 }
 
 const HazardsReportNewreportLazyRouteChildren: HazardsReportNewreportLazyRouteChildren =
-{
-  HazardsReportNewreportIndexLazyRoute: HazardsReportNewreportIndexLazyRoute,
-}
+  {
+    HazardsReportNewreportIndexLazyRoute: HazardsReportNewreportIndexLazyRoute,
+  }
 
 const HazardsReportNewreportLazyRouteWithChildren =
   HazardsReportNewreportLazyRoute._addFileChildren(
@@ -128,6 +144,7 @@ const HazardsReportNewreportLazyRouteWithChildren =
 export interface FileRoutesByFullPath {
   '/ccus': typeof CcusIndexLazyRoute
   '/hazards': typeof HazardsIndexLazyRoute
+  '/minerals': typeof MineralsIndexLazyRoute
   '/hazards/report/$aoi': typeof HazardsReportAoiLazyRoute
   '/hazards/report/newreport': typeof HazardsReportNewreportLazyRouteWithChildren
   '/hazards/report/newreport/': typeof HazardsReportNewreportIndexLazyRoute
@@ -136,6 +153,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/ccus': typeof CcusIndexLazyRoute
   '/hazards': typeof HazardsIndexLazyRoute
+  '/minerals': typeof MineralsIndexLazyRoute
   '/hazards/report/$aoi': typeof HazardsReportAoiLazyRoute
   '/hazards/report/newreport': typeof HazardsReportNewreportIndexLazyRoute
 }
@@ -144,6 +162,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/ccus/': typeof CcusIndexLazyRoute
   '/hazards/': typeof HazardsIndexLazyRoute
+  '/minerals/': typeof MineralsIndexLazyRoute
   '/hazards/report/$aoi': typeof HazardsReportAoiLazyRoute
   '/hazards/report/newreport': typeof HazardsReportNewreportLazyRouteWithChildren
   '/hazards/report/newreport/': typeof HazardsReportNewreportIndexLazyRoute
@@ -152,30 +171,34 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-  | '/ccus'
-  | '/hazards'
-  | '/hazards/report/$aoi'
-  | '/hazards/report/newreport'
-  | '/hazards/report/newreport/'
+    | '/ccus'
+    | '/hazards'
+    | '/minerals'
+    | '/hazards/report/$aoi'
+    | '/hazards/report/newreport'
+    | '/hazards/report/newreport/'
   fileRoutesByTo: FileRoutesByTo
   to:
-  | '/ccus'
-  | '/hazards'
-  | '/hazards/report/$aoi'
-  | '/hazards/report/newreport'
+    | '/ccus'
+    | '/hazards'
+    | '/minerals'
+    | '/hazards/report/$aoi'
+    | '/hazards/report/newreport'
   id:
-  | '__root__'
-  | '/ccus/'
-  | '/hazards/'
-  | '/hazards/report/$aoi'
-  | '/hazards/report/newreport'
-  | '/hazards/report/newreport/'
+    | '__root__'
+    | '/ccus/'
+    | '/hazards/'
+    | '/minerals/'
+    | '/hazards/report/$aoi'
+    | '/hazards/report/newreport'
+    | '/hazards/report/newreport/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   CcusIndexLazyRoute: typeof CcusIndexLazyRoute
   HazardsIndexLazyRoute: typeof HazardsIndexLazyRoute
+  MineralsIndexLazyRoute: typeof MineralsIndexLazyRoute
   HazardsReportAoiLazyRoute: typeof HazardsReportAoiLazyRoute
   HazardsReportNewreportLazyRoute: typeof HazardsReportNewreportLazyRouteWithChildren
 }
@@ -183,6 +206,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   CcusIndexLazyRoute: CcusIndexLazyRoute,
   HazardsIndexLazyRoute: HazardsIndexLazyRoute,
+  MineralsIndexLazyRoute: MineralsIndexLazyRoute,
   HazardsReportAoiLazyRoute: HazardsReportAoiLazyRoute,
   HazardsReportNewreportLazyRoute: HazardsReportNewreportLazyRouteWithChildren,
 }
@@ -199,6 +223,7 @@ export const routeTree = rootRoute
       "children": [
         "/ccus/",
         "/hazards/",
+        "/minerals/",
         "/hazards/report/$aoi",
         "/hazards/report/newreport"
       ]
@@ -208,6 +233,9 @@ export const routeTree = rootRoute
     },
     "/hazards/": {
       "filePath": "hazards/index.lazy.tsx"
+    },
+    "/minerals/": {
+      "filePath": "minerals/index.lazy.tsx"
     },
     "/hazards/report/$aoi": {
       "filePath": "hazards/report/$aoi.lazy.tsx"

@@ -6,7 +6,7 @@ const GEN_GIS_WORKSPACE = 'gen_gis';
 const UNIT_DESCRIPTIONS_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/unit_descriptions';
 
 const landslideLegacyLayerName = 'landslidelegacy_current';
-const landslideLegacyWMSTitle = 'Legacy Landslide Compilation';
+const landslideLegacyWMSTitle = 'Legacy Landslide Compilation - Statewide';
 const landslideLegacyWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -158,7 +158,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
 
 // TODO: explore refactor to display peak ground acceleration like the imagery layer
 const groundshakingLayerName = 'groundshaking_current';
-const groundshakingWMSTitle = 'Earthquake Ground Shaking';
+const groundshakingWMSTitle = 'Earthquake Ground Shaking - Statewide';
 const groundshakingWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -190,7 +190,7 @@ const groundshakingWMSConfig: WMSLayerProps = {
 }
 
 const qFaultsLayerName = 'quaternaryfaults_current';
-const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults';
+const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults - Statewide';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -653,7 +653,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
 }
 
 const alluvialFanLayerName = 'alluvialfan_current';
-const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility';
+const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility - Statewide';
 const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,

@@ -254,8 +254,8 @@ export const createView = (
 
 // Dynamically add layers to the map
 export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
-    // Add layers to the map
-    layers.forEach((layer: LayerProps) => {
+    // Add layers to the map in reverse order to maintain the correct drawing order
+    layers.reverse().forEach((layer: LayerProps) => {
         const createdLayer = createLayer(layer) as __esri.Layer;
         if (createdLayer) {
             map.add(createdLayer)
@@ -296,7 +296,8 @@ function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
 export const createLayer = (layer: LayerProps) => {
     if (layer.type === 'group') {
         const typedLayer = layer as GroupLayerProps;
-        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined) as __esri.CollectionProperties<__esri.LayerProperties> | undefined;
+        // Recursively create group layers and reverse the order
+        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined).reverse() as __esri.CollectionProperties<__esri.LayerProperties> | undefined;
         return new GroupLayer({
             title: layer.title,
             visible: layer.visible,
@@ -345,6 +346,43 @@ export function setPopupAlignment(view: SceneView | MapView) {
         };
     });
 }
+
+export interface LayerOrderConfig {
+    layerName: string;
+    position: "start" | "end" | number;
+}
+
+// Reorder layers based on the specified order config. this is useful for reordering layers in the popup
+export const reorderLayers = (layerInfo: any[], layerOrderConfigs: LayerOrderConfig[]) => {
+
+    // First, create an object to map layer names to their desired positions
+    const layerPositions: Record<string, number> = {};
+
+    // Loop through layerOrderConfigs and assign positions
+    layerOrderConfigs.forEach(config => {
+        if (config.position === 'start') {
+            layerPositions[config.layerName] = -Infinity; // Move to the front
+        } else if (config.position === 'end') {
+            layerPositions[config.layerName] = Infinity;  // Move to the back
+        }
+    });
+
+    // Now, sort the layers based on these positions
+    return layerInfo.sort((a, b) => {
+        // Determine the title to use for layer A (considering empty layerTitle)
+        const aLayerTitle = a.layerTitle.trim() || a.groupLayerTitle.trim() || "Unnamed Layer";
+        // Determine the title to use for layer B
+        const bLayerTitle = b.layerTitle.trim() || b.groupLayerTitle.trim() || "Unnamed Layer";
+
+        // Get positions from the layerPositions map (default to 0 if not found)
+        const aPosition = layerPositions[aLayerTitle] ?? 0;
+        const bPosition = layerPositions[bLayerTitle] ?? 0;
+
+        // Compare positions
+        return aPosition - bPosition;
+    });
+};
+
 
 export function expandClickHandlers(view: SceneView | MapView) {
     view.when().then(() => {

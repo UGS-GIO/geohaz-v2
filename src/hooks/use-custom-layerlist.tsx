@@ -216,24 +216,30 @@ const useCustomLayerList = () => {
     useEffect(() => {
         if (activeLayers) {
             const invertedGroupLayers = [...activeLayers].reverse(); // inverse the order of the layers to match the order in the map
-            const list = invertedGroupLayers.map((layer, index) => {
-                if (layer.type === 'group') {
-                    return <GroupLayerAccordion key={layer.id} layer={layer as __esri.GroupLayer} index={index} />;
-                }
 
-                return (
-                    <div className='mr-2 my-2 border border-secondary rounded' key={layer.id}>
-                        <ChildLayerAccordion layer={layer} isTopLevel={true} />
-                    </div>
-                );
-            });
+            const list = invertedGroupLayers
+                .filter(layer => {
+                    // Exclude dynamic sketch-related layers
+                    return !(layer.type === 'graphics');
+                })
+                .map((layer, index) => {
+                    if (layer.type === 'group') {
+                        return <GroupLayerAccordion key={layer.id} layer={layer as __esri.GroupLayer} index={index} />;
+                    }
+
+                    return (
+                        <div className='mr-2 my-2 border border-secondary rounded' key={layer.id}>
+                            <ChildLayerAccordion layer={layer} isTopLevel={true} />
+                        </div>
+                    );
+                });
 
             setLayerList(new Collection(list));
         }
 
         return () => {
             setLayerList(undefined);
-        }
+        };
     }, [activeLayers]);
 
     return layerList;
