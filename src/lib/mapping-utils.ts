@@ -696,17 +696,28 @@ export async function fetchWMSFeatureInfo({
     return data;
 }
 
-export async function fetchWfsGeometry({ namespace, featureId }: { namespace: string; featureId: string }) {
+export async function fetchWfsGeometry({ namespace, feature }: { namespace: string; feature: ExtendedFeature }) {
+    console.log('Fetching WFS feature:', feature);
+    const featureId = feature.id!.toString()
+    const layerName = featureId.split('.')[0];
+    const ogcFid = feature.properties?.ogc_fid;
+
     const baseUrl = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wfs'
     const params = new URLSearchParams({
         SERVICE: 'WFS',
         REQUEST: 'GetFeature',
         VERSION: '2.0.0',
-        TYPENAMES: `${namespace}:${featureId.split('.')[0]}`, // Extract typename from featureId
+        TYPENAMES: `${namespace}:${layerName}`, // Extract typename from featureId
         OUTPUTFORMAT: 'application/json',
         SRSNAME: 'EPSG:26912',
-        FEATUREID: featureId,
     })
+    // in order to differentiate between normal layer and a view based layer
+    // we need to check if the feature has ogc_fid property
+    if (feature.properties?.ogc_fid) { // view based layer
+        params.append('CQL_FILTER', `ogc_fid=${ogcFid}`);
+    } else { // normal layer
+        params.append('FEATUREID', featureId);
+    }
 
     const url = `${baseUrl}?${params.toString()}`
 
@@ -896,7 +907,7 @@ export const highlightFeature = async (
     if ('namespace' in feature) {
         const wfsGeometry = await fetchWfsGeometry({
             namespace: feature.namespace,
-            featureId: feature.id!.toString()
+            feature: feature
         });
         targetFeature = wfsGeometry.features[0];
     } else {
