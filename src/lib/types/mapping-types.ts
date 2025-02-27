@@ -180,5 +180,5 @@ export interface RelatedTable {
 interface DisplayField {
     field: string;
     label?: string;
-    format?: (value: any) => string; // todo: add format function
+    transform?: (value: string) => React.ReactNode;
 }

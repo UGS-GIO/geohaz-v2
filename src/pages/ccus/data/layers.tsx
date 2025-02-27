@@ -1,3 +1,4 @@
+import { Link } from "@/components/custom/link";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
 export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
@@ -223,7 +224,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     },
                     displayFields: [
                         { field: 'formation_name', label: 'Formation Name' },
-                        { field: 'formation_depth', label: 'Formation Depth (meters??? verify)' },
+                        { field: 'formation_depth', label: 'Formation Depth (feet)' },
                     ]
                 },
                 {
@@ -241,7 +242,17 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                         { field: 'display_description', label: 'Description' },
                         { field: 'display_field_name', label: 'Field Name' },
                         { field: 'display_well_status', label: 'Well Status' },
-                        { field: 'display_well_type', label: 'Well Type' }
+                        { field: 'display_well_type', label: 'Well Type' },
+                        {
+                            field: 'display_source', label: 'Source', transform: (value) => {
+                                if (value === 'DOGM') {
+                                    return <Link to="https://geology.utah.gov/data/explorer/">State of Utah - Data Explorer</Link>
+                                } else if (value === 'UGS') {
+                                    return <>contact <Link to="mailto:gstpierre@utah.gov">gstpierre@utah.gov</Link></>
+                                }
+                                return value;
+                            }
+                        },
                     ]
                 }
             ]

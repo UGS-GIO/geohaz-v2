@@ -69,7 +69,8 @@ const useRelatedTable = (
                         const result = rawData.map(item => {
                             // Create label-value pairs for each field specified in displayFields
                             const labelValuePairs = config.displayFields!.map(df => {
-                                const value = item[df.field] ?? 'N/A';
+                                const transformedvalue = df.transform ? df.transform(item[df.field]) : item[df.field];
+                                const value = transformedvalue ?? 'N/A';
                                 return {
                                     label: df.label,
                                     value: value
