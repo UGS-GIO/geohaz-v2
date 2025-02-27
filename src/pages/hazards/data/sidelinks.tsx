@@ -1,4 +1,4 @@
-import { FileText, House, Info as InfoIcon, Layers as LayersIcon, MessageSquareText, Settings } from 'lucide-react'
+import { FileText, House, Info as InfoIcon, Layers as LayersIcon, MessageSquare, Settings } from 'lucide-react'
 import Info from '@/components/sidebar/info'
 import Layers from '@/components/sidebar/layers'
 import MapConfigurations from '@/components/sidebar/map-configurations'
@@ -58,6 +58,6 @@ export const sidelinks: SideLink[] = [
     title: 'Feedback',
     label: '',
     href: 'https://forms.gle/RnwEi6a92grdqqFk9',
-    icon: <MessageSquareText />,
+    icon: <MessageSquare />,
   }
 ];
