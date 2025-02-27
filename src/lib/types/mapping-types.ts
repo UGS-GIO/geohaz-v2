@@ -173,6 +173,7 @@ export interface RelatedTable {
     url: string;
     headers: Record<string, string>;
     displayFields?: DisplayField[];
+    logicalOperator?: string;
 }
 
 

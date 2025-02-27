@@ -225,6 +225,27 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                         { field: 'formation_name', label: 'Formation Name' },
                         { field: 'formation_depth', label: 'Formation Depth (meters??? verify)' },
                     ]
+                },
+                {
+                    fieldLabel: 'LAS Related Table',
+                    matchingField: 'display_api',
+                    targetField: 'api',
+                    logicalOperator: 'ilike',
+                    url: PROD_POSTGREST_URL + '/ccus_las_display_view',
+                    headers: {
+                        "Accept-Profile": 'emp',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'display_county', label: 'County' },
+                        { field: 'display_description', label: 'Description' },
+                        { field: 'display_field_name', label: 'Field Name' },
+                        { field: 'display_operator', label: 'Operator' },
+                        { field: 'display_well_name', label: 'Well Name' },
+                        { field: 'display_well_status', label: 'Well Status' },
+                        { field: 'display_well_type', label: 'Well Type' }
+                    ]
                 }
             ]
         },
