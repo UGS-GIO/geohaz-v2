@@ -5,8 +5,8 @@ const HAZARDS_WORKSPACE = 'hazards';
 const GEN_GIS_WORKSPACE = 'gen_gis';
 const UNIT_DESCRIPTIONS_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/unit_descriptions';
 
-const landslideLegacyLayerName = 'landslidelegacy';
-const landslideLegacyWMSTitle = 'Legacy Landslide Compilation';
+const landslideLegacyLayerName = 'landslidelegacy_current';
+const landslideLegacyWMSTitle = 'Legacy Landslide Compilation - Statewide';
 const landslideLegacyWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -37,7 +37,7 @@ const landslideLegacyWMSConfig: WMSLayerProps = {
     ],
 }
 
-const landslideInventoryLayerName = 'landslideinventory';
+const landslideInventoryLayerName = 'landslideinventory_current';
 const landslideInventoryWMSTitle = 'Landslides';
 const landslideInventoryWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -64,7 +64,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'lsfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -81,7 +81,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
     ],
 }
 
-const landslideSusceptibilityLayerName = 'landslidesusceptibility';
+const landslideSusceptibilityLayerName = 'landslidesusceptibility_current';
 const landslideSusceptibilityWMSTitle = 'Landslide Susceptibility';
 const landslideSusceptibilityWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -102,7 +102,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'lsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -119,7 +119,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
     ],
 }
 
-const liquefactionLayerName = 'liquefaction';
+const liquefactionLayerName = 'liquefaction_current';
 const liquefactionWMSTitle = 'Liquefaction Susceptibility';
 const liquefactionWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -139,7 +139,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'lqshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -157,8 +157,8 @@ const liquefactionWMSConfig: WMSLayerProps = {
 };
 
 // TODO: explore refactor to display peak ground acceleration like the imagery layer
-const groundshakingLayerName = 'groundshaking';
-const groundshakingWMSTitle = 'Earthquake Ground Shaking';
+const groundshakingLayerName = 'groundshaking_current';
+const groundshakingWMSTitle = 'Earthquake Ground Shaking - Statewide';
 const groundshakingWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -189,8 +189,8 @@ const groundshakingWMSConfig: WMSLayerProps = {
     ],
 }
 
-const qFaultsLayerName = 'quaternaryfaults';
-const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults';
+const qFaultsLayerName = 'quaternaryfaults_current';
+const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults - Statewide';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -221,7 +221,7 @@ const qFaultsWMSConfig: WMSLayerProps = {
 };
 
 
-const surfaceFaultRuptureLayerName = 'surfacefaultrupture';
+const surfaceFaultRuptureLayerName = 'surfacefaultrupture_current';
 const surfaceFaultRuptureWMSTitle = 'Surface Fault Rupture Special Study Zones';
 const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -240,7 +240,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sfrhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -257,7 +257,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
     ],
 }
 
-const windBlownSandLayerName = 'windblownsand';
+const windBlownSandLayerName = 'windblownsand_current';
 const windBlownSandWMSTitle = 'Wind-Blown Sand Susceptibility';
 const windBlownSandWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -274,7 +274,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'wsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -291,7 +291,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
     ],
 }
 
-const saltTectonicsDeformationLayerName = 'salttectonicsdeformation';
+const saltTectonicsDeformationLayerName = 'salttectonicsdeformation_current';
 const saltTectonicsDeformationWMSTitle = 'Salt Tectonics-Related Ground Deformation';
 const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -310,7 +310,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sdhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -327,7 +327,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
     ],
 }
 
-const shallowBedrockLayerName = 'shallowbedrock';
+const shallowBedrockLayerName = 'shallowbedrock_current';
 const shallowBedrockWMSTitle = 'Shallow Bedrock Potential';
 const shallowBedrockWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -346,7 +346,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sbphazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -363,7 +363,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
     ],
 }
 
-const rockfallHazardLayerName = 'rockfall';
+const rockfallHazardLayerName = 'rockfall_current';
 const rockfallHazardWMSTitle = 'Rockfall Hazard';
 const rockfallHazardWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -382,7 +382,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'rfhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -399,7 +399,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
     ],
 }
 
-const pipingAndErosionLayerName = 'pipinganderosion';
+const pipingAndErosionLayerName = 'pipinganderosion_current';
 const pipingAndErosionWMSTitle = 'Piping and Erosion Susceptibility';
 const pipingAndErosionWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -418,7 +418,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'peshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -435,7 +435,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
     ],
 }
 
-const expansiveSoilRockLayerName = 'expansivesoilrock';
+const expansiveSoilRockLayerName = 'expansivesoilrock_current';
 const expansiveSoilRockWMSTitle = 'Expansive Soil and Rock Susceptibility';
 const expansiveSoilRockWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -454,7 +454,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'exshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -471,7 +471,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
     ],
 }
 
-const shallowGroundwaterLayerName = 'shallowgroundwater';
+const shallowGroundwaterLayerName = 'shallowgroundwater_current';
 const shallowGroundwaterWMSTitle = 'Shallow Groundwater Susceptibility';
 const shallowGroundwaterWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -491,7 +491,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sgshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -508,7 +508,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
     ],
 }
 
-const radonSusceptibilityLayerName = 'radonsusceptibility';
+const radonSusceptibilityLayerName = 'radonsusceptibility_current';
 const radonSusceptibilityWMSTitle = 'Geologic Radon Susceptibility';
 const radonSusceptibilityWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -527,7 +527,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'grshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -544,7 +544,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
     ],
 }
 
-const corrosiveSoilRockLayerName = 'corrosivesoilrock';
+const corrosiveSoilRockLayerName = 'corrosivesoilrock_current';
 const corrosiveSoilRockWMSTitle = 'Corrosive Soil and Rock Susceptibility';
 const corrosiveSoilRockWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -563,7 +563,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'crshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -580,7 +580,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
     ],
 }
 
-const collapsibleSoilLayerName = 'collapsiblesoil';
+const collapsibleSoilLayerName = 'collapsiblesoil_current';
 const collapsibleSoilWMSTitle = 'Collapsible Soil Susceptibility';
 const collapsibleSoilWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -599,7 +599,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'csshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -616,7 +616,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
     ],
 }
 
-const solubleSoilAndRockLayerName = 'solublesoilandrock';
+const solubleSoilAndRockLayerName = 'solublesoilandrock_current';
 const solubleSoilAndRockWMSTitle = 'Soluble Soil and Rock Susceptibility';
 const solubleSoilAndRockWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -635,7 +635,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'slshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -652,8 +652,8 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
     ],
 }
 
-const alluvialFanLayerName = 'alluvialfan';
-const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility';
+const alluvialFanLayerName = 'alluvialfan_current';
+const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility - Statewide';
 const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -671,7 +671,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'aafhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -688,7 +688,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
     ],
 }
 
-const earthFissureLayerName = 'earthfissure';
+const earthFissureLayerName = 'earthfissure_current';
 const earthFissureWMSTitle = 'Earth Fissure Hazard';
 const earthFissureWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -706,7 +706,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'efhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -723,7 +723,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
     ],
 }
 
-const erosionHazardZoneLayerName = 'erosionhazardzone';
+const erosionHazardZoneLayerName = 'erosionhazardzone_current';
 const erosionHazardZoneWMSTitle = 'J.E. Fuller Flood Erosion Hazard Zones';
 const erosionHazardZoneWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -742,7 +742,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'erzhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -759,7 +759,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
     ],
 }
 
-const karstFeaturesLayerName = 'karstfeatures';
+const karstFeaturesLayerName = 'karstfeatures_current';
 const karstFeaturesWMSTitle = 'Karst Features';
 const karstFeaturesWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -777,7 +777,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'mkfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -810,7 +810,7 @@ const quads24kWMSConfig: WMSLayerProps = {
     ],
 }
 
-const studyAreasLayerName = 'studyareas';
+const studyAreasLayerName = 'studyareas_current';
 const studyAreasWMSTitle = 'Mapped Areas';
 const studyAreasWMSConfig: WMSLayerProps = {
     type: 'wms',

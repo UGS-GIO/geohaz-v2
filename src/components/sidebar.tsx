@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { useGetSidebarLinks } from '@/hooks/use-get-sidebar-links';
 import { SideLink } from '@/lib/types/sidelink-types';
-import { useGetPageInfo } from '@/hooks/use-get-website-info';
+import { useGetPageInfo } from '@/hooks/use-get-page-info';
 import { Link } from '@/components/custom/link';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> { }
@@ -83,7 +83,7 @@ export default function Sidebar({
               className={`flex flex-col justify-end truncate ${isCollapsed ? 'invisible w-0' : 'visible w-auto'
                 }`}
             >
-              <span className='font-medium'>{title}</span>
+              <span className='font-medium text-wrap'>{title}</span>
               <span className='text-sm'>Utah Geological Survey</span>
             </div>
           </div>

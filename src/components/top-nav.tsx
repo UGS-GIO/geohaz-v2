@@ -104,8 +104,8 @@ function TopNav({ className, ...props }: TopNavProps) {
   const desktopTrigger = (
     <Button
       className={cn(
-        'text-stone-400',
-        isLongActive && 'text-primary-foreground underline',
+        'text-muted-foreground',
+        isLongActive && 'text-secondary-foreground underline',
         'focus-visible:outline-none'
       )}
       variant="ghost"
@@ -147,7 +147,7 @@ function TopNav({ className, ...props }: TopNavProps) {
                 key={`${title}-${basemapStyle}`}
                 onClick={() => handleBasemapChange(basemapStyle, customBasemap)}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-primary-foreground',
+                  'text-sm font-medium transition-colors hover:text-secondary-foreground',
                   isActive ? 'underline' : 'text-muted-foreground'
                 )}
               >

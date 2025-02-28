@@ -7,12 +7,17 @@ import { Button } from '@/components/custom/button';
 import { BackToMenuButton } from "@/components/custom/back-to-menu-button";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Polygon from "@arcgis/core/geometry/Polygon";
-
+import { useToast } from "@/hooks/use-toast";
+import Map from "@arcgis/core/Map";
+import MapView from "@arcgis/core/views/MapView";
+import Graphic from "@arcgis/core/Graphic";
+import { Link } from "@/components/custom/link";
 
 
 type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
+type DialogType = 'areaTooLarge' | 'confirmation' | null;
 
 function ReportGenerator() {
   const { view, setIsSketching } = useContext(MapContext);
@@ -21,20 +26,168 @@ function ReportGenerator() {
   const sketchVM = useRef<__esri.SketchViewModel | undefined>(undefined);
   const { setNavOpened } = useSidebar();
   const isMobile = useIsMobile();
-  const [modalOpen, setModalOpen] = useState(false);
+  const [activeDialog, setActiveDialog] = useState<DialogType>(null);
+  const [screenshot, setScreenshot] = useState<string>("");
+  const [pendingAoi, setPendingAoi] = useState<__esri.Geometry | null>(null);
+  const { toast } = useToast()
 
-  const handleNavigate = (aoi: __esri.Geometry) => {
-    const aoiString = JSON.stringify(aoi);
-    // Navigate to the report page with the aoi parameter
+  const createMap = async (aoi: string): Promise<{ view: __esri.MapView, cleanup: () => void }> => {
+    // Remove any existing map containers
+    const existingDiv = document.getElementById('screenshotMapDiv');
+    if (existingDiv) {
+      existingDiv.remove();
+    }
+
+    // Create new map container
+    const mapDiv = document.createElement('div');
+    mapDiv.id = 'screenshotMapDiv';
+    mapDiv.style.width = '50vw';
+    mapDiv.style.height = '50vh';
+    document.body.appendChild(mapDiv);
+
+    const polylineSymbol = {
+      type: "simple-fill",
+      color: "rgba(138,43,226, 0.8)",
+      style: "solid",
+      outline: {
+        color: "white",
+        width: 1
+      }
+    }
+
+    const parsedAoi = JSON.parse(aoi);
+    const polygon = new Polygon(parsedAoi);
+
+    const polylineGraphic = new Graphic({
+      geometry: polygon,
+      symbol: polylineSymbol
+    });
+
+    const map = new Map({
+      basemap: "topo"
+    });
+
+    const extentClone = polygon.extent.clone();
+
+    const screenshotView = new MapView({
+      map: map,
+      container: mapDiv,
+      ui: {
+        components: ['attribution']
+      },
+      extent: extentClone.expand(2),
+      constraints: {
+        snapToZoom: false
+      }
+    });
+
+    // Add graphic after view initialization
+    screenshotView.graphics.add(polylineGraphic);
+
+    // Wait for the view to be ready
+    await screenshotView.when();
+
+    // Wait for the basemap to load
+    await map.basemap.load();
+
+    // Important: Wait for ALL basemap layers to load
+    const basemapLayerPromises = map.basemap.baseLayers.map(layer => layer.load());
+    await Promise.all(basemapLayerPromises);
+
+    // Go to extent after layers are loaded
+    await screenshotView.goTo(extentClone.expand(2), {
+      animate: false,
+      duration: 0
+    });
+
+    // Wait for rendering to complete
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const cleanup = () => {
+      screenshotView.destroy();
+      mapDiv.remove();
+    };
+
+    return { view: screenshotView, cleanup };
+  };
+
+  const getScreenshot = async (geometry: __esri.Geometry) => {
+    try {
+      const aoi = JSON.stringify(geometry);
+      const { view: screenshotView, cleanup } = await createMap(aoi);
+
+      // Dynamically get the width and height of the map container
+      const mapDiv = document.getElementById('screenshotMapDiv');
+      const width = mapDiv?.offsetWidth || 0;
+      const height = mapDiv?.offsetHeight || 0;
+
+      // Capture the screenshot with dynamic width and height
+      const screenshot = await screenshotView.takeScreenshot({
+        width: width,
+        height: height,
+        format: "png"
+      });
+
+      // Clean up
+      cleanup();
+
+      return screenshot?.dataUrl;
+    } catch (error) {
+      console.error('Failed to capture screenshot:', error);
+      return null;
+    }
+  };
+
+
+
+  const handleNavigate = async (aoi: __esri.Geometry) => {
+    setPendingAoi(aoi);
+    const screenshotDataUrl = await getScreenshot(aoi);
+
+    if (screenshotDataUrl) {
+      setScreenshot(screenshotDataUrl);
+    }
+
+    setActiveDialog('confirmation');
+  };
+
+  const handleConfirmNavigation = () => {
+    if (!pendingAoi) return;
+
+    const aoiString = JSON.stringify(pendingAoi);
+    const reportUrl = '/hazards/report/' + aoiString;
+
+    // Open in new tab
+    window.open(reportUrl, '_blank');
     handleReset();
-    window.open('/hazards/report/' + aoiString, '_blank');
+  };
+
+  const handleCopyLink = () => {
+    if (!pendingAoi) return;
+
+    const aoiString = JSON.stringify(pendingAoi);
+    const reportUrl = window.location.origin + '/hazards/report/' + aoiString;
+
+    navigator.clipboard.writeText(reportUrl)
+      .catch(err => {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "There was a copying the link. Please try again.",
+        })
+        console.error('Failed to copy URL:', err)
+      });
+
+    toast({
+      variant: "default",
+      description: "Link copied!",
+    })
   };
 
   function addGraphic(
     event: __esri.SketchViewModelCreateEvent,
     tempGraphicsLayer: __esri.GraphicsLayer | undefined,
-    setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>,
-    setModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+    setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>
   ) {
     if (event.state === "complete" && event.graphic) {
       tempGraphicsLayer?.remove(event.graphic);
@@ -43,15 +196,12 @@ function ReportGenerator() {
       const aoi = event.graphic.geometry;
 
       if (drawAOIHeight < 12000 && drawAOIWidth < 18000) {
-
         handleNavigate(aoi);
         setActiveButton(undefined);
       } else {
-        setModalOpen(true);
+        setActiveDialog('areaTooLarge');
         setActiveButton(undefined);
       }
-    } else if (event.state === "start" && event.graphic) {
-      // console.log("addGraphic: Drawing started");
     }
   }
 
@@ -107,8 +257,7 @@ function ReportGenerator() {
       });
       handleNavigate(aoi);
     } else {
-      setModalOpen(true);
-      handleReset();
+      setActiveDialog('areaTooLarge');
     }
   };
 
@@ -150,7 +299,7 @@ function ReportGenerator() {
       }
 
       if (event.state === "active") {
-        addGraphic(event, tempGraphicsLayer.current, setActiveButton, setModalOpen);
+        addGraphic(event, tempGraphicsLayer.current, setActiveButton);
       }
 
       if (event.state === "complete") {
@@ -172,8 +321,7 @@ function ReportGenerator() {
           });
           handleNavigate(aoi);
         } else {
-          console.log("Area of interest is too large, try again");
-          setModalOpen(true);
+          setActiveDialog('areaTooLarge');
         }
 
       }
@@ -195,7 +343,7 @@ function ReportGenerator() {
     requestAnimationFrame(() => {
       setIsSketching?.(false);
     })
-    if (modalOpen) setModalOpen(false);
+    setActiveDialog(null);
   };
 
   const buttonText = (buttonName: ActiveButtonOptions, defaultText: string) => {
@@ -204,9 +352,11 @@ function ReportGenerator() {
     );
   }
 
-  const handleCloseModal = () => {
-    setModalOpen(false);
-  };
+  const handleCloseDialog = () => {
+    setActiveDialog(null);
+    setPendingAoi(null);
+    handleReset();
+  }
 
   const handleResetDrawing = () => {
     setIsSketching?.(true);
@@ -219,8 +369,8 @@ function ReportGenerator() {
       <div className="p-4 space-y-4">
         <div>
           <h3 className="text-lg font-medium mb-2">Report Generator</h3>
-          <p>
-            The Report Generator is designed to provide a summary of information for small areas. If your area of interest is larger than that, you will see a notification prompting you to select a smaller area.
+          <p className="text-sm">
+            The Report Generator is designed to provide a summary of geologic hazard information for small areas. Use the current map extent or create a custom area and double-click to finish the drawing. If your area of interest is too large, you will be prompted to select a smaller area.
           </p>
         </div>
         <div className="space-y-2">
@@ -238,28 +388,59 @@ function ReportGenerator() {
             </Button>
           </div>
         </div>
+        <p className="text-sm italic">
+          These summary reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. See your local city or county building department for details on these investigations and <Link to="https://ugspub.nr.utah.gov/publications/circular/c-122.pdf">UGS Circular 122</Link> for more information.
+        </p>
       </div>
-      <Dialog open={modalOpen} onOpenChange={handleCloseModal}>
-        <DialogTrigger asChild>
-          <div className="hidden"></div>
-        </DialogTrigger>
-        <DialogContent className="w-4/5">
+
+      {/* Area Too Large Dialog */}
+      <Dialog open={activeDialog === 'areaTooLarge'} onOpenChange={handleCloseDialog}>
+        <DialogContent className="w-full sm:w-4/5">
           <DialogHeader>
             <DialogTitle>Area too large</DialogTitle>
           </DialogHeader>
           <DialogDescription>
             The map area is too large. Please draw a smaller custom area or zoom in.
             <div className="flex flex-row space-x-2 mt-4 justify-end">
-              <Button onClick={handleResetDrawing} variant="default" >
+              <Button onClick={handleResetDrawing} variant="default">
                 Create a new area
               </Button>
-              <Button onClick={handleReset} variant="secondary" >
+              <Button onClick={handleReset} variant="secondary">
                 Close
               </Button>
             </div>
           </DialogDescription>
           <DialogClose />
+        </DialogContent>
+      </Dialog>
 
+      {/* Confirmation Dialog */}
+      <Dialog open={activeDialog === 'confirmation'} onOpenChange={handleCloseDialog}>
+        <DialogContent className="w-full sm:w-3/5">
+          <DialogHeader>
+            <DialogTitle>Generate report for the selected area?</DialogTitle>
+          </DialogHeader>
+          <div>
+            <div className="flex justify-center">
+              <img
+                src={screenshot}
+                alt="map"
+                className="rounded-md w-full max-w-full h-auto"
+              />
+            </div>
+            <div className="flex flex-row space-x-2 mt-4 justify-end">
+              <Button onClick={handleConfirmNavigation} variant="default">
+                Generate Report
+              </Button>
+              <Button onClick={handleCopyLink} variant="secondary">
+                Copy Link
+              </Button>
+              <Button onClick={handleCloseDialog} variant="secondary">
+                Cancel
+              </Button>
+            </div>
+          </div>
+          <DialogClose />
         </DialogContent>
       </Dialog>
     </div>

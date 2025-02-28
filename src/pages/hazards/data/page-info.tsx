@@ -48,6 +48,12 @@ const references = (
                 </Link>.
             </li>
             <li>
+                Hiscock, A.I., Kleber, E.J., Jänecke, S.U., McDonald, G.N., Oaks, R.Q., Jr., and Rittenour, T., 2024, Fault trace mapping and surface-fault-rupture special study zone delineation of the East and West Cache fault zones and other regional faults, Utah: Utah Geological Report of Investigation 286, 27 p., 1 appendix,&nbsp;
+                <Link to="https://doi.org/10.34191/RI-286">
+                    RI-286
+                </Link>.
+            </li>
+            <li>
                 Knudsen, T.R., and Lund, W.R., 2014, Geologic hazards of the State Route 9 Corridor, La Verkin City to Town of Springdale, Washington County, Utah: Utah Geological Survey Special Study 148, 13 p., 9 plates, GIS data,&nbsp;
                 <Link to="https://doi.org/10.34191/SS-148">
                     SS-148
@@ -89,12 +95,6 @@ const references = (
                     RI-280
                 </Link>.
             </li>
-            <li>
-                Hiscock, A.I., Kleber, E.J., Jänecke, S.U., McDonald, G.N., Oaks, R.Q., Jr., and Rittenour, T., 2024, Fault trace mapping and surface-fault-rupture special study zone delineation of the East and West Cache fault zones and other regional faults, Utah: Utah Geological Report of Investigation 286, 27 p., 1 appendix,&nbsp;
-                <Link to="https://doi.org/10.34191/RI-286">
-                    RI-286
-                </Link>.
-            </li>
         </ul>
     </div>
 )
@@ -102,10 +102,19 @@ const references = (
 const acknowledgements = (
     <div className="space-y-2">
         <p>
-            In 2008, the Utah Geological Survey Geologic Hazards Mapping Initiative was created with funding from the Utah Legislature to map geologic hazards in areas of existing and future development. This mapping is focused on identifying hazards for an entire 7.5′ quadrangle at 1:24,000 scale, instead of single hazard maps of large regional areas. The geologic-hazard maps address hazards associated with earthquakes, landslides, flooding, debris flows, indoor radon, shallow groundwater, rockfall, and problem soils and rocks. The initiative will provide planners, local officials, property owners, developers, engineers, geologists, design professionals, and the interested public with information on the type and location of critical geologic hazards that may impact existing and future development.
+            In 2008, the Utah Geological Survey Geologic Hazards Mapping Initiative was created with funding from the Utah Legislature to map geologic hazards in areas of existing and future development. This mapping is focused on identifying hazards for 7.5′ quadrangles at 1:24,000 scale with a focus on hazards associated with earthquakes, landslides, flooding, debris flows, indoor radon, shallow groundwater, rockfall, and problem soils and rocks. The initiative is intended to provide planners, local officials, property owners, developers, engineers, geologists, design professionals, and the interested public with information on the type and location of critical geologic hazards that may impact existing and future development.
         </p>
         <p>
-            Hazard mapping is a multidisciplinary cooperative collaboration. We thank Scott Davis, Nathan Kota, Steve Gourley, and Jake Adams with the Utah Automated Geographic Reference Center (AGRC) for assistance and programming in the creation of the online web mapping application. Steve Bowman and Jessica Castleton (UGS) helped develop the schema and reporting format used in the current database. Marshall Robinson, Jay Hill, Martha Jensen (UGS) and Corey Unger (former UGS) did web design and programming for the interactive map. UGS GIS analyst Gordon Douglass contributed substantially at various stages of development of the database. We thank the hazard mappers in the UGS Geologic Hazards Program for providing high quality hazard maps.
+            Geologic hazard mapping: Utah Geological Survey Geologic Hazards Program and contributions from other state agencies
+        </p>
+        <p>
+            Original application development: Jay Hill with assistance from the Utah Geospatial Resource Center: Scott Davis, Nathan Kota, Steve Gourley, and Jake Adams
+        </p>
+        <p>
+            Schema and report formatting: Steve Bowman, Jessica Castleton, Gordon Douglass, Martha Jensen, Nathan Payne
+        </p>
+        <p>
+            New application development and design: Clinton Lunn, Jackie DeWolfe, Marshall Robinson, Mackenzie Cope
         </p>
     </div>
 )
@@ -133,45 +142,46 @@ const dataDisclaimer = (
 const mapDetails = (
     <div className='mx-2 space-y-2'>
         <p>
-            This Portal is a compilation of data from the Utah Geologic Hazards Database, and contains post-2008 UGS geologic hazard map data and data from other sources for parts of Utah. These data address earthquake, flood, landslide, and problem soil and rock hazards. This web mapping application is intended to provide planners, local government officials, property owners, developers, engineers, geologists, design professionals, and the public with information on the type, location, and relative susceptibility of geologic hazards that may impact existing and future infrastructure and development. The data also provide information that may be used for emergency response and recovery planning and community risk assessment for existing development and infrastructure.
+            The Utah Geologic Hazards Portal is a compilation of data from the Utah Geologic Hazards Database and contains post-2008 UGS geologic hazard map data and data from other sources. This mapping is intended to provide planners, local government officials, property owners, developers, engineers, geologists, design professionals, and the public with information on the type, location, and relative susceptibility of geologic hazards that may impact existing and future infrastructure and development. The data also supports emergency response and recovery planning, as well as community risk assessment for existing development and infrastructure.
         </p>
         <p>
-            Areas with comprehensive geologic hazard map data are shown with red polygons. Statewide data for hazardous (Quaternary age) faults, and a legacy compilation of landslides are also available. Limited, comprehensive geologic hazard map data are available for the remaining hazards listed in the Legend. Hazard map layers can be enabled in the Legend by clicking on the eye symbol. Map layer units describing the hazard relative susceptibility are also shown in the Legend. The absence of data does not imply that no geologic hazard or hazards exist. Additional geologic hazard mapping is on-going and will be added to the database as it is finalized.
+            Hazard map layers can be enabled using the group toggle buttons and layer checkboxes. Select features on the map to view detailed information about hazard susceptibilities. Create summary reports for individual areas by using the Report Generator tool.
         </p>
-        <p className="font-bold">
-            Database Updated May 2020
-        </p>
-        <p className="font-bold">
-            Related Information
+        <p className="italic">
+            Please note that most hazards have been mapped within specific study areas and not comprehensively statewide. Therefore, the absence of data in a particular location does not indicate the absence of geologic hazards.
         </p>
         <p>
-            For more information, see <Link to="https://geology.utah.gov/hazards/">https://geology.utah.gov/hazards/</Link> or contact the UGS.
+            For more information about geologic hazards in Utah, see <Link to="https://geology.utah.gov/hazards/">https://geology.utah.gov/hazards/</Link> or contact the UGS.
         </p>
     </div>
 )
 
 const mapDetailsShortened = (
     <p className='text-left text-sm mx-2 font-normal'>
-        This Portal is a compilation of data from the Utah Geologic Hazards Database, and contains post-2008 UGS geologic hazard map data and data from other sources for parts of Utah...
+        The Utah Geologic Hazards Portal is a compilation of data from the Utah Geologic Hazards Database and contains post-2008 UGS geologic hazard map data and data from other sources...
     </p>
 )
 
 const dataSources = (
     <div className='mx-2 space-y-2'>
         <p>
-            The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources. The database is periodically updated to incorporate the results of new mapping. Detailed geologic hazard mapping is available for limited areas and for specific hazards in Utah and additional mapping is ongoing.
+            The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from UGS studies and other sources. Detailed geologic hazard mapping is available for limited areas and additional mapping is ongoing. The database is periodically updated to incorporate the results of new mapping.
         </p>
         <p>
-            The data exists as an attributed geographic information system (GIS) feature class available for download: <Link to="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip">GIS Data</Link>
+            The data exists as an attributed GIS feature class available for download: <Link to="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip">GIS Data</Link>
         </p>
-        <p>Additionally, users can access full data reports for individual hazards by clicking on the report link in the pop-up window. These reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. These investigations provide valuable information on the site geologic conditions that may affect or be affected by development, as well as the type and relative susceptibility of geologic hazards at a site and recommend solutions to mitigate the effects and costs of the hazards, both at the time of construction and over the life of the development. See your local city or county building department for details on these investigations and <Link to="https://ugspub.nr.utah.gov/publications/circular/c-122.pdf">UGS Circular 122</Link> for more information.
+        <p className="font-bold">
+            Database Updated February 2025
+        </p>
+        <p>
+            UGS geologic hazard study reports and other downloads are available here: <Link to="https://geology.utah.gov/hazards/info/publications/">https://geology.utah.gov/hazards/info/publications/</Link>
         </p>
     </div>
 )
 
 const dataSourcesShortened = (
     <p className='text-left text-sm mx-2 font-normal'>
-        The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from the Utah Geological Survey (UGS) and other sources....
+        The database for the Utah Geologic Hazards Portal contains geologic hazard information and data from UGS studies and other sources....
     </p>
 )
 

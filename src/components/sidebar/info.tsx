@@ -7,7 +7,7 @@ import Layers from '@/components/sidebar/layers';
 import { BackToMenuButton } from '../custom/back-to-menu-button';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerTrigger } from '@/components/ui/drawer';
-import { useGetPageInfo } from '@/hooks/use-get-website-info';
+import { useGetPageInfo } from '@/hooks/use-get-page-info';
 
 function Info() {
   type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | '';
@@ -15,7 +15,7 @@ function Info() {
   const [modalType, setModalType] = useState<ModalType | ''>('');
   const { setCurrentContent } = useSidebar();
   const contentRef = useRef<HTMLDivElement>(null);
-  const [isMapDetailsExpanded, setIsMapDetailsExpanded] = useState(false);
+  const [isMapDetailsExpanded, setIsMapDetailsExpanded] = useState(true);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
   const drawerTriggerRef = useRef<HTMLButtonElement>(null);
   const pageInfo = useGetPageInfo()
@@ -51,7 +51,7 @@ function Info() {
       <div className="ml-2 overflow-y-auto flex-grow" ref={contentRef}>
         {/* Map Details Accordion */}
         <div className="mr-2" key="map-details-accordion">
-          <Accordion type="multiple">
+          <Accordion type="multiple" defaultValue={['map-details-accordion-item-1']}>
             <AccordionItem value="map-details-accordion-item-1">
               <AccordionHeader onClick={toggleMapDetails}>
                 <AccordionTrigger>
