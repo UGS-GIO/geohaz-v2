@@ -697,7 +697,6 @@ export async function fetchWMSFeatureInfo({
 }
 
 export async function fetchWfsGeometry({ namespace, feature }: { namespace: string; feature: ExtendedFeature }) {
-    console.log('Fetching WFS feature:', feature);
     const featureId = feature.id!.toString()
     const layerName = featureId.split('.')[0];
     const ogcFid = feature.properties?.ogc_fid;
