@@ -8,6 +8,7 @@ import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
 import { fetchWMSFeatureInfo, highlightFeature, reorderLayers } from "@/lib/mapping-utils";
 import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
+import { useReload3d } from "./use-reload-3d";
 
 interface PopupContent {
     features: Feature[];
@@ -19,7 +20,7 @@ interface PopupContent {
 }
 
 interface MapContainerHookResult {
-    mapRef: React.RefObject<HTMLDivElement>;
+    mapRef: React.RefObject<HTMLDivElement> | null;
     contextMenuTriggerRef: React.RefObject<HTMLDivElement>;
     drawerTriggerRef: React.RefObject<HTMLButtonElement>;
     popupContainer: HTMLDivElement | null;
@@ -45,8 +46,7 @@ interface UseMapContainerProps {
 }
 
 export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContainerProps): MapContainerHookResult {
-    const mapRef = useRef<HTMLDivElement>(null);
-    const { loadMap, view, isSketching } = useContext(MapContext);
+    const { loadMap, view, isSketching, mapRef } = useContext(MapContext);
     const { coordinates, setCoordinates } = useMapCoordinates();
     const { handleOnContextMenu, getVisibleLayers } = useMapInteractions();
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null);
@@ -58,11 +58,12 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const dragThreshold = 5;
     const { zoom, center } = useMapUrlParams(view);
     const layersConfig = useGetLayerConfig();
+    const { is3d } = useReload3d();
 
     // Initialize map when dependencies are ready
     useEffect(() => {
-        if (mapRef.current && loadMap && zoom && center && layersConfig) {
-            loadMap(mapRef.current, { zoom, center }, layersConfig);
+        if (mapRef?.current && loadMap && zoom && center && layersConfig) {
+            loadMap(mapRef.current, { zoom, center }, layersConfig, is3d ? 'scene' : 'map');
         }
     }, [loadMap, zoom, center, layersConfig]);
 

@@ -58,20 +58,26 @@ export function useMapCoordinates() {
                 pointerMoveHandler = view.on(
                     "pointer-move",
                     (event: __esri.ViewPointerMoveEvent) => {
-                        const mapPoint = view.toMap({ x: event.x, y: event.y });
-                        const mp: __esri.Point = webMercatorUtils.webMercatorToGeographic(
-                            mapPoint
-                        ) as __esri.Point;
 
-                        const xyPoint = {
-                            x: mp.x.toFixed(3),
-                            y: mp.y.toFixed(3),
-                        };
+                        if (view.type === "3d") {
 
-                        lastPointerPosition.current = xyPoint; // Store the last pointer position
-                        const convertedCoords = convertCoordinates(xyPoint.x, xyPoint.y);
-                        setCoordinates(convertedCoords);
-                        setScale(view.scale);
+                            //todo: implement 3d view pointer move
+                        } else {
+                            const mapPoint = view.toMap({ x: event.x, y: event.y });
+                            const mp: __esri.Point = webMercatorUtils.webMercatorToGeographic(
+                                mapPoint
+                            ) as __esri.Point;
+
+                            const xyPoint = {
+                                x: mp.x.toFixed(3),
+                                y: mp.y.toFixed(3),
+                            };
+
+                            lastPointerPosition.current = xyPoint; // Store the last pointer position
+                            const convertedCoords = convertCoordinates(xyPoint.x, xyPoint.y);
+                            setCoordinates(convertedCoords);
+                            setScale(view.scale);
+                        }
                     }
                 );
             });
