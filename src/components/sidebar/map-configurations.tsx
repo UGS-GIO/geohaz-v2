@@ -17,11 +17,7 @@ function MapConfigurations() {
   };
 
   const handleOnCheckedChange = () => (checked: boolean) => {
-    if (checked) {
-      setIs3d(false);
-    } else {
-      setIs3d(true);
-    };
+    setIs3d(checked);
   };
 
   return (
@@ -62,16 +58,27 @@ function MapConfigurations() {
                   Degrees, Minutes, Seconds
                 </Label>
               </div>
-              {/* reload 3d switch */}
-              <div className="flex">
-                <Switch
-                  checked={is3d ? false : true}
-                  onCheckedChange={handleOnCheckedChange()}
-                  aria-label="Toggle 3d reload"
-                  className="data-[state=unchecked]:bg-primary"
-                />
-              </div>
+
             </RadioGroup>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Reload in {!is3d ? "3D" : "2D"}
+            </CardTitle>
+            {/* <CardDescription>Choose a coordinate format to toggle between decimal degrees and degrees, minutes, seconds.</CardDescription> */}
+          </CardHeader>
+          <CardContent>
+            {/* reload 3d switch */}
+            <div className="flex">
+              <Switch
+                checked={is3d}
+                onCheckedChange={handleOnCheckedChange()}
+                aria-label="Toggle 3d reload"
+                className="data-[state=unchecked]:bg-primary"
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -10,7 +10,7 @@ const useReload3d = () => {
     const layersConfig = useGetLayerConfig();
 
     useEffect(() => {
-        if (!is3d) {
+        if (is3d) {
             if (mapRef?.current && reloadMap && layersConfig) {
                 console.log('reloading 3d map');
 
