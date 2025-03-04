@@ -1,5 +1,5 @@
 # Geological Hazards Portal v2
-
+asdffghadshgmnal;
 <p align="center">
   <img src="public/logo_main.png" alt="Utah Geological Survey Logo" width="200"/>
 </p>
@@ -7,7 +7,7 @@
 The UGS Geological Hazards Portal v2 crafted with @arcgis/core, Shadcn and Vite. Built with responsiveness and accessibility in mind.
 
 ## Features
-
+test
 - Light/dark mode
 - Responsive
 - Accessible
