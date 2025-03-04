@@ -1,5 +1,5 @@
 # Geological Hazards Portal v2
-asdffghadshgmnal;
+ankgalkdgnadklgsdffghadshgmnal;
 <p align="center">
   <img src="public/logo_main.png" alt="Utah Geological Survey Logo" width="200"/>
 </p>
