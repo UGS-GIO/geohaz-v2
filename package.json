@@ -51,6 +51,7 @@
     "dompurify": "^3.1.6",
     "embla-carousel-react": "^8.3.0",
     "fast-xml-parser": "^4.5.1",
+    "firebase": "^11.4.0",
     "lucide-react": "^0.427.0",
     "proj4": "^2.14.0",
     "query-string": "^9.1.0",
