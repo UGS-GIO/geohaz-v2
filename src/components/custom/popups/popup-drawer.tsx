@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { Feature } from "geojson";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
@@ -10,6 +10,8 @@ import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
 import useScreenSize from "@/hooks/use-screen-size";
 import { XIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { clearHighlights } from "@/lib/mapping-utils";
+import { MapContext } from "@/context/map-provider";
 
 interface PopupContent {
     features: Feature[];
@@ -36,6 +38,7 @@ function PopupDrawer({
     const [activeLayerTitle, setActiveLayerTitle] = useState<string>("");
     const screenSize = useScreenSize()
     const isMobile = useIsMobile();
+    const { view } = useContext(MapContext)
 
     const layerContent = useMemo(() => popupContent, [popupContent]);
 
@@ -81,6 +84,10 @@ function PopupDrawer({
         }
     }, [])
 
+    const handleClose = useCallback(() => {
+        if (view) clearHighlights(view);
+    }, [drawerTriggerRef]);
+
     return (
         <Drawer container={container} modal={false}>
             <DrawerTrigger asChild>
@@ -92,7 +99,7 @@ function PopupDrawer({
                     <DrawerTitle className="flex-1 pr-10">{popupTitle}</DrawerTitle>
                     {!isMobile && (
                         <DrawerClose asChild>
-                            <Button variant="outline" className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center">
+                            <Button onClick={handleClose} variant="outline" className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center">
                                 <XIcon />
                             </Button>
                         </DrawerClose>
