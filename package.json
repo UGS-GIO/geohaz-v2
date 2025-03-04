@@ -70,6 +70,9 @@
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^9.0.4",
     "@tanstack/router-devtools": "^1.70.0",
     "@tanstack/router-plugin": "^1.69.1",
     "@types/dompurify": "^3.0.5",
@@ -86,18 +89,20 @@
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "husky": "^9.1.6",
+    "husky": "^9.1.7",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "sass": "^1.77.8",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^9.0.4",
     "semantic-release": "^21.0.2",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.4.5",
     "vite": "^5.2.9",
     "vitest": "^2.0.4"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
   }
 }
