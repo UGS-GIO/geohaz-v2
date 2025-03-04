@@ -3,7 +3,7 @@ import { useGetCurrentPage } from "@/hooks/use-get-current-page";
 
 interface WebsiteInfo {
     references: React.ReactNode;
-    acknowledgements: React.ReactNode;
+    acknowledgments: React.ReactNode;
     dataDisclaimer: React.ReactNode;
     mapDetails: React.ReactNode;
     mapDetailsShortened: React.ReactNode;
