@@ -12,10 +12,10 @@ jobs:
         run: |
           if [[ "${{ github.base_ref }}" == "master" ]]; then
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_PROD" >> $GITHUB_ENV
-            echo "PROJECT_ID=ut-dnr-ugs-hazards-prod" >> $GITHUB_ENV
+            echo "PROJECT_ID=ut-dnr-ugs-maps-prod" >> $GITHUB_ENV
           else
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV" >> $GITHUB_ENV
-            echo "PROJECT_ID=ut-dnr-ugs-hazards-dev" >> $GITHUB_ENV
+            echo "PROJECT_ID=ut-dnr-ugs-maps-dev" >> $GITHUB_ENV
           fi
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
