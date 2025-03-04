@@ -2,7 +2,7 @@
 gnkadlgnkadlkankgalkdgnadklgsdffghadshgmnal;dgml;adgml;gdml;gadm;lg
 <p align="center">
   <img src="public/logo_main.png" alt="Utah Geological Survey Logo" width="200"/>
-<gad;g;ad1:wq/p>
+<giassddffad;g;ad1:wq/p>
 
 The UGS Geological Hazards Portal v2 crafted with @arcgis/core, Shadcn and Vite. Built with responsiveness and accessibility in mind.
 
