@@ -896,6 +896,10 @@ export const createHighlightGraphic = (
     return graphics;
 };
 
+export const clearGraphics = (view: __esri.MapView | __esri.SceneView) => {
+    view.graphics.removeAll();
+}
+
 export const highlightFeature = async (
     feature: ExtendedFeature,
     view: __esri.MapView | __esri.SceneView,

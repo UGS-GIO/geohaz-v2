@@ -35,10 +35,62 @@
 }
 
 @media print {
+  /* Hide unwanted elements at the top of the page */
+   .url {
+    display: none;
+  }
+
   .print--hide {
     display: none;
   }
+
+  .overflow-y-auto {
+    overflow-y: visible !important;
+  }
+
+  /* Hide scrollbar for Chrome, Safari, and Opera */
+  .overflow-y-auto::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge, and Firefox */
+  .overflow-y-auto {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  /* Page number styling */
+  @page {
+    margin: 20mm;
+  }
+
+  /* Custom Title in the header */
+  @page {
+    @top-center {
+      content: "Geologic Hazards Mapping and Data Custom Report - Page " counter(page);
+      font-size: 12px;
+    }
+  }
+
+  /* Footer setup: hide the link and show page numbers */
+  @page :left {
+    @bottom-left {
+      content: none; /* Hide bottom left link */
+    }
+    @bottom-center {
+      content: "Page " counter(page); /* Show page number in the center of the footer */
+      font-size: 11px;
+    }
+  }
+
+  @page :right {
+    @bottom-center {
+      content: "Page " counter(page); /* Show page number in the center of the footer for right pages too */
+      font-size: 11px;
+    }
+  }
 }
+
 
 
 /* Extra small devices (phones, 600px and down) */
