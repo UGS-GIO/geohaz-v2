@@ -10,7 +10,7 @@ import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
 import useScreenSize from "@/hooks/use-screen-size";
 import { XIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { clearHighlights } from "@/lib/mapping-utils";
+import { clearGraphics } from "@/lib/mapping-utils";
 import { MapContext } from "@/context/map-provider";
 
 interface PopupContent {
@@ -85,11 +85,17 @@ function PopupDrawer({
     }, [])
 
     const handleClose = useCallback(() => {
-        if (view) clearHighlights(view);
-    }, [drawerTriggerRef]);
+        if (view) {
+            try {
+                clearGraphics(view);
+            } catch (error) {
+                console.error('Error clearing highlights:', error);
+            }
+        }
+    }, [view]);
 
     return (
-        <Drawer container={container} modal={false}>
+        <Drawer container={container} modal={false} onOpenChange={(open) => { if (!open) handleClose() }}>
             <DrawerTrigger asChild>
                 <Button ref={drawerTriggerRef} size="sm" className="hidden">Open Drawer</Button>
             </DrawerTrigger>
@@ -99,7 +105,7 @@ function PopupDrawer({
                     <DrawerTitle className="flex-1 pr-10">{popupTitle}</DrawerTitle>
                     {!isMobile && (
                         <DrawerClose asChild>
-                            <Button onClick={handleClose} variant="outline" className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center">
+                            <Button variant="outline" className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center">
                                 <XIcon />
                             </Button>
                         </DrawerClose>
