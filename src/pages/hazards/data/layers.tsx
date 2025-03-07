@@ -73,7 +73,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -111,7 +111,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -148,7 +148,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -249,7 +249,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -283,7 +283,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -319,7 +319,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -355,7 +355,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -391,7 +391,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -427,7 +427,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -463,7 +463,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -500,7 +500,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -536,7 +536,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -572,7 +572,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -608,7 +608,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -644,7 +644,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -653,7 +653,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
 }
 
 const alluvialFanLayerName = 'alluvialfan_current';
-const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility - Statewide';
+const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility (Source: Division of Emergency Management)';
 const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -680,7 +680,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -715,7 +715,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -751,7 +751,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -786,7 +786,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]

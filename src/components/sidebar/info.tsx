@@ -10,7 +10,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { useGetPageInfo } from '@/hooks/use-get-page-info';
 
 function Info() {
-  type ModalType = 'references' | 'disclaimer' | 'acknowledgements' | '';
+  type ModalType = 'references' | 'disclaimer' | 'acknowledgments' | '';
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType | ''>('');
   const { setCurrentContent } = useSidebar();
@@ -90,8 +90,8 @@ function Info() {
           <Button variant={'link'} onClick={() => handleOpenModal('references')}>
             References
           </Button>
-          <Button variant={'link'} onClick={() => handleOpenModal('acknowledgements')}>
-            Acknowledgements
+          <Button variant={'link'} onClick={() => handleOpenModal('acknowledgments')}>
+            Acknowledgments
           </Button>
           <Button variant={'link'} onClick={() => window.open('https://geology.utah.gov/about-us/contact-webmaster/', '_blank')}>
             Contact Webmaster&nbsp;<ExternalLink size={16} />
@@ -104,8 +104,8 @@ function Info() {
           <Button variant={'link'} onClick={() => handleOpenDrawer('references')}>
             References
           </Button>
-          <Button variant={'link'} onClick={() => handleOpenDrawer('acknowledgements')}>
-            Acknowledgements
+          <Button variant={'link'} onClick={() => handleOpenDrawer('acknowledgments')}>
+            Acknowledgments
           </Button>
           <Button variant={'link'} onClick={() => window.open('https://geology.utah.gov/about-us/contact-webmaster/', '_blank')}>
             Contact Webmaster&nbsp;<ExternalLink size={16} />
@@ -123,12 +123,12 @@ function Info() {
             <div className="py-2">
               {modalType === 'disclaimer' && <DrawerHeader><DrawerTitle>Data Disclaimer</DrawerTitle></DrawerHeader>}
               {modalType === 'references' && <DrawerHeader><DrawerTitle>References</DrawerTitle></DrawerHeader>}
-              {modalType === 'acknowledgements' && <DrawerHeader><DrawerTitle>Acknowledgements</DrawerTitle></DrawerHeader>}
+              {modalType === 'acknowledgments' && <DrawerHeader><DrawerTitle>Acknowledgments</DrawerTitle></DrawerHeader>}
             </div>
             <div data-vaul-no-drag className="overflow-y-auto p-4">
               {modalType === 'disclaimer' && <DrawerDescription>{pageInfo?.dataDisclaimer}</DrawerDescription>}
               {modalType === 'references' && <DrawerDescription>{pageInfo?.references}</DrawerDescription>}
-              {modalType === 'acknowledgements' && <DrawerDescription>{pageInfo?.acknowledgements}</DrawerDescription>}
+              {modalType === 'acknowledgments' && <DrawerDescription>{pageInfo?.acknowledgments}</DrawerDescription>}
             </div>
           </DrawerContent>
         </Drawer>
@@ -155,12 +155,12 @@ function Info() {
                 <DialogDescription>{pageInfo?.references}</DialogDescription>
               </>
             )}
-            {modalType === 'acknowledgements' && (
+            {modalType === 'acknowledgments' && (
               <>
                 <DialogHeader>
-                  <DialogTitle>Acknowledgements</DialogTitle>
+                  <DialogTitle>Acknowledgments</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>{pageInfo?.acknowledgements}</DialogDescription>
+                <DialogDescription>{pageInfo?.acknowledgments}</DialogDescription>
               </>
             )}
           </DialogContent>

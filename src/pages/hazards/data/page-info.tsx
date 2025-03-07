@@ -99,7 +99,7 @@ const references = (
     </div>
 )
 
-const acknowledgements = (
+const acknowledgments = (
     <div className="space-y-2">
         <p>
             In 2008, the Utah Geological Survey Geologic Hazards Mapping Initiative was created with funding from the Utah Legislature to map geologic hazards in areas of existing and future development. This mapping is focused on identifying hazards for 7.5′ quadrangles at 1:24,000 scale with a focus on hazards associated with earthquakes, landslides, flooding, debris flows, indoor radon, shallow groundwater, rockfall, and problem soils and rocks. The initiative is intended to provide planners, local officials, property owners, developers, engineers, geologists, design professionals, and the interested public with information on the type and location of critical geologic hazards that may impact existing and future development.
@@ -185,4 +185,4 @@ const dataSourcesShortened = (
     </p>
 )
 
-export { references, acknowledgements, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle };
+export { references, acknowledgments, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle };
