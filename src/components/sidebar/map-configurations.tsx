@@ -3,14 +3,21 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
+import { Switch } from '@/components/ui/switch';
+import { useReload3d } from '@/hooks/use-reload-3d';
 
 function MapConfigurations() {
   const { setIsDecimalDegrees, locationCoordinateFormat } = useMapCoordinates();
+  const { is3d, setIs3d } = useReload3d();
 
   const handleCoordFormatChange = (value: string) => {
     if (value && setIsDecimalDegrees) {
       setIsDecimalDegrees(value === "Decimal Degrees");
     }
+  };
+
+  const handleOnCheckedChange = () => (checked: boolean) => {
+    setIs3d(checked);
   };
 
   return (
@@ -51,7 +58,27 @@ function MapConfigurations() {
                   Degrees, Minutes, Seconds
                 </Label>
               </div>
+
             </RadioGroup>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Reload in {!is3d ? "3D" : "2D"}
+            </CardTitle>
+            {/* <CardDescription>Choose a coordinate format to toggle between decimal degrees and degrees, minutes, seconds.</CardDescription> */}
+          </CardHeader>
+          <CardContent>
+            {/* reload 3d switch */}
+            <div className="flex">
+              <Switch
+                checked={is3d}
+                onCheckedChange={handleOnCheckedChange()}
+                aria-label="Toggle 3d reload"
+                className="data-[state=unchecked]:bg-primary"
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

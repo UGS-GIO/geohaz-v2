@@ -120,23 +120,30 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
             const pointerMoveHandler = view.on(
                 "pointer-move",
                 (event: __esri.ViewPointerMoveEvent) => {
-                    const mapPoint = view.toMap({ x: event.x, y: event.y });
-                    const mp: __esri.Point = webMercatorUtils.webMercatorToGeographic(
-                        mapPoint
-                    ) as __esri.Point;
+                    // if the type is '3d' then use the following code, otherwise use the commented code
+                    if (view.type === '3d') {
+                        // const screenPoint = view.toScreen({ x: event.x, y: event.y } as __esri.ScreenPoint);
+                        // todo: implement 3d pointer move
+                    } else {
 
-                    const xyPoint = {
-                        x: mp.x.toFixed(3),
-                        y: mp.y.toFixed(3),
-                    };
+                        const mapPoint = view.toMap({ x: event.x, y: event.y });
+                        const mp: __esri.Point = webMercatorUtils.webMercatorToGeographic(
+                            mapPoint
+                        ) as __esri.Point;
 
-                    lastPointerPosition.current = xyPoint; // Store the last pointer position
+                        const xyPoint = {
+                            x: mp.x.toFixed(3),
+                            y: mp.y.toFixed(3),
+                        };
 
-                    updatePopupTemplate({
-                        widget,
-                        xyPoint: { x: xyPoint.x, y: xyPoint.y },
-                        scale: view.scale,
-                    });
+                        lastPointerPosition.current = xyPoint; // Store the last pointer position
+
+                        updatePopupTemplate({
+                            widget,
+                            xyPoint: { x: xyPoint.x, y: xyPoint.y },
+                            scale: view.scale,
+                        });
+                    }
                 }
             );
 
