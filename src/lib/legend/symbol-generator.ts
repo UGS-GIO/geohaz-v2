@@ -123,47 +123,117 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
         }
     });
 }
-
-export function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
+function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
+    // Find the first symbolizer that has a 'Point' property
     const pointSymbolizer = symbolizers.find(symbolizer => 'Point' in symbolizer)?.Point;
 
     if (!pointSymbolizer) {
         throw new Error("No valid Point symbolizer found in the provided symbolizers.");
     }
 
-    const { size, opacity, rotation, url } = pointSymbolizer;
+    // Destructure properties from the Point symbolizer
+    const { size, opacity, rotation, url, graphics } = pointSymbolizer;
 
-    const graphic = pointSymbolizer.graphics[0]; // Take the first graphic only
+    // Ensure there is at least one graphic in the 'graphics' array
+    const graphic = graphics && graphics.length > 0 ? graphics[0] : null;
 
-    const fillColorWithOpacity = addOpacityToHex(graphic.fill, parseFloat(opacity) * parseFloat(graphic["fill-opacity"]));
+    if (!graphic) {
+        throw new Error("No valid graphic found in the Point symbolizer.");
+    }
 
-    if (url) {
-        return new PictureMarkerSymbol({
-            url,
-            width: parseFloat(size),
-            height: parseFloat(size),
+    // Parse the size, opacity, and rotation with a default value in case of invalid or expression values
+    const parsedSize = parseSize(size);
+    const parsedOpacity = parseFloat(opacity) || 1.0; // Default opacity to 1 if it's invalid
+    const parsedRotation = parseFloat(rotation) || 0.0; // Default rotation to 0 if it's invalid
+
+    // Add opacity to the fill color if necessary
+    const fillColorWithOpacity = addOpacityToHex(graphic.fill, parsedOpacity * parseFloat(graphic["fill-opacity"] || "1"));
+
+    // Get 'mark' from the graphic (mark is always supplied)
+    const mark = graphic.mark;
+
+    // Define the allowed simple marker styles with proper typing
+    type SimpleMarkerStyle = "circle" | "square" | "diamond" | "cross" | "x" | "triangle";
+
+    // Map mark values to valid SimpleMarkerSymbol styles
+    const markToStyleMap: Record<string, SimpleMarkerStyle> = {
+        "circle": "circle",
+        "square": "square",
+        "diamond": "diamond",
+        "cross": "cross",
+        "x": "x",
+        "triangle": "triangle"
+    };
+
+    // Check if mark is a valid SimpleMarkerSymbol style
+    const style = markToStyleMap[mark.toLowerCase()] as SimpleMarkerStyle;
+
+    if (style) {
+        return new SimpleMarkerSymbol({
+            style,
+            color: fillColorWithOpacity,
+            size: parsedSize,
+            angle: parsedRotation,
+            outline: {
+                color: graphic.stroke, // Use stroke color from graphic
+                width: parseFloat(graphic["stroke-width"] || "1"), // Use stroke width from graphic
+            }
         });
     }
 
-    return new SimpleMarkerSymbol({
-        color: fillColorWithOpacity,
-        size: parseFloat(size),
-        angle: parseFloat(rotation),
-        // style:  graphic.mark.toLowerCase(), // Converts 'square' to 'SQUARE'
-        outline: {
-            color: graphic.stroke, // Use stroke color from graphic
-            width: parseFloat(graphic["stroke-width"]) // Use stroke width from graphic
-        }
+    // If mark is not a recognized simple marker style, use PictureMarkerSymbol
+    return new PictureMarkerSymbol({
+        url: url || mark,  // Treat mark as the URL for custom icon or font-based symbol
+        width: parsedSize,
+        height: parsedSize,
     });
-
 }
 
+// Utility function for parsing size, including expressions
+function parseSize(size: string | number): number {
+    // Handle number values directly
+    if (typeof size === 'number') {
+        return size;
+    }
+
+    // For strings, first attempt to parse as a number
+    const parsed = parseFloat(size);
+
+    // If parsing succeeds, return the parsed value
+    if (!isNaN(parsed)) {
+        return parsed;
+    }
+
+    // If parsing fails, check if it's an expression
+    if (typeof size === 'string' && size.startsWith("[Interpolate")) {
+        console.warn(`Expression size detected, defaulting to 16.`);
+    } else {
+        console.warn(`Invalid size value: "${size}", defaulting to 16.`);
+    }
+
+    // Return default value
+    return 16;
+}
+
+// Utility function for adding opacity to a hex color
 function addOpacityToHex(hex: string, opacity: number): string {
-    const alpha = Math.round(opacity * 255).toString(16).padStart(2, '0').toUpperCase();
+    // Handle case when hex is undefined
+    if (!hex) {
+        return "#000000FF"; // Default to black with full opacity
+    }
+
+    // Ensure opacity is between 0 and 1
+    const validOpacity = Math.max(0, Math.min(1, opacity));
+    const alpha = Math.round(validOpacity * 255).toString(16).padStart(2, '0').toUpperCase();
+
+    // If hex already has an alpha channel (8 characters), replace it
+    if (hex.length === 9) {
+        return `${hex.substring(0, 7)}${alpha}`;
+    }
+
+    // Otherwise, append the alpha channel
     return `${hex}${alpha}`;
 }
-
-
 
 
 export function createEsriSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
