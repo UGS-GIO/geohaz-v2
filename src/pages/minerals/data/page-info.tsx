@@ -94,7 +94,7 @@ const references = (
     </div>
 )
 
-const acknowledgements = (
+const acknowledgments = (
     <div className="space-y-2">
         <p>
             Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
@@ -181,4 +181,4 @@ const dataSourcesShortened = (
     </p>
 )
 
-export { references, acknowledgements, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle };
+export { references, acknowledgments, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle };

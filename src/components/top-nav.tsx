@@ -25,12 +25,18 @@ const topoBasemapOptions = {
   }
 };
 
+const terrainBasemapOptions = {
+  portalItem: {
+    id: "a52ab98763904006aa382d90e906fdd5" // Terrain with Labels
+  }
+};
+
 export const basemapList: BasemapType[] = [
   { title: 'Relief', basemapStyle: 'topo', isActive: true, type: 'short' },
   { title: 'Streets', basemapStyle: 'streets', isActive: false, type: 'short' },
   { title: 'Satellite', basemapStyle: 'satellite', isActive: false, type: 'short' },
   { title: 'Hybrid', basemapStyle: 'hybrid', isActive: false, type: 'short' },
-  { title: 'Terrain', basemapStyle: 'terrain', isActive: false, type: 'long' },
+  { title: 'Terrain', basemapStyle: 'terrain', isActive: false, type: 'long', customBasemap: new Basemap(terrainBasemapOptions) },
   { title: 'Topographic', basemapStyle: 'contours', isActive: false, type: 'long', customBasemap: new Basemap(topoBasemapOptions) },
 ];
 
@@ -104,8 +110,8 @@ function TopNav({ className, ...props }: TopNavProps) {
   const desktopTrigger = (
     <Button
       className={cn(
-        'text-stone-400',
-        isLongActive && 'text-primary-foreground underline',
+        'text-muted-foreground',
+        isLongActive && 'text-secondary-foreground underline',
         'focus-visible:outline-none'
       )}
       variant="ghost"
@@ -147,7 +153,7 @@ function TopNav({ className, ...props }: TopNavProps) {
                 key={`${title}-${basemapStyle}`}
                 onClick={() => handleBasemapChange(basemapStyle, customBasemap)}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-primary-foreground',
+                  'text-sm font-medium transition-colors hover:text-secondary-foreground',
                   isActive ? 'underline' : 'text-muted-foreground'
                 )}
               >

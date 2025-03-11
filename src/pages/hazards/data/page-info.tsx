@@ -99,7 +99,7 @@ const references = (
     </div>
 )
 
-const acknowledgements = (
+const acknowledgments = (
     <div className="space-y-2">
         <p>
             In 2008, the Utah Geological Survey Geologic Hazards Mapping Initiative was created with funding from the Utah Legislature to map geologic hazards in areas of existing and future development. This mapping is focused on identifying hazards for 7.5′ quadrangles at 1:24,000 scale with a focus on hazards associated with earthquakes, landslides, flooding, debris flows, indoor radon, shallow groundwater, rockfall, and problem soils and rocks. The initiative is intended to provide planners, local officials, property owners, developers, engineers, geologists, design professionals, and the interested public with information on the type and location of critical geologic hazards that may impact existing and future development.
@@ -121,6 +121,9 @@ const acknowledgements = (
 
 const dataDisclaimer = (
     <div className="space-y-2">
+        <p className="italic">
+            Please note that most hazards have been mapped within specific study areas and not comprehensively statewide. Therefore, the absence of data in a particular location does not indicate the absence of geologic hazards.
+        </p>
         <p>
             Although this product represents the work of professional scientists, the Utah Department of Natural Resources, Utah Geological Survey, makes no warranty, expressed or implied, regarding its suitability for a particular use.      The Utah Department of Natural Resources, Utah Geological Survey, shall not be liable under any circumstances for any direct, indirect, special, incidental, or consequential damages with respect to claims by users of this product. The Utah Geological Survey does not guarantee accuracy or completeness of the data.
         </p>
@@ -141,14 +144,14 @@ const dataDisclaimer = (
 
 const mapDetails = (
     <div className='mx-2 space-y-2'>
+        <p className="italic">
+            Disclaimer: Please note that most hazards have been mapped within specific study areas and not comprehensively statewide. Therefore, the absence of data in a particular location does not indicate the absence of geologic hazards.
+        </p>
         <p>
             The Utah Geologic Hazards Portal is a compilation of data from the Utah Geologic Hazards Database and contains post-2008 UGS geologic hazard map data and data from other sources. This mapping is intended to provide planners, local government officials, property owners, developers, engineers, geologists, design professionals, and the public with information on the type, location, and relative susceptibility of geologic hazards that may impact existing and future infrastructure and development. The data also supports emergency response and recovery planning, as well as community risk assessment for existing development and infrastructure.
         </p>
         <p>
             Hazard map layers can be enabled using the group toggle buttons and layer checkboxes. Select features on the map to view detailed information about hazard susceptibilities. Create summary reports for individual areas by using the Report Generator tool.
-        </p>
-        <p className="italic">
-            Please note that most hazards have been mapped within specific study areas and not comprehensively statewide. Therefore, the absence of data in a particular location does not indicate the absence of geologic hazards.
         </p>
         <p>
             For more information about geologic hazards in Utah, see <Link to="https://geology.utah.gov/hazards/">https://geology.utah.gov/hazards/</Link> or contact the UGS.
@@ -162,6 +165,8 @@ const mapDetailsShortened = (
     </p>
 )
 
+const projection = 'Projection: WGS84';
+
 const dataSources = (
     <div className='mx-2 space-y-2'>
         <p>
@@ -172,6 +177,9 @@ const dataSources = (
         </p>
         <p className="font-bold">
             Database Updated February 2025
+        </p>
+        <p className="font-bold">
+            {projection}
         </p>
         <p>
             UGS geologic hazard study reports and other downloads are available here: <Link to="https://geology.utah.gov/hazards/info/publications/">https://geology.utah.gov/hazards/info/publications/</Link>
@@ -185,4 +193,4 @@ const dataSourcesShortened = (
     </p>
 )
 
-export { references, acknowledgements, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle };
+export { references, acknowledgments, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle, projection };

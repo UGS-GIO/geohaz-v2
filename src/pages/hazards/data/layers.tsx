@@ -64,7 +64,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'lsfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -73,7 +73,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -102,7 +102,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'lsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -111,7 +111,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -139,7 +139,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'lqshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -148,7 +148,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -240,7 +240,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sfrhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -249,7 +249,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -274,7 +274,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'wsshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -283,7 +283,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -310,7 +310,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sdhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -319,7 +319,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -346,7 +346,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sbphazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -355,7 +355,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -382,7 +382,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'rfhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -391,7 +391,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -418,7 +418,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'peshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -427,7 +427,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -454,7 +454,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'exshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -463,7 +463,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -491,7 +491,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'sgshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -500,7 +500,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -527,7 +527,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'grshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -536,7 +536,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -563,7 +563,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'crshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -572,7 +572,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -599,7 +599,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'csshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -608,7 +608,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -635,7 +635,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'slshazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -644,7 +644,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -653,7 +653,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
 }
 
 const alluvialFanLayerName = 'alluvialfan_current';
-const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility - Statewide';
+const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility (Source: Division of Emergency Management)';
 const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -671,7 +671,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'aafhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -680,7 +680,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -706,7 +706,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'efhhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -715,7 +715,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -742,7 +742,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'erzhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -751,7 +751,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]
@@ -777,7 +777,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
             relatedTables: [
                 {
                     fieldLabel: '',
-                    matchingField: 'Relate_ID',
+                    matchingField: 'relate_id',
                     targetField: 'mkfhazardunit',
                     url: UNIT_DESCRIPTIONS_URL,
                     headers: {
@@ -786,7 +786,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'Description' }
+                        { field: 'description' }
                     ]
                 }
             ]

@@ -3,7 +3,7 @@ import { useGetCurrentPage } from "@/hooks/use-get-current-page";
 
 interface WebsiteInfo {
     references: React.ReactNode;
-    acknowledgements: React.ReactNode;
+    acknowledgments: React.ReactNode;
     dataDisclaimer: React.ReactNode;
     mapDetails: React.ReactNode;
     mapDetailsShortened: React.ReactNode;
@@ -21,8 +21,6 @@ const useGetPageInfo = () => {
             try {
                 // Dynamically import the config file based on the page
                 const websiteInfo = await import(`@/pages/${currentPage}/data/page-info.tsx`);
-                console.log('websiteInfo:', websiteInfo);
-
                 setInfo(websiteInfo);
             } catch (error) {
                 console.error('Error loading sidebar configuration:', error);
