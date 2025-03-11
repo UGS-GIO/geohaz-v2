@@ -1,10 +1,8 @@
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
 export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
-const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
+// const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
 const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
-const GEN_GIS_WORKSPACE = 'gen_gis';
-const MAPPING_WORKSPACE = 'mapping';
 // Industrial Minerals WMS Layer Configurations
 const aluniteLayerName = 'metalmineralapp_im_alunite';
 const aluniteWMSTitle = 'Alunite';
@@ -167,7 +165,7 @@ const silicaWMSConfig: WMSLayerProps = {
 };
 
 // Industrial Minerals Group Layer
-const IndustrialMineralsConfig: LayerProps = {
+const industrialMineralsGroupConfig: LayerProps = {
     type: 'group',
     title: 'Industrial Minerals',
     visible: true,
@@ -182,6 +180,83 @@ const IndustrialMineralsConfig: LayerProps = {
         silicaWMSConfig
     ]
 };
+
+// Critical Minerals WMS Layer Configurations
+const criticalMineralOccurancesWMSLayerName = 'metalmineralapp_criticalmineralpoints';
+const criticalMineralOccurancesWMSTitle = 'Critical Mineral Occurances';
+const criticalMineralOccurancesWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: criticalMineralOccurancesWMSTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${criticalMineralOccurancesWMSLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Site Name': { field: 'site_name', type: 'string' },
+                'Commodity': { field: 'commodity', type: 'string' },
+                'Label': { field: 'label', type: 'string' }
+            }
+        }
+    ]
+};
+
+// Critical Minerals Areas WMS Layer Configurations
+const criticalMineralsAreasWMSLayerName = 'metalmineralapp_criticalmineralpolygons';
+const criticalMineralsAreasWMSTitle = 'Critical Mineral Areas';
+const criticalMineralsAreasWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: criticalMineralsAreasWMSTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${criticalMineralsAreasWMSLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'District Name': { field: 'district', type: 'string' },
+                'Commodity': { field: 'commodity', type: 'string' },
+                'Label': { field: 'label', type: 'string' }
+            }
+        }
+    ]
+};
+
+// Critical Minerals group layer
+const criticalMineralsGroupConfig: LayerProps = {
+    type: 'group',
+    title: 'Critical Minerals',
+    visible: true,
+    layers: [
+        criticalMineralsAreasWMSConfig,
+        criticalMineralOccurancesWMSConfig
+    ]
+};
+
+const miningDistrictsLayerName = 'metalmineralapp_mining_districts';
+const miningDistrictsTitle = 'Metalliferous Mining Districts';
+const miningDistrictsConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: miningDistrictsTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${miningDistrictsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Commodity': { field: 'commodity', type: 'string' },
+                'Productive': { field: 'productive', type: 'string' },
+                'Short Tons': { field: 'short_tons', type: 'string' },
+                'Total Dollar Value': { field: 'total_dollar_value', type: 'string' },
+            },
+        },
+    ],
+}
 
 const umosLayerName = 'metalmineralapp_umos';
 const umosWMSTitle = 'Utah Mineral Occurance System';
@@ -261,10 +336,25 @@ const landAssessmentWMSConfig: WMSLayerProps = {
     ],
 }
 
+// SITLA Land Ownership Layer
+const SITLAConfig: LayerProps = {
+    type: 'feature',
+    url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
+    options: {
+        popupEnabled: false,
+        title: 'SITLA Land Ownership',
+        elevationInfo: [{ mode: 'on-the-ground' }],
+        visible: false,
+    },
+};
+
 const layersConfig: LayerProps[] = [
-    IndustrialMineralsConfig,
     umosWMSConfig,
-    landAssessmentWMSConfig
+    criticalMineralsGroupConfig,
+    miningDistrictsConfig,
+    industrialMineralsGroupConfig,
+    landAssessmentWMSConfig,
+    SITLAConfig
 ];
 
 export default layersConfig;
