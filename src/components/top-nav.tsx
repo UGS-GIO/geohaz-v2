@@ -25,12 +25,18 @@ const topoBasemapOptions = {
   }
 };
 
+const terrainBasemapOptions = {
+  portalItem: {
+    id: "a52ab98763904006aa382d90e906fdd5" // Terrain with Labels
+  }
+};
+
 export const basemapList: BasemapType[] = [
   { title: 'Relief', basemapStyle: 'topo', isActive: true, type: 'short' },
   { title: 'Streets', basemapStyle: 'streets', isActive: false, type: 'short' },
   { title: 'Satellite', basemapStyle: 'satellite', isActive: false, type: 'short' },
   { title: 'Hybrid', basemapStyle: 'hybrid', isActive: false, type: 'short' },
-  { title: 'Terrain', basemapStyle: 'terrain', isActive: false, type: 'long' },
+  { title: 'Terrain', basemapStyle: 'terrain', isActive: false, type: 'long', customBasemap: new Basemap(terrainBasemapOptions) },
   { title: 'Topographic', basemapStyle: 'contours', isActive: false, type: 'long', customBasemap: new Basemap(topoBasemapOptions) },
 ];
 
