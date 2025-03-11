@@ -162,6 +162,8 @@ const mapDetailsShortened = (
     </p>
 )
 
+const projection = 'Projection: WGS84';
+
 const dataSources = (
     <div className='mx-2 space-y-2'>
         <p>
@@ -172,6 +174,9 @@ const dataSources = (
         </p>
         <p className="font-bold">
             Database Updated February 2025
+        </p>
+        <p className="font-bold">
+            {projection}
         </p>
         <p>
             UGS geologic hazard study reports and other downloads are available here: <Link to="https://geology.utah.gov/hazards/info/publications/">https://geology.utah.gov/hazards/info/publications/</Link>
@@ -185,4 +190,4 @@ const dataSourcesShortened = (
     </p>
 )
 
-export { references, acknowledgments, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle };
+export { references, acknowledgments, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle, projection };
