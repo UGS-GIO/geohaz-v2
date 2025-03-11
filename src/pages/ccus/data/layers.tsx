@@ -244,7 +244,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                         { field: 'display_well_status', label: 'Well Status' },
                         { field: 'display_well_type', label: 'Well Type' },
                         {
-                            field: 'display_source', label: 'Source', transform: (value) => {
+                            field: 'source', label: 'Source', transform: (value) => {
                                 if (value === 'DOGM') {
                                     return <Link to="https://geology.utah.gov/data/explorer/">State of Utah - Data Explorer</Link>
                                 } else if (value === 'UGS') {
