@@ -10,7 +10,7 @@ const aluniteWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: aluniteWMSTitle,
-    opacity: .75,
+    opacity: .5,
     visible: true,
     sublayers: [
         {
@@ -31,7 +31,7 @@ const bentoniteWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: bentoniteWMSTitle,
-    opacity: .75,
+    opacity: .5,
     visible: true,
     sublayers: [
         {
@@ -52,7 +52,7 @@ const dolomiteWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: dolomiteWMSTitle,
-    opacity: .75,
+    opacity: .5,
     visible: true,
     sublayers: [
         {
@@ -73,7 +73,7 @@ const gypsumWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: gypsumWMSTitle,
-    opacity: .75,
+    opacity: .5,
     visible: true,
     sublayers: [
         {
@@ -94,7 +94,7 @@ const limestoneWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: limestoneWMSTitle,
-    opacity: .75,
+    opacity: .5,
     visible: true,
     sublayers: [
         {
@@ -115,7 +115,7 @@ const phosphateWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: phosphateWMSTitle,
-    opacity: .75,
+    opacity: .5,
     visible: true,
     sublayers: [
         {
@@ -136,7 +136,7 @@ const potashWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: potashWMSTitle,
-    opacity: .75,
+    opacity: .5,
     visible: true,
     sublayers: [
         {
@@ -157,7 +157,7 @@ const silicaWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: silicaWMSTitle,
-    opacity: .75,
+    opacity: .5,
     visible: true,
     sublayers: [
         {
@@ -218,7 +218,7 @@ const criticalMineralsAreasWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: criticalMineralsAreasWMSTitle,
-    opacity: 0.75,
+    opacity: 0.5,
     visible: true,
     sublayers: [
         {
@@ -251,7 +251,7 @@ const miningDistrictsConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: miningDistrictsTitle,
-    opacity: 0.75,
+    opacity: 0.5,
     visible: true,
     sublayers: [
         {
@@ -350,7 +350,7 @@ const landAssessmentWMSConfig: WMSLayerProps = {
 const SITLAConfig: LayerProps = {
     type: 'feature',
     url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
-    opacity: 0.75,
+    opacity: 0.45,
     options: {
         popupEnabled: false,
         title: 'SITLA Land Ownership',
