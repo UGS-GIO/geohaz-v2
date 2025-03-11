@@ -167,7 +167,7 @@ const silicaWMSConfig: WMSLayerProps = {
 // Industrial Minerals Group Layer
 const industrialMineralsGroupConfig: LayerProps = {
     type: 'group',
-    title: 'Industrial Minerals',
+    title: 'Industrial Mineral Resource Potential',
     visible: true,
     layers: [
         aluniteWMSConfig,
@@ -182,16 +182,16 @@ const industrialMineralsGroupConfig: LayerProps = {
 };
 
 // Critical Minerals WMS Layer Configurations
-const criticalMineralOccurancesWMSLayerName = 'metalmineralapp_criticalmineralpoints';
-const criticalMineralOccurancesWMSTitle = 'Critical Mineral Occurances';
-const criticalMineralOccurancesWMSConfig: WMSLayerProps = {
+const criticalMineralOccurencesWMSLayerName = 'metalmineralapp_criticalmineralpoints';
+const criticalMineralOccurencesWMSTitle = 'Critical Mineral Occurrences';
+const criticalMineralOccurencesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
-    title: criticalMineralOccurancesWMSTitle,
+    title: criticalMineralOccurencesWMSTitle,
     visible: true,
     sublayers: [
         {
-            name: `${ENERGY_MINERALS_WORKSPACE}:${criticalMineralOccurancesWMSLayerName}`,
+            name: `${ENERGY_MINERALS_WORKSPACE}:${criticalMineralOccurencesWMSLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {
@@ -232,7 +232,7 @@ const criticalMineralsGroupConfig: LayerProps = {
     visible: true,
     layers: [
         criticalMineralsAreasWMSConfig,
-        criticalMineralOccurancesWMSConfig
+        criticalMineralOccurencesWMSConfig
     ]
 };
 
@@ -259,7 +259,7 @@ const miningDistrictsConfig: WMSLayerProps = {
 }
 
 const umosLayerName = 'metalmineralapp_umos';
-const umosWMSTitle = 'Utah Mineral Occurance System';
+const umosWMSTitle = 'Utah Mineral Occurrence System';
 const umosWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
