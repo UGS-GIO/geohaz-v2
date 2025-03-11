@@ -284,6 +284,7 @@ function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
             url: layer.url,
             title: layer.title,
             visible: layer.visible,
+            opacity: layer.opacity,
             ...layer.options,
         });
     }
