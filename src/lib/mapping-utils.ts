@@ -98,24 +98,23 @@ const getMapImageLayerRenderer = async (layer: __esri.MapImageLayer) => {
 const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
     if (layer.renderer.type === 'unique-value') {
         const renderer = layer.renderer as __esri.UniqueValueRenderer;
-        const firstInfo = renderer.uniqueValueInfos[0];
-        return {
-            renderer: firstInfo.symbol,
+        return renderer.uniqueValueInfos.map(info => ({
+            renderer: info.symbol,
             id: layer.id,
-            label: firstInfo.label,
+            label: info.label,
             url: layer.url,
-        };
+        }));
     } else if (layer.renderer.type === 'simple') {
         const renderer = layer.renderer as __esri.SimpleRenderer;
-        return {
+        return [{
             renderer: renderer.symbol,
             id: layer.id,
             label: layer.title,
             url: layer.url,
-        };
+        }];
     } else {
         console.error('Unsupported renderer type for FeatureLayer.');
-        return;
+        return [];
     }
 };
 
