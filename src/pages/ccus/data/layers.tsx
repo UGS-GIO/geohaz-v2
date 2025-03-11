@@ -103,12 +103,12 @@ const sco2WMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Storage Resource Estimate': {
+                'Storage Resource Estimate (Mt CO₂)': {
                     field: 'capacity_mtco2',
                     type: 'number',
                     decimalPlaces: 2,
                 },
-                'Storage Cost ($/tCO2)': {
+                'Storage Cost ($/tCO₂)': {
                     field: 'storage_cost_doll_per_tco2',
                     type: 'number',
                     decimalPlaces: 2,
@@ -129,7 +129,7 @@ const sco2WMSConfig: WMSLayerProps = {
                     type: 'number',
                     decimalPlaces: 2,
                 },
-                'Porosity': {
+                'Porosity (φ)': {
                     field: 'porosity',
                     type: 'number',
                     decimalPlaces: 2,
