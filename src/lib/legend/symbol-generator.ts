@@ -196,23 +196,11 @@ function parseSize(size: string | number): number {
         return size;
     }
 
-    // For strings, first attempt to parse as a number
+    // For strings, attempt to parse as a number
     const parsed = parseFloat(size);
 
-    // If parsing succeeds, return the parsed value
-    if (!isNaN(parsed)) {
-        return parsed;
-    }
-
-    // If parsing fails, check if it's an expression
-    if (typeof size === 'string' && size.startsWith("[Interpolate")) {
-        console.warn(`Expression size detected, defaulting to 16.`);
-    } else {
-        console.warn(`Invalid size value: "${size}", defaulting to 16.`);
-    }
-
-    // Return default value
-    return 16;
+    // If parsing succeeds, return the parsed value; otherwise return default
+    return !isNaN(parsed) ? parsed : 16;
 }
 
 // Utility function for adding opacity to a hex color
@@ -234,7 +222,6 @@ function addOpacityToHex(hex: string, opacity: number): string {
     // Otherwise, append the alpha channel
     return `${hex}${alpha}`;
 }
-
 
 export function createEsriSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
     if (symbolizers.every(symbolizer => symbolizer.Line)) {
