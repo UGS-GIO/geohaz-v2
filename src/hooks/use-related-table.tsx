@@ -99,13 +99,6 @@ const useRelatedTable = (
         })),
     });
 
-    console.log('HOOK: Query results status:', queryResults.map(q => ({
-        dataLength: q.data?.length || 0,
-        isLoading: q.isLoading,
-        isError: !!q.error,
-        errorMessage: q.error?.message
-    })));
-
     const combinedResult: CombinedResult = {
         data: queryResults.map((result) => {
             return result.data ?? [];

@@ -239,18 +239,18 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'display_description', label: 'Description' },
-                        { field: 'display_field_name', label: 'Field Name' },
-                        { field: 'display_well_status', label: 'Well Status' },
-                        { field: 'display_well_type', label: 'Well Type' },
+                        { field: 'display_description', label: 'Description', transform: (value) => value !== '' ? value : 'No Data' },
+                        { field: 'display_field_name', label: 'Field Name', transform: (value) => value !== '' ? value : 'No Data' },
+                        { field: 'display_well_status', label: 'Well Status', transform: (value) => value !== '' ? value : 'No Data' },
+                        { field: 'display_well_type', label: 'Well Type', transform: (value) => value !== '' ? value : 'No Data' },
                         {
                             field: 'source', label: 'Source', transform: (value) => {
                                 if (value === 'DOGM') {
-                                    return <Link to="https://geology.utah.gov/data/explorer/">State of Utah - Data Explorer</Link>
+                                    return <Link to="https://dataexplorer.ogm.utah.gov/">Utah Division of Oil, Gas and Mining</Link>
                                 } else if (value === 'UGS') {
-                                    return <>contact <Link to="mailto:gstpierre@utah.gov">gstpierre@utah.gov</Link></>
+                                    return <>Utah Geological Survey - contact <Link to="mailto:gstpierre@utah.gov">gstpierre@utah.gov</Link></>
                                 }
-                                return value;
+                                return value !== '' ? value : 'No Data';
                             }
                         },
                     ]

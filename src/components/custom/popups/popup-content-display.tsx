@@ -170,7 +170,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
     const getRelatedTableValues = (groupedLayerIndex: number) => {
         if (!data?.length) {
-            return [[{ label: "No data available", value: "No data available" }]];
+            return [[{ label: "", value: "No data available" }]];
         }
 
         const groupedValues: LabelValuePair[][] = [];
@@ -205,7 +205,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
         return groupedValues.length
             ? groupedValues
-            : [[{ label: "No data available", value: "No data available" }]];
+            : [[{ label: "", value: "No data available" }]];
     };
 
 
