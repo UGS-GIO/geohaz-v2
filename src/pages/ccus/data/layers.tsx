@@ -1,3 +1,4 @@
+import { Link } from "@/components/custom/link";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
 export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
@@ -223,7 +224,35 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     },
                     displayFields: [
                         { field: 'formation_name', label: 'Formation Name' },
-                        { field: 'formation_depth', label: 'Formation Depth (meters??? verify)' },
+                        { field: 'formation_depth', label: 'Formation Depth (feet)' },
+                    ]
+                },
+                {
+                    fieldLabel: 'LAS File Information',
+                    matchingField: 'display_api',
+                    targetField: 'api',
+                    logicalOperator: 'ilike',
+                    url: PROD_POSTGREST_URL + '/ccus_las_display_view',
+                    headers: {
+                        "Accept-Profile": 'emp',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'display_description', label: 'Description', transform: (value) => value !== '' ? value : 'No Data' },
+                        { field: 'display_field_name', label: 'Field Name', transform: (value) => value !== '' ? value : 'No Data' },
+                        { field: 'display_well_status', label: 'Well Status', transform: (value) => value !== '' ? value : 'No Data' },
+                        { field: 'display_well_type', label: 'Well Type', transform: (value) => value !== '' ? value : 'No Data' },
+                        {
+                            field: 'source', label: 'Source', transform: (value) => {
+                                if (value === 'DOGM') {
+                                    return <Link to="https://dataexplorer.ogm.utah.gov/">Utah Division of Oil, Gas and Mining</Link>
+                                } else if (value === 'UGS') {
+                                    return <>Utah Geological Survey - contact <Link to="mailto:gstpierre@utah.gov">gstpierre@utah.gov</Link></>
+                                }
+                                return value !== '' ? value : 'No Data';
+                            }
+                        },
                     ]
                 }
             ]

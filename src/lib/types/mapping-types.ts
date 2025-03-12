@@ -173,11 +173,12 @@ export interface RelatedTable {
     url: string;
     headers: Record<string, string>;
     displayFields?: DisplayField[];
+    logicalOperator?: string;
 }
 
 
 interface DisplayField {
     field: string;
     label?: string;
-    format?: (value: any) => string; // todo: add format function
+    transform?: (value: string) => React.ReactNode;
 }
