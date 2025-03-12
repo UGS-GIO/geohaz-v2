@@ -116,6 +116,38 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
     };
 
     const createLink = (value: string, field: string) => {
+        // Check if we have a special 'custom' key in linkFields
+        if (linkFields?.['custom']) {
+            const customLinks = linkFields['custom'];
+
+            if (field === 'custom' && customLinks.transform) {
+                const hrefs = customLinks.transform(value);
+
+                return (
+                    <>
+                        {hrefs.map((item, index) => {
+                            if (item.href === null) {
+                                return null;
+                            }
+
+                            return (
+                                <div key={`${item.href}-${index}`} className="flex gap-2">
+                                    <Link
+                                        to={item.href}
+                                        className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
+                                        variant='primary'
+                                    >
+                                        <span className="break-all inline-block">{item.label}</span>
+                                        <ExternalLink className="flex-shrink-0 ml-1" size={16} />
+                                    </Link>
+                                </div>
+                            )
+                        })}
+                    </>
+                );
+            }
+        }
+
         const linkConfig = linkFields?.[field];
 
         if (linkConfig) {
@@ -210,9 +242,13 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
 
     const baseFeatureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
+
+    // Add custom field entry if we have custom links
+    const customFieldEntries = linkFields?.['custom'] ? [['', { field: 'custom', type: 'string' }]] : [];
+
     const featureEntries = rasterValue !== null
-        ? [...baseFeatureEntries, [`${rasterSource?.valueLabel}`, rasterValue]]
-        : baseFeatureEntries;
+        ? [...baseFeatureEntries, ...customFieldEntries, [`${rasterSource?.valueLabel}`, rasterValue]]
+        : [...baseFeatureEntries, ...customFieldEntries];
 
     const shouldDisplayValue = (value: string): boolean => {
         // Cases where we don't want to display the value:
@@ -230,6 +266,20 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         regularContent: JSX.Element[];
     }>(
         (acc, [label, field]) => {
+            // Handle special case for custom links
+            if (field && typeof field === 'object' && field.field === 'custom') {
+                const content = (
+                    <div key={label} className="flex flex-col">
+                        <p className="font-bold underline text-primary">{label}</p>
+                        <div className="break-words">
+                            {createLink('', 'custom')}
+                        </div>
+                    </div>
+                );
+                acc.urlContent.push(content);
+                return acc;
+            }
+
             const fieldConfig = popupFields ? field : { field, type: 'string' as const };
 
             // Special handling for raster value
