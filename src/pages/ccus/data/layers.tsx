@@ -196,7 +196,7 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
 };
 
 const wellWithTopsLayerName = 'wellswithtops_hascore';
-const wellWithTopsWMSTitle = 'Wells with Tops (Has Core)';
+const wellWithTopsWMSTitle = 'Wells Database';
 const wellWithTopsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -224,7 +224,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     },
                     displayFields: [
                         { field: 'formation_name', label: 'Formation Name' },
-                        { field: 'formation_depth', label: 'Formation Depth (feet)' },
+                        { field: 'formation_depth', label: 'Formation Depth (ft)' },
                     ]
                 },
                 {
