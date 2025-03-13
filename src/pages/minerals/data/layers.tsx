@@ -368,7 +368,23 @@ const miningDistrictsConfig: WMSLayerProps = {
                 'Organized District': { field: 'organized', type: 'string' },
                 'Productive': { field: 'productive', type: 'string' },
                 'Short Tons': { field: 'short_tons', type: 'string' },
-                'Total Dollar Value': { field: 'total_dollar_value', type: 'string' },
+                'Total Dollar Value': {
+                    field: 'total_dollar_value',
+                    type: 'string',
+                    transform: (value) => {
+                        if (!value) return value;
+
+                        // Convert to number, round to 2 decimal places
+                        const numValue = parseFloat(value);
+                        if (isNaN(numValue)) return value;
+
+                        // Format with commas and 2 decimal places
+                        return numValue.toLocaleString('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                        });
+                    }
+                },
             },
         },
     ],
