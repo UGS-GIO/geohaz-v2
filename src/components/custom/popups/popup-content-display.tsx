@@ -272,7 +272,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                     <div key={label} className="flex flex-col">
                         <p className="font-bold underline text-primary">{label}</p>
                         <div className="break-words">
-                            {createLink('', 'custom')}
+                            {popupFields ? (field.transform ? field.transform(properties) : '') : createLink('', 'custom')}
                         </div>
                     </div>
                 );
