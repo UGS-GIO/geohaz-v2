@@ -272,7 +272,7 @@ const SITLAConfig: LayerProps = {
 };
 
 const faultsLayerName = 'faults_m-179dm';
-const faultsWMSTitle = '500k Faults';
+const faultsWMSTitle = 'Utah Faults';
 const faultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -287,11 +287,34 @@ const faultsWMSConfig: WMSLayerProps = {
                 'Series ID': { field: 'series_id', type: 'string' },
                 'Scale': {
                     field: 'scale',
-                    type: 'number',
-                    // example way of using transform
-                    // transform: (value) => value.toFixed(2)
-                }
+                    type: 'string',
+                    transform: (value: string) => {
+                        if (value === 'small') return '1:500,000'
+                        return ''
+                    }
+                },
+                'Description': {
+                    field: 'custom',
+                    type: 'string',
+                    transform: (popupFields: any) => {
+                        console.log(popupFields);
+                        return `${popupFields['subtype']}, ${popupFields['type']}, ${popupFields['modifier']}`;
+                    }
+                },
             },
+            linkFields: {
+                'series_id': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const transformedValues = {
+                            href: `https://doi.org/10.34191/${value}`,
+                            label: `${value}`
+                        };
+                        return [transformedValues];
+                    }
+                }
+            }
         },
     ],
 };
@@ -302,14 +325,14 @@ const EMPConfig: LayerProps = {
     title: 'Energy and Minerals',
     visible: true,
     layers: [
-        basinNamesWMSConfig,
-        oilGasFieldsWMSConfig,
-        pipelinesWMSConfig,
-        sco2WMSConfig,
-        riversWMSConfig,
-        seamlessGeolunitsWMSConfig,
-        wellWithTopsWMSConfig,
-        SITLAConfig,
+        // basinNamesWMSConfig,
+        // oilGasFieldsWMSConfig,
+        // pipelinesWMSConfig,
+        // sco2WMSConfig,
+        // riversWMSConfig,
+        // seamlessGeolunitsWMSConfig,
+        // wellWithTopsWMSConfig,
+        // SITLAConfig,
         faultsWMSConfig,
     ]
 };
