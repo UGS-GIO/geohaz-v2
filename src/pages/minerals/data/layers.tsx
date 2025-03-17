@@ -20,7 +20,6 @@ const aluniteWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Name': { field: 'name', type: 'string' },
                 'Deposit Type': { field: 'deposit_type', type: 'string' },
-                'Unit Name': { field: 'unit_name', type: 'string' }
             },
             linkFields: {
                 'custom': { // use 'custom' to create a custom hardcoded link
@@ -55,7 +54,7 @@ const bentoniteWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unit_name', type: 'string' },
+                'Unit Name': { field: 'unitname', type: 'string' },
             },
             linkFields: {
                 'custom': { // use 'custom' to create a custom hardcoded link
@@ -89,7 +88,7 @@ const dolomiteWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unit_name', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' }
             },
             linkFields: {
                 'custom': { // use 'custom' to create a custom hardcoded link
@@ -123,7 +122,7 @@ const gypsumWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unit_name', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' }
             },
             linkFields: {
                 'custom': { // use 'custom' to create a custom hardcoded link
@@ -157,7 +156,7 @@ const limestoneWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unit_name', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' }
             },
             linkFields: {
                 'custom': { // use 'custom' to create a custom hardcoded link
@@ -191,7 +190,7 @@ const phosphateWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unit_name', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' }
             },
             linkFields: {
                 'custom': { // use 'custom' to create a custom hardcoded link
@@ -259,7 +258,7 @@ const silicaWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unit_name', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' }
             },
             linkFields: {
                 'custom': { // use 'custom' to create a custom hardcoded link
