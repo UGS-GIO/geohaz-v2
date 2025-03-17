@@ -19,7 +19,8 @@ const aluniteWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Name': { field: 'name', type: 'string' },
-                'Deposit Type': { field: 'deposit_type', type: 'string' }
+                'Deposit Type': { field: 'deposit_type', type: 'string' },
+                'Unit Name': { field: 'unit_name', type: 'string' }
             },
             linkFields: {
                 'custom': { // use 'custom' to create a custom hardcoded link
@@ -223,8 +224,8 @@ const potashWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unit_name', type: 'string' }
+                'Name': { field: 'name', type: 'string' },
+                'Deposit Type': { field: 'deposit_type', type: 'string' }
             },
             linkFields: {
                 'custom': { // use 'custom' to create a custom hardcoded link
@@ -367,7 +368,13 @@ const miningDistrictsConfig: WMSLayerProps = {
                 'Commodity': { field: 'commodity', type: 'string' },
                 'Organized District': { field: 'organized', type: 'string' },
                 'Productive': { field: 'productive', type: 'string' },
-                'Short Tons': { field: 'short_tons', type: 'string' },
+                'Short Tons': {
+                    field: 'short_tons', type: 'string', transform: (value) => {
+                        // if value is 0, return empty string so popup doesn't show the field
+                        if (value === '0') return '';
+                        return value;
+                    },
+                },
                 'Total Dollar Value': {
                     field: 'total_dollar_value',
                     type: 'string',
