@@ -11,6 +11,8 @@ import ScaleBar from "@arcgis/core/widgets/ScaleBar.js";
 import './HazardMap.scss';
 import { ProgressContext } from '../contexts/ProgressContext';
 import { HazardMapContext } from '../contexts/HazardMapContext';
+import Polyline from '@arcgis/core/geometry/Polyline';
+import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
 
 interface VisualAssets {
   [key: string]: any;
@@ -55,11 +57,10 @@ const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) =>
     const mapDiv = document.createElement('div');
     document.body.appendChild(mapDiv);
 
-    const polylineSymbol = {
-      type: 'simple-line',
+    const polylineSymbol = new SimpleLineSymbol({
       color: '#f012be',
       width: 4
-    };
+    });
 
     const parsedAoi = JSON.parse(aoi);
     const polygon = new Polygon(parsedAoi);
@@ -73,7 +74,7 @@ const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) =>
       portalItem: { id: config.webMaps.hazard }
     });
 
-    const extentClone = polygon.extent.clone();
+    const extentClone = polygon.extent?.clone();
 
     view = new MapView({
       map,
@@ -81,7 +82,7 @@ const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) =>
       ui: {
         components: ['attribution']
       },
-      extent: extentClone.expand(3),
+      extent: extentClone?.expand(3),
       graphics: [polylineGraphic],
       constraints: {
         snapToZoom: false
@@ -91,8 +92,8 @@ const HazardMap: FC<HazardMapProps> = ({ aoi, queriesWithResults, children }) =>
     // make map scale a multiple of 2500
     view.when(() => {
       const extent = polygon.extent;
-      const expandedExtent = extent.expand(3);
-      view.extent = expandedExtent;
+      const expandedExtent = extent?.expand(3);
+      view.goTo(expandedExtent)
     });
     const remainder = view.scale % config.scaleMultiple;
     view.scale += config.scaleMultiple - remainder;

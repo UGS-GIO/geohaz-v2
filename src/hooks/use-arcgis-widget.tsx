@@ -3,11 +3,9 @@
 import { useEffect, useRef, useContext, useCallback } from "react";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
-import PopupTemplate from "@arcgis/core/PopupTemplate.js";
 import { MapContext } from "@/context/map-provider";
-import { addCommas } from "@/lib/utils";
 import { UIPositionOptions } from "@/lib/types/mapping-types";
-import { convertDDToDMS } from "@/lib/mapping-utils";
+import Point from "@arcgis/core/geometry/Point";
 
 // Define a type for the widget constructors
 type WidgetConstructor<T extends __esri.Widget> = new (args: any) => T;
@@ -21,12 +19,6 @@ interface ArcGISWidgetProps {
 interface FeatureHandleTypes {
     view: __esri.MapView | __esri.SceneView;
     widget: __esri.Feature;
-}
-
-interface UpdatePopupTemplateTypes {
-    widget: __esri.Feature;
-    xyPoint: { x: string; y: string };
-    scale: number;
 }
 
 // Type guard to check if a widget is a Feature widget
@@ -64,35 +56,13 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
         [view]
     );
 
-    // Function to update the popup template
-    const updatePopupTemplate = useCallback(({ widget, xyPoint, scale }: UpdatePopupTemplateTypes) => {
-        let lat = xyPoint.y;
-        let lon = xyPoint.x;
-
-        if (!isDecimalDegrees) {
-            lat = convertDDToDMS(parseFloat(xyPoint.y))
-            lon = convertDDToDMS(parseFloat(xyPoint.x))
-        }
-
-        widget.graphic.popupTemplate = new PopupTemplate({
-            content: `Lat: ${lat}, Lon: ${lon}<br>Scale: 1:${addCommas(
-                scale.toFixed(0)
-            )}`,
-        });
-    }, [isDecimalDegrees]);
-
     // Function to handle zoom and center events for mobile
     const handleMobileViewChange = useCallback(
-        ({ view, widget }: FeatureHandleTypes) => {
+        ({ view }: FeatureHandleTypes) => {
             const watchHandle = reactiveUtils.watch(
                 () => [view.zoom, view.center],
                 () => {
-                    const xyPoint = {
-                        x: view.center.longitude.toFixed(3),
-                        y: view.center.latitude.toFixed(3),
-                    };
-
-                    updatePopupTemplate({ widget, xyPoint, scale: view.scale });
+                    // idk what to do here yet
                 }
             );
 
@@ -100,27 +70,16 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
                 watchHandle.remove();
             };
         },
-        [updatePopupTemplate]
+        []
     );
 
     // Function to handle zoom and pointer move events for non-mobile
     const handleDesktopViewChange = useCallback(
-        ({ view, widget }: FeatureHandleTypes) => {
-            const zoomWatcher = view.watch("zoom", () => {
-                updatePopupTemplate({
-                    widget,
-                    xyPoint: {
-                        x: lastPointerPosition.current.x,
-                        y: lastPointerPosition.current.y,
-                    },
-                    scale: view.scale,
-                });
-            });
-
+        ({ view }: FeatureHandleTypes) => {
             const pointerMoveHandler = view.on(
                 "pointer-move",
                 (event: __esri.ViewPointerMoveEvent) => {
-                    const mapPoint = view.toMap({ x: event.x, y: event.y });
+                    const mapPoint = view.toMap({ x: event.x, y: event.y }) || new Point();
                     const mp: __esri.Point = webMercatorUtils.webMercatorToGeographic(
                         mapPoint
                     ) as __esri.Point;
@@ -131,21 +90,14 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
                     };
 
                     lastPointerPosition.current = xyPoint; // Store the last pointer position
-
-                    updatePopupTemplate({
-                        widget,
-                        xyPoint: { x: xyPoint.x, y: xyPoint.y },
-                        scale: view.scale,
-                    });
                 }
             );
 
             return () => {
-                zoomWatcher.remove();
                 pointerMoveHandler.remove();
             };
         },
-        [updatePopupTemplate]
+        []
     );
 
     useEffect(() => {
@@ -199,7 +151,7 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
         createWidget,
         handleMobileViewChange,
         handleDesktopViewChange,
-        updatePopupTemplate,
+        // updatePopupTemplate,
     ]);
 
     return widgetInstances;
