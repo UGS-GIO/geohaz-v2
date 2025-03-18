@@ -14,6 +14,8 @@ import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import Graphic from "@arcgis/core/Graphic";
 import { Link } from "@/components/custom/link";
+import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol";
+import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol";
 
 
 type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
@@ -45,29 +47,28 @@ function ReportGenerator() {
     mapDiv.style.height = '50vh';
     document.body.appendChild(mapDiv);
 
-    const polylineSymbol = {
-      type: "simple-fill",
-      color: "rgba(138,43,226, 0.8)",
+    const polygonSymbol = new SimpleFillSymbol({
+      color: "#8a2be2cc",
       style: "solid",
       outline: {
         color: "white",
         width: 1
       }
-    }
+    });
 
     const parsedAoi = JSON.parse(aoi);
     const polygon = new Polygon(parsedAoi);
 
     const polylineGraphic = new Graphic({
       geometry: polygon,
-      symbol: polylineSymbol
+      symbol: polygonSymbol
     });
 
     const map = new Map({
       basemap: "topo"
     });
 
-    const extentClone = polygon.extent.clone();
+    const extentClone = polygon.extent?.clone();
 
     const screenshotView = new MapView({
       map: map,
@@ -75,7 +76,7 @@ function ReportGenerator() {
       ui: {
         components: ['attribution']
       },
-      extent: extentClone.expand(2),
+      extent: extentClone?.expand(2),
       constraints: {
         snapToZoom: false
       }
@@ -88,14 +89,14 @@ function ReportGenerator() {
     await screenshotView.when();
 
     // Wait for the basemap to load
-    await map.basemap.load();
+    await map.basemap?.load();
 
     // Important: Wait for ALL basemap layers to load
-    const basemapLayerPromises = map.basemap.baseLayers.map(layer => layer.load());
-    await Promise.all(basemapLayerPromises);
+    const basemapLayerPromises = map.basemap?.baseLayers.map(layer => layer.load());
+    await Promise.all(basemapLayerPromises || []);
 
     // Go to extent after layers are loaded
-    await screenshotView.goTo(extentClone.expand(2), {
+    await screenshotView.goTo(extentClone?.expand(2), {
       animate: false,
       duration: 0
     });
@@ -189,7 +190,7 @@ function ReportGenerator() {
     tempGraphicsLayer: __esri.GraphicsLayer | undefined,
     setActiveButton: React.Dispatch<React.SetStateAction<ActiveButtonOptions | undefined>>
   ) {
-    if (event.state === "complete" && event.graphic) {
+    if (event.state === "complete" && event.graphic && event.graphic.geometry && event.graphic.geometry.extent) {
       tempGraphicsLayer?.remove(event.graphic);
       const drawAOIHeight = event.graphic.geometry.extent.height;
       const drawAOIWidth = event.graphic.geometry.extent.width;
@@ -304,9 +305,10 @@ function ReportGenerator() {
 
       if (event.state === "complete") {
         setIsSketching?.(true); // Ensure it remains true immediately after completion
-        view?.ui.remove(view?.ui.find("complete-button"));
+        const completeButton = view?.ui.find("complete-button")
+        if (completeButton) view?.ui.remove(completeButton);
 
-        const extent = event.graphic.geometry.extent;
+        const extent = event.graphic.geometry?.extent;
         const areaHeight = extent?.height;
         const areaWidth = extent?.width;
         const geometry = event.graphic.geometry as __esri.Polygon;
