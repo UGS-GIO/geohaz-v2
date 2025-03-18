@@ -325,14 +325,14 @@ const EMPConfig: LayerProps = {
     title: 'Energy and Minerals',
     visible: true,
     layers: [
-        // basinNamesWMSConfig,
-        // oilGasFieldsWMSConfig,
-        // pipelinesWMSConfig,
-        // sco2WMSConfig,
-        // riversWMSConfig,
-        // seamlessGeolunitsWMSConfig,
-        // wellWithTopsWMSConfig,
-        // SITLAConfig,
+        basinNamesWMSConfig,
+        oilGasFieldsWMSConfig,
+        pipelinesWMSConfig,
+        sco2WMSConfig,
+        riversWMSConfig,
+        seamlessGeolunitsWMSConfig,
+        wellWithTopsWMSConfig,
+        SITLAConfig,
         faultsWMSConfig,
     ]
 };
