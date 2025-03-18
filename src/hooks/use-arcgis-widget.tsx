@@ -27,7 +27,7 @@ function isFeatureWidget(widget: __esri.Widget): widget is __esri.Feature {
 }
 
 function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
-    const { view, isMobile, isDecimalDegrees } = useContext(MapContext);
+    const { view, isMobile } = useContext(MapContext);
     const widgetInstances = useRef<Map<symbol, __esri.Widget>>(new Map());
     const lastPointerPosition = useRef<{ x: string; y: string }>({
         x: "",

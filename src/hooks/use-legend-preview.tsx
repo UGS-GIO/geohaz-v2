@@ -24,9 +24,9 @@ const useLegendPreview = (layerId: string, url: string) => {
 
             // Generate previews for all renderers
             const previews = await Promise.all(
-                renderers.map(async (r) => {
+                renderers.map(async (renderer) => {
                     try {
-                        const preview = await RendererFactory.createPreview(r);
+                        const preview = await RendererFactory.createPreview(renderer);
                         return preview; // Return individual preview if successful
                     } catch (err) {
                         console.error('Error generating preview:', err);

@@ -28,6 +28,8 @@ import WMSSublayer from "@arcgis/core/layers/support/WMSSublayer.js";
 import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
+import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
+import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer.js";
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -101,7 +103,7 @@ const getMapImageLayerRenderer = async (layer: __esri.MapImageLayer) => {
 
 const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
     if (layer.renderer?.type === 'unique-value') {
-        const renderer = layer.renderer as __esri.UniqueValueRenderer;
+        const renderer = new UniqueValueRenderer(layer.renderer);
         return renderer.uniqueValueInfos?.map(info => ({
             renderer: info.symbol,
             id: layer.id,
@@ -109,7 +111,7 @@ const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
             url: layer.url,
         }));
     } else if (layer.renderer?.type === 'simple') {
-        const renderer = layer.renderer as __esri.SimpleRenderer;
+        const renderer = new SimpleRenderer(layer.renderer);
         return [{
             renderer: renderer.symbol,
             id: layer.id,
@@ -118,7 +120,7 @@ const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
         }];
     } else {
         console.error('Unsupported renderer type for FeatureLayer.');
-        return [];
+        return [new SimpleRenderer];
     }
 };
 
