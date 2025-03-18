@@ -284,7 +284,14 @@ const faultsWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Series ID': { field: 'series_id', type: 'string' },
+                'Description': {
+                    field: 'custom',
+                    type: 'string',
+                    transform: (popupFields: any) => {
+                        console.log(popupFields);
+                        return `${popupFields['subtype']} ${popupFields['type']}, ${popupFields['modifier']}`;
+                    }
+                },
                 'Scale': {
                     field: 'scale',
                     type: 'string',
@@ -293,14 +300,7 @@ const faultsWMSConfig: WMSLayerProps = {
                         return ''
                     }
                 },
-                'Description': {
-                    field: 'custom',
-                    type: 'string',
-                    transform: (popupFields: any) => {
-                        console.log(popupFields);
-                        return `${popupFields['subtype']}, ${popupFields['type']}, ${popupFields['modifier']}`;
-                    }
-                },
+                'Source': { field: 'series_id', type: 'string' },
             },
             linkFields: {
                 'series_id': {
