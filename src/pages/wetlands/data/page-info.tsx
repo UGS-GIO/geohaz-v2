@@ -108,10 +108,10 @@ const acknowledgments = (
 const dataDisclaimer = (
     <div className="space-y-2">
         <p>
-            Although this product represents the work of professional scientists, the Utah Department of Natural Resources, Utah Geological Survey and U.S. Department of the Interior, U.S. Bureau of Land Management make no warranty, expressed or implied, regarding its suitability for any particular use. The Utah Department of Natural Resources, Utah Geological Survey, and U.S. Department of the Interior, U.S. Bureau of Land Management shall not be liable under any circumstances for any direct, indirect, special, incidental, or consequential damages with respect to claims by users of this product. The Utah Geological Survey and U.S. Bureau of Land Management do not guarantee accuracy or completeness of the data. The views and conclusions contained in this document are those of the authors and should not be interpreted as necessarily representing the official policies, either expressed or implied, of the U.S. Government. Persons or agencies using these data specifically agree not to misrepresent the data, nor to imply that changes they made were approved by the Utah Geological Survey, and should indicate the data source and any modifications made on plots, digital copies, derivative products, and in metadata. The authors' determinations of resource potential DO NOT imply a determination of locatability for claim-staking purposes. The authors' determinations of resource potential also DO NOT imply potential for development of mineral resources.
+            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
         </p>
         <p>
-            The Utah Geological Survey presents U.S. Bureau of Mines Mineral Land Assessments as a public service and has no role in the production or approval of these reports. The Utah Department of Natural Resources, Utah Geological Survey makes no warranty, expressed or implied, regarding the suitability of these reports for a particular purpose and shall not be liable under any circumstances for any direct, indirect, special, incidental, or consequential damages with respect to claims by users of this product.
+            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
         </p>
     </div>
 );
@@ -119,14 +119,14 @@ const dataDisclaimer = (
 const mapDetails = (
     <div className='mx-2 space-y-2'>
         <p>
-            This web map application was created by the Utah Geological Survey (UGS) in cooperation with the U.S. Bureau of Land Management (BLM) to show mineral resource information in Utah. Use the links below to download the map data.
+        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
         </p>
     </div>
 )
 
 const mapDetailsShortened = (
     <p className='text-left text-sm mx-2 font-normal'>
-        This web map application was created by the Utah Geological Survey (UGS) in cooperation with the U.S. Bureau of Land Management (BLM) to show mineral resource information in Utah. Use the links below to download the map data.
+        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
     </p>
 )
 
