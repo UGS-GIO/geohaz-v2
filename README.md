@@ -58,7 +58,7 @@ Start the server
 
 ## Author
 
-Crafted with 🤍 by the [Utah Geological Survey](https://github.com/UGS-GIO/)
+Crafted with love by the [Utah Geological Survey](https://github.com/UGS-GIO/)
 
 ## License
 
