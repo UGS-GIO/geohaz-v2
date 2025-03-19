@@ -288,7 +288,6 @@ const faultsWMSConfig: WMSLayerProps = {
                     field: 'custom',
                     type: 'string',
                     transform: (popupFields: any) => {
-                        console.log(popupFields);
                         return `${popupFields['subtype']} ${popupFields['type']}, ${popupFields['modifier']}`;
                     }
                 },
