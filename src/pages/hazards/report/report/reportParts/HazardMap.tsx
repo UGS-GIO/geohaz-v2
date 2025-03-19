@@ -11,7 +11,6 @@ import ScaleBar from "@arcgis/core/widgets/ScaleBar.js";
 import './HazardMap.scss';
 import { ProgressContext } from '../contexts/ProgressContext';
 import { HazardMapContext } from '../contexts/HazardMapContext';
-import Polyline from '@arcgis/core/geometry/Polyline';
 import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
 
 interface VisualAssets {
