@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { RendererFactory } from '@/lib/legend/renderer-factory';
-import { getRenderer } from '@/lib/mapping-utils'; // Assumes getRenderer returns a single renderer
+import { getRenderer } from '@/lib/mapping-utils';
 import { MapContext } from '@/context/map-provider';
 import { useContext } from 'react';
+import { MapImageLayerRenderer, RegularLayerRenderer } from '@/lib/types/mapping-types';
 
 const useLegendPreview = (layerId: string, url: string) => {
     const { view } = useContext(MapContext);
@@ -24,10 +25,23 @@ const useLegendPreview = (layerId: string, url: string) => {
 
             // Generate previews for all renderers
             const previews = await Promise.all(
-                renderers.map(async (renderer) => {
+                renderers.map(async (rendererItem) => {
                     try {
-                        const preview = await RendererFactory.createPreview(renderer);
-                        return preview; // Return individual preview if successful
+                        // Skip null or undefined renderers
+                        if (!rendererItem) {
+                            console.warn('Skipping null or undefined renderer');
+                            return null;
+                        }
+
+                        // Check renderer type directly
+                        if (rendererItem.type !== 'map-image-renderer' && rendererItem.type !== 'regular-layer-renderer') {
+                            console.warn(`Unsupported renderer type: ${rendererItem.type}`);
+                            return null;
+                        }
+
+                        // At this point TypeScript should recognize rendererItem as one of the two valid types
+                        const preview = await RendererFactory.createPreview(rendererItem as MapImageLayerRenderer | RegularLayerRenderer);
+                        return preview;
                     } catch (err) {
                         console.error('Error generating preview:', err);
                         return null; // Return null on error to filter out later
@@ -43,13 +57,12 @@ const useLegendPreview = (layerId: string, url: string) => {
         }
     };
 
-
     // Query with dependencies: view, layerId, and url (for caching and refetch logic)
     const { data: preview = [], isLoading, error } = useQuery({
-        queryKey: ['legendPreview', layerId, url], // Query key
+        queryKey: ['legendPreview', layerId, url],
         queryFn: fetchLegendData,
-        enabled: !!view, // Only run the query when the view
-        staleTime: 1000 * 60 * 60 * 1, // Cache for 1 hours
+        enabled: !!view, // Only run the query when the view is available
+        staleTime: 1000 * 60 * 60 * 1, // Cache for 1 hour
     });
 
     return { preview, isLoading, error };

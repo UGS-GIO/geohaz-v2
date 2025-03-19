@@ -105,6 +105,7 @@ export const layerTypeMapping = {
 };
 
 export type MapImageLayerRenderer = {
+    type: 'map-image-renderer';
     label: string;
     imageData: string;
     id: string;
@@ -113,6 +114,7 @@ export type MapImageLayerRenderer = {
 };
 
 export type RegularLayerRenderer = {
+    type: 'regular-layer-renderer';
     renderer: __esri.Symbol;
     id: string;
     label: string;

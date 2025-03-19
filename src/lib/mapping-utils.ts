@@ -89,6 +89,7 @@ const getMapImageLayerRenderer = async (layer: __esri.MapImageLayer) => {
     const firstLegendElement = legend.layers[0]?.legend[0];
     if (firstLegendElement) {
         return {
+            type: 'map-image-renderer',
             label: firstLegendElement.label,
             imageData: firstLegendElement.imageData,
             id: '0',
@@ -105,6 +106,7 @@ const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
     if (layer.renderer?.type === 'unique-value') {
         const renderer = new UniqueValueRenderer(layer.renderer);
         return renderer.uniqueValueInfos?.map(info => ({
+            type: 'regular-layer-renderer',
             renderer: info.symbol,
             id: layer.id,
             label: info.label,
@@ -113,6 +115,7 @@ const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
     } else if (layer.renderer?.type === 'simple') {
         const renderer = new SimpleRenderer(layer.renderer);
         return [{
+            type: 'regular-layer-renderer',
             renderer: renderer.symbol,
             id: layer.id,
             label: layer.title,
@@ -120,7 +123,13 @@ const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
         }];
     } else {
         console.error('Unsupported renderer type for FeatureLayer.');
-        return [new SimpleRenderer];
+        return [{
+            type: 'regular-layer-renderer',
+            renderer: new SimpleRenderer(),
+            id: layer.id,
+            label: layer.title,
+            url: layer.url,
+        }];
     }
 };
 
@@ -150,6 +159,7 @@ const getWMSLayerRenderer = async (layer: __esri.WMSLayer) => {
 
         // Map through all the rules and generate preview objects for each rule
         const previews = rules.map((rule) => ({
+            type: 'regular-layer-renderer',
             label: rule.title,
             renderer: createEsriSymbol(rule.symbolizers),
             id: layer.id.toString(),
