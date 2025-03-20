@@ -24,6 +24,12 @@ import proj4 from 'proj4';
 import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 import Extent from '@arcgis/core/geometry/Extent';
 import { basemapList } from '@/components/top-nav';
+import WMSSublayer from "@arcgis/core/layers/support/WMSSublayer.js";
+import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
+import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
+import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
+import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
+import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer.js";
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -83,6 +89,7 @@ const getMapImageLayerRenderer = async (layer: __esri.MapImageLayer) => {
     const firstLegendElement = legend.layers[0]?.legend[0];
     if (firstLegendElement) {
         return {
+            type: 'map-image-renderer',
             label: firstLegendElement.label,
             imageData: firstLegendElement.imageData,
             id: '0',
@@ -96,17 +103,19 @@ const getMapImageLayerRenderer = async (layer: __esri.MapImageLayer) => {
 };
 
 const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
-    if (layer.renderer.type === 'unique-value') {
-        const renderer = layer.renderer as __esri.UniqueValueRenderer;
-        return renderer.uniqueValueInfos.map(info => ({
+    if (layer.renderer?.type === 'unique-value') {
+        const renderer = new UniqueValueRenderer(layer.renderer);
+        return renderer.uniqueValueInfos?.map(info => ({
+            type: 'regular-layer-renderer',
             renderer: info.symbol,
             id: layer.id,
             label: info.label,
             url: layer.url,
         }));
-    } else if (layer.renderer.type === 'simple') {
-        const renderer = layer.renderer as __esri.SimpleRenderer;
+    } else if (layer.renderer?.type === 'simple') {
+        const renderer = new SimpleRenderer(layer.renderer);
         return [{
+            type: 'regular-layer-renderer',
             renderer: renderer.symbol,
             id: layer.id,
             label: layer.title,
@@ -114,12 +123,18 @@ const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
         }];
     } else {
         console.error('Unsupported renderer type for FeatureLayer.');
-        return [];
+        return [{
+            type: 'regular-layer-renderer',
+            renderer: new SimpleRenderer(),
+            id: layer.id,
+            label: layer.title,
+            url: layer.url,
+        }];
     }
 };
 
 const getWMSLayerRenderer = async (layer: __esri.WMSLayer) => {
-    const sublayer: __esri.WMSSublayer = layer.sublayers.getItemAt(0); // we are currently only supporting the first sublayer, but a wms layer can have multiple sublayers
+    const sublayer: __esri.WMSSublayer = layer.sublayers.getItemAt(0) || new WMSSublayer(); // we are currently only supporting the first sublayer, but a wms layer can have multiple sublayers
 
     const legendUrl = `${layer.url}?service=WMS&request=GetLegendGraphic&format=application/json&layer=${sublayer.name}`;
 
@@ -144,6 +159,7 @@ const getWMSLayerRenderer = async (layer: __esri.WMSLayer) => {
 
         // Map through all the rules and generate preview objects for each rule
         const previews = rules.map((rule) => ({
+            type: 'regular-layer-renderer',
             label: rule.title,
             renderer: createEsriSymbol(rule.symbolizers),
             id: layer.id.toString(),
@@ -297,7 +313,7 @@ export const createLayer = (layer: LayerProps) => {
     if (layer.type === 'group') {
         const typedLayer = layer as GroupLayerProps;
         // Recursively create group layers and reverse the order
-        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined).reverse() as __esri.CollectionProperties<__esri.LayerProperties> | undefined;
+        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined).reverse() as __esri.CollectionProperties<__esri.Layer> | undefined;
         return new GroupLayer({
             title: layer.title,
             visible: layer.visible,
@@ -318,32 +334,36 @@ export const createLayer = (layer: LayerProps) => {
 // Set the popup alignment based on the location of the popup
 export function setPopupAlignment(view: SceneView | MapView) {
     reactiveUtils.watch(() => view.popup?.id, function () {
-        view.popup.alignment = function () {
-            const { location, view } = this;
 
-            if ((location) && (view)) {
-                const viewPoint = view.toScreen(location);
-                const y2 = view.height / 2;
-                const x2 = view.width / 3;
-                const x3 = x2 * 2;
+        if (view && view.popup) {
+            view.popup.alignment = function () {
+                const { location, view } = this;
 
-                if (viewPoint.y >= y2) {
-                    if (viewPoint.x < x2)
-                        return "top-right";
-                    else if (viewPoint.x > x3)
-                        return "top-left";
-                } else {
-                    if (viewPoint.x < x2)
-                        return "bottom-right";
-                    else if (viewPoint.x > x3)
-                        return "bottom-left";
-                    else
-                        return "bottom-center";
+                if ((location) && (view)) {
+                    const viewPoint = view.toScreen(location) || new Point();
+                    const y2 = view.height / 2;
+                    const x2 = view.width / 3;
+                    const x3 = x2 * 2;
+
+                    if (viewPoint.y >= y2) {
+                        if (viewPoint.x < x2)
+                            return "top-right";
+                        else if (viewPoint.x > x3)
+                            return "top-left";
+                    } else {
+                        if (viewPoint.x < x2)
+                            return "bottom-right";
+                        else if (viewPoint.x > x3)
+                            return "bottom-left";
+                        else
+                            return "bottom-center";
+                    }
                 }
-            }
 
-            return "top-center";
-        };
+                return "top-center";
+            };
+        }
+
     });
 }
 
@@ -449,7 +469,7 @@ export const fetchQFaultResults = async (params: GetResultsHandlerType, url: str
     // If the sourceIndex is not null, then the user selected a suggestion from the search box
     // If the sourceIndex is null, then the user pressed enter in the search box or hit the search button (a non specific search)
     if (params.suggestResult.sourceIndex !== null) {
-        searchTerm = params.suggestResult.key ? params.suggestResult.key : '';
+        searchTerm = params.suggestResult.key?.toString() ? params.suggestResult.key.toString() : '';
         searchUrl += `?search_key=${encodeURIComponent(searchTerm)}`;
     } else {
         searchTerm = params.suggestResult.text ? params.suggestResult.text : '';
@@ -829,15 +849,14 @@ export const createHighlightGraphic = (
 
     switch (feature.geometry.type) {
         case 'Point':
-            const pointSymbol = {
-                type: 'simple-marker',
+            const pointSymbol = new SimpleMarkerSymbol({
                 color: mergedOptions.fillColor,
                 size: mergedOptions.pointSize,
                 outline: {
                     color: mergedOptions.outlineColor,
                     width: mergedOptions.outlineWidth
                 }
-            };
+            });
 
             graphics.push(new Graphic({
                 geometry: new Point({
@@ -853,11 +872,11 @@ export const createHighlightGraphic = (
         case 'MultiLineString':
             coordinates.forEach(lineSegment => {
                 const convertedSegment = convertCoordinates([lineSegment]);
-                const polylineSymbol = {
-                    type: 'simple-line',
+
+                const polylineSymbol = new SimpleLineSymbol({
                     color: mergedOptions.outlineColor,
                     width: mergedOptions.outlineWidth
-                };
+                });
 
                 graphics.push(new Graphic({
                     geometry: new Polyline({
@@ -873,14 +892,13 @@ export const createHighlightGraphic = (
         case 'MultiPolygon':
             coordinates.forEach(polygonRing => {
                 const convertedRing = convertCoordinates([polygonRing]);
-                const polygonSymbol = {
-                    type: 'simple-fill',
+                const polygonSymbol = new SimpleFillSymbol({
                     color: mergedOptions.fillColor,
                     outline: {
                         color: mergedOptions.outlineColor,
                         width: mergedOptions.outlineWidth
                     }
-                };
+                });
 
                 graphics.push(new Graphic({
                     geometry: new Polygon({

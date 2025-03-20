@@ -149,11 +149,11 @@ const ChildLayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChang
                         <LayerControls
                             layerOpacity={layerOpacity}
                             handleOpacityChange={handleOpacityChange}
-                            title={layerTitle}
-                            description={layerDescriptions ? layerDescriptions[layerTitle] : ''}
+                            title={layerTitle || ''}
+                            description={layerDescriptions ? layerDescriptions[layerTitle || ''] : ''}
                             handleZoomToLayer={handleZoomToLayer}
                             layerId={layerId}
-                            url={typeNarrowedLayer.url}
+                            url={typeNarrowedLayer.url || ''}
                             openLegend={true}
                         />
                     </AccordionContent>
