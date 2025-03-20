@@ -5,6 +5,7 @@ export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.ru
 const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
 const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
 const GEN_GIS_WORKSPACE = 'gen_gis';
+const HAZARDS_WORKSPACE = 'hazards';
 const MAPPING_WORKSPACE = 'mapping';
 
 // GeoRegions WMS Layer
@@ -318,6 +319,37 @@ const faultsWMSConfig: WMSLayerProps = {
     ],
 };
 
+const qFaultsLayerName = 'quaternaryfaults_current';
+const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults - Statewide';
+const qFaultsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: qFaultsWMSTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Fault Zone Name': { field: 'faultzone', type: 'string' },
+                'Summary': { field: 'summary', type: 'string' },
+                'Fault Name': { field: 'faultname', type: 'string' },
+                'Section Name': { field: 'sectionname', type: 'string' },
+                'Strand Name': { field: 'strandname', type: 'string' },
+                'Structure Number': { field: 'faultnum', type: 'string' },
+                'Mapped Scale': { field: 'mappedscale', type: 'string' },
+                'Dip Direction': { field: 'dipdirection', type: 'string' },
+                'Slip Sense': { field: 'slipsense', type: 'string' },
+                'Slip Rate': { field: 'sliprate', type: 'string' },
+                'Structure Class': { field: 'faultclass', type: 'string' },
+                'Structure Age': { field: 'faultage', type: 'string' },
+                'Detailed Report': { field: 'usgs_link', type: 'string' },
+            }
+        },
+    ],
+};
+
 // Energy and Minerals Group Layer
 const EMPConfig: LayerProps = {
     type: 'group',
@@ -333,6 +365,7 @@ const EMPConfig: LayerProps = {
         wellWithTopsWMSConfig,
         SITLAConfig,
         faultsWMSConfig,
+        qFaultsWMSConfig
     ]
 };
 
