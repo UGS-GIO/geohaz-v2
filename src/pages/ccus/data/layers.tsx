@@ -214,7 +214,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'Wells With Related Formation Tops',
+                    fieldLabel: 'Formation Tops',
                     matchingField: 'api',
                     targetField: 'api',
                     url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore',
@@ -226,7 +226,9 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     displayFields: [
                         { field: 'formation_name', label: 'Formation Name' },
                         { field: 'formation_depth', label: 'Formation Depth (ft)' },
-                    ]
+                    ],
+                    sortBy: 'formation_depth',
+                    sortDirection: 'asc'
                 },
                 {
                     fieldLabel: 'LAS File Information',

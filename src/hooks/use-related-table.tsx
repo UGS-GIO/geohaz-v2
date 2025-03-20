@@ -48,7 +48,7 @@ const useRelatedTable = (
                     }
 
                     const queryUrl = targetValue
-                        ? `${config.url}?${config.matchingField}=${logicalOperator}.${targetValue}`
+                        ? `${config.url}?${config.matchingField}=${logicalOperator}.${targetValue}${config.sortBy ? `&order=${config.sortBy}.${config.sortDirection || 'asc'}` : ''}`
                         : config.url;
 
                     const response = await fetch(queryUrl, {
