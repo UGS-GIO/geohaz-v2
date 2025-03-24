@@ -176,6 +176,8 @@ export interface RelatedTable {
     headers: Record<string, string>;
     displayFields?: DisplayField[];
     logicalOperator?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
 }
 
 
