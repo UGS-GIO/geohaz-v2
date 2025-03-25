@@ -4,6 +4,13 @@ const appTitle = 'Utah Mineral Resources: Metals and Industrial Minerals';
 
 const references = (
     <div>
+        <li>AmphibiaWeb, 2018, AmphibiaWeb: Berkeley, California, University of California, online,<a href="https://amphibiaweb.org/">https://amphibiaweb.org/</a>, accessed January 2018.</li>
+        <li>Green, D.M., Weir, L.A., Casper, G.S., and Lannoo, M., 2014, North American amphibians− distribution and diversity: Berkeley, University of California Press, 600 p.</li>
+        <li>IUCN, 2017, The IUCN Red List of Threatened Species−version 2017-3: online,<a href="http://www.iucnredlist.org"> http://www.iucnredlist.org</a>, accessed March 2018.</li>
+        <li>Menuz, 2015, Landscape integrity model for Utah’s wetlands: Salt Lake City, Utah Geological Survey, 50 p., available <a href="https://geodata.geology.utah.gov/pages/search.php?search=!list15236&amp;order_by=date&amp;sort=DESC&amp;offset=0&amp;archive=0&amp;sort=DESC&amp;k=">online</a>. </li>
+        <li>Utah Conservation Data Center, 2017, Utah’s state listed species by county: Online,<a href="https://dwrcdc.nr.utah.gov/ucdc/ViewReports/sslist.htm">https://dwrcdc.nr.utah.gov/ucdc/ViewReports/sslist.htm</a>, accessed March 2018.</li>
+        <li>U.S. Fish and Wildlife Service (2009), A system for mapping riparian areas in the western United States: Arlington, 43 p.</li>
+        <li>U.S. Geological Survey, 2014, National amphibian atlas−version number 3.0: Laurel, Maryland, Patuxent Wildlife Research Center: Online,<a href="http://www.pwrc.usgs.gov/naa">www.pwrc.usgs.gov/naa</a>, accessed March 2018.</li>
         {/* <ul className="list-disc ml-5 space-y-4">
             <li>
                 Beukelman, G.S., Erickson, B.E., and Giraud, R.E., 2015, Landslide inventory map of the Sixmile Canyon and North Hollow area, Sanpete County, Utah: Utah Geological Survey Map 273DM, scale 1:24,000,&nbsp;
@@ -107,19 +114,32 @@ const acknowledgments = (
 
 const dataDisclaimer = (
     <div className="space-y-2">
-        <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
-        </p>
-        <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
-        </p>
+        <p>This product represents a compilation of information from both the Utah Geological Survey and external sources. The Utah Department of Natural Resources, Utah Geological Survey, makes no warranty, expressed or implied, regarding its suitability for a particular use. The Utah Department of Natural Resources, Utah Geological Survey, shall not be liable under any circumstances for any direct, indirect, special, incidental, or consequential damages with respect to claims by users of this product.</p>
+        <p>Wetlands spatial data were produced from a combination of aerial imagery examination and on-the-ground assessment and are not meant to be used as the basis for a jurisdictional wetland delineation. Wetlands across much of the state were mapped in the 1980s at a coarse resolution; some wetlands may have been inadvertently omitted and other wetlands may no longer exist or may not be considered jurisdictional. Please contact your local U.S. Army Corps of Engineers office if you are unsure of the status of a wetland on your property.</p>
+        <p>County-level data on species’ ranges were compiled from the Utah Conservation Data Center (2017) and the National Amphibian Atlas (U.S. Geological Survey, 2014); however, species may be found outside of the listed counties, elevation ranges, and habitat types.</p>
     </div>
 );
 
 const mapDetails = (
     <div className='mx-2 space-y-2'>
         <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
+            The Utah Geological Survey (UGS) conducts wetland mapping and wetland field assessment projects across Utah. All UGS mapping projects follow the National Wetland Inventory (NWI) standards developed by the U.S. Fish and Wildlife Service, and recent projects also include riparian mapping. Mapping is conducted primarily by reviewing aerial imagery and cannot be used as the basis for a jurisdictional wetland delineation. This map contains data from NWI that is up-to-date as of November 12, 2024. Wetland field assessment data and links to reports can be found under the Wetland Field Studies section of the application. Landscape Data show patterns of wetland abundance, ownership, and condition at multiple spatial scales. See <a href="#" id="openData"> Database Contents</a> for more information about the data in this map.
+        </p>
+        <p>
+            <strong>Contact</strong>
+        </p>
+        <p>
+            <ul>
+                <li><a href="mailto:pgoodwin@utah.gov">Peter Goodwin </a>- 801.537.3130</li>
+            </ul>
+        </p>
+        <p><strong>Links to Related Information</strong></p>
+        <p><ul>
+            <li><a href="https://geology.utah.gov/water/wetlands/">UGS Wetland Webpages</a> for information on wetlands and UGS wetland research</li>
+            <li><a href="https://www.fws.gov/wetlands/Data/Data-Download.html">National Wetlands Inventory</a> for downloads of the original NWI data</li>
+            <li><a href="http://www.spk.usace.army.mil/Missions/Regulatory/Contacts/Contact-Your-Local-Office/">U.S. Army Corps of Engineers District Offices</a> for information about wetland regulations and jurisdictional wetland delineations</li>
+            <li><a href="https://www.spk.usace.army.mil/Missions/Regulatory/Contacts/Wetland-Consultants/">U.S. Army Corps Wetland Consultants List</a> for a list of consultants that can conduct wetland delineations</li>
+        </ul>
         </p>
     </div>
 )
@@ -128,6 +148,7 @@ const mapDetailsShortened = (
     <p className='text-left text-sm mx-2 font-normal'>
         Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
     </p>
+
 )
 
 const dataSources = (
