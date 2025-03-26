@@ -114,19 +114,19 @@ const dataSources = (
             <strong>Additional Attributes and LLWW Data</strong>
         </p>
         <p>
-            Wetland mapping was additionally described with Landscape Position, Landform, Water Flow path, and Waterbody Type (LLWW) attributes to provide detail about a wetland’s geomorphic setting, shape and form, and connectivity to stream networks as well as to characterize a greater variety of human impacts, water sources, and unique wetland types through LLWW-specific modifiers. When combined with NWI mapping, LLWW attributes allow for unique visualizations such as the reclassification of wetland mapping according to the Hydrogeomorphic (HGM) system depicted in this app. LLWW attributes can similarly be used to estimate some likely functions (such as nutrient retention or flood control) provided by wetlands and show the distribution of those functions across the landscape. More information about the LLWW classification system, and specific functions and how they are modeled, can be found in the <Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-744.pdf" target="_blank">Cache Valley Supplemental Mapping Report.</Link> The complete LLWW dataset and results of individual function models are available to <Link to="https://firebasestorage.googleapis.com/v0/b/ut-dnr-wetlands-prod.appspot.com/o/LLWW_datasets.zip?alt=media&amp;token=3e2fbafb-522e-4fe3-8a46-c8692ddf2234">download.</Link>
+            Wetland mapping was additionally described with Landscape Position, Landform, Water Flow path, and Waterbody Type (LLWW) attributes to provide detail about a wetland’s geomorphic setting, shape and form, and connectivity to stream networks as well as to characterize a greater variety of human impacts, water sources, and unique wetland types through LLWW-specific modifiers. When combined with NWI mapping, LLWW attributes allow for unique visualizations such as the reclassification of wetland mapping according to the Hydrogeomorphic (HGM) system depicted in this app. LLWW attributes can similarly be used to estimate some likely functions (such as nutrient retention or flood control) provided by wetlands and show the distribution of those functions across the landscape. More information about the LLWW classification system, and specific functions and how they are modeled, can be found in the <Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-744.pdf">Cache Valley Supplemental Mapping Report.</Link> The complete LLWW dataset and results of individual function models are available to <Link to="https://firebasestorage.googleapis.com/v0/b/ut-dnr-wetlands-prod.appspot.com/o/LLWW_datasets.zip?alt=media&amp;token=3e2fbafb-522e-4fe3-8a46-c8692ddf2234">download.</Link>
         </p>
         <p>
             <strong>HYDRIC SOIL CLASSES</strong>
         </p>
         <p>
-            The hydric soil classes data were produced by the Natural Resources Consevation Service and depict soils that are saturated for periods of time long enough to create wetland conditions. This data layer is maintained by <Link to="https://www.arcgis.com/home/item.html?id=2be45af986af4624839cedae883faf47" target="_blank">ESRI.</Link>
+            The hydric soil classes data were produced by the Natural Resources Consevation Service and depict soils that are saturated for periods of time long enough to create wetland conditions. This data layer is maintained by <Link to="https://www.arcgis.com/home/item.html?id=2be45af986af4624839cedae883faf47">ESRI.</Link>
         </p>
         <p>
             <strong>LANDSCAPE DATA</strong>
         </p>
         <p>
-            The landscape dataset summarizes information relevant to Utah’s wetlands at five spatial scales. These data allow us to understand where and what kinds of wetlands are in Utah, who owns those wetlands, how ownership patterns differ from overall land ownership patterns, and locations that have potentially restorable wetlands. These data also summarize trends in groundwater and surface water resources across the state. The data and a more detailed description of how they were developed are available via <Link to="https://firebasestorage.googleapis.com/v0/b/ut-dnr-wetlands-prod.appspot.com/o/Wetlands_Landscape_StudyResults.zip?alt=media&amp;token=fa7d4ff1-ebd3-40b2-b18e-e5bf609f8099" target="_blank">download</Link>.
+            The landscape dataset summarizes information relevant to Utah’s wetlands at five spatial scales. These data allow us to understand where and what kinds of wetlands are in Utah, who owns those wetlands, how ownership patterns differ from overall land ownership patterns, and locations that have potentially restorable wetlands. These data also summarize trends in groundwater and surface water resources across the state. The data and a more detailed description of how they were developed are available via <Link to="https://firebasestorage.googleapis.com/v0/b/ut-dnr-wetlands-prod.appspot.com/o/Wetlands_Landscape_StudyResults.zip?alt=media&amp;token=fa7d4ff1-ebd3-40b2-b18e-e5bf609f8099">download</Link>.
         </p>
           
         <p>
@@ -142,13 +142,13 @@ const dataSources = (
             <strong>Wetland assessment results</strong>
         </p>
         <p>
-            The wetland assessment results dataset summarizes major findings from UGS wetland surveys. Results are organized by strata, which were based on ecoregions or watersheds, depending on the project. Only results from projects where sites were selected and surveyed using a random design are included in this dataset. The data and a more detailed methodology are available via <Link to="https://firebasestorage.googleapis.com/v0/b/ut-dnr-wetlands-prod.appspot.com/o/Wetlands_Landscape_StudyResults.zip?alt=media&amp;token=fa7d4ff1-ebd3-40b2-b18e-e5bf609f8099" target="_blank">download</Link>.
+            The wetland assessment results dataset summarizes major findings from UGS wetland surveys. Results are organized by strata, which were based on ecoregions or watersheds, depending on the project. Only results from projects where sites were selected and surveyed using a random design are included in this dataset. The data and a more detailed methodology are available via <Link to="https://firebasestorage.googleapis.com/v0/b/ut-dnr-wetlands-prod.appspot.com/o/Wetlands_Landscape_StudyResults.zip?alt=media&amp;token=fa7d4ff1-ebd3-40b2-b18e-e5bf609f8099">download</Link>.
         </p>
         <p>
             <strong>Wetland stressors</strong>
         </p>
         <p>
-            UGS created a landscape stress model for the state of Utah, focused on stressors likely to impact wetlands, including agriculture, development, hydrologic manipulations, and linear disturbances such as roads and pipelines. See <Link to="https://geodata.geology.utah.gov/pages/download.php?direct=1&amp;noattach=true&amp;ref=43843&amp;ext=pdf&amp;k=" target="_blank">Menuz (2015)</Link> for more information on the development of the landscape stress model.
+            UGS created a landscape stress model for the state of Utah, focused on stressors likely to impact wetlands, including agriculture, development, hydrologic manipulations, and linear disturbances such as roads and pipelines. See <Link to="https://geodata.geology.utah.gov/pages/download.php?direct=1&amp;noattach=true&amp;ref=43843&amp;ext=pdf&amp;k=">Menuz (2015)</Link> for more information on the development of the landscape stress model.
         </p>
 
         <p>
@@ -164,10 +164,8 @@ const dataSources = (
             <strong>LAND OWNERSHIP</strong>
         </p>
         <p>
-            Land ownership data are maintained by the Bureau of Land Management and the State of Utah School and Institutional Trust Lands Administration and are described in more detail <Link to="https://gis.utah.gov/data/cadastre/land-ownership/" target="_blank">here.</Link>
+            Land ownership data are maintained by the Bureau of Land Management and the State of Utah School and Institutional Trust Lands Administration and are described in more detail <Link to="https://gis.utah.gov/data/cadastre/land-ownership/">here.</Link>
         </p>
-
-
         <p>
             <strong>
                 Utah Mineral Occurance System (UMOS) (<Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-757/ofr-757.zip">data</Link>, <Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-757/ofr-757.pdf">report</Link>)
