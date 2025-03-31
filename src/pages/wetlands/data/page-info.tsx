@@ -58,7 +58,7 @@ const mapDetails = (
         <p>
             The Utah Geological Survey (UGS) conducts wetland mapping and wetland field assessment projects across Utah. All UGS mapping projects follow the National Wetland Inventory (NWI) standards developed by the U.S. Fish and Wildlife Service, and recent projects also include riparian mapping. Mapping is conducted primarily by reviewing aerial imagery and cannot be used as the basis for a jurisdictional wetland delineation. This map contains data from NWI that is up-to-date as of November 12, 2024. Wetland field assessment data and links to reports can be found under the Wetland Field Studies section of the application. Landscape Data show patterns of wetland abundance, ownership, and condition at multiple spatial scales. See Database Contents for more information about the data in this map.
         </p>
-        <p><strong>/Contact</strong></p>
+        <p><strong>Contact</strong></p>
         <ul>
             <li>
                 <Link to="mailto:pgoodwin@utah.gov">Peter Goodwin </Link>- 801.537.3130
