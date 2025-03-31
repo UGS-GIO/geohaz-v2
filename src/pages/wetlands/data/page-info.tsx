@@ -1,6 +1,6 @@
 import { Link } from "@/components/custom/link";
 
-const appTitle = 'Utah Mineral Resources: Metals and Industrial Minerals';
+const appTitle = 'Utah Wetlands';
 
 const references = (
     <ul className="list-disc ml-5 space-y-4">
@@ -14,16 +14,16 @@ const references = (
             IUCN, 2017, The IUCN Red List of Threatened Species−version 2017-3: online,<Link to="http://www.iucnredlist.org"> http://www.iucnredlist.org</Link>, accessed March 2018.
         </li>
         <li>
-            Menuz, 2015, Landscape integrity model for Utah’s wetlands: Salt Lake City, Utah Geological Survey, 50 p., available <Link to="https://geodata.geology.utah.gov/pages/search.php?search=!list15236&amp;order_by=date&amp;sort=DESC&amp;offset=0&amp;archive=0&amp;sort=DESC&amp;k=">online</Link>. 
+            Menuz, 2015, Landscape integrity model for Utah’s wetlands: Salt Lake City, Utah Geological Survey, 50 p., available <Link to="https://geodata.geology.utah.gov/pages/search.php?search=!list15236&amp;order_by=date&amp;sort=DESC&amp;offset=0&amp;archive=0&amp;sort=DESC&amp;k=">online</Link>.
         </li>
         <li>
-            Utah Conservation Data Center, 2017, Utah’s state listed species by county: Online,<Link to="https://dwrcdc.nr.utah.gov/ucdc/ViewReports/sslist.htm">https://dwrcdc.nr.utah.gov/ucdc/ViewReports/sslist.htm</Link>, accessed March 2018.
+            Utah Conservation Data Center, 2017, Utah’s state listed species by county: Online, <Link to="https://dwrcdc.nr.utah.gov/ucdc/ViewReports/sslist.htm">https://dwrcdc.nr.utah.gov/ucdc/ViewReports/sslist.htm</Link>, accessed March 2018.
         </li>
         <li>
             U.S. Fish and Wildlife Service (2009), A system for mapping riparian areas in the western United States: Arlington, 43 p.
         </li>
         <li>
-            U.S. Geological Survey, 2014, National amphibian atlas−version number 3.0: Laurel, Maryland, Patuxent Wildlife Research Center: Online,<Link to="http://www.pwrc.usgs.gov/naa">www.pwrc.usgs.gov/naa</Link>, accessed March 2018.
+            U.S. Geological Survey, 2014, National amphibian atlas−version number 3.0: Laurel, Maryland, Patuxent Wildlife Research Center: Online, <Link to="http://www.pwrc.usgs.gov/naa">www.pwrc.usgs.gov/naa</Link>, accessed March 2018.
         </li>
     </ul>
 )
@@ -56,19 +56,16 @@ const dataDisclaimer = (
 const mapDetails = (
     <div className='mx-2 space-y-2'>
         <p>
+            The Utah Geological Survey (UGS) conducts wetland mapping and wetland field assessment projects across Utah. All UGS mapping projects follow the National Wetland Inventory (NWI) standards developed by the U.S. Fish and Wildlife Service, and recent projects also include riparian mapping. Mapping is conducted primarily by reviewing aerial imagery and cannot be used as the basis for a jurisdictional wetland delineation. This map contains data from NWI that is up-to-date as of November 12, 2024. Wetland field assessment data and links to reports can be found under the Wetland Field Studies section of the application. Landscape Data show patterns of wetland abundance, ownership, and condition at multiple spatial scales. See Database Contents for more information about the data in this map.
+        </p>
+        <p><strong>/Contact</strong></p>
         <ul>
             <li>
-                The Utah Geological Survey (UGS) conducts wetland mapping and wetland field assessment projects across Utah. All UGS mapping projects follow the National Wetland Inventory (NWI) standards developed by the U.S. Fish and Wildlife Service, and recent projects also include riparian mapping. Mapping is conducted primarily by reviewing aerial imagery and cannot be used as the basis for a jurisdictional wetland delineation. This map contains data from NWI that is up-to-date as of November 12, 2024. Wetland field assessment data and links to reports can be found under the Wetland Field Studies section of the application. Landscape Data show patterns of wetland abundance, ownership, and condition at multiple spatial scales. See Database Contents for more information about the data in this map.
+                <Link to="mailto:pgoodwin@utah.gov">Peter Goodwin </Link>- 801.537.3130
             </li>
-            <li>
-                <strong>Contact</strong>
-            </li>
-            <li>
-                <li><Link to="mailto:pgoodwin@utah.gov">Peter Goodwin </Link>- 801.537.3130</li>
-            </li>
-            <li>
-                <strong>Links to Related Information</strong>
-            </li>
+        </ul>
+        <p><strong>Links to Related Information</strong></p>
+        <ul className="bullets">
             <li>
                 <Link to="https://geology.utah.gov/water/wetlands/">UGS Wetland Webpages</Link> for information on wetlands and UGS wetland research
             </li>
@@ -82,7 +79,6 @@ const mapDetails = (
                 <Link to="https://www.spk.usace.army.mil/Missions/Regulatory/Contacts/Wetland-Consultants/">U.S. Army Corps Wetland Consultants List</Link> for a list of consultants that can conduct wetland delineations
             </li>
         </ul>
-        </p>
     </div>
 )
 
@@ -128,7 +124,7 @@ const dataSources = (
         <p>
             The landscape dataset summarizes information relevant to Utah’s wetlands at five spatial scales. These data allow us to understand where and what kinds of wetlands are in Utah, who owns those wetlands, how ownership patterns differ from overall land ownership patterns, and locations that have potentially restorable wetlands. These data also summarize trends in groundwater and surface water resources across the state. The data and a more detailed description of how they were developed are available via <Link to="https://firebasestorage.googleapis.com/v0/b/ut-dnr-wetlands-prod.appspot.com/o/Wetlands_Landscape_StudyResults.zip?alt=media&amp;token=fa7d4ff1-ebd3-40b2-b18e-e5bf609f8099">download</Link>.
         </p>
-          
+
         <p>
             <strong>WETLAND CONDITION</strong>
         </p>
@@ -165,46 +161,6 @@ const dataSources = (
         </p>
         <p>
             Land ownership data are maintained by the Bureau of Land Management and the State of Utah School and Institutional Trust Lands Administration and are described in more detail <Link to="https://gis.utah.gov/data/cadastre/land-ownership/">here.</Link>
-        </p>
-        <p>
-            <strong>
-                Utah Mineral Occurance System (UMOS) (<Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-757/ofr-757.zip">data</Link>, <Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-757/ofr-757.pdf">report</Link>)
-            </strong>
-        </p>
-        <p className="pl-4">
-            A database of mineral occurrences, prospects, mines, and mineral resources in the state of Utah.
-        </p>
-        <p>
-            <strong>
-                Critical Mineral Occurrences (<Link to="https://ugspub.nr.utah.gov/publications/circular/c-135.pdf">publication</Link>, <Link to="https://geology.utah.gov/apps/blm_mineral/appfiles/Utah_Critical_Minerals.gdb.zip">current GIS data</Link>, <Link to="https://geology.utah.gov/apps/blm_mineral/appfiles/Utah_CriticalMinerals.gdb.zip">old GIS data</Link>)
-            </strong>
-        </p>
-        <p className="pl-4">
-            Locations in Utah with critical mineral potential and of known critical mineral occurrences. Definition of critical mineral is based on the <Link to="https://www.federalregister.gov/documents/2022/02/24/2022-04027/2022-final-list-of-critical-minerals">2022 list published by the U.S. Geological Survey.</Link>.
-        </p>
-        <p>
-            <strong>
-                Mining Districts (<Link to="https://ugspub.nr.utah.gov/publications/open_file_reports/ofr-695.pdf">publication</Link>, <Link to="https://geology.utah.gov/apps/blm_mineral/appfiles/Mining_Districts_20190116gdb.zip">GIS data</Link>)
-            </strong>
-        </p>
-        <p className="pl-4">
-            Locations of Utah’s mining districts with summaries of relevant information for each district.
-        </p>
-        <p>
-            <strong>
-                Industrial Mineral Resource Potential (<Link to="https://ugspub.nr.utah.gov/publications/circular/c-135.pdf">publication</Link>, <Link to="https://geology.utah.gov/apps/blm_mineral/appfiles/Utah_IM_GIS.zip">download</Link>)
-            </strong>
-        </p>
-        <p className="pl-4">
-            Resource potential for various locatable industrial mineral commodities.
-        </p>
-        <p>
-            <strong>
-                U.S. Bureau of Mines Wilderness Study Area (WSA) Mineral Land Assessment
-            </strong>
-        </p>
-        <p className="pl-4">
-            Mineral resource assessment reports of BLM Wilderness Study Areas prepared by the U.S. Bureau of Mines.
         </p>
     </div>
 )
