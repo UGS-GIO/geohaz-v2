@@ -65,7 +65,7 @@ const mapDetails = (
             </li>
         </ul>
         <p><strong>Links to Related Information</strong></p>
-        <ul className="bullets">
+        <ul className="list-disc ml-5 space-y-4">
             <li>
                 <Link to="https://geology.utah.gov/water/wetlands/">UGS Wetland Webpages</Link> for information on wetlands and UGS wetland research
             </li>
