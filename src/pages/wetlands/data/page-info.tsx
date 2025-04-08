@@ -5,7 +5,7 @@ const appTitle = 'Utah Wetlands';
 const references = (
     <ul className="list-disc ml-5 space-y-4">
         <li>
-            AmphibiaWeb, 2018, AmphibiaWeb: Berkeley, California, University of California, online,<Link to="https://amphibiaweb.org/">https://amphibiaweb.org/</Link>, accessed January 2018.
+            AmphibiaWeb, 2018, AmphibiaWeb: Berkeley, California, University of California, online, <Link to="https://amphibiaweb.org/">https://amphibiaweb.org/</Link>, accessed January 2018.
         </li>
         <li>
             Green, D.M., Weir, L.A., Casper, G.S., and Lannoo, M., 2014, North American amphibians− distribution and diversity: Berkeley, University of California Press, 600 p.
@@ -84,7 +84,7 @@ const mapDetails = (
 
 const mapDetailsShortened = (
     <p className='text-left text-sm mx-2 font-normal'>
-        This web map application was created by the Utah Geological Survey (UGS) in cooperation with the U.S. Bureau of Land Management (BLM) to show mineral resource information in Utah. Use the links below to download the map data.
+        The Utah Geological Survey (UGS) conducts wetland mapping and wetland field assessment projects across Utah. All UGS mapping projects follow the National Wetland Inventory (NWI) standards developed by the U.S. Fish and Wildlife Service, and recent projects also include riparian mapping.
     </p>
 
 )
