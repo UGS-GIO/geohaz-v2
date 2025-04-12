@@ -1,6 +1,6 @@
 import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
-import { GetResultsHandlerType, GroupLayerProps, LayerConstructor, MapApp, MapImageLayerType, WMSLayerProps } from '@/lib/types/mapping-types'
+import { GroupLayerProps, LayerConstructor, MapApp, MapImageLayerType, WMSLayerProps } from '@/lib/types/mapping-types'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
 import Map from '@arcgis/core/Map'
@@ -12,8 +12,7 @@ import Expand from "@arcgis/core/widgets/Expand";
 import Popup from "@arcgis/core/widgets/Popup";
 import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
-import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
-import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import { Feature, GeoJsonProperties, Geometry } from 'geojson';
 import { createEsriSymbol } from '@/lib/legend/symbol-generator';
 import { Legend } from '@/lib/types/geoserver-types';
 import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
@@ -241,12 +240,12 @@ export const createView = (
         map,
         zoom: initialView.zoom,
         center: initialView.center,
-        highlightOptions: {
-            color: new Color([255, 255, 0, 1]),
-            haloColor: new Color("white"),
-            haloOpacity: 0.9,
-            fillOpacity: 0.2,
-        },
+        // highlightOptions: {
+        //     color: new Color([255, 255, 0, 1]),
+        //     haloColor: new Color("white"),
+        //     haloOpacity: 0.9,
+        //     fillOpacity: 0.2,
+        // },
         ui: {
             components: ['zoom', 'compass', 'attribution'],
         },
@@ -447,92 +446,6 @@ export function expandClickHandlers(view: SceneView | MapView) {
 }
 
 
-// Function to fetch suggestions from the search box
-export const fetchQFaultSuggestions = async (params: { suggestTerm: string, sourceIndex: number }, url: string): Promise<__esri.SuggestResult[]> => {
-    const response = await fetch(`${url}?search_term=${encodeURIComponent(params.suggestTerm)}`);
-    const data: FeatureCollection = await response.json();
-
-    return data.features.map((item: Feature) => {
-        return {
-            text: '<p>' + item.properties?.concatnames + '</p>',
-            key: item.properties?.concatnames,
-            sourceIndex: params.sourceIndex,
-        };
-    });
-};
-
-// Function to fetch results from the search box
-export const fetchQFaultResults = async (params: GetResultsHandlerType, url: string): Promise<__esri.SearchResult[]> => {
-    let searchUrl = url;
-    let searchTerm = '';
-
-    // If the sourceIndex is not null, then the user selected a suggestion from the search box
-    // If the sourceIndex is null, then the user pressed enter in the search box or hit the search button (a non specific search)
-    if (params.suggestResult.sourceIndex !== null) {
-        searchTerm = params.suggestResult.key?.toString() ? params.suggestResult.key.toString() : '';
-        searchUrl += `?search_key=${encodeURIComponent(searchTerm)}`;
-    } else {
-        searchTerm = params.suggestResult.text ? params.suggestResult.text : '';
-        searchUrl += `?search_term=${encodeURIComponent(searchTerm)}`;
-    }
-
-    const response = await fetch(searchUrl);
-    const data = await response.json();
-
-    if (data.features.length === 0) {
-        return [];
-    }
-
-    // Create graphics for each feature returned from the search
-    const graphics: __esri.Graphic[] = data.features.map((item: GeoJSON.Feature) => {
-        const typedGeometry = item.geometry as GeoJSON.MultiPoint;
-        const coordinates = typedGeometry.coordinates as unknown as number[][][]
-
-        const polyline = new Polyline({
-            paths: coordinates,
-            spatialReference: new SpatialReference({
-                wkid: 4326
-            }),
-        });
-
-        return new Graphic({
-            geometry: polyline,
-            attributes: item.properties
-        });
-    });
-
-    // Create a merged polyline to add the polyline paths to
-    const mergedPolyline = new Polyline({
-        spatialReference: new SpatialReference({ wkid: 4326 })
-    });
-
-    // Add the paths from each graphic to the merged polyline
-    graphics.forEach((graphic: __esri.Graphic) => {
-        const polyline = graphic.geometry as Polyline;
-        const paths = polyline.paths;
-        paths.forEach(path => {
-            mergedPolyline.addPath(path);
-        });
-    });
-
-    // Create attributes for the target graphic
-    const attributes = params.sourceIndex !== null
-        ? { name: data.features[0].properties.concatnames }
-        : { name: `Search results for: ${searchTerm}` };
-
-    // Create a target graphic to return
-    const target = new Graphic({
-        geometry: mergedPolyline,
-        attributes: attributes
-    });
-
-    return [{
-        extent: mergedPolyline.extent,
-        name: target.attributes.name,
-        feature: target,
-        target: target
-    }];
-};
 
 export function convertDDToDMS(dd: number, isLongitude: boolean = false) {
     const dir = dd < 0
@@ -752,20 +665,6 @@ export async function fetchWfsGeometry({ namespace, feature }: { namespace: stri
 proj4.defs("EPSG:26912", "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs");
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 
-interface HighlightOptions {
-    fillColor?: [number, number, number, number];
-    outlineColor?: [number, number, number, number];
-    outlineWidth?: number;
-    pointSize?: number;
-}
-
-const defaultHighlightOptions: HighlightOptions = {
-    fillColor: [0, 0, 0, 0], // Transparent fill
-    outlineColor: [255, 255, 0, 1],
-    outlineWidth: 2,
-    pointSize: 12
-};
-
 export const convertCoordinate = (point: number[], sourceEPSG: string = "EPSG:26912", targetEPSG: string = "EPSG:4326"): number[] => {
     try {
         const converted = proj4(
@@ -833,16 +732,34 @@ export const extractCoordinates = (feature: Feature<Geometry, GeoJsonProperties>
         case 'MultiPolygon':
             return feature.geometry.coordinates.flatMap(polygon => polygon);
         default:
-            console.warn('Unsupported geometry type');
+            console.warn('Unsupported geometry type', feature.geometry.type);
             return [];
     }
+};
+
+export const clearGraphics = (view: __esri.MapView | __esri.SceneView) => {
+    view.graphics.removeAll();
+}
+
+export interface HighlightOptions {
+    fillColor?: [number, number, number, number];
+    outlineColor?: [number, number, number, number];
+    outlineWidth?: number;
+    pointSize?: number;
+}
+
+export const defaultSearchResultHighlightOptions: HighlightOptions = {
+    fillColor: [0, 0, 0, 0], // Transparent fill
+    outlineColor: [255, 255, 0, .5],
+    outlineWidth: 2,
+    pointSize: 12
 };
 
 export const createHighlightGraphic = (
     feature: Feature<Geometry, GeoJsonProperties>,
     options: HighlightOptions = {}
 ): Graphic[] => {
-    const mergedOptions = { ...defaultHighlightOptions, ...options };
+    const mergedOptions = { ...defaultSearchResultHighlightOptions, ...options };
     const coordinates = extractCoordinates(feature);
     const convertedCoordinates = convertCoordinates(coordinates);
     const graphics: Graphic[] = [];
@@ -914,10 +831,6 @@ export const createHighlightGraphic = (
     return graphics;
 };
 
-export const clearGraphics = (view: __esri.MapView | __esri.SceneView) => {
-    view.graphics.removeAll();
-}
-
 export const highlightFeature = async (
     feature: ExtendedFeature,
     view: __esri.MapView | __esri.SceneView,
@@ -932,13 +845,14 @@ export const highlightFeature = async (
         });
         targetFeature = wfsGeometry.features[0];
     } else {
-        targetFeature = feature as Feature<Geometry, GeoJsonProperties>;
+        targetFeature = feature;
     }
 
     // Clear previous highlights
     view.graphics.removeAll();
 
     // Create and add new highlight graphics with default or provided options
+    // click highlight defaults to yellow
     const defaultHighlightOptions: HighlightOptions = {
         fillColor: [0, 0, 0, 0],
         outlineColor: [255, 255, 0, 1],

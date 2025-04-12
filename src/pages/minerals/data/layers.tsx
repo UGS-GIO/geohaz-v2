@@ -1,7 +1,7 @@
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
 export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
-// const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
+export const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
 const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
 // Industrial Minerals WMS Layer Configurations
 const aluniteLayerName = 'metalmineralapp_im_alunite';

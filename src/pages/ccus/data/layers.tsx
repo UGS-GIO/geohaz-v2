@@ -2,12 +2,11 @@ import { Link } from "@/components/custom/link";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
 export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
-const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
-const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
-const GEN_GIS_WORKSPACE = 'gen_gis';
-const HAZARDS_WORKSPACE = 'hazards';
-const MAPPING_WORKSPACE = 'mapping';
-
+export const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
+export const HAZARDS_WORKSPACE = 'hazards';
+export const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
+export const GEN_GIS_WORKSPACE = 'gen_gis';
+export const MAPPING_WORKSPACE = 'mapping';
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
 const basinNamesWMSTitle = 'GeoRegions';
@@ -196,7 +195,7 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     ],
 };
 
-const wellWithTopsLayerName = 'wellswithtops_hascore';
+export const wellWithTopsLayerName = 'wellswithtops_hascore';
 const wellWithTopsWMSTitle = 'Wells Database';
 const wellWithTopsWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -232,7 +231,6 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     fieldLabel: 'LAS File Information',
                     matchingField: 'display_api',
                     targetField: 'api',
-                    logicalOperator: 'ilike',
                     url: PROD_POSTGREST_URL + '/ccus_las_display_view',
                     headers: {
                         "Accept-Profile": 'emp',

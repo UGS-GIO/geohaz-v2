@@ -1,11 +1,12 @@
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
+import GeoJSON from "geojson";
 
-const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
-const HAZARDS_WORKSPACE = 'hazards';
-const GEN_GIS_WORKSPACE = 'gen_gis';
-const UNIT_DESCRIPTIONS_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/unit_descriptions';
+export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
+export const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
+export const HAZARDS_WORKSPACE = 'hazards';
+export const GEN_GIS_WORKSPACE = 'gen_gis';
 
-const landslideLegacyLayerName = 'landslidelegacy_current';
+export const landslideLegacyLayerName = 'landslidelegacy_current';
 const landslideLegacyWMSTitle = 'Legacy Landslide Compilation - Statewide';
 const landslideLegacyWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -66,7 +67,7 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'lsfhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -104,7 +105,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'lsshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -141,7 +142,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'lqshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -188,8 +189,16 @@ const groundshakingWMSConfig: WMSLayerProps = {
         },
     ],
 }
+export interface QFaultsFeatureType {
+    geom: GeoJSON.MultiLineString;
+    concatnames: string;
+    faultzones: string[];
+    faultnames: string[];
+    sectionnames: string[];
+    strandnames: string[];
 
-const qFaultsLayerName = 'quaternaryfaults_current';
+}
+export const qFaultsLayerName = 'quaternaryfaults_current';
 const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults - Statewide';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
@@ -215,7 +224,8 @@ const qFaultsWMSConfig: WMSLayerProps = {
                 'Structure Class': { field: 'faultclass', type: 'string' },
                 'Structure Age': { field: 'faultage', type: 'string' },
                 'Detailed Report': { field: 'usgs_link', type: 'string' },
-            }
+            },
+            schema: 'hazards'
         },
     ],
 };
@@ -242,7 +252,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'sfrhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -276,7 +286,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'wsshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -312,7 +322,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'sdhhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -348,7 +358,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'sbphazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -384,7 +394,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'rfhhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -420,7 +430,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'peshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -456,7 +466,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'exshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -493,7 +503,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'sgshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -529,7 +539,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'grshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -565,7 +575,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'crshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -601,7 +611,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'csshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -637,7 +647,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'slshazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -673,7 +683,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'aafhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -708,7 +718,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'efhhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -744,7 +754,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'erzhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",
@@ -779,7 +789,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
                     fieldLabel: '',
                     matchingField: 'relate_id',
                     targetField: 'mkfhazardunit',
-                    url: UNIT_DESCRIPTIONS_URL,
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
                         "Accept-Profile": 'hazards',
                         "Accept": "application/json",

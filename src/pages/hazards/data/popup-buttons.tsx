@@ -1,5 +1,5 @@
 import { Button } from "@/components/custom/button"
-import ReportGenerator from "@/components/sidebar/report-generator"
+import ReportGenerator from "@/pages/hazards/components/sidebar/report-generator"
 import { FileText, FileTextIcon } from "lucide-react"
 import { useSidebar } from "@/hooks/use-sidebar"
 
@@ -12,7 +12,7 @@ const ReportGeneratorButton: React.FC = () => {
             title: 'Report Generator',
             label: '',
             icon: <FileTextIcon />,
-            componentPath: '/src/components/sidebar/report-generator',
+            componentPath: '/src/pages/hazards/components/sidebar/report-generator',
             component: ReportGenerator,
         })
     }
