@@ -1,12 +1,7 @@
 import { Link } from "@/components/custom/link";
+import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 
-export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
-export const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
-export const HAZARDS_WORKSPACE = 'hazards';
-export const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
-export const GEN_GIS_WORKSPACE = 'gen_gis';
-export const MAPPING_WORKSPACE = 'mapping';
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
 const basinNamesWMSTitle = 'GeoRegions';

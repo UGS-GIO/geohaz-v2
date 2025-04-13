@@ -6,7 +6,6 @@ import GroupLayer from "@arcgis/core/layers/GroupLayer";
 import Map from '@arcgis/core/Map'
 import { LayerProps, layerTypeMapping } from "@/lib/types/mapping-types";
 import * as promiseUtils from "@arcgis/core/core/promiseUtils.js";
-import Color from "@arcgis/core/Color";
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
 import Expand from "@arcgis/core/widgets/Expand";
 import Popup from "@arcgis/core/widgets/Popup";

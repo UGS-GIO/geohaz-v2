@@ -7,12 +7,12 @@ import MapContainer from './components/map-container'
 import Sidebar from '@/components/sidebar'
 import { useSidebar } from '@/hooks/use-sidebar'
 import { ExtendedGeometry, SearchCombobox, SearchConfig } from '@/components/sidebar/filter/search-combobox'
-import { PROD_POSTGREST_URL } from './data/layers'
 import { useContext } from 'react'
 import { MapContext } from '@/context/map-provider'
 import { Feature, GeoJsonProperties } from 'geojson'
 import { getBoundingBox, highlightSearchResult, zoomToExtent } from '@/lib/sidebar/filter/util'
 import { wellWithTopsLayerName } from '../ccus/data/layers'
+import { PROD_POSTGREST_URL } from '@/lib/constants'
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
