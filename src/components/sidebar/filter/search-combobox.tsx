@@ -41,6 +41,7 @@ interface SearchComboboxProps {
     onSearchSelect?: (
         feature: Feature<ExtendedGeometry, GeoJsonProperties> | null
     ) => void;
+    className?: string;
 }
 
 /**
@@ -50,6 +51,7 @@ interface SearchComboboxProps {
 function SearchCombobox({
     config,
     onSearchSelect,
+    className,
 }: SearchComboboxProps) {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(''); // Stores the display value of the selected item trigger
@@ -212,7 +214,7 @@ function SearchCombobox({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={cn('w-1/4', 'justify-between')}
+                    className={cn(className, 'justify-between')}
                     aria-label={`Search ${getPlaceholderText()}`}
                 >
                     <span className="truncate">
@@ -305,9 +307,9 @@ function SearchCombobox({
                                                     key={feature.id ?? `${displayValue}-${featureIndex}-${sourceIndex}`}
                                                     value={displayValue}
                                                     onSelect={() => handleSelect(displayValue, sourceIndex, false, featureIndex)}
-                                                    className="cursor-pointer text-wrap"
+                                                    className="cursor-pointer"
                                                 >
-                                                    <span className="truncate">{displayValue}</span> {/* Style from your version */}
+                                                    <span className="text-wrap">{displayValue}</span> {/* Style from your version */}
                                                     <Check className={cn('ml-auto h-4 w-4', value === displayValue ? 'opacity-100' : 'opacity-0')} />
                                                 </CommandItem>
                                             );

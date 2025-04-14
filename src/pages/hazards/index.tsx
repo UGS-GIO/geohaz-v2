@@ -80,15 +80,20 @@ export default function Map() {
         <Layout>
 
           {/* ===== Top Heading ===== */}
-          <Layout.Header>
-            <TopNav />
-            {/* <div className='flex items-center space-x-4 w-4/5 md:w-1/4'> */}
-            <SearchCombobox
-              config={searchConfig}
-              onSearchSelect={handleSearchSelect}
-            />
-            <ThemeSwitch />
-            {/* </div> */}
+          <Layout.Header className='flex items-center justify-between px-4 md:px-6'>
+            <TopNav className="hidden md:block md:w-auto w-1/12" />
+            <div className='flex items-center w-10/12 md:w-1/4 md:ml-auto space-x-2'>
+              <div className="flex-1 min-w-0 max-w-4/5">
+                <SearchCombobox
+                  config={searchConfig}
+                  onSearchSelect={handleSearchSelect}
+                  className="w-full"
+                />
+              </div>
+              <div className="w-1/12 flex-none">
+                <ThemeSwitch />
+              </div>
+            </div>
           </Layout.Header>
 
           {/* ===== Main ===== */}
