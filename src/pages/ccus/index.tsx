@@ -38,7 +38,7 @@ export default function Map() {
   ];
 
 
-  const handleSearchSelect = (searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null) => { // Added sourceUrl parameter back
+  const handleSearchSelect = (searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null) => {
     const geom = searchResult?.geometry;
 
     if (!geom) {
@@ -49,7 +49,7 @@ export default function Map() {
     if (view) {
       const [xmin, ymin, xmax, ymax] = getBoundingBox(geom);
       zoomToExtent(xmin, ymin, xmax, ymax, view);
-      highlightSearchResult(searchResult, view); // Pass the prepared result
+      highlightSearchResult(searchResult, view);
     }
   }
 
