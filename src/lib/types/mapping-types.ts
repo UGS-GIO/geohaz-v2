@@ -105,6 +105,7 @@ export const layerTypeMapping = {
 };
 
 export type MapImageLayerRenderer = {
+    type: 'map-image-renderer';
     label: string;
     imageData: string;
     id: string;
@@ -113,6 +114,7 @@ export type MapImageLayerRenderer = {
 };
 
 export type RegularLayerRenderer = {
+    type: 'regular-layer-renderer';
     renderer: __esri.Symbol;
     id: string;
     label: string;
@@ -173,11 +175,14 @@ export interface RelatedTable {
     url: string;
     headers: Record<string, string>;
     displayFields?: DisplayField[];
+    logicalOperator?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
 }
 
 
 interface DisplayField {
     field: string;
     label?: string;
-    format?: (value: any) => string; // todo: add format function
+    transform?: (value: string) => React.ReactNode;
 }
