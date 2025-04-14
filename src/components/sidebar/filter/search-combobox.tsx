@@ -6,7 +6,7 @@ import { Command, CommandInput, CommandList, CommandItem, CommandGroup, CommandE
 import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from 'geojson';
-
+import { useDebounce } from 'use-debounce';
 interface PostgRESTConfig {
     url: string;
     params?: Params;
@@ -56,6 +56,7 @@ function SearchCombobox({
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(''); // Stores the display value of the selected item trigger
     const [search, setSearch] = useState(''); // Input search text
+    const [debouncedSearch] = useDebounce(search, 300);
     const [activeSourceIndex, setActiveSourceIndex] = useState<number | null>(null);
 
     // Get the PostgREST queries for each source
@@ -66,7 +67,7 @@ function SearchCombobox({
 
             // Type useQuery to expect FeatureCollection from geojson
             return useQuery<FeatureCollection<ExtendedGeometry, GeoJsonProperties>, Error>({
-                queryKey: ['search-features', postgrest.url, postgrest.functionName, search, index],
+                queryKey: ['search-features', postgrest.url, postgrest.functionName, debouncedSearch, index],
                 queryFn: async (): Promise<FeatureCollection<ExtendedGeometry, GeoJsonProperties>> => {
                     const params = cleanParams(postgrest.params);
                     const urlParams = new URLSearchParams();
@@ -77,7 +78,7 @@ function SearchCombobox({
                     // Build URL (Function or Table/View) - Using logic that expects FeatureCollection response
                     if (postgrest.functionName) {
                         const functionUrl = `${postgrest.url}/rpc/${postgrest.functionName}`;
-                        const searchTerm = search ? `%${search}%` : '';
+                        const searchTerm = debouncedSearch ? `%${debouncedSearch}%` : '';
                         const searchTermParamName = postgrest.searchTerm;
                         if (!searchTermParamName) {
                             console.error(`Function ${postgrest.functionName} in source ${index} is missing 'searchTerm' parameter.`);
@@ -88,7 +89,7 @@ function SearchCombobox({
                     } else {
                         // Table/View Query URL
                         apiUrl = `${postgrest.url}`;
-                        const searchTerm = search ? `%${search}%` : '';
+                        const searchTerm = debouncedSearch ? `%${debouncedSearch}%` : '';
 
                         if ('targetField' in params && params.targetField && searchTerm) {
                             urlParams.set(params.targetField, `ilike.${searchTerm}`);
@@ -124,8 +125,7 @@ function SearchCombobox({
                         return { type: "FeatureCollection", features: [] }; // Return empty FC
                     }
                 },
-                // useQuery options
-                enabled: !!search && search.trim().length > 2,
+                enabled: !!debouncedSearch && debouncedSearch.trim().length > 2,
                 refetchOnWindowFocus: false,
                 retry: 1,
                 staleTime: 300000, // 5 minutes
