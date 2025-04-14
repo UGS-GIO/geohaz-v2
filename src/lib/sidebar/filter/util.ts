@@ -12,6 +12,7 @@ export interface SearchResult {
 export const highlightSearchResult = async (
     searchResult: Feature<ExtendedGeometry, GeoJsonProperties>,
     view: __esri.MapView | __esri.SceneView,
+    clearGraphics: boolean = true,
     options?: HighlightOptions
 ) => {
 
@@ -35,7 +36,7 @@ export const highlightSearchResult = async (
 
     const highlightOptions = { ...defaultHighlightOptions, ...options };
     const graphics = createHighlightGraphic(targetFeature, highlightOptions);
-    view.graphics.removeAll();
+    clearGraphics && view.graphics.removeAll();
 
     graphics.forEach(graphic => view.graphics.add(graphic));
 

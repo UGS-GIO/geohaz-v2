@@ -6,12 +6,15 @@ import { Command, CommandInput, CommandList, CommandItem, CommandGroup, CommandE
 import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from 'geojson';
+import { featureCollection } from '@turf/helpers'; // Using turf helper
 import { useDebounce } from 'use-debounce';
+
+// --- Config & Type Interfaces ---
 interface PostgRESTConfig {
     url: string;
     params?: Params;
     functionName?: string;
-    searchTerm?: string;
+    searchTerm?: string; // Param name for search term in function calls
     headers?: Record<string, string>;
     sourceName?: string;
 }
@@ -38,8 +41,17 @@ export type ExtendedGeometry = Geometry & {
 
 interface SearchComboboxProps {
     config: SearchConfig[];
-    onSearchSelect?: (
-        feature: Feature<ExtendedGeometry, GeoJsonProperties> | null
+    // Callback for when a single item is clicked
+    onFeatureSelect?: (
+        feature: Feature<Geometry, GeoJsonProperties> | null,
+        sourceUrl: string,
+        sourceIndex: number
+    ) => void;
+    // Callback for when Enter is pressed (selects all visible)
+    onCollectionSelect?: (
+        featureCollection: FeatureCollection<Geometry, GeoJsonProperties> | null,
+        sourceUrl: string | null,
+        sourceIndex: number
     ) => void;
     className?: string;
 }
@@ -50,51 +62,40 @@ interface SearchComboboxProps {
  */
 function SearchCombobox({
     config,
-    onSearchSelect,
+    onFeatureSelect,
+    onCollectionSelect,
     className,
 }: SearchComboboxProps) {
     const [open, setOpen] = useState(false);
-    const [value, setValue] = useState(''); // Stores the display value of the selected item trigger
-    const [search, setSearch] = useState(''); // Input search text
+    const [dataSourcesValue, setDataSourcesValue] = useState('');
+    const [search, setSearch] = useState('');
     const [debouncedSearch] = useDebounce(search, 300);
     const [activeSourceIndex, setActiveSourceIndex] = useState<number | null>(null);
 
-    // Get the PostgREST queries for each source
-    // TODO: refactor this to make more generic, and only care about it being a rest api. name it getRESTQueries
     const getPostgRESTQueries = () => {
         return config.map((source, index) => {
             const { postgrest } = source;
-
-            // Type useQuery to expect FeatureCollection from geojson
-            return useQuery<FeatureCollection<ExtendedGeometry, GeoJsonProperties>, Error>({
+            return useQuery<FeatureCollection<Geometry, GeoJsonProperties>, Error>({
                 queryKey: ['search-features', postgrest.url, postgrest.functionName, debouncedSearch, index],
-                queryFn: async (): Promise<FeatureCollection<ExtendedGeometry, GeoJsonProperties>> => {
+                queryFn: async (): Promise<FeatureCollection<Geometry, GeoJsonProperties>> => {
                     const params = cleanParams(postgrest.params);
                     const urlParams = new URLSearchParams();
                     let apiUrl = '';
-
                     const headers: HeadersInit = postgrest.headers || {};
 
-                    // Build URL (Function or Table/View) - Using logic that expects FeatureCollection response
                     if (postgrest.functionName) {
                         const functionUrl = `${postgrest.url}/rpc/${postgrest.functionName}`;
                         const searchTerm = debouncedSearch ? `%${debouncedSearch}%` : '';
                         const searchTermParamName = postgrest.searchTerm;
-                        if (!searchTermParamName) {
-                            console.error(`Function ${postgrest.functionName} in source ${index} is missing 'searchTerm' parameter.`);
-                            throw new Error(`Missing searchTerm parameter for function ${postgrest.functionName}`);
-                        }
+                        if (!searchTermParamName) { throw new Error(`Missing searchTerm parameter config for function ${postgrest.functionName}`); }
                         urlParams.set(searchTermParamName, searchTerm);
                         apiUrl = `${functionUrl}?${urlParams.toString()}`;
                     } else {
-                        // Table/View Query URL
                         apiUrl = `${postgrest.url}`;
                         const searchTerm = debouncedSearch ? `%${debouncedSearch}%` : '';
-
                         if ('targetField' in params && params.targetField && searchTerm) {
                             urlParams.set(params.targetField, `ilike.${searchTerm}`);
                         }
-
                         // CRITICAL: Ensure geometry column is selected for GeoJSON output
                         if ('select' in params && params.select) {
                             // If select is provided, assume it includes the geometry column
@@ -104,85 +105,107 @@ function SearchCombobox({
                         apiUrl = `${apiUrl}?${urlParams.toString()}`;
                     }
 
-                    // Fetch
+                    // Fetch and Validate Response
                     const response = await fetch(apiUrl, { method: 'GET', headers });
-
-                    // Error Handling
                     if (!response.ok) {
                         const errorText = await response.text();
                         console.error(`API Error (${response.status}) from ${apiUrl}: ${errorText}`);
                         throw new Error(`Network response was not ok (${response.status})`);
                     }
-
-                    // Parse JSON
                     const data = await response.json();
-
-                    // Validate and Assert Type
                     if (data && data.type === 'FeatureCollection' && Array.isArray(data.features)) {
                         return data as FeatureCollection<Geometry, GeoJsonProperties>;
                     } else {
-                        console.warn(`API response from ${apiUrl} was not a valid FeatureCollection:`, data);
-                        return { type: "FeatureCollection", features: [] }; // Return empty FC
+                        console.warn(`API response from ${apiUrl} was not valid FeatureCollection.`, data);
+                        return { type: "FeatureCollection", features: [] }; // Return empty collection on error
                     }
                 },
                 enabled: !!debouncedSearch && debouncedSearch.trim().length > 2,
                 refetchOnWindowFocus: false,
                 retry: 1,
                 staleTime: 300000, // 5 minutes
-                gcTime: 600000,    // 10 minutes
+                gcTime: 600000, // 10 minutes
             });
         });
     };
 
-    // Helper function to clean params (keep simple version)
-    const cleanParams = (params: Params | undefined): Partial<Params> => {
-        return params || {};
-    };
+    const cleanParams = (params: Params | undefined): Partial<Params> => { return params || {}; };
 
-    // handleSelect to pass FeatureCollection ---
     const handleSelect = (
-        currentValue: string, // The display value of the item *clicked*
+        currentValue: string,
         sourceIndex: number,
-        isSourceOnly: boolean = false,
-        featureIndex?: number
+        isSourceOnly: boolean = false
     ) => {
         if (isSourceOnly) {
             setActiveSourceIndex(sourceIndex === activeSourceIndex ? null : sourceIndex);
-            setValue(''); // Clear display value
+            setDataSourcesValue('');
             return;
         }
 
-
-        // Get the FeatureCollection associated with the current search for this source
+        const source = config[sourceIndex];
+        const displayField = source.postgrest.params?.displayField;
         const currentFeatureCollection = queryResults[sourceIndex]?.data;
-        const featureToReturn = currentFeatureCollection?.features[featureIndex ?? 0];
 
-        // Set the input display value to the item the user clicked
-        setValue(currentValue);
+        let selectedFeature: Feature<Geometry, GeoJsonProperties> | null = null;
+
+        if (displayField && currentFeatureCollection?.features) {
+            selectedFeature = currentFeatureCollection.features.find(feature => {
+                const properties = feature.properties || {};
+                return String(properties[displayField]) === currentValue;
+            }) ?? null;
+        }
+
+        setDataSourcesValue(currentValue);
         setOpen(false);
-
-        // Pass the entire FeatureCollection back to the parent component
-        onSearchSelect?.(featureToReturn);
-
+        onFeatureSelect?.(selectedFeature, source.postgrest.url, sourceIndex);
     };
 
+    // --- handleKeyDown (Enter Handler) -> Calls onCollectionSelect ---
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+            event.preventDefault();
+
+            let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
+            let firstValidSourceUrl: string | null = null;
+            let firstValidSourceIndex: number = -1; // Indicate combined results
+
+            const indicesToCheck = activeSourceIndex !== null ? [activeSourceIndex] : config.map((_, i) => i);
+
+            indicesToCheck.forEach(index => {
+                const sourceResult = queryResults[index];
+                if (sourceResult?.data?.features?.length) {
+                    allVisibleFeatures = allVisibleFeatures.concat(sourceResult.data.features);
+                    if (firstValidSourceIndex === -1) { // Capture info from first source with results
+                        firstValidSourceUrl = config[index].postgrest.url;
+                        firstValidSourceIndex = index;
+                    }
+                }
+            });
+
+            let combinedCollection: FeatureCollection | null = null;
+            if (allVisibleFeatures.length > 0) {
+                combinedCollection = featureCollection(allVisibleFeatures);
+            }
+
+            // Call the collection callback
+            onCollectionSelect?.(combinedCollection, firstValidSourceUrl, firstValidSourceIndex);
+            setOpen(false);
+        }
+    };
+
+    // --- Helper Functions ---
     function getSourceDisplayName(source: SearchConfig): string {
         if (source.postgrest.sourceName) return source.postgrest.sourceName;
         if (source.postgrest.functionName) return formatName(source.postgrest.functionName);
-        // Check if params exists before accessing targetField
         if (source.postgrest.params && 'targetField' in source.postgrest.params && source.postgrest.params.targetField) {
             return formatName(source.postgrest.params.targetField);
         }
         const urlParts = source.postgrest.url.split('/');
         return formatName(urlParts[urlParts.length - 1] || 'Unknown Source');
     }
-
     function formatName(name: string): string {
-        return name.replace(/_/g, ' ')
-            .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
-            .join(' ').trim(); // Trim potential leading/trailing spaces
+        return name.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ').trim();
     }
 
     // Get the results for each PostgREST source
@@ -190,17 +213,15 @@ function SearchCombobox({
         const { data, isLoading, error } = query;
         return {
             // Default to empty FeatureCollection if data is initially undefined
-            data: data ?? { type: "FeatureCollection", features: [] } as FeatureCollection,
+            data: data ?? { type: "FeatureCollection", features: [] },
             isLoading,
             error,
             sourceName: config[index].postgrest.sourceName || getSourceDisplayName(config[index])
         };
     });
 
-    // set placeholder text based on active source index
     const getPlaceholderText = () => {
         if (activeSourceIndex !== null) {
-            // Ensure queryResults[activeSourceIndex] exists before accessing sourceName
             return `Search in ${queryResults[activeSourceIndex]?.sourceName ?? 'selected source'}...`;
         }
         const sourceNames = config.map(c => c.postgrest.sourceName || getSourceDisplayName(c)).join(' or ');
@@ -214,103 +235,70 @@ function SearchCombobox({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={cn(className, 'justify-between')}
+                    className={cn(className, 'w-full', 'justify-between')}
                     aria-label={`Search ${getPlaceholderText()}`}
                 >
                     <span className="truncate">
-                        {value || (activeSourceIndex !== null ?
+                        {dataSourcesValue || (activeSourceIndex !== null ?
                             `Search in ${queryResults[activeSourceIndex]?.sourceName}...` :
                             'Search...')}
                     </span>
-                    {queryResults.some(result => result.isLoading) && <Loader2 className="ml-2 h-4 w-4 animate-spin flex-shrink-0" />}
-                    {!queryResults.some(result => result.isLoading) && <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
+                    <span className='flex-shrink-0'>
+                        {queryResults.some(result => result.isLoading) && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                        {!queryResults.some(result => result.isLoading) && <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />}
+                    </span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" >
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="end">
                 <Command shouldFilter={false}>
                     <CommandInput
                         placeholder={getPlaceholderText()}
                         className="h-9"
                         value={search}
                         onValueChange={setSearch}
+                        onKeyDown={handleKeyDown} // Attach Enter key handler
                     />
                     <CommandList>
-                        {/* Data Sources Filter Section */}
+                        {/* Data Sources */}
                         <CommandGroup heading="Filter by Data Source">
-                            {config.map((source, idx) => {
-
-                                return (
-                                    <CommandItem
-                                        key={`source-${idx}`}
-                                        value={`##source-${idx}`} // Prefix value
-                                        onSelect={() => handleSelect(`##source-${idx}`, idx, true)}
-                                        className="cursor-pointer" // Style from your version
-                                    >
-                                        {source.postgrest.sourceName || getSourceDisplayName(source)}
-                                        <Check className={cn('ml-auto h-4 w-4', activeSourceIndex === idx ? 'opacity-100' : 'opacity-0')} />
-                                    </CommandItem>
-                                )
-                            })}
+                            {config.map((source, idx) => (
+                                <CommandItem
+                                    key={`source-${idx}`}
+                                    value={`##source-${idx}`}
+                                    onSelect={() => handleSelect(`##source-${idx}`, idx, true)}
+                                    className="cursor-pointer" >
+                                    {source.postgrest.sourceName || getSourceDisplayName(source)}
+                                    <Check className={cn('ml-auto h-4 w-4', activeSourceIndex === idx ? 'opacity-100' : 'opacity-0')} />
+                                </CommandItem>
+                            ))}
                         </CommandGroup>
-
                         <CommandSeparator />
-
-                        {/* --- Results Rendering Logic */}
+                        {/* Results */}
                         {queryResults.map((sourceResults, sourceIndex) => {
-                            // Filter sources if activeSourceIndex is set
-                            if (activeSourceIndex !== null && activeSourceIndex !== sourceIndex) {
-                                return null;
-                            }
-
+                            if (activeSourceIndex !== null && activeSourceIndex !== sourceIndex) return null;
                             const displayField = config[sourceIndex].postgrest.params?.displayField;
-                            if (!displayField) {
-                                return <CommandItem key={`error-config-${sourceIndex}`} disabled className="text-destructive">Config Error for {sourceResults.sourceName}</CommandItem>;
-                            }
+                            if (!displayField) return <CommandItem key={`error-config-${sourceIndex}`} disabled className="text-destructive">Config Error</CommandItem>;
+                            if (sourceResults.isLoading && debouncedSearch.trim().length > 2) return <CommandItem key={`loading-${sourceIndex}`} disabled>Loading...</CommandItem>;
+                            if (sourceResults.error) return <CommandItem key={`error-fetch-${sourceIndex}`} disabled className="text-destructive">Error</CommandItem>;
+                            if (debouncedSearch.trim().length > 2 && !sourceResults.data?.features?.length && !sourceResults.isLoading) return <CommandEmpty key={`empty-${sourceIndex}`}>No results found.</CommandEmpty>;
+                            if (!sourceResults.data?.features?.length) return null;
 
-                            // console.log('Source Results:', sourceResults);
-
-
-                            // Loading/Error/Empty States
-                            if (sourceResults.isLoading && search.trim().length > 2) {
-                                return <CommandItem key={`loading-${sourceIndex}`} disabled>Loading {sourceResults.sourceName}...</CommandItem>;
-                            }
-                            if (sourceResults.error) {
-                                return <CommandItem key={`error-fetch-${sourceIndex}`} disabled className="text-destructive">Error loading {sourceResults.sourceName}</CommandItem>;
-
-
-                            }
-                            if (search.trim().length > 2 && sourceResults.data?.features?.length === 0) {
-                                // console.log(search.trim().length > 2 && sourceResults.data?.features?.length === 0);
-                                return <CommandEmpty key={`empty-${sourceIndex}`}>No results found in {sourceResults.sourceName}.</CommandEmpty>;
-                            }
-                            if (!sourceResults.data?.features?.length) {
-                                return null; // Don't render group if no features (e.g., before search starts)
-                            }
-
-                            // Render the group heading and feature items
                             return (
                                 <React.Fragment key={sourceIndex}>
                                     {sourceIndex > 0 && activeSourceIndex === null && <CommandSeparator />}
                                     <CommandGroup heading={sourceResults.sourceName}>
-                                        {sourceResults.data.features.map((feature: Feature<Geometry, GeoJsonProperties>, featureIndex: number) => {
+                                        {sourceResults.data.features.map((feature: Feature<Geometry, GeoJsonProperties>, featureIndex: number) => { // Use Geometry here unless ExtendedGeometry is strictly necessary
                                             const properties = feature.properties || {};
                                             const displayValue = String(properties[displayField] ?? '');
-
-                                            if (!displayValue) {
-                                                console.warn(`Feature (index ${featureIndex}, id ${feature.id ?? 'N/A'}) in source ${sourceIndex} missing displayField '${displayField}'.`);
-                                                console.log('properties:', properties);
-                                                return null;
-                                            }
-
+                                            if (!displayValue) return null;
                                             return (
                                                 <CommandItem
                                                     key={feature.id ?? `${displayValue}-${featureIndex}-${sourceIndex}`}
                                                     value={displayValue}
-                                                    onSelect={() => handleSelect(displayValue, sourceIndex, false, featureIndex)}
-                                                    className="cursor-pointer"
-                                                >
-                                                    <span className="text-wrap">{displayValue}</span> {/* Style from your version */}
-                                                    <Check className={cn('ml-auto h-4 w-4', value === displayValue ? 'opacity-100' : 'opacity-0')} />
+                                                    onSelect={() => handleSelect(displayValue, sourceIndex, false)} // Click calls handleSelect
+                                                    className="cursor-pointer" >
+                                                    <span className="text-wrap">{displayValue}</span>
+                                                    <Check className={cn('ml-auto h-4 w-4', dataSourcesValue === displayValue ? 'opacity-100' : 'opacity-0')} />
                                                 </CommandItem>
                                             );
                                         })}

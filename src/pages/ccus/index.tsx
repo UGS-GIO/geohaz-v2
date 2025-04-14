@@ -12,12 +12,64 @@ import { PROD_POSTGREST_URL } from '@/lib/constants'
 import { wellWithTopsLayerName } from '@/pages/ccus/data/layers'
 import { ExtendedGeometry, SearchCombobox, SearchConfig } from '@/components/sidebar/filter/search-combobox'
 import { getBoundingBox, zoomToExtent, highlightSearchResult } from '@/lib/sidebar/filter/util'
-import { Feature, GeoJsonProperties } from 'geojson'
+import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson'
+import { convertBbox } from '@/lib/mapping-utils'
+import * as turf from '@turf/turf'
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
 
   const { view } = useContext(MapContext);
+
+  const handleSearchSelect = (searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null) => { // Added sourceUrl parameter back
+    const geom = searchResult?.geometry;
+
+    if (!geom) {
+      console.error("No geometry found in search result");
+      return;
+    }
+
+    if (view) {
+
+      const [xmin, ymin, xmax, ymax] = getBoundingBox(geom);
+      zoomToExtent(xmin, ymin, xmax, ymax, view);
+      highlightSearchResult(searchResult, view);
+    }
+  }
+
+  const handleCollectionSelect = (
+    collection: FeatureCollection<ExtendedGeometry, GeoJsonProperties> | null,
+  ) => {
+    view?.graphics.removeAll();
+    if (!collection?.features?.length || !view) {
+      console.warn("No features in collection or map view unavailable for collection action.");
+      return;
+    }
+
+    try {
+      // Calculate overall bbox for the collection using Turf
+      const collectionBbox = turf.bbox(collection);
+      let [xmin, ymin, xmax, ymax] = collectionBbox;
+      [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax]);
+
+      if (!collectionBbox.every(isFinite)) {
+        console.error("Invalid bounding box calculated for collection");
+        return;
+      }
+
+      // Zoom to the extent of the entire collection using your util
+      zoomToExtent(xmin, ymin, xmax, ymax, view);
+
+      // Highlight all features in the collection
+      collection.features.forEach(feature => {
+        // Pass each feature individually to the highlight function
+        highlightSearchResult(feature, view, false);
+      });
+
+    } catch (error) {
+      console.error("Error processing feature collection selection:", error);
+    }
+  };
 
   const searchConfig: SearchConfig[] = [
     {
@@ -36,23 +88,6 @@ export default function Map() {
       },
     }
   ];
-
-
-  const handleSearchSelect = (searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null) => {
-    const geom = searchResult?.geometry;
-
-    if (!geom) {
-      console.error("No geometry found in search result");
-      return;
-    }
-
-    if (view) {
-      const [xmin, ymin, xmax, ymax] = getBoundingBox(geom);
-      zoomToExtent(xmin, ymin, xmax, ymax, view);
-      highlightSearchResult(searchResult, view);
-    }
-  }
-
   return (
     <div className="relative h-full overflow-hidden bg-background">
       <Sidebar />
@@ -69,7 +104,8 @@ export default function Map() {
             <div className='ml-auto flex items-center space-x-4'>
               <SearchCombobox
                 config={searchConfig}
-                onSearchSelect={handleSearchSelect}
+                onFeatureSelect={handleSearchSelect}
+                onCollectionSelect={handleCollectionSelect}
               />
               Filter goes here
               <ThemeSwitch />

@@ -9,31 +9,17 @@ import { useSidebar } from '@/hooks/use-sidebar'
 import { ExtendedGeometry, SearchCombobox, SearchConfig } from '@/components/sidebar/filter/search-combobox'
 import { useContext } from 'react'
 import { MapContext } from '@/context/map-provider'
-import { Feature, GeoJsonProperties } from 'geojson'
+import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson'
 import { getBoundingBox, highlightSearchResult, zoomToExtent } from '@/lib/sidebar/filter/util'
-import { wellWithTopsLayerName } from '../ccus/data/layers'
 import { PROD_POSTGREST_URL } from '@/lib/constants'
+import * as turf from '@turf/turf'
+import { convertBbox } from '@/lib/mapping-utils'
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
   const { view } = useContext(MapContext);
 
   const searchConfig: SearchConfig[] = [
-    {
-      postgrest: {
-        url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
-        params: {
-          targetField: 'api',
-          displayField: 'api',
-          select: 'shape, api',
-        },
-        headers: {
-          'content-type': 'application/geo+json',
-          'accept-profile': 'emp',
-          'accept': 'application/geo+json',
-        }
-      },
-    },
     {
       postgrest: {
         url: PROD_POSTGREST_URL,
@@ -69,6 +55,40 @@ export default function Map() {
     }
   }
 
+  const handleCollectionSelect = (
+    collection: FeatureCollection<ExtendedGeometry, GeoJsonProperties> | null,
+  ) => {
+    view?.graphics.removeAll();
+    if (!collection?.features?.length || !view) {
+      console.warn("No features in collection or map view unavailable for collection action.");
+      return;
+    }
+
+    try {
+      // Calculate overall bbox for the collection using Turf
+      const collectionBbox = turf.bbox(collection);
+      let [xmin, ymin, xmax, ymax] = collectionBbox;
+      [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax]);
+
+      if (!collectionBbox.every(isFinite)) {
+        console.error("Invalid bounding box calculated for collection");
+        return;
+      }
+
+      // Zoom to the extent of the entire collection using your util
+      zoomToExtent(xmin, ymin, xmax, ymax, view);
+
+      // Highlight all features in the collection
+      collection.features.forEach(feature => {
+        // Pass each feature individually to the highlight function
+        highlightSearchResult(feature, view, false);
+      });
+
+    } catch (error) {
+      console.error("Error processing feature collection selection:", error);
+    }
+  };
+
   return (
     <div className="relative h-full overflow-hidden bg-background">
       <Sidebar />
@@ -86,7 +106,8 @@ export default function Map() {
               <div className="flex-1 min-w-0 max-w-4/5">
                 <SearchCombobox
                   config={searchConfig}
-                  onSearchSelect={handleSearchSelect}
+                  onFeatureSelect={handleSearchSelect}
+                  onCollectionSelect={handleCollectionSelect}
                   className="w-full"
                 />
               </div>
