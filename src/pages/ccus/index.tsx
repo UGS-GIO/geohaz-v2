@@ -73,20 +73,21 @@ export default function Map() {
 
   const searchConfig: SearchConfig[] = [
     {
-      postgrest: {
+      restConfig: {
         url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
+        sourceName: 'API #',
+        displayField: 'api',
         params: {
-          targetField: 'api',
-          displayField: 'api',
           select: 'shape, api',
+          targetField: 'api',
         },
         headers: {
           'content-type': 'application/json',
           'accept-profile': 'emp',
           'accept': 'application/geo+json',
         }
-      },
-    }
+      }
+    },
   ];
   return (
     <div className="relative h-full overflow-hidden bg-background">
@@ -107,7 +108,6 @@ export default function Map() {
                 onFeatureSelect={handleSearchSelect}
                 onCollectionSelect={handleCollectionSelect}
               />
-              Filter goes here
               <ThemeSwitch />
             </div>
           </Layout.Header>

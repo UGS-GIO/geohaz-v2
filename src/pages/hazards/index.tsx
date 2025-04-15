@@ -11,7 +11,7 @@ import { useContext } from 'react'
 import { MapContext } from '@/context/map-provider'
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson'
 import { getBoundingBox, highlightSearchResult, zoomToExtent } from '@/lib/sidebar/filter/util'
-import { PROD_POSTGREST_URL } from '@/lib/constants'
+import { GEOCODE_PROXY_FUNCTION_URL, PROD_POSTGREST_URL } from '@/lib/constants'
 import * as turf from '@turf/turf'
 import { convertBbox } from '@/lib/mapping-utils'
 
@@ -20,26 +20,34 @@ export default function Map() {
   const { view } = useContext(MapContext);
 
   const searchConfig: SearchConfig[] = [
+    // --- Geocode Proxy Configuration ---
     {
-      postgrest: {
+      restConfig: {
+        isGeocodeProxy: true,
+        url: GEOCODE_PROXY_FUNCTION_URL,
+        sourceName: 'Address Search',
+        displayField: 'matchAddress', // Top-level displayField (from geocode JSON result)
+        headers: { 'Accept': 'application/json' }
+      }
+    },
+    // --- PostgREST Fault Search Configuration ---
+    {
+      restConfig: {
         url: PROD_POSTGREST_URL,
         functionName: "search_fault_data",
         searchTerm: "search_term",
-        params: {
-          displayField: "concatnames",
-          searchKeyParam: "search_key",
-        },
+        sourceName: 'Faults',
+        displayField: "concatnames",
         headers: {
-          'content-type': 'application/geo+json',
-          'accept-profile': 'hazards',
-          'accept': 'application/geo+json',
+          'Accept-Profile': 'hazards',
+          'Accept': 'application/geo+json',
         }
       },
     },
-  ];
+  ]
 
 
-  const handleSearchSelect = (searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null) => { // Added sourceUrl parameter back
+  const handleSearchSelect = (searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null) => {
     const geom = searchResult?.geometry;
 
     if (!geom) {
