@@ -121,45 +121,129 @@ const dataDisclaimer = (
 const mapDetails = (
     <div className='mx-2 space-y-2'>
         <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
+            This web application is a tool for scientists and industry professionals working on carbon capture, utilization, and storage (CCUS). It provides access to spatial data and technical resources to support site selection, storage assessment, and project planning. The purpose of this visualization is to make it easier to evaluate CCUS options and make informed decisions based on current information.
         </p>
         <p>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eius ipsa ipsam adipisci? Amet reprehenderit veritatis sint voluptate repellendus temporibus dolorem debitis placeat earum necessitatibus, quisquam illum facilis assumenda enim quia?
-        </p>
-        <p className="font-bold">
-            Database Updated May 2020
-        </p>
-        <p className="font-bold">
-            Related Information
-        </p>
-        <p>
-            For more information, see <Link to="https://geology.utah.gov/hazards/">https://geology.utah.gov/hazards/</Link> or contact the UGS.
+            CCUS involves collecting carbon dioxide (CO₂) from the atmosphere or industrial sources and either using it in commercial processes or storing it underground. Successful geologic storage requires porous rock reservoirs capped by non-porous seals to trap the CO₂. Utah’s unique geology offers many suitable sites for CO₂ storage, often located near major emission sources like power plants and refineries. <Link to="https://geology.utah.gov/energy-minerals/ccus/">Learn More</Link>.
         </p>
     </div>
 )
 
 const mapDetailsShortened = (
     <p className='text-left text-sm mx-2 font-normal'>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis esse dolorem quam officiis...
+        This web application is a tool for scientists and industry professionals working on carbon capture, utilization, and storage (CCUS)...
     </p>
 )
 
+
 const dataSources = (
-    <div className='mx-2 space-y-2'>
+    <div className='mx-2 space-y-4'>
         <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae laudantium repellat amet saepe voluptate velit neque molestiae atque vero facilis minima, dicta maxime expedita animi natus quos quod rerum ipsum.        </p>
-        <p>
-            The data exists as an attributed geographic information system (GIS) feature class available for download: <Link to="https://geology.utah.gov/docs/zip/Geologic_Hazards_Geodatabase.gdb.zip">GIS Data</Link>
+            Data for the CCUS Portal is collected from a variety of authoritative sources including the Utah Geological Survey, Utah Division of Oil, Gas and Mining, Utah State and Institutional Trust Lands Administration, and federal agencies.        </p>
+        <p className="text-lg font-semibold underline">
+            CCUS Resources
         </p>
-        <p>Additionally, users can access full data reports for individual hazards by clicking on the report link in the pop-up window. These reports are not a substitute for a site-specific geologic hazards and geotechnical engineering investigation by a qualified, Utah-licensed consultant. These investigations provide valuable information on the site geologic conditions that may affect or be affected by development, as well as the type and relative susceptibility of geologic hazards at a site and recommend solutions to mitigate the effects and costs of the hazards, both at the time of construction and over the life of the development. See your local city or county building department for details on these investigations and <Link to="https://ugspub.nr.utah.gov/publications/circular/c-122.pdf">UGS Circular 122</Link> for more information.
+        <p>
+            <strong>
+                Storage Resource Estimates (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Based on a 2024-2025 study to analyze extent and quality of seals for CO₂ storage. Each georegion was separated based on its unique geology.
+        </p>
+        <p>
+            <strong>
+                GeoRegions (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Based on a study to analyze extent and quality of seals for CO₂ storage. Each georegion was separated based on its unique geology.
+        </p>
+        <p>
+            <strong>
+                Wells Database (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Locations of Utah’s mining districts with summaries of relevant information for each district.
+        </p>
+        <p>
+            <strong>
+                Oil and Gas Fields (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Resource potential for various locatable industrial mineral commodities.
+        </p>
+
+        <p className="text-lg font-semibold underline mt-4">
+            Infrastructure and Land Use
+        </p>
+
+        <p>
+            <strong>
+                Pipelines (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Mineral resource assessment reports of BLM Wilderness Study Areas prepared by the U.S. Bureau of Mines.
+        </p>
+        <p>
+            <strong>
+                Major Rivers (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Mineral resource assessment reports of BLM Wilderness Study Areas prepared by the U.S. Bureau of Mines.
+        </p>
+        <p>
+            <strong>
+                SITLA Land Ownership (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Mineral resource assessment reports of BLM Wilderness Study Areas prepared by the U.S. Bureau of Mines.
+        </p>
+
+
+
+        {/* Geological information Section */}
+
+        <p className="text-lg font-semibold underline mt-4">
+            Geological Information
+        </p>
+
+        <p>
+            <strong>
+                Hazardous (Quaternary age) Faults (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Mineral resource assessment reports of BLM Wilderness Study Areas prepared by the U.S. Bureau of Mines.
+        </p>
+        <p>
+            <strong>
+                Utah Faults (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Mineral resource assessment reports of BLM Wilderness Study Areas prepared by the U.S. Bureau of Mines.
+        </p>
+        <p>
+            <strong>
+                Seamless Geological Units (500k) (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+            </strong>
+        </p>
+        <p className="pl-4">
+            Mineral resource assessment reports of BLM Wilderness Study Areas prepared by the U.S. Bureau of Mines.
         </p>
     </div>
 )
 
+
 const dataSourcesShortened = (
     <p className='text-left text-sm mx-2 font-normal'>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis laudantium veniam nisi harum et, repellendus necessitatibus ea sapiente assumenda placeat vero, sint quasi quibusdam odit, cum exercitationem rem totam quod!
-    </p>
+        Data for the CCUS Portal is collected from a variety of authoritative sources including the Utah Geological Survey, Utah Division of Oil, Gas and Mining, Utah State and Institutional Trust Lands Administration, and federal agencies.    </p>
 )
 
 export { references, acknowledgments, dataDisclaimer, mapDetails, mapDetailsShortened, dataSources, dataSourcesShortened, appTitle };
