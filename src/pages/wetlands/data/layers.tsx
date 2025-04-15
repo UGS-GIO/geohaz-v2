@@ -8,6 +8,7 @@ const WETLANDS_WORKSPACE = 'wetlands_project';
 const wetMetaLayerName = 'Wetland Project Information';
 const wetMetaTitle = 'Wetland Project Information';
 const wetMetaConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/WetlandMappingTest27June23/MapServer/1",
   title: wetMetaTitle,
   renderer: "wetMetaRenderer",
@@ -31,6 +32,7 @@ const wetMetaConfig = {
 const wetNonRiverineLayerName = 'Wetlands (non-riverine)';
 const wetNonRiverineTitle = 'Wetlands (non-riverine)';
 const wetNonRiverineConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/WetlandMappingTest27June23/MapServer/2",
   title: wetNonRiverineTitle,
   renderer: "nonRiverineRenderer",
@@ -50,6 +52,7 @@ const wetNonRiverineConfig = {
 const riverineLayerName = 'Riverine';
 const riverineTitle = 'Riverine';
 const riverineConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/WetlandMappingTest27June23/MapServer/3",
   title: riverineTitle,
   visible: false,
@@ -79,6 +82,7 @@ const wetlandGroupConfig: LayerProps = {
 const ripMetaLayerName = 'Riparian Project Information';
 const ripMetaTitle = 'Riparian Project Information';
 const ripMetaConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/RiparianMappingtest27June23/MapServer/0",
   visible: false,
   title: ripMetaTitle,
@@ -102,6 +106,7 @@ const ripMetaConfig = {
 const ripDataLayerName = 'Riparian Mapping';
 const ripDataTitle = 'Riparian Mapping';
 const ripDataConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/RiparianMappingtest27June23/MapServer/1",
   title: ripDataTitle,
   visible: true,
@@ -131,6 +136,7 @@ const riparianGroupConfig: LayerProps = {
 const llwwMappingLayerName = 'LLWW Descriptions';
 const llwwMappingTitle = 'LLWW Descriptions';
 const llwwMappingConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/LLWW_Additional_Attributes/MapServer/0",
   title: llwwMappingTitle,
   visible: true,
@@ -149,6 +155,7 @@ const llwwMappingConfig = {
 const cacheProjectsLayerName = 'LLWW Mapping Areas';
 const cacheProjectsTitle = 'LLWW Mapping Areas';
 const cacheProjectsConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/LLWW_Additional_Attributes/MapServer/1",
   title: cacheProjectsTitle,
   visible: true,
@@ -173,7 +180,7 @@ const additonalGroupConfig: LayerProps = {
 
 const hydricSoilsTitle = 'Hydric Soils Classes';
 const hydricSoilsConfig : LayerProps = {
-  type: 'wms',
+  type: 'feature',
   url: "https://utility.arcgis.com/usrsvcs/servers/771b11ef2a574ce9a3a2351b758498fa/rest/services/USA_Soils_Hydric_Class/ImageServer",
   title: hydricSoilsTitle,
   visible: false,
@@ -184,6 +191,7 @@ const hydricSoilsConfig : LayerProps = {
 const landscapeLayerName = 'Watershed (HUC12) by Ecoregion';
 const landscapeTitle = 'Watershed (HUC12) by Ecoregion';
 const landscapeConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/Wetland_Landscape_Data/MapServer/0",
   title: landscapeTitle,
   visible: true,
@@ -232,6 +240,7 @@ const wetlandsWMSConfig: WMSLayerProps = {
 const assessmentLayerName = 'Wetland Assessment Projects';
 const assessmentTitle = 'Wetland Assessment Projects';
 const assessmentConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/Wetland_Condition/MapServer/0",
   visible: true,
   renderer: "assRenderer",  
@@ -251,6 +260,7 @@ const assessmentConfig = {
 const studyResultsLayerName = 'Wetland Assessment Study Results';
 const studyResultsTitle = 'Wetland Assessment Study Results';
 const studyResultsConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/Wetland_Condition/MapServer/2",
   title: studyResultsTitle,
   opacity: 0.6,
@@ -267,6 +277,7 @@ const studyResultsConfig = {
 //const stressorsLayerName = '';
 const stressorsTitle = 'Wetland Stressors';
 const stressorsConfig = {
+  type: 'feature',
   url: "https://webmaps.geology.utah.gov/arcgis/rest/services/Wetlands/Wetland_Condition/MapServer/1",
   renderer: "stressorsRenderer",
   visible: false,
@@ -286,7 +297,7 @@ const wetConditionGroupConfig: LayerProps = {
 const ownershipLayerName = 'Land Ownership';
 const ownershipitle = 'Land Ownership';
 const ownershipConfig: LayerProps = {
-  type: 'wms',
+  type: 'mapimagelayer',
   url: "https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer",
   visible: false,
   title: ownershipitle,
