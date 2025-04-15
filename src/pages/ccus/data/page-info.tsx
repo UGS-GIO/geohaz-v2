@@ -145,7 +145,7 @@ const dataSources = (
         </p>
         <p>
             <strong>
-                Storage Resource Estimates (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, <Link to="">Report (coming soon)</Link>)
+                Storage Resource Estimates (Utah Geological Survey, <Link to="https://docs.google.com/document/d/1VdEmT8IGd2cAP8ptVGha0L-c3ylq8R-0tQK3e0OP3QE/edit#">Data</Link>, Report (coming soon))
             </strong>
         </p>
         <p className="pl-4">
