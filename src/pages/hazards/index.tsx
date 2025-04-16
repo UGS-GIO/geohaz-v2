@@ -11,7 +11,7 @@ import { useContext } from 'react'
 import { MapContext } from '@/context/map-provider'
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson'
 import { getBoundingBox, highlightSearchResult, zoomToExtent } from '@/lib/sidebar/filter/util'
-import { GEOCODE_PROXY_FUNCTION_URL, PROD_POSTGREST_URL } from '@/lib/constants'
+import { PROD_POSTGREST_URL } from '@/lib/constants'
 import * as turf from '@turf/turf'
 import { convertBbox } from '@/lib/mapping-utils'
 
