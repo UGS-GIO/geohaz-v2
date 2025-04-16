@@ -137,6 +137,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
                                     fieldLabel: table.fieldLabel || ""
                                 }))
                             }),
+                            ...(value.schema && { schema: value.schema }),
                         };
 
                         if (value.rasterSource) {

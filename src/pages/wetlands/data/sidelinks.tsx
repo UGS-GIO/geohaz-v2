@@ -1,7 +1,7 @@
 import { House, Info as InfoIcon, Layers as LayersIcon, Settings } from 'lucide-react'
 import Info from '@/components/sidebar/info'
 import Layers from '@/components/sidebar/layers'
-import MapConfigurations from '@/components/sidebar/map-configurations'
+import MapConfigurations from '@/pages/wetlands/components/sidebar/map-configurations/map-configurations'
 
 export interface NavLink {
   title: string
