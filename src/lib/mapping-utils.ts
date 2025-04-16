@@ -746,13 +746,12 @@ export interface HighlightOptions {
     outlineWidth?: number;
     pointSize?: number;
 }
-
-export const defaultSearchResultHighlightOptions: HighlightOptions = {
-    fillColor: [0, 0, 0, 0], // Transparent fill
-    outlineColor: [255, 255, 0, .5],
-    outlineWidth: 2,
-    pointSize: 12
-};
+const defaultSearchResultHighlightOptions: HighlightOptions = {
+    fillColor: [255, 255, 0, 1],
+    outlineColor: [255, 255, 0, 1],
+    outlineWidth: 4,
+    pointSize: 5
+}
 
 export const createHighlightGraphic = (
     feature: Feature<Geometry, GeoJsonProperties>,

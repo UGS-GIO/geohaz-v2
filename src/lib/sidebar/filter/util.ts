@@ -27,9 +27,10 @@ export const highlightSearchResult = async (
     };
 
     const targetFeature = resultToHighlight.feature
+    // yellow highlight
     const defaultHighlightOptions: HighlightOptions = {
-        fillColor: [0, 0, 0, 0],
-        outlineColor: [255, 0, 0, 1],
+        fillColor: [255, 255, 0, 1],
+        outlineColor: [255, 255, 0, 1],
         outlineWidth: 4,
         pointSize: 5
     }
