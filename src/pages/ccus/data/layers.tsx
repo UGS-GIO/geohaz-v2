@@ -1,12 +1,6 @@
 import { Link } from "@/components/custom/link";
+import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
-
-export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
-const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
-const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
-const GEN_GIS_WORKSPACE = 'gen_gis';
-const HAZARDS_WORKSPACE = 'hazards';
-const MAPPING_WORKSPACE = 'mapping';
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -16,6 +10,7 @@ const basinNamesWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: basinNamesWMSTitle,
     visible: true,
+    opacity: 0.5,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${basinNamesLayerName}`,
@@ -50,7 +45,8 @@ const oilGasFieldsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: oilGasFieldsWMSTitle,
-    visible: true,
+    visible: false,
+    opacity: 0.5,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${oilGasFieldsLayerName}`,
@@ -74,7 +70,7 @@ const pipelinesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: pipelinesWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${pipelinesLayerName}`,
@@ -163,7 +159,7 @@ const riversWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: riversWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${GEN_GIS_WORKSPACE}:${riversLayerName}`,
@@ -185,7 +181,8 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: seamlessGeolunitsWMSTitle,
-    visible: true,
+    opacity: 0.5,
+    visible: false,
     sublayers: [
         {
             name: `${MAPPING_WORKSPACE}:${seamlessGeolunitsLayerName}`,
@@ -196,13 +193,13 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     ],
 };
 
-const wellWithTopsLayerName = 'wellswithtops_hascore';
+export const wellWithTopsLayerName = 'wellswithtops_hascore';
 const wellWithTopsWMSTitle = 'Wells Database';
 const wellWithTopsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: wellWithTopsWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${wellWithTopsLayerName}`,
@@ -234,7 +231,6 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     fieldLabel: 'LAS File Information',
                     matchingField: 'display_api',
                     targetField: 'api',
-                    logicalOperator: 'ilike',
                     url: PROD_POSTGREST_URL + '/ccus_las_display_view',
                     headers: {
                         "Accept-Profile": 'emp',
@@ -267,6 +263,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
 const SITLAConfig: LayerProps = {
     type: 'feature',
     url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
+    opacity: 0.5,
     options: {
         title: 'SITLA Land Ownership',
         elevationInfo: [{ mode: 'on-the-ground' }],
@@ -280,7 +277,7 @@ const faultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: faultsWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${MAPPING_WORKSPACE}:${faultsLayerName}`,
@@ -322,12 +319,12 @@ const faultsWMSConfig: WMSLayerProps = {
 };
 
 const qFaultsLayerName = 'quaternaryfaults_current';
-const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults - Statewide';
+const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: qFaultsWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
@@ -353,26 +350,46 @@ const qFaultsWMSConfig: WMSLayerProps = {
 };
 
 // Energy and Minerals Group Layer
-const EMPConfig: LayerProps = {
+const ccusResourcesConfig: LayerProps = {
     type: 'group',
-    title: 'Energy and Minerals',
+    title: 'CCUS Resources',
     visible: true,
     layers: [
-        basinNamesWMSConfig,
-        oilGasFieldsWMSConfig,
-        pipelinesWMSConfig,
         sco2WMSConfig,
-        riversWMSConfig,
-        seamlessGeolunitsWMSConfig,
+        basinNamesWMSConfig,
         wellWithTopsWMSConfig,
-        SITLAConfig,
-        faultsWMSConfig,
-        qFaultsWMSConfig
+        oilGasFieldsWMSConfig,
     ]
-};
+}
+
+const infrastructureAndLandUseConfig: LayerProps = {
+    type: 'group',
+    title: 'Infrastructure and Land Use',
+    visible: false,
+    layers: [
+        pipelinesWMSConfig,
+        riversWMSConfig,
+        SITLAConfig
+    ]
+}
+
+const geologicalInformationConfig: LayerProps = {
+    type: 'group',
+    title: 'Geological Information',
+    visible: false,
+    layers: [
+        qFaultsWMSConfig,
+        faultsWMSConfig,
+        seamlessGeolunitsWMSConfig
+    ]
+}
+
+
 
 const layersConfig: LayerProps[] = [
-    EMPConfig
+    ccusResourcesConfig,
+    infrastructureAndLandUseConfig,
+    geologicalInformationConfig
 ];
 
 export default layersConfig;
