@@ -21,15 +21,15 @@ export default function Map() {
 
   const searchConfig: SearchConfig[] = [
     // --- Geocode Proxy Configuration ---
-    {
-      restConfig: {
-        isGeocodeProxy: true,
-        url: GEOCODE_PROXY_FUNCTION_URL,
-        sourceName: 'Address Search',
-        displayField: 'matchAddress', // Top-level displayField (from geocode JSON result)
-        headers: { 'Accept': 'application/json' }
-      }
-    },
+    // {
+    //   restConfig: {
+    //     isGeocodeProxy: true,
+    //     url: GEOCODE_PROXY_FUNCTION_URL,
+    //     sourceName: 'Address Search',
+    //     displayField: 'matchAddress', // Top-level displayField (from geocode JSON result)
+    //     headers: { 'Accept': 'application/json' }
+    //   }
+    // },
     // --- PostgREST Fault Search Configuration ---
     {
       restConfig: {
