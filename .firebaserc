@@ -1,5 +1,24 @@
 {
   "projects": {
     "default": "ut-dnr-ugs-hazards-dev"
-  }
+  },
+  "targets": {
+    "ut-dnr-ugs-maps-prod": {
+      "hosting": {
+        "main-site": [
+          "maps-geology-utah-gov"
+        ],
+        "hazards-subdomain": [
+          "hazards-geology-utah-gov"
+        ],
+        "ccus-subdomain": [
+          "ccus-geology-utah-gov"
+        ],
+        "minerals-subdomain": [
+          "minerals-geology-utah-gov"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
