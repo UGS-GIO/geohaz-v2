@@ -25,6 +25,7 @@ export const useMapInteractions = () => {
         linkFields?: LinkFields;
         colorCodingMap?: ColorCodingRecordFunction;
         rasterSource?: RasterSource;
+        schema?: string;
     }>;
 
     type VisibleLayersResult = {
@@ -84,6 +85,7 @@ export const useMapInteractions = () => {
                             linkFields: sublayer.linkFields,
                             colorCodingMap: sublayer.colorCodingMap,
                             rasterSource: sublayer.rasterSource,
+                            schema: sublayer.schema,
                         };
                     }
                 });
@@ -103,6 +105,7 @@ export const useMapInteractions = () => {
                                     linkFields: sublayer.linkFields,
                                     colorCodingMap: sublayer.colorCodingMap,
                                     rasterSource: sublayer.rasterSource,
+                                    schema: sublayer.schema,
                                 };
                             }
                         });
@@ -137,26 +140,44 @@ export const useMapInteractions = () => {
                                 groupedMapLayer.visible &&
                                 sublayer.visible
                             ) {
-                                layerVisibilityMap[sublayerName].visible = true;
+                                // Ensure layerVisibilityMap[sublayerName] is an object with a visible property
+                                if (typeof layerVisibilityMap[sublayerName] === 'object' && layerVisibilityMap[sublayerName] !== null) {
+                                    layerVisibilityMap[sublayerName].visible = true;
+                                }
                             }
                         });
+
                     }
                 });
             }
         });
 
+
+
         // Step 3: Filter WMS layers based on visibility
         const filteredWMSLayers = mapLayers.filter(mapLayer => {
             if (isWMSMapLayer(mapLayer)) {
-                return mapLayer.sublayers.some(sublayer =>
-                    sublayer.name && layerVisibilityMap[sublayer.name]
-                );
+                return mapLayer.sublayers.some(sublayer => {
+                    const sublayerName = sublayer.name;
+                    const isVisible = layerVisibilityMap[sublayerName]?.visible;
+
+                    // Convert condition to a boolean
+                    const conditionBool = !!(sublayerName && isVisible);
+
+                    return conditionBool;
+                });
             } else if (isGroupMapLayer(mapLayer)) {
                 return mapLayer.layers?.some(groupedMapLayer =>
                     isWMSMapLayer(groupedMapLayer) &&
-                    groupedMapLayer.sublayers.some(sublayer =>
-                        sublayer.name && layerVisibilityMap[sublayer.name]
-                    )
+                    groupedMapLayer.sublayers.some(sublayer => {
+                        const sublayerName = sublayer.name;
+                        const isVisible = layerVisibilityMap[sublayerName]?.visible;
+
+                        // Convert condition to a boolean
+                        const conditionBool = !!(sublayerName && isVisible);
+
+                        return conditionBool;
+                    })
                 );
             }
             return false;
@@ -192,13 +213,15 @@ export const useMapInteractions = () => {
             // Convert offsetX and offsetX to map coordinates
             const mapPoint = view.toMap({ x: x, y: y });
 
-            // Update selected coordinates with the converted lat/lon
-            const { latitude, longitude } = mapPoint;
+            if (mapPoint && mapPoint.latitude && mapPoint.longitude) {
+                // Update selected coordinates with the converted lat/lon
+                const { latitude, longitude } = mapPoint;
 
-            // Update your state or context with the new coordinates
-            setCoordinates({ x: longitude.toString(), y: latitude.toString() }); // Assuming x = longitude and y = latitude
-            removeGraphics(view);
-            createGraphic(latitude, longitude, view);
+                // Update your state or context with the new coordinates
+                setCoordinates({ x: longitude.toString(), y: latitude.toString() }); // Assuming x = longitude and y = latitude
+                removeGraphics(view);
+                createGraphic(latitude, longitude, view);
+            }
         }
 
         if (hiddenTriggerRef.current) {

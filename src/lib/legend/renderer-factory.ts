@@ -1,5 +1,6 @@
 import * as symbolUtils from "@arcgis/core/symbols/support/symbolUtils.js";
 import { MapImageLayerRenderer, RegularLayerRenderer } from '@/lib/types/mapping-types';
+import { SymbolUnion } from "@arcgis/core/unionTypes.js";
 
 export const RendererFactory = {
     createPreview: async (rendererData: MapImageLayerRenderer | RegularLayerRenderer) => {
@@ -13,7 +14,10 @@ export const RendererFactory = {
     },
 
     createFeatureLayerPreview: async (rendererData: RegularLayerRenderer) => {
-        const html = await symbolUtils.renderPreviewHTML(rendererData.renderer);
+
+        const renderer = rendererData.renderer as SymbolUnion;
+
+        const html = await symbolUtils.renderPreviewHTML(renderer);
         return {
             html,
             label: rendererData.label,

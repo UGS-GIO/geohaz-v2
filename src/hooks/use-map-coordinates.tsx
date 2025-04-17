@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { MapContext } from '@/context/map-provider';
 import { convertDDToDMS } from '@/lib/mapping-utils';
 import * as webMercatorUtils from '@arcgis/core/geometry/support/webMercatorUtils';
+import Point from '@arcgis/core/geometry/Point';
 
 // Custom hook to provide the sidebar context data
 export function useMapCoordinates() {
@@ -58,7 +59,7 @@ export function useMapCoordinates() {
                 pointerMoveHandler = view.on(
                     "pointer-move",
                     (event: __esri.ViewPointerMoveEvent) => {
-                        const mapPoint = view.toMap({ x: event.x, y: event.y });
+                        const mapPoint = view.toMap({ x: event.x, y: event.y }) || new Point();
                         const mp: __esri.Point = webMercatorUtils.webMercatorToGeographic(
                             mapPoint
                         ) as __esri.Point;

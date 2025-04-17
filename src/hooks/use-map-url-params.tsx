@@ -14,8 +14,8 @@ const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) =>
             const { latitude, longitude } = view.center;
             const zoom = view.zoom;
 
-            const formattedLongitude = parseFloat(longitude.toFixed(3));
-            const formattedLatitude = parseFloat(latitude.toFixed(3));
+            const formattedLongitude = parseFloat(longitude?.toFixed(3) || '');
+            const formattedLatitude = parseFloat(latitude?.toFixed(3) || '');
 
             // Update local state
             setMapState({ zoom, center: [formattedLongitude, formattedLatitude] });

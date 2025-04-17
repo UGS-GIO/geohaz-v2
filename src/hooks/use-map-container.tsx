@@ -8,6 +8,7 @@ import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
 import { fetchWMSFeatureInfo, highlightFeature, reorderLayers } from "@/lib/mapping-utils";
 import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
+import Point from "@arcgis/core/geometry/Point";
 
 interface PopupContent {
     features: Feature[];
@@ -102,7 +103,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
             const visibleLayersMap = layers.layerVisibilityMap;
 
             const { offsetX: x, offsetY: y } = e.nativeEvent;
-            const mapPoint = view.toMap({ x, y });
+            const mapPoint = view.toMap({ x, y }) || new Point();
 
             const keys = Object.entries(visibleLayersMap)
                 .filter(([_, layerInfo]) => layerInfo.visible && layerInfo.queryable)
@@ -136,6 +137,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
                                     fieldLabel: table.fieldLabel || ""
                                 }))
                             }),
+                            ...(value.schema && { schema: value.schema }),
                         };
 
                         if (value.rasterSource) {

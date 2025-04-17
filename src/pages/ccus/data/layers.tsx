@@ -1,10 +1,6 @@
+import { Link } from "@/components/custom/link";
+import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
-
-export const PROD_GEOSERVER_URL = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/';
-const PROD_POSTGREST_URL = 'https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app';
-const ENERGY_MINERALS_WORKSPACE = 'energy_mineral';
-const GEN_GIS_WORKSPACE = 'gen_gis';
-const MAPPING_WORKSPACE = 'mapping';
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -14,6 +10,7 @@ const basinNamesWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: basinNamesWMSTitle,
     visible: true,
+    opacity: 0.5,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${basinNamesLayerName}`,
@@ -48,7 +45,8 @@ const oilGasFieldsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: oilGasFieldsWMSTitle,
-    visible: true,
+    visible: false,
+    opacity: 0.5,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${oilGasFieldsLayerName}`,
@@ -72,7 +70,7 @@ const pipelinesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: pipelinesWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${pipelinesLayerName}`,
@@ -103,12 +101,12 @@ const sco2WMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Storage Resource Estimate': {
+                'Storage Resource Estimate (Mt CO₂)': {
                     field: 'capacity_mtco2',
                     type: 'number',
                     decimalPlaces: 2,
                 },
-                'Storage Cost ($/tCO2)': {
+                'Storage Cost ($/tCO₂)': {
                     field: 'storage_cost_doll_per_tco2',
                     type: 'number',
                     decimalPlaces: 2,
@@ -129,7 +127,7 @@ const sco2WMSConfig: WMSLayerProps = {
                     type: 'number',
                     decimalPlaces: 2,
                 },
-                'Porosity': {
+                'Porosity (φ)': {
                     field: 'porosity',
                     type: 'number',
                     decimalPlaces: 2,
@@ -161,7 +159,7 @@ const riversWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: riversWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${GEN_GIS_WORKSPACE}:${riversLayerName}`,
@@ -183,7 +181,8 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: seamlessGeolunitsWMSTitle,
-    visible: true,
+    opacity: 0.5,
+    visible: false,
     sublayers: [
         {
             name: `${MAPPING_WORKSPACE}:${seamlessGeolunitsLayerName}`,
@@ -194,13 +193,13 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     ],
 };
 
-const wellWithTopsLayerName = 'wellswithtops_hascore';
-const wellWithTopsWMSTitle = 'Wells with Tops (Has Core)';
+export const wellWithTopsLayerName = 'wellswithtops_hascore';
+const wellWithTopsWMSTitle = 'Wells Database';
 const wellWithTopsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: wellWithTopsWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${wellWithTopsLayerName}`,
@@ -212,7 +211,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'Wells With Related Formation Tops',
+                    fieldLabel: 'Formation Tops',
                     matchingField: 'api',
                     targetField: 'api',
                     url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore',
@@ -223,7 +222,36 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     },
                     displayFields: [
                         { field: 'formation_name', label: 'Formation Name' },
-                        { field: 'formation_depth', label: 'Formation Depth (meters??? verify)' },
+                        { field: 'formation_depth', label: 'Formation Depth (ft)' },
+                    ],
+                    sortBy: 'formation_depth',
+                    sortDirection: 'asc'
+                },
+                {
+                    fieldLabel: 'LAS File Information',
+                    matchingField: 'display_api',
+                    targetField: 'api',
+                    url: PROD_POSTGREST_URL + '/ccus_las_display_view',
+                    headers: {
+                        "Accept-Profile": 'emp',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'display_description', label: 'Description', transform: (value) => value !== '' ? value : 'No Data' },
+                        { field: 'display_field_name', label: 'Field Name', transform: (value) => value !== '' ? value : 'No Data' },
+                        { field: 'display_well_status', label: 'Well Status', transform: (value) => value !== '' ? value : 'No Data' },
+                        { field: 'display_well_type', label: 'Well Type', transform: (value) => value !== '' ? value : 'No Data' },
+                        {
+                            field: 'source', label: 'Source', transform: (value) => {
+                                if (value === 'DOGM') {
+                                    return <Link to="https://dataexplorer.ogm.utah.gov/">Utah Division of Oil, Gas and Mining</Link>
+                                } else if (value === 'UGS') {
+                                    return <>Utah Geological Survey - contact <Link to="mailto:gstpierre@utah.gov">gstpierre@utah.gov</Link></>
+                                }
+                                return value !== '' ? value : 'No Data';
+                            }
+                        },
                     ]
                 }
             ]
@@ -235,6 +263,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
 const SITLAConfig: LayerProps = {
     type: 'feature',
     url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
+    opacity: 0.5,
     options: {
         title: 'SITLA Land Ownership',
         elevationInfo: [{ mode: 'on-the-ground' }],
@@ -243,50 +272,124 @@ const SITLAConfig: LayerProps = {
 };
 
 const faultsLayerName = 'faults_m-179dm';
-const faultsWMSTitle = '500k Faults';
+const faultsWMSTitle = 'Utah Faults';
 const faultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: faultsWMSTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${MAPPING_WORKSPACE}:${faultsLayerName}`,
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Series ID': { field: 'series_id', type: 'string' },
+                'Description': {
+                    field: 'custom',
+                    type: 'string',
+                    transform: (popupFields: any) => {
+                        return `${popupFields['subtype']} ${popupFields['type']}, ${popupFields['modifier']}`;
+                    }
+                },
                 'Scale': {
                     field: 'scale',
-                    type: 'number',
-                    // example way of using transform
-                    // transform: (value) => value.toFixed(2)
-                }
+                    type: 'string',
+                    transform: (value: string) => {
+                        if (value === 'small') return '1:500,000'
+                        return ''
+                    }
+                },
+                'Source': { field: 'series_id', type: 'string' },
             },
+            linkFields: {
+                'series_id': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const transformedValues = {
+                            href: `https://doi.org/10.34191/${value}`,
+                            label: `${value}`
+                        };
+                        return [transformedValues];
+                    }
+                }
+            }
+        },
+    ],
+};
+
+const qFaultsLayerName = 'quaternaryfaults_current';
+const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults';
+const qFaultsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: qFaultsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Fault Zone Name': { field: 'faultzone', type: 'string' },
+                'Summary': { field: 'summary', type: 'string' },
+                'Fault Name': { field: 'faultname', type: 'string' },
+                'Section Name': { field: 'sectionname', type: 'string' },
+                'Strand Name': { field: 'strandname', type: 'string' },
+                'Structure Number': { field: 'faultnum', type: 'string' },
+                'Mapped Scale': { field: 'mappedscale', type: 'string' },
+                'Dip Direction': { field: 'dipdirection', type: 'string' },
+                'Slip Sense': { field: 'slipsense', type: 'string' },
+                'Slip Rate': { field: 'sliprate', type: 'string' },
+                'Structure Class': { field: 'faultclass', type: 'string' },
+                'Structure Age': { field: 'faultage', type: 'string' },
+                'Detailed Report': { field: 'usgs_link', type: 'string' },
+            }
         },
     ],
 };
 
 // Energy and Minerals Group Layer
-const EMPConfig: LayerProps = {
+const ccusResourcesConfig: LayerProps = {
     type: 'group',
-    title: 'Energy and Minerals',
+    title: 'CCUS Resources',
     visible: true,
     layers: [
-        basinNamesWMSConfig,
-        oilGasFieldsWMSConfig,
-        pipelinesWMSConfig,
         sco2WMSConfig,
-        riversWMSConfig,
-        seamlessGeolunitsWMSConfig,
+        basinNamesWMSConfig,
         wellWithTopsWMSConfig,
-        SITLAConfig,
-        faultsWMSConfig,
+        oilGasFieldsWMSConfig,
     ]
-};
+}
+
+const infrastructureAndLandUseConfig: LayerProps = {
+    type: 'group',
+    title: 'Infrastructure and Land Use',
+    visible: false,
+    layers: [
+        pipelinesWMSConfig,
+        riversWMSConfig,
+        SITLAConfig
+    ]
+}
+
+const geologicalInformationConfig: LayerProps = {
+    type: 'group',
+    title: 'Geological Information',
+    visible: false,
+    layers: [
+        qFaultsWMSConfig,
+        faultsWMSConfig,
+        seamlessGeolunitsWMSConfig
+    ]
+}
+
+
 
 const layersConfig: LayerProps[] = [
-    EMPConfig
+    ccusResourcesConfig,
+    infrastructureAndLandUseConfig,
+    geologicalInformationConfig
 ];
 
 export default layersConfig;

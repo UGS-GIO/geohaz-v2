@@ -70,6 +70,7 @@ type CustomSublayerProps = {
     linkFields?: LinkFields;
     colorCodingMap?: ColorCodingRecordFunction; // Maps field names to color coding functions
     rasterSource?: RasterSource;
+    schema?: string; // postgreSQL schema name, used for the accept-profile header in postgrest requests because the schema name does not necessarilly match the workspace name in geoserver
 };
 
 type ExtendedSublayerProperties =
@@ -105,6 +106,7 @@ export const layerTypeMapping = {
 };
 
 export type MapImageLayerRenderer = {
+    type: 'map-image-renderer';
     label: string;
     imageData: string;
     id: string;
@@ -113,6 +115,7 @@ export type MapImageLayerRenderer = {
 };
 
 export type RegularLayerRenderer = {
+    type: 'regular-layer-renderer';
     renderer: __esri.Symbol;
     id: string;
     label: string;
@@ -162,8 +165,6 @@ export type LayerConstructor = typeof FeatureLayer | typeof TileLayer | typeof G
 
 export type UIPositionOptions = "bottom-leading" | "bottom-left" | "bottom-right" | "bottom-trailing" | "top-leading" | "top-left" | "top-right" | "top-trailing" | "manual"
 
-export type GetResultsHandlerType = { exactMatch: boolean, location: __esri.Point, maxResults: number, sourceIndex: number, spatialReference: __esri.SpatialReference, suggestResult: __esri.SuggestResult, view: __esri.MapView | __esri.SceneView }
-
 export type GetSuggestionsHandlerType = { exactMatch: boolean, location: __esri.Point, maxResults: number, sourceIndex: number, spatialReference: __esri.SpatialReference, suggestResult: __esri.SuggestResult, view: __esri.MapView | __esri.SceneView }
 
 export interface RelatedTable {
@@ -173,11 +174,14 @@ export interface RelatedTable {
     url: string;
     headers: Record<string, string>;
     displayFields?: DisplayField[];
+    logicalOperator?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
 }
 
 
 interface DisplayField {
     field: string;
     label?: string;
-    format?: (value: any) => string; // todo: add format function
+    transform?: (value: string) => React.ReactNode;
 }

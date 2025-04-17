@@ -1,19 +1,17 @@
 import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
-import { GetResultsHandlerType, GroupLayerProps, LayerConstructor, MapApp, MapImageLayerType, WMSLayerProps } from '@/lib/types/mapping-types'
+import { GroupLayerProps, LayerConstructor, MapApp, MapImageLayerType, WMSLayerProps } from '@/lib/types/mapping-types'
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
 import Map from '@arcgis/core/Map'
 import { LayerProps, layerTypeMapping } from "@/lib/types/mapping-types";
 import * as promiseUtils from "@arcgis/core/core/promiseUtils.js";
-import Color from "@arcgis/core/Color";
 import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
 import Expand from "@arcgis/core/widgets/Expand";
 import Popup from "@arcgis/core/widgets/Popup";
 import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
-import SpatialReference from "@arcgis/core/geometry/SpatialReference.js";
-import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import { Feature, GeoJsonProperties, Geometry } from 'geojson';
 import { createEsriSymbol } from '@/lib/legend/symbol-generator';
 import { Legend } from '@/lib/types/geoserver-types';
 import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
@@ -24,6 +22,12 @@ import proj4 from 'proj4';
 import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 import Extent from '@arcgis/core/geometry/Extent';
 import { basemapList } from '@/components/top-nav';
+import WMSSublayer from "@arcgis/core/layers/support/WMSSublayer.js";
+import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
+import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
+import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
+import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
+import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer.js";
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -83,6 +87,7 @@ const getMapImageLayerRenderer = async (layer: __esri.MapImageLayer) => {
     const firstLegendElement = legend.layers[0]?.legend[0];
     if (firstLegendElement) {
         return {
+            type: 'map-image-renderer',
             label: firstLegendElement.label,
             imageData: firstLegendElement.imageData,
             id: '0',
@@ -96,31 +101,38 @@ const getMapImageLayerRenderer = async (layer: __esri.MapImageLayer) => {
 };
 
 const getFeatureLayerRenderer = async (layer: __esri.FeatureLayer) => {
-    if (layer.renderer.type === 'unique-value') {
-        const renderer = layer.renderer as __esri.UniqueValueRenderer;
-        const firstInfo = renderer.uniqueValueInfos[0];
-        return {
-            renderer: firstInfo.symbol,
+    if (layer.renderer?.type === 'unique-value') {
+        const renderer = new UniqueValueRenderer(layer.renderer);
+        return renderer.uniqueValueInfos?.map(info => ({
+            type: 'regular-layer-renderer',
+            renderer: info.symbol,
             id: layer.id,
-            label: firstInfo.label,
+            label: info.label,
             url: layer.url,
-        };
-    } else if (layer.renderer.type === 'simple') {
-        const renderer = layer.renderer as __esri.SimpleRenderer;
-        return {
+        }));
+    } else if (layer.renderer?.type === 'simple') {
+        const renderer = new SimpleRenderer(layer.renderer);
+        return [{
+            type: 'regular-layer-renderer',
             renderer: renderer.symbol,
             id: layer.id,
             label: layer.title,
             url: layer.url,
-        };
+        }];
     } else {
         console.error('Unsupported renderer type for FeatureLayer.');
-        return;
+        return [{
+            type: 'regular-layer-renderer',
+            renderer: new SimpleRenderer(),
+            id: layer.id,
+            label: layer.title,
+            url: layer.url,
+        }];
     }
 };
 
 const getWMSLayerRenderer = async (layer: __esri.WMSLayer) => {
-    const sublayer: __esri.WMSSublayer = layer.sublayers.getItemAt(0); // we are currently only supporting the first sublayer, but a wms layer can have multiple sublayers
+    const sublayer: __esri.WMSSublayer = layer.sublayers.getItemAt(0) || new WMSSublayer(); // we are currently only supporting the first sublayer, but a wms layer can have multiple sublayers
 
     const legendUrl = `${layer.url}?service=WMS&request=GetLegendGraphic&format=application/json&layer=${sublayer.name}`;
 
@@ -145,6 +157,7 @@ const getWMSLayerRenderer = async (layer: __esri.WMSLayer) => {
 
         // Map through all the rules and generate preview objects for each rule
         const previews = rules.map((rule) => ({
+            type: 'regular-layer-renderer',
             label: rule.title,
             renderer: createEsriSymbol(rule.symbolizers),
             id: layer.id.toString(),
@@ -226,12 +239,12 @@ export const createView = (
         map,
         zoom: initialView.zoom,
         center: initialView.center,
-        highlightOptions: {
-            color: new Color([255, 255, 0, 1]),
-            haloColor: new Color("white"),
-            haloOpacity: 0.9,
-            fillOpacity: 0.2,
-        },
+        // highlightOptions: {
+        //     color: new Color([255, 255, 0, 1]),
+        //     haloColor: new Color("white"),
+        //     haloOpacity: 0.9,
+        //     fillOpacity: 0.2,
+        // },
         ui: {
             components: ['zoom', 'compass', 'attribution'],
         },
@@ -285,6 +298,7 @@ function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
             url: layer.url,
             title: layer.title,
             visible: layer.visible,
+            opacity: layer.opacity,
             ...layer.options,
         });
     }
@@ -297,7 +311,7 @@ export const createLayer = (layer: LayerProps) => {
     if (layer.type === 'group') {
         const typedLayer = layer as GroupLayerProps;
         // Recursively create group layers and reverse the order
-        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined).reverse() as __esri.CollectionProperties<__esri.LayerProperties> | undefined;
+        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined).reverse() as __esri.CollectionProperties<__esri.Layer> | undefined;
         return new GroupLayer({
             title: layer.title,
             visible: layer.visible,
@@ -318,32 +332,36 @@ export const createLayer = (layer: LayerProps) => {
 // Set the popup alignment based on the location of the popup
 export function setPopupAlignment(view: SceneView | MapView) {
     reactiveUtils.watch(() => view.popup?.id, function () {
-        view.popup.alignment = function () {
-            const { location, view } = this;
 
-            if ((location) && (view)) {
-                const viewPoint = view.toScreen(location);
-                const y2 = view.height / 2;
-                const x2 = view.width / 3;
-                const x3 = x2 * 2;
+        if (view && view.popup) {
+            view.popup.alignment = function () {
+                const { location, view } = this;
 
-                if (viewPoint.y >= y2) {
-                    if (viewPoint.x < x2)
-                        return "top-right";
-                    else if (viewPoint.x > x3)
-                        return "top-left";
-                } else {
-                    if (viewPoint.x < x2)
-                        return "bottom-right";
-                    else if (viewPoint.x > x3)
-                        return "bottom-left";
-                    else
-                        return "bottom-center";
+                if ((location) && (view)) {
+                    const viewPoint = view.toScreen(location) || new Point();
+                    const y2 = view.height / 2;
+                    const x2 = view.width / 3;
+                    const x3 = x2 * 2;
+
+                    if (viewPoint.y >= y2) {
+                        if (viewPoint.x < x2)
+                            return "top-right";
+                        else if (viewPoint.x > x3)
+                            return "top-left";
+                    } else {
+                        if (viewPoint.x < x2)
+                            return "bottom-right";
+                        else if (viewPoint.x > x3)
+                            return "bottom-left";
+                        else
+                            return "bottom-center";
+                    }
                 }
-            }
 
-            return "top-center";
-        };
+                return "top-center";
+            };
+        }
+
     });
 }
 
@@ -427,92 +445,6 @@ export function expandClickHandlers(view: SceneView | MapView) {
 }
 
 
-// Function to fetch suggestions from the search box
-export const fetchQFaultSuggestions = async (params: { suggestTerm: string, sourceIndex: number }, url: string): Promise<__esri.SuggestResult[]> => {
-    const response = await fetch(`${url}?search_term=${encodeURIComponent(params.suggestTerm)}`);
-    const data: FeatureCollection = await response.json();
-
-    return data.features.map((item: Feature) => {
-        return {
-            text: '<p>' + item.properties?.concatnames + '</p>',
-            key: item.properties?.concatnames,
-            sourceIndex: params.sourceIndex,
-        };
-    });
-};
-
-// Function to fetch results from the search box
-export const fetchQFaultResults = async (params: GetResultsHandlerType, url: string): Promise<__esri.SearchResult[]> => {
-    let searchUrl = url;
-    let searchTerm = '';
-
-    // If the sourceIndex is not null, then the user selected a suggestion from the search box
-    // If the sourceIndex is null, then the user pressed enter in the search box or hit the search button (a non specific search)
-    if (params.suggestResult.sourceIndex !== null) {
-        searchTerm = params.suggestResult.key ? params.suggestResult.key : '';
-        searchUrl += `?search_key=${encodeURIComponent(searchTerm)}`;
-    } else {
-        searchTerm = params.suggestResult.text ? params.suggestResult.text : '';
-        searchUrl += `?search_term=${encodeURIComponent(searchTerm)}`;
-    }
-
-    const response = await fetch(searchUrl);
-    const data = await response.json();
-
-    if (data.features.length === 0) {
-        return [];
-    }
-
-    // Create graphics for each feature returned from the search
-    const graphics: __esri.Graphic[] = data.features.map((item: GeoJSON.Feature) => {
-        const typedGeometry = item.geometry as GeoJSON.MultiPoint;
-        const coordinates = typedGeometry.coordinates as unknown as number[][][]
-
-        const polyline = new Polyline({
-            paths: coordinates,
-            spatialReference: new SpatialReference({
-                wkid: 4326
-            }),
-        });
-
-        return new Graphic({
-            geometry: polyline,
-            attributes: item.properties
-        });
-    });
-
-    // Create a merged polyline to add the polyline paths to
-    const mergedPolyline = new Polyline({
-        spatialReference: new SpatialReference({ wkid: 4326 })
-    });
-
-    // Add the paths from each graphic to the merged polyline
-    graphics.forEach((graphic: __esri.Graphic) => {
-        const polyline = graphic.geometry as Polyline;
-        const paths = polyline.paths;
-        paths.forEach(path => {
-            mergedPolyline.addPath(path);
-        });
-    });
-
-    // Create attributes for the target graphic
-    const attributes = params.sourceIndex !== null
-        ? { name: data.features[0].properties.concatnames }
-        : { name: `Search results for: ${searchTerm}` };
-
-    // Create a target graphic to return
-    const target = new Graphic({
-        geometry: mergedPolyline,
-        attributes: attributes
-    });
-
-    return [{
-        extent: mergedPolyline.extent,
-        name: target.attributes.name,
-        feature: target,
-        target: target
-    }];
-};
 
 export function convertDDToDMS(dd: number, isLongitude: boolean = false) {
     const dir = dd < 0
@@ -732,20 +664,6 @@ export async function fetchWfsGeometry({ namespace, feature }: { namespace: stri
 proj4.defs("EPSG:26912", "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs");
 proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
 
-interface HighlightOptions {
-    fillColor?: [number, number, number, number];
-    outlineColor?: [number, number, number, number];
-    outlineWidth?: number;
-    pointSize?: number;
-}
-
-const defaultHighlightOptions: HighlightOptions = {
-    fillColor: [0, 0, 0, 0], // Transparent fill
-    outlineColor: [255, 255, 0, 1],
-    outlineWidth: 2,
-    pointSize: 12
-};
-
 export const convertCoordinate = (point: number[], sourceEPSG: string = "EPSG:26912", targetEPSG: string = "EPSG:4326"): number[] => {
     try {
         const converted = proj4(
@@ -813,31 +731,47 @@ export const extractCoordinates = (feature: Feature<Geometry, GeoJsonProperties>
         case 'MultiPolygon':
             return feature.geometry.coordinates.flatMap(polygon => polygon);
         default:
-            console.warn('Unsupported geometry type');
+            console.warn('Unsupported geometry type', feature.geometry.type);
             return [];
     }
 };
+
+export const clearGraphics = (view: __esri.MapView | __esri.SceneView) => {
+    view.graphics.removeAll();
+}
+
+export interface HighlightOptions {
+    fillColor?: [number, number, number, number];
+    outlineColor?: [number, number, number, number];
+    outlineWidth?: number;
+    pointSize?: number;
+}
+const defaultSearchResultHighlightOptions: HighlightOptions = {
+    fillColor: [255, 255, 0, 1],
+    outlineColor: [255, 255, 0, 1],
+    outlineWidth: 4,
+    pointSize: 5
+}
 
 export const createHighlightGraphic = (
     feature: Feature<Geometry, GeoJsonProperties>,
     options: HighlightOptions = {}
 ): Graphic[] => {
-    const mergedOptions = { ...defaultHighlightOptions, ...options };
+    const mergedOptions = { ...defaultSearchResultHighlightOptions, ...options };
     const coordinates = extractCoordinates(feature);
     const convertedCoordinates = convertCoordinates(coordinates);
     const graphics: Graphic[] = [];
 
     switch (feature.geometry.type) {
         case 'Point':
-            const pointSymbol = {
-                type: 'simple-marker',
+            const pointSymbol = new SimpleMarkerSymbol({
                 color: mergedOptions.fillColor,
                 size: mergedOptions.pointSize,
                 outline: {
                     color: mergedOptions.outlineColor,
                     width: mergedOptions.outlineWidth
                 }
-            };
+            });
 
             graphics.push(new Graphic({
                 geometry: new Point({
@@ -853,11 +787,11 @@ export const createHighlightGraphic = (
         case 'MultiLineString':
             coordinates.forEach(lineSegment => {
                 const convertedSegment = convertCoordinates([lineSegment]);
-                const polylineSymbol = {
-                    type: 'simple-line',
+
+                const polylineSymbol = new SimpleLineSymbol({
                     color: mergedOptions.outlineColor,
                     width: mergedOptions.outlineWidth
-                };
+                });
 
                 graphics.push(new Graphic({
                     geometry: new Polyline({
@@ -873,14 +807,13 @@ export const createHighlightGraphic = (
         case 'MultiPolygon':
             coordinates.forEach(polygonRing => {
                 const convertedRing = convertCoordinates([polygonRing]);
-                const polygonSymbol = {
-                    type: 'simple-fill',
+                const polygonSymbol = new SimpleFillSymbol({
                     color: mergedOptions.fillColor,
                     outline: {
                         color: mergedOptions.outlineColor,
                         width: mergedOptions.outlineWidth
                     }
-                };
+                });
 
                 graphics.push(new Graphic({
                     geometry: new Polygon({
@@ -896,10 +829,6 @@ export const createHighlightGraphic = (
     return graphics;
 };
 
-export const clearGraphics = (view: __esri.MapView | __esri.SceneView) => {
-    view.graphics.removeAll();
-}
-
 export const highlightFeature = async (
     feature: ExtendedFeature,
     view: __esri.MapView | __esri.SceneView,
@@ -914,13 +843,14 @@ export const highlightFeature = async (
         });
         targetFeature = wfsGeometry.features[0];
     } else {
-        targetFeature = feature as Feature<Geometry, GeoJsonProperties>;
+        targetFeature = feature;
     }
 
     // Clear previous highlights
     view.graphics.removeAll();
 
     // Create and add new highlight graphics with default or provided options
+    // click highlight defaults to yellow
     const defaultHighlightOptions: HighlightOptions = {
         fillColor: [0, 0, 0, 0],
         outlineColor: [255, 255, 0, 1],

@@ -8,12 +8,12 @@ module.exports = {
                 releaseRules: [
                     // Default rules for all commits
                     { type: "feat", release: "minor" },
-                    { type: "fix", release: "patch" },
+                    { type: "fix", release: "minor" },
                     { type: "perf", release: "patch" },
                     { type: "revert", release: "patch" },
                     { type: "docs", release: "patch" },
                     { type: "style", release: "patch" },
-                    { type: "refactor", release: "patch" },
+                    { type: "refactor", release: "minor" },
                     { type: "test", release: "patch" },
                     { type: "build", release: "patch" },
                     { type: "ci", release: "patch" },
@@ -28,6 +28,22 @@ module.exports = {
             "@semantic-release/release-notes-generator",
             {
                 preset: "angular",
+                presetConfig: {
+                    types: [
+                        { type: 'feat', section: 'Features' },
+                        { type: 'fix', section: 'Bug Fixes' },
+                        { type: 'perf', section: 'Performance Improvements' },
+                        { type: 'revert', section: 'Reverts' },
+                        { type: 'docs', section: 'Documentation', hidden: false },
+                        { type: 'style', section: 'Styles', hidden: false },
+                        { type: 'chore', section: 'Miscellaneous Chores', hidden: false },
+                        { type: 'refactor', section: 'Code Refactors', hidden: false },
+                        { type: 'test', section: 'Tests', hidden: false },
+                        { type: 'build', section: 'Build System', hidden: false },
+                        { type: 'ci', section: 'CI/CD', hidden: false },
+                        { type: 'improvement', section: 'Improvements', hidden: false },
+                    ],
+                },
                 parserOpts: {
                     noteKeywords: ["BREAKING CHANGE", "BREAKING CHANGES"]
                 },

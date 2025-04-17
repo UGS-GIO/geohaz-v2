@@ -35,11 +35,12 @@ const useRelatedTable = (
     }
 
     const queryResults: UseQueryResult<ProcessedRelatedData[]>[] = useQueries({
-        queries: configs.map((config) => ({
-            queryKey: ["relatedTable", config.targetField, feature?.properties?.[config.targetField]],
+        queries: configs.map((config, index) => ({
+            queryKey: ["relatedTable", config.targetField, feature?.properties?.[config.targetField], config.url, index],
             queryFn: async (): Promise<ProcessedRelatedData[]> => {
                 try {
                     const targetValue = feature?.properties?.[config.targetField];
+                    const logicalOperator = config.logicalOperator || 'eq';
 
                     // If no target value and it's required, return empty array
                     if (!targetValue && config.targetField) {
@@ -47,7 +48,7 @@ const useRelatedTable = (
                     }
 
                     const queryUrl = targetValue
-                        ? `${config.url}?${config.matchingField}=eq.${targetValue}`
+                        ? `${config.url}?${config.matchingField}=${logicalOperator}.${targetValue}${config.sortBy ? `&order=${config.sortBy}.${config.sortDirection || 'asc'}` : ''}`
                         : config.url;
 
                     const response = await fetch(queryUrl, {
@@ -55,6 +56,7 @@ const useRelatedTable = (
                     });
 
                     if (!response.ok) {
+                        console.error(`QUERY ${index}: Request failed with status ${response.status}: ${response.statusText}`);
                         throw new Error(
                             `Failed to fetch related table for ${config.targetField}: ${response.statusText}`
                         );
@@ -64,23 +66,28 @@ const useRelatedTable = (
                     const rawData = Array.isArray(data) ? data : [data];
 
                     if (config.displayFields) {
-                        return rawData.map(item => {
+                        const result = rawData.map(item => {
                             // Create label-value pairs for each field specified in displayFields
-                            const labelValuePairs = config.displayFields!.map(df => ({
-                                label: df.label,
-                                value: item[df.field] ?? 'N/A'
-                            }));
+                            const labelValuePairs = config.displayFields!.map(df => {
+                                const transformedvalue = df.transform ? df.transform(item[df.field]) : item[df.field];
+                                const value = transformedvalue ?? 'N/A';
+                                return {
+                                    label: df.label,
+                                    value: value
+                                };
+                            });
 
                             return {
                                 ...item,
                                 labelValuePairs,
                             };
                         });
+                        return result;
                     }
 
                     return rawData;
                 } catch (error) {
-                    console.error(`Error fetching related table for ${config.targetField}:`, error);
+                    console.error(`QUERY ${index}: Error fetching related table for ${config.targetField}:`, error);
                     throw error;
                 }
             },
@@ -93,7 +100,9 @@ const useRelatedTable = (
     });
 
     const combinedResult: CombinedResult = {
-        data: queryResults.map(result => result.data ?? []),
+        data: queryResults.map((result) => {
+            return result.data ?? [];
+        }),
         isLoading: queryResults.some(result => result.isLoading),
         error: queryResults.find(result => result.error)?.error || null,
     };

@@ -12,7 +12,6 @@ type PopupContentDisplayProps = {
     layout?: "grid" | "stacked";
 };
 
-
 // Type guard for number fields
 const isNumberField = (field: FieldConfig): field is NumberFieldConfig =>
     field.type === 'number';
@@ -55,7 +54,6 @@ const processFieldValue = (field: FieldConfig, value: unknown): string => {
 
     return String(value);
 };
-
 
 const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProps) => {
     const { relatedTables, popupFields, linkFields, colorCodingMap, rasterSource } = layer;
@@ -116,6 +114,38 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
     };
 
     const createLink = (value: string, field: string) => {
+        // Check if we have a special 'custom' key in linkFields
+        if (linkFields?.['custom']) {
+            const customLinks = linkFields['custom'];
+
+            if (field === 'custom' && customLinks.transform) {
+                const hrefs = customLinks.transform(value);
+
+                return (
+                    <>
+                        {hrefs.map((item, index) => {
+                            if (item.href === null) {
+                                return null;
+                            }
+
+                            return (
+                                <div key={`${item.href}-${index}`} className="flex gap-2">
+                                    <Link
+                                        to={item.href}
+                                        className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
+                                        variant='primary'
+                                    >
+                                        <span className="break-all inline-block">{item.label}</span>
+                                        <ExternalLink className="flex-shrink-0 ml-1" size={16} />
+                                    </Link>
+                                </div>
+                            )
+                        })}
+                    </>
+                );
+            }
+        }
+
         const linkConfig = linkFields?.[field];
 
         if (linkConfig) {
@@ -168,32 +198,63 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         value: string | number;
     }
 
-    const getRelatedTableValues = () => {
-        if (!data?.length) return [[{ label: "No data available", value: "No data available" }]];
+    const getRelatedTableValues = (groupedLayerIndex: number) => {
+        if (!data?.length) {
+            return [[{ label: "", value: "No data available" }]];
+        }
 
         const groupedValues: LabelValuePair[][] = [];
-        relatedTables?.forEach((table) => {
-            const targetField = properties[table.targetField];
 
-            data.forEach((entry) => {
-                entry?.forEach((item: Record<string, any>) => {
-                    if (item[table.matchingField] === targetField && item.labelValuePairs) {
-                        // Each item's labelValuePairs becomes its own group
-                        groupedValues.push([...item.labelValuePairs]);
-                    }
-                });
+        // Check if the provided groupedLayerIndex is valid
+        const table = relatedTables?.[groupedLayerIndex];
+        if (!table) {
+            return [[{ label: "Invalid index", value: "Invalid index" }]];
+        }
+
+        // Get the target value for matching for the specific table
+        const targetField = properties[table.targetField];
+
+        // Process the related table for the provided groupedLayerIndex
+        if (data[groupedLayerIndex]) {
+            // Create a new group for this table's matches
+            const tableMatches: LabelValuePair[] = [];
+
+            data[groupedLayerIndex].forEach((item) => {
+                // Convert both to strings before comparing
+                if (String(item[table.matchingField]) === String(targetField) && item.labelValuePairs) {
+                    // Add these pairs to this table's matches
+                    tableMatches.push(...item.labelValuePairs);
+                }
             });
-        });
+
+            // Only add non-empty matches to the grouped values
+            if (tableMatches.length > 0) {
+                groupedValues.push(tableMatches);
+            }
+        }
 
         return groupedValues.length
             ? groupedValues
-            : [[{ label: "No data available", value: "No data available" }]];
+            : [[{ label: "", value: "No data available" }]];
     };
 
+    // Get entries from popupFields or properties
     const baseFeatureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
-    const featureEntries = rasterValue !== null
-        ? [...baseFeatureEntries, [`${rasterSource?.valueLabel}`, rasterValue]]
-        : baseFeatureEntries;
+
+    // Use the same entries but handle special cases while preserving order
+    const featureEntries = baseFeatureEntries.map(([label, field]) => {
+        // For each entry in baseFeatureEntries, check if we need to replace it with a special field
+        if (linkFields?.['custom'] && field.field === 'custom') {
+            // If this is a custom field with linkFields['custom'], use the original entry to preserve position
+            return [label, { field: 'custom', type: 'string' }];
+        }
+        return [label, field];
+    });
+
+    // Only add raster value at the end if it exists
+    if (rasterValue !== null && rasterSource?.valueLabel) {
+        featureEntries.push([`${rasterSource.valueLabel}`, rasterValue]);
+    }
 
     const shouldDisplayValue = (value: string): boolean => {
         // Cases where we don't want to display the value:
@@ -205,59 +266,74 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         return !isEmptyOrWhitespace && !isNullOrUndefined;
     };
 
-    const { urlContent, longTextContent, regularContent } = featureEntries.reduce<{
-        urlContent: JSX.Element[];
-        longTextContent: JSX.Element[];
-        regularContent: JSX.Element[];
-    }>(
-        (acc, [label, field]) => {
-            const fieldConfig = popupFields ? field : { field, type: 'string' as const };
+    // Create an ordered array of content sections that maintains the original order
+    // but still separates long content for better display
+    const contentItems: {
+        content: JSX.Element;
+        isLongContent: boolean;
+        originalIndex: number;
+    }[] = [];
 
-            // Special handling for raster value
-            const value = label === `${rasterSource?.valueLabel}`
-                ? rasterSource?.transform ? rasterSource.transform(rasterValue) : rasterValue
-                : properties[fieldConfig.field];
-
-            if (value === null || value === ' ') {
-                return acc;
-            }
-
-            const processedValue = processFieldValue(fieldConfig, value);
-
-            // Skip if the value shouldn't be displayed
-            if (!shouldDisplayValue(processedValue)) {
-                return acc;
-            }
-
+    // Process feature fields while keeping track of original order
+    featureEntries.forEach(([label, field], index) => {
+        // Special handling for custom field (in both linkFields and popupFields)
+        if (field && field.field === 'custom') {
             const content = (
-                <div key={label} className="flex flex-col" style={applyColor(fieldConfig.field, processedValue)}>
+                <div key={`feature-${index}`} className="flex flex-col">
                     <p className="font-bold underline text-primary">{label}</p>
-                    <p className="break-words">
-                        {createLink(processedValue, fieldConfig.field)}
-                    </p>
+                    <div className="break-words">
+                        {linkFields?.['custom']
+                            ? createLink('', 'custom')  // For custom field in linkFields
+                            : (popupFields && field.transform ? field.transform(properties) : '') // Regular handling if it's in popupFields
+                        }
+                        {linkFields?.['custom'] && field.transform && field.transform(properties)}
+                    </div>
                 </div>
             );
 
-            // Categorize the content based on its type
-            if (urlPattern.test(processedValue) || linkFields?.[fieldConfig.field]) {
-                acc.urlContent.push(content);
-            } else if (String(processedValue).split(/\s+/).length > 20) {
-                acc.longTextContent.push(content);
-            } else {
-                acc.regularContent.push(content);
-            }
+            const isLongContent = String(field.transform(properties)).split(/\s+/).length > 20;
+            contentItems.push({ content, isLongContent, originalIndex: index });
+            return;
+        }
 
-            return acc;
-        },
-        { urlContent: [], longTextContent: [], regularContent: [] }
-    );
+        const fieldConfig = popupFields ? field : { field, type: 'string' as const };
 
-    type ContentProps = { longRelatedContent: JSX.Element[]; regularRelatedContent: JSX.Element[] };
-    const { longRelatedContent, regularRelatedContent } = (relatedTables || []).reduce<ContentProps>((acc, table, index) => {
-        const groupedValues = getRelatedTableValues();
+        // Special handling for raster value
+        const value = label === `${rasterSource?.valueLabel}`
+            ? rasterSource?.transform ? rasterSource.transform(rasterValue) : rasterValue
+            : properties[fieldConfig.field];
+
+        if (value === null || value === ' ') {
+            return;
+        }
+
+        const processedValue = processFieldValue(fieldConfig, value);
+
+        // Skip if the value shouldn't be displayed
+        if (!shouldDisplayValue(processedValue)) {
+            return;
+        }
 
         const content = (
-            <div key={index} className="flex flex-col space-y-2">
+            <div key={`feature-${index}`} className="flex flex-col" style={applyColor(fieldConfig.field, processedValue)}>
+                <p className="font-bold underline text-primary">{label}</p>
+                <p className="break-words">
+                    {createLink(processedValue, fieldConfig.field)}
+                </p>
+            </div>
+        );
+
+        // Check if this is long content
+        const isLongContent = String(processedValue).split(/\s+/).length > 20;
+        contentItems.push({ content, isLongContent, originalIndex: index });
+    });
+
+    // Process related table content
+    (relatedTables || []).forEach((table, tableIndex) => {
+        const groupedValues = getRelatedTableValues(tableIndex);
+
+        const content = (
+            <div key={`related-${tableIndex}`} className="flex flex-col space-y-2">
                 <p className="font-bold underline text-primary">
                     {properties[table.fieldLabel] || table.fieldLabel}
                 </p>
@@ -281,31 +357,39 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
             .join(" ")
             .split(/\s+/).length;
 
-        acc[totalWords > 20 ? 'longRelatedContent' : 'regularRelatedContent'].push(content);
-        return acc;
-    }, { longRelatedContent: [], regularRelatedContent: [] });
+        const isLongContent = totalWords > 20;
+        // Use a high index for related content to ensure it comes after feature content
+        contentItems.push({
+            content,
+            isLongContent,
+            originalIndex: 1000 + tableIndex
+        });
+    });
+
+    // Separate long content and regular content while preserving original order within each group
+    const longContent = contentItems
+        .filter(item => item.isLongContent)
+        .sort((a, b) => a.originalIndex - b.originalIndex)
+        .map(item => item.content);
+
+    const regularContent = contentItems
+        .filter(item => !item.isLongContent)
+        .sort((a, b) => a.originalIndex - b.originalIndex)
+        .map(item => item.content);
 
     const useGridLayout = layout === "grid" || regularContent.length > 5;
 
     return (
         <div className="space-y-4">
-            {(longTextContent.length > 0 || longRelatedContent.length > 0) && (
+            {longContent.length > 0 && (
                 <div className="space-y-4 col-span-full">
-                    {longTextContent}
-                    {longRelatedContent}
+                    {longContent}
                 </div>
             )}
 
             <div className={useGridLayout ? "grid grid-cols-2 gap-4" : "space-y-4"}>
                 {regularContent}
-                {regularRelatedContent}
             </div>
-
-            {urlContent.length > 0 && (
-                <div className="space-y-4 col-span-full">
-                    {urlContent}
-                </div>
-            )}
         </div>
     );
 };
