@@ -63,7 +63,7 @@ jobs:
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-maps-dev" >> $GITHUB_ENV
           fi
-      
+
       # Temporarily modify firebase.json to use single site deployment
       - name: Update firebase.json for initial deployment
         run: |
@@ -230,6 +230,7 @@ jobs:
           EOF
       
       # Deploy to all sites
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
