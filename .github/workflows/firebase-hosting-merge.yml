@@ -1,4 +1,4 @@
-name: Deploy to Firebase Hosting on merge
+name: Deploy to Firebase Hosting and Release on merge
 'on':
   push:
     branches:
@@ -6,7 +6,7 @@ name: Deploy to Firebase Hosting on merge
       - develop
 
 jobs:
-  build_and_deploy:
+  build_deploy_release:
     permissions:
       contents: write
       issues: write
@@ -16,16 +16,45 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # Important for semantic-release to access all commits
+      
       - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           cache: npm
           node-version: lts/*
-      - run: npm ci && npm run build
-      - name: Release
-        run: npx semantic-release
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      # Global Release
+      - name: Global Release
+        if: github.ref == 'refs/heads/master' # only run release on master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: github.ref == 'refs/heads/master' # only run release on master
+        run: npx semantic-release
+      
+      # App-specific releases
+      - name: Hazards App Release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --extends ./release-config-hazards.js
+      
+      - name: Minerals App Release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --extends ./release-config-minerals.js
+      
+      - name: CCUS App Release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --extends ./release-config-ccus.js
+      
+      # Firebase deployment
       - name: Set Firebase service account and project ID
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
@@ -35,6 +64,7 @@ jobs:
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-maps-dev" >> $GITHUB_ENV
           fi
+      
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
