@@ -4,7 +4,6 @@ name: Deploy to Firebase Hosting and Release on merge
     branches:
       - master
       - develop
-
 jobs:
   build_deploy_release:
     permissions:
@@ -64,6 +63,28 @@ jobs:
             echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-maps-dev" >> $GITHUB_ENV
           fi
+      
+      # Configure Firebase Hosting Targets
+      - name: Configure Firebase Hosting Targets
+        run: |
+          npm install -g firebase-tools
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            # For production
+            echo "Configuring hosting targets for production"
+            firebase target:apply --project ${{ env.PROJECT_ID }} hosting main-site ut-dnr-ugs-maps-prod
+            firebase target:apply --project ${{ env.PROJECT_ID }} hosting hazards-subdomain hazards-geology-utah-gov
+            firebase target:apply --project ${{ env.PROJECT_ID }} hosting ccus-subdomain ccus-geology-utah-gov
+            firebase target:apply --project ${{ env.PROJECT_ID }} hosting minerals-subdomain minerals-geology-utah-gov
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            # For development
+            echo "Configuring hosting targets for development"
+            firebase target:apply --project ${{ env.PROJECT_ID }} hosting main-site ut-dnr-ugs-maps-dev
+            firebase target:apply --project ${{ env.PROJECT_ID }} hosting hazards-subdomain hazards-dev-geology-utah-gov
+            firebase target:apply --project ${{ env.PROJECT_ID }} hosting ccus-subdomain ccus-dev-geology-utah-gov
+            firebase target:apply --project ${{ env.PROJECT_ID }} hosting minerals-subdomain minerals-dev-geology-utah-gov
+          fi
+        env:
+          FIREBASE_TOKEN: ${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}
       
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
