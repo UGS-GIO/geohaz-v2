@@ -64,28 +64,172 @@ jobs:
             echo "PROJECT_ID=ut-dnr-ugs-maps-dev" >> $GITHUB_ENV
           fi
       
-      # Configure Firebase Hosting Targets
-      - name: Configure Firebase Hosting Targets
+      # Temporarily modify firebase.json to use single site deployment
+      - name: Update firebase.json for initial deployment
+        run: |
+          cat > firebase.json << EOF
+          {
+            "hosting": {
+              "public": "dist",
+              "ignore": [
+                "firebase.json",
+                "**/.*",
+                "**/node_modules/**"
+              ],
+              "rewrites": [
+                {
+                  "source": "**",
+                  "destination": "/index.html"
+                }
+              ]
+            }
+          }
+          EOF
+      
+      # Deploy to main site first
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
+          channelId: live
+          projectId: '${{ env.PROJECT_ID }}'
+      
+      # Create additional sites
+      - name: Create and configure additional Firebase sites
         run: |
           npm install -g firebase-tools
+          
+          # Authentication
+          echo "${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}" > /tmp/service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
+          
+          # Create sites if they don't exist
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            # For production
-            echo "Configuring hosting targets for production"
+            # Check and create Hazards site
+            if ! firebase hosting:sites:get hazards-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
+              echo "Creating hazards-geology-utah-gov site"
+              firebase hosting:sites:create hazards-geology-utah-gov --project ${{ env.PROJECT_ID }}
+            fi
+            
+            # Check and create CCUS site
+            if ! firebase hosting:sites:get ccus-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
+              echo "Creating ccus-geology-utah-gov site"
+              firebase hosting:sites:create ccus-geology-utah-gov --project ${{ env.PROJECT_ID }}
+            fi
+            
+            # Check and create Minerals site
+            if ! firebase hosting:sites:get minerals-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
+              echo "Creating minerals-geology-utah-gov site"
+              firebase hosting:sites:create minerals-geology-utah-gov --project ${{ env.PROJECT_ID }}
+            fi
+            
+            # Configure hosting targets
             firebase target:apply --project ${{ env.PROJECT_ID }} hosting main-site ut-dnr-ugs-maps-prod
             firebase target:apply --project ${{ env.PROJECT_ID }} hosting hazards-subdomain hazards-geology-utah-gov
             firebase target:apply --project ${{ env.PROJECT_ID }} hosting ccus-subdomain ccus-geology-utah-gov
             firebase target:apply --project ${{ env.PROJECT_ID }} hosting minerals-subdomain minerals-geology-utah-gov
+          
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            # For development
-            echo "Configuring hosting targets for development"
+            # Check and create Hazards dev site
+            if ! firebase hosting:sites:get hazards-dev-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
+              echo "Creating hazards-dev-geology-utah-gov site"
+              firebase hosting:sites:create hazards-dev-geology-utah-gov --project ${{ env.PROJECT_ID }}
+            fi
+            
+            # Check and create CCUS dev site
+            if ! firebase hosting:sites:get ccus-dev-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
+              echo "Creating ccus-dev-geology-utah-gov site"
+              firebase hosting:sites:create ccus-dev-geology-utah-gov --project ${{ env.PROJECT_ID }}
+            fi
+            
+            # Check and create Minerals dev site
+            if ! firebase hosting:sites:get minerals-dev-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
+              echo "Creating minerals-dev-geology-utah-gov site"
+              firebase hosting:sites:create minerals-dev-geology-utah-gov --project ${{ env.PROJECT_ID }}
+            fi
+            
+            # Configure hosting targets
             firebase target:apply --project ${{ env.PROJECT_ID }} hosting main-site ut-dnr-ugs-maps-dev
             firebase target:apply --project ${{ env.PROJECT_ID }} hosting hazards-subdomain hazards-dev-geology-utah-gov
             firebase target:apply --project ${{ env.PROJECT_ID }} hosting ccus-subdomain ccus-dev-geology-utah-gov
             firebase target:apply --project ${{ env.PROJECT_ID }} hosting minerals-subdomain minerals-dev-geology-utah-gov
           fi
-        env:
-          FIREBASE_TOKEN: ${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}
+          
+          # Clean up
+          rm /tmp/service-account.json
+          
+          # Restore original firebase.json
+          cat > firebase.json << EOF
+          {
+            "hosting": [
+              {
+                "target": "main-site",
+                "public": "dist",
+                "ignore": [
+                  "firebase.json",
+                  "**/.*",
+                  "**/node_modules/**"
+                ],
+                "rewrites": [
+                  {
+                    "source": "**",
+                    "destination": "/index.html"
+                  }
+                ]
+              },
+              {
+                "target": "hazards-subdomain",
+                "public": "dist",
+                "ignore": [
+                  "firebase.json",
+                  "**/.*",
+                  "**/node_modules/**"
+                ],
+                "redirects": [
+                  {
+                    "source": "**",
+                    "destination": "https://maps.geology.utah.gov/hazards",
+                    "type": 301
+                  }
+                ]
+              },
+              {
+                "target": "ccus-subdomain",
+                "public": "dist",
+                "ignore": [
+                  "firebase.json",
+                  "**/.*",
+                  "**/node_modules/**"
+                ],
+                "redirects": [
+                  {
+                    "source": "**",
+                    "destination": "https://maps.geology.utah.gov/ccus",
+                    "type": 301
+                  }
+                ]
+              },
+              {
+                "target": "minerals-subdomain",
+                "public": "dist",
+                "ignore": [
+                  "firebase.json",
+                  "**/.*",
+                  "**/node_modules/**"
+                ],
+                "redirects": [
+                  {
+                    "source": "**",
+                    "destination": "https://maps.geology.utah.gov/minerals",
+                    "type": 301
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
       
+      # Deploy to all sites
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
