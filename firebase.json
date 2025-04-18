@@ -25,7 +25,7 @@
       ],
       "redirects": [
         {
-          "source": "**",
+          "source": "/:path*",
           "destination": "https://maps.geology.utah.gov/hazards",
           "type": 301
         }

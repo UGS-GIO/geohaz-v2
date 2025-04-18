@@ -1,237 +1,73 @@
 name: Deploy to Firebase Hosting and Release on merge
 'on':
- push:
-   branches:
-     - master
-     - develop
+  push:
+    branches:
+      - master
+      - develop
 jobs:
- build_deploy_release:
-   permissions:
-     contents: write
-     issues: write
-     pull-requests: write
-   runs-on: ubuntu-latest
-   steps:
-     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-       with:
-         fetch-depth: 0 # Important for semantic-release to access all commits
-    
-     - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
-       with:
-         cache: npm
-         node-version: lts/*
-    
-     - name: Install dependencies
-       run: npm ci
-    
-     - name: Build
-       run: npm run build
-    
-     # Global Release
-     - name: Global Release
-       if: github.ref == 'refs/heads/master' # only run release on master
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       run: npx semantic-release
-    
-     # App-specific releases
-     - name: Hazards App Release
-       if: github.ref == 'refs/heads/master'
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       run: npx semantic-release --extends ./release-config-hazards.js
-    
-     - name: Minerals App Release
-       if: github.ref == 'refs/heads/master'
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       run: npx semantic-release --extends ./release-config-minerals.js
-    
-     - name: CCUS App Release
-       if: github.ref == 'refs/heads/master'
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       run: npx semantic-release --extends ./release-config-ccus.js
-    
-     # Firebase deployment
-     - name: Set Firebase service account and project ID
-       run: |
-         if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-           echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_PROD" >> $GITHUB_ENV
-           echo "PROJECT_ID=ut-dnr-ugs-maps-prod" >> $GITHUB_ENV
-         elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-           echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV" >> $GITHUB_ENV
-           echo "PROJECT_ID=ut-dnr-ugs-maps-dev" >> $GITHUB_ENV
-         fi
-    
-     # Temporarily modify firebase.json to use single site deployment
-     - name: Update firebase.json for initial deployment
-       run: |
-         cat > firebase.json << EOF
-         {
-           "hosting": {
-             "public": "dist",
-             "ignore": [
-               "firebase.json",
-               "**/.*",
-               "**/node_modules/**"
-             ],
-             "rewrites": [
-               {
-                 "source": "**",
-                 "destination": "/index.html"
-               }
-             ]
-           }
-         }
-         EOF
-    
-     # Deploy to main site first
-     - uses: FirebaseExtended/action-hosting-deploy@v0
-       with:
-         repoToken: '${{ secrets.GITHUB_TOKEN }}'
-         firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
-         channelId: live
-         projectId: '${{ env.PROJECT_ID }}'
-    
-     # Create additional sites
-     - name: Create and configure additional Firebase sites
-       run: |
-         npm install -g firebase-tools
-        
-         # Authentication using CI token
-         firebase use ${{ env.PROJECT_ID }} --token "${{ secrets.FIREBASE_TOKEN }}"
-        
-         # Create sites if they don't exist
-         if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-           # Check and create Hazards site
-           if ! firebase hosting:sites:get hazards-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
-             echo "Creating hazards-geology-utah-gov site"
-             firebase hosting:sites:create hazards-geology-utah-gov --project ${{ env.PROJECT_ID }}
-           fi
-          
-           # Check and create CCUS site
-           if ! firebase hosting:sites:get ccus-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
-             echo "Creating ccus-geology-utah-gov site"
-             firebase hosting:sites:create ccus-geology-utah-gov --project ${{ env.PROJECT_ID }}
-           fi
-          
-           # Check and create Minerals site
-           if ! firebase hosting:sites:get minerals-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
-             echo "Creating minerals-geology-utah-gov site"
-             firebase hosting:sites:create minerals-geology-utah-gov --project ${{ env.PROJECT_ID }}
-           fi
-          
-           # Configure hosting targets
-           firebase target:apply --project ${{ env.PROJECT_ID }} hosting main-site ut-dnr-ugs-maps-prod
-           firebase target:apply --project ${{ env.PROJECT_ID }} hosting hazards-subdomain hazards-geology-utah-gov
-           firebase target:apply --project ${{ env.PROJECT_ID }} hosting ccus-subdomain ccus-geology-utah-gov
-           firebase target:apply --project ${{ env.PROJECT_ID }} hosting minerals-subdomain minerals-geology-utah-gov
-        
-         elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-           # Check and create Hazards dev site
-           if ! firebase hosting:sites:get hazards-dev-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
-             echo "Creating hazards-dev-geology-utah-gov site"
-             firebase hosting:sites:create hazards-dev-geology-utah-gov --project ${{ env.PROJECT_ID }}
-           fi
-          
-           # Check and create CCUS dev site
-           if ! firebase hosting:sites:get ccus-dev-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
-             echo "Creating ccus-dev-geology-utah-gov site"
-             firebase hosting:sites:create ccus-dev-geology-utah-gov --project ${{ env.PROJECT_ID }}
-           fi
-          
-           # Check and create Minerals dev site
-           if ! firebase hosting:sites:get minerals-dev-geology-utah-gov --project ${{ env.PROJECT_ID }} &>/dev/null; then
-             echo "Creating minerals-dev-geology-utah-gov site"
-             firebase hosting:sites:create minerals-dev-geology-utah-gov --project ${{ env.PROJECT_ID }}
-           fi
-          
-           # Configure hosting targets
-           firebase target:apply --project ${{ env.PROJECT_ID }} hosting main-site ut-dnr-ugs-maps-dev
-           firebase target:apply --project ${{ env.PROJECT_ID }} hosting hazards-subdomain hazards-dev-geology-utah-gov
-           firebase target:apply --project ${{ env.PROJECT_ID }} hosting ccus-subdomain ccus-dev-geology-utah-gov
-           firebase target:apply --project ${{ env.PROJECT_ID }} hosting minerals-subdomain minerals-dev-geology-utah-gov
-         fi
-        
-         # Clean up
-         rm /tmp/service-account.json
-        
-         # Restore original firebase.json
-         cat > firebase.json << EOF
-         {
-           "hosting": [
-             {
-               "target": "main-site",
-               "public": "dist",
-               "ignore": [
-                 "firebase.json",
-                 "**/.*",
-                 "**/node_modules/**"
-               ],
-               "rewrites": [
-                 {
-                   "source": "**",
-                   "destination": "/index.html"
-                 }
-               ]
-             },
-             {
-               "target": "hazards-subdomain",
-               "public": "dist",
-               "ignore": [
-                 "firebase.json",
-                 "**/.*",
-                 "**/node_modules/**"
-               ],
-               "redirects": [
-                 {
-                   "source": "**",
-                   "destination": "https://maps.geology.utah.gov/hazards",
-                   "type": 301
-                 }
-               ]
-             },
-             {
-               "target": "ccus-subdomain",
-               "public": "dist",
-               "ignore": [
-                 "firebase.json",
-                 "**/.*",
-                 "**/node_modules/**"
-               ],
-               "redirects": [
-                 {
-                   "source": "**",
-                   "destination": "https://maps.geology.utah.gov/ccus",
-                   "type": 301
-                 }
-               ]
-             },
-             {
-               "target": "minerals-subdomain",
-               "public": "dist",
-               "ignore": [
-                 "firebase.json",
-                 "**/.*",
-                 "**/node_modules/**"
-               ],
-               "redirects": [
-                 {
-                   "source": "**",
-                   "destination": "https://maps.geology.utah.gov/minerals",
-                   "type": 301
-                 }
-               ]
-             }
-           ]
-         }
-         EOF
-    
-     # Deploy to all sites
-     - uses: FirebaseExtended/action-hosting-deploy@v0
-       with:
-         repoToken: '${{ secrets.GITHUB_TOKEN }}'
-         firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
-         channelId: live
-         projectId: '${{ env.PROJECT_ID }}'
+  build_deploy_release:
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0 # Important for semantic-release to access all commits
+      
+      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        with:
+          cache: npm
+          node-version: lts/*
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      # Global Release
+      - name: Global Release
+        if: github.ref == 'refs/heads/master' # only run release on master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+      
+      # App-specific releases
+      - name: Hazards App Release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --extends ./release-config-hazards.js
+      
+      - name: Minerals App Release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --extends ./release-config-minerals.js
+      
+      - name: CCUS App Release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release --extends ./release-config-ccus.js
+      
+      # Firebase deployment - set environment variables
+      - name: Set Firebase project ID
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_PROD" >> $GITHUB_ENV
+            echo "PROJECT_ID=ut-dnr-ugs-maps-prod" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV" >> $GITHUB_ENV
+            echo "PROJECT_ID=ut-dnr-ugs-maps-dev" >> $GITHUB_ENV
+          fi
+      
+      # Deploy to all configured hosting targets in firebase.json
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
+          channelId: live
+          projectId: '${{ env.PROJECT_ID }}'
