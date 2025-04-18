@@ -13,6 +13,17 @@
           "source": "**",
           "destination": "/index.html"
         }
+      ],
+      "headers": [
+        {
+          "source": "**",
+          "headers": [
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "*"
+            }
+          ]
+        }
       ]
     },
     {
@@ -23,11 +34,10 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "redirects": [
+      "rewrites": [
         {
-          "source": "/:path*",
-          "destination": "https://maps.geology.utah.gov/hazards",
-          "type": 301
+          "source": "**",
+          "destination": "/index.html"
         }
       ]
     },
@@ -39,11 +49,10 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "redirects": [
+      "rewrites": [
         {
           "source": "**",
-          "destination": "https://maps.geology.utah.gov/ccus",
-          "type": 301
+          "destination": "/index.html"
         }
       ]
     },
@@ -55,11 +64,10 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "redirects": [
+      "rewrites": [
         {
           "source": "**",
-          "destination": "https://maps.geology.utah.gov/minerals",
-          "type": 301
+          "destination": "/index.html"
         }
       ]
     }
@@ -81,4 +89,4 @@
       ]
     }
   ]
- }
+}
