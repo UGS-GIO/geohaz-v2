@@ -37,7 +37,7 @@
       "rewrites": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "/hazards"
         }
       ]
     },
@@ -52,7 +52,7 @@
       "rewrites": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "/ccus"
         }
       ]
     },
@@ -67,7 +67,7 @@
       "rewrites": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "/minerals"
         }
       ]
     }
