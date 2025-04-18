@@ -69,7 +69,7 @@
       "redirects": [
         {
           "source": "**",
-          "destination": "https://maps.geology.utah.gov/mineralss",
+          "destination": "https://maps.geology.utah.gov/minerals",
           "type": 302
         }
       ]
