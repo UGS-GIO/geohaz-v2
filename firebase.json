@@ -34,10 +34,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/hazards"
+          "destination": "https://maps.geology.utah.gov/hazards",
+          "type": 302
         }
       ]
     },
@@ -49,10 +50,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/ccus"
+          "destination": "https://maps.geology.utah.gov/ccus",
+          "type": 302
         }
       ]
     },
@@ -64,10 +66,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/minerals"
+          "destination": "https://maps.geology.utah.gov/mineralss",
+          "type": 302
         }
       ]
     }
