@@ -217,7 +217,7 @@ const landscapeGroupConfig: LayerProps = {
 // Wetlands WMS Layer Configurations
 const wetlandsWMSLayerName = 'wetlandsapp_assessmentLayer';
 const wetlandsWMSTitle = 'Wetland Assessment Projects';
-const wetlandsWMSConfig: WMSLayerProps = {
+const wetlandsWMSConfig: LayerProps = {
   type: 'wms',
   url: `${PROD_GEOSERVER_URL}/wms`,
   title: wetlandsWMSTitle,
@@ -290,23 +290,18 @@ const wetConditionGroupConfig: LayerProps = {
   type: 'group',
   title: 'Wetland Condition',
   visible: true,
-  layers: [wetlandsWMSConfig,assessmentConfig, studyResultsConfig, stressorsConfig]
+  layers: [wetlandsWMSConfig, assessmentConfig, studyResultsConfig, stressorsConfig]
 };
 
 // Land Ownership Layer Configuration
 const ownershipLayerName = 'Land Ownership';
 const ownershipitle = 'Land Ownership';
 const ownershipConfig: LayerProps = {
-  type: 'mapimagelayer',
+  type: 'map-image',
   url: "https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer",
   visible: false,
   title: ownershipitle,
-  listMode: "hide-children",
-  sublayers: [
-    {
-      name: ownershipLayerName,
-    },
-  ]
+  //listMode: "hide-children",
 };
 
 
