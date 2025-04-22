@@ -11,10 +11,11 @@ import { useContext } from 'react'
 import { PROD_POSTGREST_URL } from '@/lib/constants'
 import { wellWithTopsLayerName } from '@/pages/ccus/data/layers'
 import { ExtendedGeometry, SearchCombobox, SearchConfig } from '@/components/sidebar/filter/search-combobox'
-import { getBoundingBox, zoomToExtent, highlightSearchResult } from '@/lib/sidebar/filter/util'
+import { getBoundingBox, zoomToExtent } from '@/lib/sidebar/filter/util'
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson'
 import { convertBbox } from '@/lib/mapping-utils'
 import * as turf from '@turf/turf'
+import { highlightSearchResult } from '@/lib/util/highlight-utils'
 
 export default function Map() {
   const { isCollapsed } = useSidebar();

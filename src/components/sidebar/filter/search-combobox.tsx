@@ -68,6 +68,7 @@ function SearchCombobox({
                         }
                         urlParams.set('street', street);
                         urlParams.set('zone', zone);
+                        urlParams.set('spatialReference', '4326'); // request EPSG:4326 to be returned
                         apiUrl = `${apiUrl}?${urlParams.toString()}`;
 
                         const response = await fetch(apiUrl, { method: 'GET', headers });
@@ -80,13 +81,13 @@ function SearchCombobox({
                         if (data && data.status === 200 && data.result?.location?.x && data.result?.location?.y) {
                             const result = data.result;
                             const pointGeom = turfPoint([result.location.x, result.location.y]).geometry;
-                            console.log(`Geocode result: ${pointGeom}`);
 
                             return featureCollection([{
-                                type: "Feature", geometry: pointGeom,
+                                type: "Feature",
+                                geometry: pointGeom,
                                 properties: {
                                     matchAddress: result.matchAddress, score: result.score,
-                                    [restConfig.displayField]: result.matchAddress, // Ensure displayField property exists
+                                    [restConfig.displayField]: result.matchAddress,
                                     geocoder: result.locator,
                                 }
                             }]);

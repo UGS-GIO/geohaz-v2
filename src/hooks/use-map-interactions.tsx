@@ -1,9 +1,9 @@
 import { useCallback, useState, useContext } from "react";
-import { removeGraphics, createGraphic } from "@/lib/mapping-utils";
 import Collection from "@arcgis/core/core/Collection.js";
 import { MapContext } from "@/context/map-provider";
 import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
 import { useGetLayerConfig } from "./use-get-layer-config";
+import { createPinGraphic, removeGraphics } from "@/lib/util/highlight-utils";
 
 type VisibleLayer = {
     visible: boolean;
@@ -220,7 +220,7 @@ export const useMapInteractions = () => {
                 // Update your state or context with the new coordinates
                 setCoordinates({ x: longitude.toString(), y: latitude.toString() }); // Assuming x = longitude and y = latitude
                 removeGraphics(view);
-                createGraphic(latitude, longitude, view);
+                createPinGraphic(latitude, longitude, view);
             }
         }
 

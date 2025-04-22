@@ -10,10 +10,11 @@ import { ExtendedGeometry, SearchCombobox, SearchConfig } from '@/components/sid
 import { useContext } from 'react'
 import { MapContext } from '@/context/map-provider'
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson'
-import { getBoundingBox, highlightSearchResult, zoomToExtent } from '@/lib/sidebar/filter/util'
-import { PROD_POSTGREST_URL } from '@/lib/constants'
+import { getBoundingBox, zoomToExtent } from '@/lib/sidebar/filter/util'
+import { GEOCODE_PROXY_FUNCTION_URL, PROD_POSTGREST_URL } from '@/lib/constants'
 import * as turf from '@turf/turf'
 import { convertBbox } from '@/lib/mapping-utils'
+import { highlightSearchResult } from '@/lib/util/highlight-utils'
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
@@ -21,15 +22,15 @@ export default function Map() {
 
   const searchConfig: SearchConfig[] = [
     // --- Geocode Proxy Configuration ---
-    // {
-    //   restConfig: {
-    //     isGeocodeProxy: true,
-    //     url: GEOCODE_PROXY_FUNCTION_URL,
-    //     sourceName: 'Address Search',
-    //     displayField: 'matchAddress', // Top-level displayField (from geocode JSON result)
-    //     headers: { 'Accept': 'application/json' }
-    //   }
-    // },
+    {
+      restConfig: {
+        isGeocodeProxy: true,
+        url: GEOCODE_PROXY_FUNCTION_URL,
+        sourceName: 'Address Search',
+        displayField: 'matchAddress', // Top-level displayField (from geocode JSON result)
+        headers: { 'Accept': 'application/geo+json' }
+      }
+    },
     // --- PostgREST Fault Search Configuration ---
     {
       restConfig: {

@@ -3,8 +3,9 @@ import { useMapCoordinates } from '@/hooks/use-map-coordinates';
 import { RefObject, useCallback, useContext, useMemo } from 'react';
 import { ClipboardCopy } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { convertDDToDMS, removeGraphics } from '@/lib/mapping-utils';
+import { convertDDToDMS } from '@/lib/mapping-utils';
 import { MapContext } from '@/context/map-provider';
+import { removeGraphics } from '@/lib/util/highlight-utils';
 
 interface Props {
     hiddenTriggerRef: RefObject<HTMLDivElement>,
