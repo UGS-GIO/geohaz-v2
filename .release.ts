@@ -92,10 +92,10 @@ module.exports = {
                     },
                     // Configure groups for the changelog
                     commitGroups: [
-                        { title: "📱 Hazards", route: "hazards" },
-                        { title: "🪨 Minerals", route: "minerals" },
-                        { title: "☁️ CCUS", route: "ccus" },
-                        { title: "🔄 Common Changes", route: "common" }
+                        { title: "Hazards", route: "hazards" },
+                        { title: "Minerals", route: "minerals" },
+                        { title: "CCUS", route: "ccus" },
+                        { title: "Common Changes", route: "common" }
                     ]
                 }
             }
