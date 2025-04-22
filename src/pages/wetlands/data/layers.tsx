@@ -278,7 +278,7 @@ const wetConditionGroupConfig: LayerProps = {
 
 // Land Ownership Layer Configuration
 const ownershipLayerName = 'Land Ownership';
-const ownershipitle = 'Land Ownership';
+const ownershipitle = ownershipLayerName;
 const ownershipConfig: LayerProps = {
     type: 'map-image',
     url: "https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer",
