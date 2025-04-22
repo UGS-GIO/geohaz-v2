@@ -1,0 +1,55 @@
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - master
+  
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Global Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+        
+      - name: Hazards App Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Filter for hazards commits only for this release
+          npx semantic-release --extends ./release-config-hazards.js
+        
+      - name: Minerals App Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Filter for minerals commits only for this release
+          npx semantic-release --extends ./release-config-minerals.js
+          
+      - name: CCUS App Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Filter for ccus commits only for this release
+          npx semantic-release --extends ./release-config-ccus.js
