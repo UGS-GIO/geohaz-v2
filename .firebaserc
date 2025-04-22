@@ -23,6 +23,15 @@
       "hosting": {
         "main-site": [
           "ut-dnr-ugs-maps-dev"
+        ],
+        "hazards-subdomain": [
+          "hazards-geology-utah-gov-dev"
+        ],
+        "ccus-subdomain": [
+          "ccus-geology-utah-gov-dev"
+        ],
+        "minerals-subdomain": [
+          "minerals-geology-utah-gov-dev"
         ]
       }
     }
