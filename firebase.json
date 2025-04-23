@@ -64,32 +64,49 @@
       "ignore": [
         "firebase.json",
         "**/.*",
-        "**/node_modules/**"
-      ],
-      "redirects": [
-        {
-          "source": "**",
-          "destination": "https://maps.geology.utah.gov/minerals",
-          "type": 302
-        }
-      ]
-    }
-  ],
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run lint",
-        "npm --prefix \"$RESOURCE_DIR\" run build"
-      ]
-    }
-  ]
+       "**/node_modules/**"
+     ],
+     "redirects": [
+       {
+         "source": "**",
+         "destination": "https://maps.geology.utah.gov/minerals",
+         "type": 302
+       }
+     ]
+   },
+   {
+     "target": "wetlands-subdomain",
+     "public": "dist",
+     "ignore": [
+       "firebase.json",
+       "**/.*",
+       "**/node_modules/**"
+     ],
+     "redirects": [
+       {
+         "source": "**",
+         "destination": "https://maps.geology.utah.gov/wetlands",
+         "type": 302
+       }
+     ]
+   }
+ ],
+ "functions": [
+   {
+     "source": "functions",
+     "codebase": "default",
+     "ignore": [
+       "node_modules",
+       ".git",
+       "firebase-debug.log",
+       "firebase-debug.*.log",
+       "*.local"
+     ],
+     "predeploy": [
+       "npm --prefix \"$RESOURCE_DIR\" run lint",
+       "npm --prefix \"$RESOURCE_DIR\" run build"
+     ]
+   }
+ ]
 }
+
