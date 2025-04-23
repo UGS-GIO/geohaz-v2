@@ -17,7 +17,7 @@
         "minerals-subdomain": [
           "minerals-geology-utah-gov"
         ],
-        "wetlands": [
+        "wetlands-subdomain": [
           "wetlands-geology-utah-gov"
         ]
       }
@@ -36,12 +36,11 @@
         "minerals": [
           "minerals-geology-utah-gov"
         ],
-        "wetlands": [
+        "wetlands-subdomain": [
           "wetlands-geology-utah-gov"
         ]
       }
     }
   },
   "etags": {}
- }
- 
+}
