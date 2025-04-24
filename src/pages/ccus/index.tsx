@@ -74,22 +74,27 @@ export default function Map() {
 
   const searchConfig: SearchConfig[] = [
     {
-      restConfig: {
+      config: {
+        type: 'postgREST',
         url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
         sourceName: 'API #',
         displayField: 'api',
+
         params: {
-          select: 'shape, api',
+          select: 'shape,api',
           targetField: 'api',
         },
         headers: {
-          'content-type': 'application/json',
-          'accept-profile': 'emp',
-          'accept': 'application/geo+json',
-        }
-      }
+          'Accept': 'application/geo+json',
+          'Content-Type': 'application/json',
+          'Accept-Profile': 'emp',
+        },
+        crs: '26912'
+      },
+      placeholder: 'Search by API #: e.g. 4300...',
     },
   ];
+
   return (
     <div className="relative h-full overflow-hidden bg-background">
       <Sidebar />
