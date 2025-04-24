@@ -84,7 +84,6 @@ export default function Map() {
 
       if (data?.candidates?.length > 0) {
         const bestCandidate = data.candidates[0];
-        console.log("Best candidate:", bestCandidate);
 
         // --- Format Candidate into GeoJSON Feature ---
         const pointGeom = turfPoint([bestCandidate.location.x, bestCandidate.location.y]).geometry;
