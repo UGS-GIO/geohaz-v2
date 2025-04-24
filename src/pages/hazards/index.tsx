@@ -28,7 +28,7 @@ export default function Map() {
   const { view } = useContext(MapContext);
 
   const searchConfig: SearchSourceConfig[] = [
-    // --- Masquerade Geocoder Configuration ---
+    // Masquerade Geocoder Configuration ---
     {
       type: 'masquerade',
       url: MASQUERADE_GEOCODER_URL,
@@ -36,7 +36,7 @@ export default function Map() {
       displayField: 'text',
       outSR: 4326 // Request WGS84
     },
-    // --- PostgREST Fault Search Configuration ---
+    // PostgREST Fault Search Configuration ---
     {
       type: 'postgREST',
       url: PROD_POSTGREST_URL,
@@ -85,7 +85,7 @@ export default function Map() {
       if (data?.candidates?.length > 0) {
         const bestCandidate = data.candidates[0];
 
-        // --- Format Candidate into GeoJSON Feature ---
+        // Format Candidate into GeoJSON Feature
         const pointGeom = turfPoint([bestCandidate.location.x, bestCandidate.location.y]).geometry;
         const feature: Feature<Geometry, GeoJsonProperties> = {
           type: "Feature",
@@ -179,7 +179,6 @@ export default function Map() {
       let [xmin, ymin, xmax, ymax] = featureBbox;
       const targetCRS = "EPSG:4326";
       if (sourceCRS.toUpperCase() !== targetCRS && sourceCRS.toUpperCase() !== 'WGS84') {
-        console.log(`Converting bbox from ${sourceCRS} to ${targetCRS}`);
         try {
           [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax], sourceCRS, targetCRS);
         } catch (bboxError) {
@@ -188,8 +187,7 @@ export default function Map() {
         }
       }
 
-      // --- Zoom ---
-      console.log(`Zooming to ${targetCRS} extent:`, { xmin, ymin, xmax, ymax });
+      // Zoom to the extent of the feature
       zoomToExtent(xmin, ymin, xmax, ymax, view); // Use the WGS84 bbox
 
     } catch (error) {
