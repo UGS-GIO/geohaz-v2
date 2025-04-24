@@ -123,7 +123,7 @@ function SearchCombobox({
                     return addressPointSuggestions; // Type: Suggestion[]
 
                 } else if (source.type === 'postgREST') {
-                    / Fetch logic for PostgREST ---
+                    // Fetch logic for PostgREST
                     const params = source.params;
                     const urlParams = new URLSearchParams();
                     let apiUrl = '';
