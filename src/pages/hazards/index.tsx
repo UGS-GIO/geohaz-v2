@@ -1,4 +1,4 @@
-import { useContext } from 'react'; // Import React
+import { useContext } from 'react';
 import { Layout } from '@/components/custom/layout';
 import ThemeSwitch from '@/components/theme-switch';
 import { TopNav } from '@/components/top-nav';
@@ -7,15 +7,15 @@ import { cn } from '@/lib/utils';
 import MapContainer from './components/map-container';
 import Sidebar from '@/components/sidebar';
 import { useSidebar } from '@/hooks/use-sidebar';
-import { ExtendedGeometry, SearchCombobox, SearchSourceConfig } from '@/components/sidebar/filter/search-combobox'; // Import updated types
+import { ExtendedGeometry, SearchCombobox, SearchSourceConfig } from '@/components/sidebar/filter/search-combobox';
 import { MapContext } from '@/context/map-provider';
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
-import { PROD_POSTGREST_URL, MASQUERADE_GEOCODER_URL } from '@/lib/constants'; // Use constants
+import { PROD_POSTGREST_URL, MASQUERADE_GEOCODER_URL } from '@/lib/constants';
 import * as turf from '@turf/turf';
 import { convertBbox } from '@/lib/mapping-utils';
-import { highlightSearchResult, removeGraphics } from '@/lib/util/highlight-utils'; // Assuming this works with standard Features
-import { point as turfPoint } from '@turf/helpers'; // For creating GeoJSON point
+import { highlightSearchResult, removeGraphics } from '@/lib/util/highlight-utils';
+import { point as turfPoint } from '@turf/helpers';
 
 interface Suggestion {
   text: string;
