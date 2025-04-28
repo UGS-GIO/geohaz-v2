@@ -75,7 +75,6 @@ export default function Map() {
   const searchConfig: SearchSourceConfig[] = [
 
     defaultMasqueradeConfig,
-    // PostgREST Fault Search Configuration ---
     {
       type: 'postgREST',
       url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
