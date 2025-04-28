@@ -173,33 +173,6 @@ const hydricSoilsConfig: LayerProps = {
     visible: false,
 };
 
-// cache project areas
-const landscapeLayerName = 'wetlandsapp_huc12_ecoregion';
-const landscapeTitle = 'Watershed (HUC12) by Ecoregion';
-const landscapeConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: landscapeTitle,
-    visible: true,
-    sublayers: [
-        {
-            name: `${WETLANDS_WORKSPACE}:${landscapeLayerName}`,
-            popupEnabled: false,
-            queryable: true,
-            popupFields: {
-            }
-        }
-    ]
-};
-
-// Landscape Group Layer
-const landscapeGroupConfig: LayerProps = {
-    type: 'group',
-    title: 'Landscape Data',
-    visible: true,
-    layers: [landscapeConfig]
-};
-
 // Wetlands WMS Layer Configurations
 const wetlandsWMSLayerName = 'wetlandsapp_assessmentLayer';
 const wetlandsWMSTitle = 'Wetland Assessment Projects';
@@ -277,7 +250,7 @@ const wetConditionGroupConfig: LayerProps = {
 };
 
 // Land Ownership Layer Configuration
-const ownershipLayerName = 'Land Ownership';
+// const ownershipLayerName = 'Land Ownership';
 const ownershipitle = 'Land Ownership';
 const ownershipConfig: LayerProps = {
     type: 'map-image',
@@ -287,15 +260,119 @@ const ownershipConfig: LayerProps = {
     //listMode: "hide-children",
 };
 
+// landscape ecoregions
+const huc12ecoLayerName = 'wetlandsapp_huc12_ecoregion';
+const huc12ecoTitle = 'Watershed (HUC12) by Ecoregion';
+const huc12ecoConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: huc12ecoTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${huc12ecoLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+
+// HUC 12
+const huc12LayerName = 'wetlandsapp_huc12';
+const huc12Title = 'Watershed (HUC12)';
+const huc12Config: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: huc12Title,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${huc12LayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+// HUC 8
+const huc8ecoLayerName = 'wetlandsapp_huc8_ecoregion';
+const huc8ecoTitle = 'Watershed (HUC8) by Ecoregion';
+const huc8ecoConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: huc8ecoTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${huc8ecoLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+// HUC 8
+const huc8LayerName = 'wetlandsapp_huc8';
+const huc8Title = 'Watershed (HUC8)';
+const huc8Config: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: huc8Title,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${huc8LayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+// Ecoregion
+const ecoregionLayerName = 'wetlandsapp_ecoregion';
+const ecoregionTitle = 'Egoregion';
+const ecoregionConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: ecoregionTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${ecoregionLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+// Wetlands Group Layer
+const ecoregionsGroupConfig: LayerProps = {
+    type: 'group',
+    title: 'Landscape Ecoregion Data',
+    visible: true,
+    layers: [huc12ecoConfig, huc12Config, huc8ecoConfig, huc8Config, ecoregionConfig]
+};
+
 
 const layersConfig: LayerProps[] = [
     wetlandGroupConfig,
     riparianGroupConfig,
     additonalGroupConfig,
     hydricSoilsConfig,
-    landscapeGroupConfig,
     wetConditionGroupConfig,
-    ownershipConfig
+    ownershipConfig,
+    ecoregionsGroupConfig
 ];
 
 export default layersConfig;
