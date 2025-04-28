@@ -10,7 +10,7 @@ import { MapContext } from '@/context/map-provider'
 import { useContext } from 'react'
 import { PROD_POSTGREST_URL } from '@/lib/constants'
 import { wellWithTopsLayerName } from '@/pages/ccus/data/layers'
-import { ExtendedGeometry, SearchCombobox, SearchConfig } from '@/components/sidebar/filter/search-combobox'
+import { ExtendedGeometry, SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox'
 import { getBoundingBox, zoomToExtent } from '@/lib/sidebar/filter/util'
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson'
 import { convertBbox } from '@/lib/mapping-utils'
@@ -71,27 +71,26 @@ export default function Map() {
       console.error("Error processing feature collection selection:", error);
     }
   };
+  'enter'
+  const searchConfig: SearchSourceConfig[] = [
 
-  const searchConfig: SearchConfig[] = [
+    defaultMasqueradeConfig,
+    // PostgREST Fault Search Configuration ---
     {
-      config: {
-        type: 'postgREST',
-        url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
-        sourceName: 'API #',
-        displayField: 'api',
-
-        params: {
-          select: 'shape,api',
-          targetField: 'api',
-        },
-        headers: {
-          'Accept': 'application/geo+json',
-          'Content-Type': 'application/json',
-          'Accept-Profile': 'emp',
-        },
-        crs: '26912'
+      type: 'postgREST',
+      url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
+      sourceName: 'API #',
+      displayField: 'api',
+      params: {
+        select: 'shape,api',
+        targetField: 'api',
       },
-      placeholder: 'Search by API #: e.g. 4300...',
+      headers: {
+        'Accept': 'application/geo+json',
+        'Content-Type': 'application/json',
+        'Accept-Profile': 'emp',
+      },
+      crs: '26912'
     },
   ];
 
@@ -114,6 +113,7 @@ export default function Map() {
                   config={searchConfig}
                   onFeatureSelect={handleSearchSelect}
                   onCollectionSelect={handleCollectionSelect}
+                  onSuggestionSelect={handleSuggestionSelect}
                   className="w-full"
                 />
               </div>

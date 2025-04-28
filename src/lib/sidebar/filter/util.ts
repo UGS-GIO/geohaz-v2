@@ -9,7 +9,7 @@ export interface SearchResult {
     feature: Feature<ExtendedGeometry, GeoJsonProperties>,
 }
 
-export const zoomToExtent = (xmin: number, ymin: number, xmax: number, ymax: number, view: __esri.SceneView | __esri.MapView) => {
+export const zoomToExtent = (xmin: number, ymin: number, xmax: number, ymax: number, view: __esri.SceneView | __esri.MapView, scale?: number) => {
     const extent = new Extent({
         xmin: xmin,
         ymin: ymin,
@@ -18,7 +18,10 @@ export const zoomToExtent = (xmin: number, ymin: number, xmax: number, ymax: num
         spatialReference: { wkid: 4326 } // Assuming WGS 84 from the CRS
     });
 
-    view.goTo(extent.expand(1.5)).catch(error => {
+    view.goTo({
+        target: extent.expand(1.5),
+        scale: scale ? scale : undefined,
+    }).catch(error => {
         if (error.name !== "AbortError") {
             console.error("Error zooming to extent:", error);
         }
@@ -27,7 +30,6 @@ export const zoomToExtent = (xmin: number, ymin: number, xmax: number, ymax: num
 
 
 export const getBoundingBox = (geom: ExtendedGeometry) => {
-
     let xmin, ymin, xmax, ymax;
     [xmin, ymin, xmax, ymax] = turf.bbox(geom);
 
