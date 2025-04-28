@@ -252,7 +252,6 @@ function SearchCombobox({
         }
 
         setOpen(false);
-        setSearch('');
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
