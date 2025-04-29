@@ -165,6 +165,9 @@ const additonalGroupConfig: LayerProps = {
     layers: [llwwMappingConfig, cacheProjectsConfig]
 };
 
+// Hydric Soils Classes (Soil_Hydric_Classes/0)
+// Still need to impliment image server layers
+/*
 const hydricSoilsTitle = 'Hydric Soils Classes';
 const hydricSoilsConfig: LayerProps = {
     type: 'feature',
@@ -172,6 +175,7 @@ const hydricSoilsConfig: LayerProps = {
     title: hydricSoilsTitle,
     visible: false,
 };
+*/
 
 // Wetland Assessment Study Results  (Wetland_Condition/2)
 const wetlandsWMSLayerName = 'wetlandsapp_wetlandassessmentstudyresults';
@@ -208,20 +212,6 @@ const assessmentConfig: WMSLayerProps = {
     ]
 };
 
-const studyResultsLayerName = 'wetlandsapp_wetlandassessmentstudyresults';
-const studyResultsTitle = 'Wetland Assessment Study Results';
-const studyResultsConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: studyResultsTitle,
-    opacity: 0.6,
-    sublayers: [
-        {
-            name: `${WETLANDS_WORKSPACE}:${studyResultsLayerName}`,
-        }
-    ]
-};
-
 const stressorsLayerName = 'wetlandsapp_wetlandstressors';
 const stressorsTitle = 'Wetland Stressors';
 const stressorsConfig: WMSLayerProps = {
@@ -246,7 +236,7 @@ const wetConditionGroupConfig: LayerProps = {
     type: 'group',
     title: 'Wetland Condition',
     visible: true,
-    layers: [wetlandsWMSConfig, assessmentConfig, studyResultsConfig, stressorsConfig]
+    layers: [wetlandsWMSConfig, assessmentConfig, stressorsConfig]
 };
 
 // SITLA Land Ownership Layer
@@ -304,6 +294,7 @@ const huc12Config: WMSLayerProps = {
 };
 
 // HUC 8
+/*
 const huc8ecoLayerName = 'wetlandsapp_huc8_ecoregion';
 const huc8ecoTitle = 'Watershed (HUC8) by Ecoregion';
 const huc8ecoConfig: WMSLayerProps = {
@@ -321,6 +312,7 @@ const huc8ecoConfig: WMSLayerProps = {
         }
     ]
 };
+*/
 
 // HUC 8
 const huc8LayerName = 'wetlandsapp_huc8';
@@ -343,7 +335,7 @@ const huc8Config: WMSLayerProps = {
 
 // Ecoregion
 const ecoregionLayerName = 'wetlandsapp_ecoregion';
-const ecoregionTitle = 'Egoregion';
+const ecoregionTitle = 'Ecoregion';
 const ecoregionConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
