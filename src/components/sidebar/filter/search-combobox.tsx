@@ -257,55 +257,58 @@ function SearchCombobox({
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+            // Find the currently highlighted item, if any
+            const selectedItem = commandRef.current?.querySelector('[role="option"][data-selected="true"]');
 
-            const commandElement = commandRef.current;
-            // cmdk typically uses data-selected="true" for the highlighted item
-            const selectedItem = commandElement?.querySelector('[role="option"][data-selected="true"]');
+            // Check if the selected item is one of the source filters
+            const isSourceFilterSelected = selectedItem?.getAttribute('value')?.startsWith('##source-');
 
-            if (selectedItem) {
-                // An item is highlighted. Let cmdk handle the Enter press via the item's onSelect.
-                // Do NOT prevent default and do NOT run collection logic here.
-                return;
+            // If nothing is selected OR a source filter is selected,
+            // prevent default selection/submission and run the collection search.
+            if (!selectedItem || isSourceFilterSelected) {
+                event.preventDefault(); // Prevent cmdk from acting on Enter
+                executeCollectionSearch(); // Handle collection logic separately
             }
+        }
+    };
 
-            // No item is highlighted, proceed with the original collection selection logic.
-            event.preventDefault();
+    const executeCollectionSearch = () => {
+        let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
+        let firstValidSourceUrl: string | null = null;
+        let firstValidSourceIndex: number = -1;
+        const indicesToCheck = activeSourceIndex !== null ? [activeSourceIndex] : config.map((_, index) => index);
 
-            let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
-            let firstValidSourceUrl: string | null = null;
-            let firstValidSourceIndex: number = -1;
-
-            const indicesToCheck = activeSourceIndex !== null ? [activeSourceIndex] : config.map((_, index) => index);
-
-            indicesToCheck.forEach(index => {
-                const sourceResult = queryResults[index];
-                const searchConfigItem = config[index];
-                const sourceConfig = searchConfigItem;
-
-                if (sourceResult && sourceConfig?.type === 'postgREST' && sourceResult.data && 'features' in sourceResult.data && Array.isArray(sourceResult.data.features) && sourceResult.data.features.length > 0) {
+        indicesToCheck.forEach(index => {
+            const sourceResult = queryResults[index];
+            // Ensure we only try to access properties if sourceResult and its data exist and match PostgREST type
+            if (sourceResult?.data && sourceResult.type === 'postgREST' && 'features' in sourceResult.data && Array.isArray(sourceResult.data.features)) {
+                const sourceConfig = config[index]; // Get config for this index
+                // Ensure config exists and is PostgREST type (safety check)
+                if (sourceConfig?.type === 'postgREST' && sourceResult.data.features.length > 0) { // Check length here too
                     allVisibleFeatures = allVisibleFeatures.concat(sourceResult.data.features);
                     if (firstValidSourceIndex === -1) {
                         firstValidSourceUrl = sourceConfig.url;
                         firstValidSourceIndex = index;
                     }
                 }
-            });
-
-            let combinedCollection: FeatureCollection | null = null;
-            if (allVisibleFeatures.length > 0) {
-                combinedCollection = featureCollection(allVisibleFeatures);
             }
+        });
 
-            onCollectionSelect?.(combinedCollection, firstValidSourceUrl, firstValidSourceIndex, view);
+        let combinedCollection: FeatureCollection | null = null;
+        if (allVisibleFeatures.length > 0) {
+            combinedCollection = featureCollection(allVisibleFeatures);
+        }
 
-            if (combinedCollection !== null) {
-                // Close Popover only if features were successfully collected
-                setOpen(false);
-            } else {
-                // If no features were collected, shake the input
-                setIsShaking(true);
-                setTimeout(() => setIsShaking(false), 650);
-            }
+        // Call the actual select handler provided by the parent component
+        onCollectionSelect?.(combinedCollection, firstValidSourceUrl, firstValidSourceIndex, view);
+
+        // Handle UI feedback (close popover or shake input)
+        if (combinedCollection !== null) {
+            setOpen(false); // Close popover if results were found and selected
+        } else {
+            // If no features were collected for this action, shake the input
+            setIsShaking(true);
+            setTimeout(() => setIsShaking(false), 650); // Duration of the shake animation
         }
     };
 
@@ -391,6 +394,13 @@ function SearchCombobox({
                         {config.length > 1 && ( // Only show source filter if more than one source
                             <>
                                 <CommandGroup heading="Filter by Data Source">
+                                    <CommandItem
+                                        key="hidden-enter-trigger"
+                                        value="##hidden-enter-trigger"
+                                        onSelect={executeCollectionSearch}
+                                        className="hidden"
+                                        aria-hidden="true"
+                                    />
                                     {config.map((sourceConfigWrapper, idx) => (
                                         <CommandItem
                                             key={`source-${idx}`}
