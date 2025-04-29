@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -108,6 +108,7 @@ function SearchCombobox({
     const [activeSourceIndex, setActiveSourceIndex] = useState<number | null>(null);
     const [isShaking, setIsShaking] = useState(false);
     const { view } = useContext(MapContext)
+    const commandRef = useRef<HTMLDivElement>(null);
 
     const queryResults: QueryResultWrapper[] = config.map((sourceConfigWrapper, index) => {
         const source = sourceConfigWrapper;
@@ -241,7 +242,7 @@ function SearchCombobox({
         // Use type guards or property checks on itemData
         if (sourceConfig.type === 'masquerade' && 'magicKey' in itemData) { // Check if it's a Suggestion
             onSuggestionSelect?.(itemData, sourceConfig, sourceIndex, view, searchConfig);
-            setInputValue(itemData.text);
+            setInputValue(formatAddressCase(itemData.text));
         } else if (sourceConfig.type === 'postgREST' && 'type' in itemData && itemData.type === 'Feature') {
             const displayValue = String(itemData.properties?.[sourceConfig.displayField] ?? '');
             setInputValue(displayValue || value);
@@ -256,6 +257,18 @@ function SearchCombobox({
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+
+            const commandElement = commandRef.current;
+            // cmdk typically uses data-selected="true" for the highlighted item
+            const selectedItem = commandElement?.querySelector('[role="option"][data-selected="true"]');
+
+            if (selectedItem) {
+                // An item is highlighted. Let cmdk handle the Enter press via the item's onSelect.
+                // Do NOT prevent default and do NOT run collection logic here.
+                return;
+            }
+
+            // No item is highlighted, proceed with the original collection selection logic.
             event.preventDefault();
 
             let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
@@ -286,9 +299,10 @@ function SearchCombobox({
             onCollectionSelect?.(combinedCollection, firstValidSourceUrl, firstValidSourceIndex, view);
 
             if (combinedCollection !== null) {
-                setOpen(false); // Close Popover if features were collected
+                // Close Popover only if features were successfully collected
+                setOpen(false);
             } else {
-                // If no features were collected, shake the input to indicate an error
+                // If no features were collected, shake the input
                 setIsShaking(true);
                 setTimeout(() => setIsShaking(false), 650);
             }
@@ -363,7 +377,7 @@ function SearchCombobox({
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="end">
-                <Command shouldFilter={false} className='max-h-[400px]'>
+                <Command ref={commandRef} shouldFilter={false} className='max-h-[400px]'>
                     <CommandInput
                         placeholder={getPlaceholderText()}
                         className="h-9"
