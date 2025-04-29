@@ -97,16 +97,15 @@ export default function Map() {
       <Sidebar />
       <main
         id="content"
-        className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-[32rem]'
-          } h-full`}
+        className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-[32rem]'} h-full`}
       >
         <Layout>
 
           {/* ===== Top Heading ===== */}
           <Layout.Header className='flex items-center justify-between px-4 md:px-6'>
             <TopNav className="hidden md:block md:w-auto w-1/12" />
-            <div className='flex items-center w-10/12 md:w-1/4 md:ml-auto space-x-2'>
-              <div className="flex-1 min-w-0 max-w-4/5">
+            <div className='flex items-center w-full md:w-1/3 md:ml-auto space-x-2'>
+              <div className="flex-1 min-w-0">
                 <SearchCombobox
                   config={searchConfig}
                   onFeatureSelect={handleSearchSelect}
@@ -115,7 +114,7 @@ export default function Map() {
                   className="w-full"
                 />
               </div>
-              <div className="w-1/12 flex-none">
+              <div className="flex-shrink-0">
                 <ThemeSwitch />
               </div>
             </div>
