@@ -71,9 +71,8 @@ export default function Map() {
       console.error("Error processing feature collection selection:", error);
     }
   };
-  'enter'
-  const searchConfig: SearchSourceConfig[] = [
 
+  const searchConfig: SearchSourceConfig[] = [
     defaultMasqueradeConfig,
     {
       type: 'postgREST',
