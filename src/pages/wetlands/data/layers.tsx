@@ -112,7 +112,7 @@ const
 const riparianGroupConfig: LayerProps = {
     type: 'group',
     title: 'Riparian Data',
-    visible: true,
+    visible: false,
     layers: [
         ripMetaConfig,
         ripDataConfig
@@ -161,7 +161,7 @@ const cacheProjectsConfig: WMSLayerProps = {
 const additonalGroupConfig: LayerProps = {
     type: 'group',
     title: 'Additional Attributes (LLWW)',
-    visible: true,
+    visible: false,
     layers: [llwwMappingConfig, cacheProjectsConfig]
 };
 
@@ -176,25 +176,6 @@ const hydricSoilsConfig: LayerProps = {
     visible: false,
 };
 */
-
-// Wetland Assessment Study Results  (Wetland_Condition/2)
-const wetlandsWMSLayerName = 'wetlandsapp_wetlandassessmentstudyresults';
-const wetlandsWMSTitle = 'Wetland Assessment Study Results';
-const wetlandsWMSConfig: LayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: wetlandsWMSTitle,
-    visible: true,
-    sublayers: [
-        {
-            name: `${WETLANDS_WORKSPACE}:${wetlandsWMSLayerName}`,
-            popupEnabled: false,
-            queryable: true,
-            popupFields: {
-            }
-        }
-    ]
-};
 
 // Wetland Assessment Projects  (Wetland_Condition/0)
 const assessmentLayerName = 'wetlandsapp_wetlandassessmentprojects';
@@ -211,6 +192,26 @@ const assessmentConfig: WMSLayerProps = {
         },
     ]
 };
+
+// Wetland Assessment Study Results  (Wetland_Condition/2)
+const wetlandsWMSLayerName = 'wetlandsapp_wetlandassessmentstudyresults';
+const wetlandsWMSTitle = 'Wetland Assessment Study Results';
+const wetlandsWMSConfig: LayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: wetlandsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${wetlandsWMSLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
 
 const stressorsLayerName = 'wetlandsapp_wetlandstressors';
 const stressorsTitle = 'Wetland Stressors';
@@ -235,7 +236,7 @@ const stressorsConfig: WMSLayerProps = {
 const wetConditionGroupConfig: LayerProps = {
     type: 'group',
     title: 'Wetland Condition',
-    visible: true,
+    visible: false,
     layers: [wetlandsWMSConfig, assessmentConfig, stressorsConfig]
 };
 
@@ -261,7 +262,7 @@ const huc12ecoConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: huc12ecoTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${huc12ecoLayerName}`,
@@ -281,7 +282,7 @@ const huc12Config: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: huc12Title,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${huc12LayerName}`,
@@ -294,14 +295,13 @@ const huc12Config: WMSLayerProps = {
 };
 
 // HUC 8
-/*
 const huc8ecoLayerName = 'wetlandsapp_huc8_ecoregion';
 const huc8ecoTitle = 'Watershed (HUC8) by Ecoregion';
 const huc8ecoConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: huc8ecoTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${huc8ecoLayerName}`,
@@ -312,7 +312,7 @@ const huc8ecoConfig: WMSLayerProps = {
         }
     ]
 };
-*/
+
 
 // HUC 8
 const huc8LayerName = 'wetlandsapp_huc8';
@@ -321,7 +321,7 @@ const huc8Config: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: huc8Title,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${huc8LayerName}`,
@@ -340,7 +340,7 @@ const ecoregionConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: ecoregionTitle,
-    visible: true,
+    visible: false,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${ecoregionLayerName}`,
@@ -365,7 +365,7 @@ const layersConfig: LayerProps[] = [
     wetlandGroupConfig,
     riparianGroupConfig,
     additonalGroupConfig,
-    hydricSoilsConfig,
+    //hydricSoilsConfig,
     wetConditionGroupConfig,
     ownershipConfig,
     ecoregionsGroupConfig
