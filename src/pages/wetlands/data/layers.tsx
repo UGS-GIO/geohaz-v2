@@ -356,7 +356,7 @@ const ecoregionConfig: WMSLayerProps = {
 const ecoregionsGroupConfig: LayerProps = {
     type: 'group',
     title: 'Landscape Ecoregion Data',
-    visible: true,
+    visible: false,
     layers: [huc12ecoConfig, huc12Config, huc8ecoConfig, huc8Config, ecoregionConfig]
 };
 
