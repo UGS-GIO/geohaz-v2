@@ -267,12 +267,12 @@ function SearchCombobox({
             // prevent default selection/submission and run the collection search.
             if (!selectedItem || isSourceFilterSelected) {
                 event.preventDefault(); // Prevent cmdk from acting on Enter
-                executeCollectionSearch(); // Handle collection logic separately
+                executeCollectionSearch(search);
             }
         }
     };
 
-    const executeCollectionSearch = () => {
+    const executeCollectionSearch = (currentSearchTerm: string) => {
         let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
         let firstValidSourceUrl: string | null = null;
         let firstValidSourceIndex: number = -1;
@@ -304,6 +304,7 @@ function SearchCombobox({
 
         if (combinedCollection !== null) {
             setOpen(false);
+            setInputValue(`Results for "${currentSearchTerm}"`);
         } else {
             // If no features were collected for this action, shake the input
             setIsShaking(true);
@@ -396,7 +397,7 @@ function SearchCombobox({
                                     <CommandItem
                                         key="hidden-enter-trigger"
                                         value="##hidden-enter-trigger"
-                                        onSelect={executeCollectionSearch}
+                                        onSelect={() => executeCollectionSearch(search)}
                                         className="hidden"
                                         aria-hidden="true"
                                     />
