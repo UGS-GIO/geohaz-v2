@@ -14,7 +14,7 @@ import { convertBbox } from '@/lib/mapping-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
 import { highlightSearchResult, removeGraphics } from '@/lib/util/highlight-utils';
 import * as turf from '@turf/turf';
-
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // Import Tooltip components
 
 export const defaultMasqueradeConfig: SearchSourceConfig = {
     type: 'masquerade',
@@ -356,156 +356,171 @@ function SearchCombobox({
     };
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className={cn(className,
-                        'w-full',
-                        'justify-between',
-                        'text-left h-auto min-h-10',
-                        isShaking && 'animate-shake border-destructive',
-                    )}
-                    aria-label={getPlaceholderText()}
-                >
-                    <span className="truncate">
-                        {inputValue || getPlaceholderText()}
-                    </span>
-                    <span className='ml-2 flex-shrink-0'>
-                        {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {!isLoading && <ChevronsUpDown className="h-4 w-4 opacity-50" />}
-                    </span>
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="end">
-                <Command ref={commandRef} shouldFilter={false} className='max-h-[400px]'>
-                    <CommandInput
-                        placeholder={getPlaceholderText()}
-                        className="h-9"
-                        value={search}
-                        onValueChange={setSearch}
-                        onKeyDown={handleKeyDown}
-                        aria-label="Search input"
-                    />
-                    <CommandList>
-                        {/* Data Sources Filter */}
-                        {config.length > 1 && ( // Only show source filter if more than one source
-                            <>
-                                <CommandGroup heading="Filter by Data Source">
-                                    <CommandItem
-                                        key="hidden-enter-trigger"
-                                        value="##hidden-enter-trigger"
-                                        onSelect={() => executeCollectionSearch(search)}
-                                        className="hidden"
-                                        aria-hidden="true"
-                                    />
-                                    {config.map((sourceConfigWrapper, idx) => (
-                                        <CommandItem
-                                            key={`source-${idx}`}
-                                            value={`##source-${idx}`}
-                                            onSelect={() => handleSourceFilterSelect(idx)}
-                                            className="cursor-pointer"
-                                        >
-                                            {getSourceDisplayName(sourceConfigWrapper)}
-                                            <Check className={cn('ml-auto h-4 w-4', activeSourceIndex === idx ? 'opacity-100' : 'opacity-0')} />
-                                        </CommandItem>
-                                    ))}
-                                </CommandGroup>
-                                <CommandSeparator />
-                            </>
+        <TooltipProvider>
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className={cn(className,
+                            'w-full',
+                            'justify-between',
+                            'text-left h-auto min-h-10',
+                            isShaking && 'animate-shake border-destructive',
                         )}
-
-                        {/* Results Area */}
-                        {queryResults.map((sourceResult, sourceIndex) => {
-                            // Skip rendering if a filter is active and it's not the active source
-                            if (activeSourceIndex !== null && activeSourceIndex !== sourceIndex) return null;
-
-                            const source = config[sourceIndex];
-
-                            // Loading State: check if query is loading AND search term is valid length
-                            const isSearchLongEnough = debouncedSearch.trim().length > 3;
-                            if (sourceResult.isLoading && isSearchLongEnough) {
-                                return (
-                                    <CommandItem key={`loading-${sourceIndex}`} disabled className="opacity-50 italic">
-                                        Loading {getSourceDisplayName(source)}...
-                                    </CommandItem>
-                                );
-                            }
-
-                            // Error State
-                            if (sourceResult.isError) {
-                                return (
-                                    <CommandItem key={`error-fetch-${sourceIndex}`} disabled className="text-destructive">
-                                        Error loading {getSourceDisplayName(source)}.
-                                    </CommandItem>
-                                );
-                            }
-
-                            const hasData = sourceResult.data &&
-                                ((sourceResult.type === 'masquerade' && Array.isArray(sourceResult.data) && sourceResult.data.length > 0) ||
-                                    (sourceResult.type === 'postgREST' && 'features' in sourceResult.data && sourceResult.data.features.length > 0));
-
-                            // Empty State
-                            if (isSearchLongEnough && !sourceResult.isLoading && !hasData) {
-                                return <CommandEmpty key={`empty-${sourceIndex}`}>No results found for "{debouncedSearch}" in {getSourceDisplayName(source)}.</CommandEmpty>;
-                            }
-
-                            // return null for no data
-                            if (!hasData) {
-                                return null;
-                            }
-
-                            return (
-                                <CommandGroup key={sourceIndex} heading={getSourceDisplayName(source)}>
-                                    {/* Type guard for Masquerade results */}
-                                    {sourceResult.type === 'masquerade' && Array.isArray(sourceResult.data) && sourceResult.data.map((suggestion, sugIndex) => (
+                        aria-label={getPlaceholderText()}
+                    >
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <span className="truncate">
+                                    <span className="truncate">
+                                        {inputValue || getPlaceholderText()}
+                                    </span>
+                                </span>
+                            </TooltipTrigger>
+                            <TooltipContent side='top' className="z-60 bg-secondary text-base text-secondary-foreground">
+                                <p>{inputValue || getPlaceholderText()}</p>
+                                <TooltipArrow className="fill-current text-secondary" />
+                            </TooltipContent>
+                        </Tooltip>
+                        <span className='ml-2 flex-shrink-0'>
+                            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                            {!isLoading && <ChevronsUpDown className="h-4 w-4 opacity-50" />}
+                        </span>
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="end">
+                    <Command ref={commandRef} shouldFilter={false} className='max-h-[400px]'>
+                        <CommandInput
+                            placeholder={getPlaceholderText()}
+                            className="h-9"
+                            value={search}
+                            onValueChange={setSearch}
+                            onKeyDown={handleKeyDown}
+                            aria-label="Search input"
+                        />
+                        <CommandList>
+                            {/* Data Sources Filter */}
+                            {config.length > 1 && ( // Only show source filter if more than one source
+                                <>
+                                    <CommandGroup heading="Filter by Data Source">
                                         <CommandItem
-                                            key={`${suggestion.magicKey}-${sugIndex}`}
-                                            value={suggestion.text}
-                                            onSelect={(currentValue) => handleResultSelect(currentValue, sourceIndex, suggestion, config)}
-                                            className="cursor-pointer"
-                                        >
-                                            <span className="text-wrap">{formatAddressCase(suggestion.text)}</span>
-                                        </CommandItem>
-                                    ))}
-
-                                    {/* Type guard for PostgREST results */}
-                                    {sourceResult.type === 'postgREST' && sourceResult.data && 'features' in sourceResult.data && sourceResult.data.features.map((feature, featureIndex) => {
-                                        const displayValue = String(feature.properties?.[source.displayField] ?? '');
-                                        if (!displayValue) return null;
-
-                                        return (
+                                            key="hidden-enter-trigger"
+                                            value="##hidden-enter-trigger"
+                                            onSelect={() => executeCollectionSearch(search)}
+                                            className="hidden"
+                                            aria-hidden="true"
+                                        />
+                                        {config.map((sourceConfigWrapper, idx) => (
                                             <CommandItem
-                                                key={feature.id ?? `${displayValue}-${featureIndex}-${sourceIndex}`}
-                                                value={displayValue}
-                                                onSelect={(currentValue) => handleResultSelect(currentValue, sourceIndex, feature, config)}
+                                                key={`source-${idx}`}
+                                                value={`##source-${idx}`}
+                                                onSelect={() => handleSourceFilterSelect(idx)}
                                                 className="cursor-pointer"
                                             >
-                                                <span className="text-wrap">{displayValue}</span>
+                                                {getSourceDisplayName(sourceConfigWrapper)}
+                                                <Check className={cn('ml-auto h-4 w-4', activeSourceIndex === idx ? 'opacity-100' : 'opacity-0')} />
                                             </CommandItem>
-                                        );
-                                    })}
-                                </CommandGroup>
-                            );
-                        })}
-
-                        {/* Empty State Check */}
-                        {!isLoading && debouncedSearch.trim().length > 1 && queryResults.every(result => {
-                            // Check if this specific source is loading or has data
-                            const hasDataForSource = result.data &&
-                                ((result.type === 'masquerade' && Array.isArray(result.data) && result.data.length > 0) ||
-                                    (result.type === 'postgREST' && 'features' in result.data && result.data.features.length > 0));
-                            // The condition for .every is true if the source is NOT loading AND it does NOT have data
-                            return !result.isLoading && !hasDataForSource;
-                        }) && (
-                                <CommandEmpty>No results found for "{debouncedSearch}".</CommandEmpty>
+                                        ))}
+                                    </CommandGroup>
+                                    <CommandSeparator />
+                                </>
                             )}
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+
+                            {/* Results Area */}
+                            {queryResults.map((sourceResult, sourceIndex) => {
+                                // Skip rendering if a filter is active and it's not the active source
+                                if (activeSourceIndex !== null && activeSourceIndex !== sourceIndex) return null;
+
+                                const source = config[sourceIndex];
+
+                                // Loading State: check if query is loading AND search term is valid length
+                                const isSearchLongEnough = debouncedSearch.trim().length > 3;
+                                if (sourceResult.isLoading && isSearchLongEnough) {
+                                    return (
+                                        <CommandItem key={`loading-${sourceIndex}`} disabled className="opacity-50 italic">
+                                            Loading {getSourceDisplayName(source)}...
+                                        </CommandItem>
+                                    );
+                                }
+
+                                // Error State
+                                if (sourceResult.isError) {
+                                    return (
+                                        <CommandItem key={`error-fetch-${sourceIndex}`} disabled className="text-destructive">
+                                            Error loading {getSourceDisplayName(source)}.
+                                        </CommandItem>
+                                    );
+                                }
+
+                                const hasData = sourceResult.data &&
+                                    ((sourceResult.type === 'masquerade' && Array.isArray(sourceResult.data) && sourceResult.data.length > 0) ||
+                                        (sourceResult.type === 'postgREST' && 'features' in sourceResult.data && sourceResult.data.features.length > 0));
+
+                                // Empty State
+                                if (isSearchLongEnough && !sourceResult.isLoading && !hasData) {
+                                    return <CommandEmpty key={`empty-${sourceIndex}`}>No results found for "{debouncedSearch}" in {getSourceDisplayName(source)}.</CommandEmpty>;
+                                }
+
+                                // return null for no data
+                                if (!hasData) {
+                                    return null;
+                                }
+
+                                return (
+                                    <CommandGroup key={sourceIndex} heading={getSourceDisplayName(source)}>
+                                        {/* Type guard for Masquerade results */}
+                                        {sourceResult.type === 'masquerade' && Array.isArray(sourceResult.data) && sourceResult.data.map((suggestion, sugIndex) => {
+                                            return (
+                                                <CommandItem
+                                                    key={`${suggestion.magicKey}-${sugIndex}`}
+                                                    value={suggestion.text}
+                                                    onSelect={(currentValue) => handleResultSelect(currentValue, sourceIndex, suggestion, config)}
+                                                    className="cursor-pointer"
+                                                >
+                                                    <span className='text-wrap'>{formatAddressCase(suggestion.text)}</span>
+                                                </CommandItem>
+                                            )
+                                        }
+                                        )}
+
+                                        {/* Type guard for PostgREST results */}
+                                        {sourceResult.type === 'postgREST' && sourceResult.data && 'features' in sourceResult.data && sourceResult.data.features.map((feature, featureIndex) => {
+                                            const displayValue = String(feature.properties?.[source.displayField] ?? '');
+                                            if (!displayValue) return null;
+
+                                            return (
+                                                <CommandItem
+                                                    key={feature.id ?? `${displayValue}-${featureIndex}-${sourceIndex}`}
+                                                    value={displayValue}
+                                                    onSelect={(currentValue) => handleResultSelect(currentValue, sourceIndex, feature, config)}
+                                                    className="cursor-pointer"
+                                                >
+                                                    <span className="text-wrap">{displayValue}</span>
+                                                </CommandItem>
+                                            );
+                                        })}
+                                    </CommandGroup>
+                                );
+                            })}
+
+                            {/* Empty State Check */}
+                            {!isLoading && debouncedSearch.trim().length > 1 && queryResults.every(result => {
+                                // Check if this specific source is loading or has data
+                                const hasDataForSource = result.data &&
+                                    ((result.type === 'masquerade' && Array.isArray(result.data) && result.data.length > 0) ||
+                                        (result.type === 'postgREST' && 'features' in result.data && result.data.features.length > 0));
+                                // The condition for .every is true if the source is NOT loading AND it does NOT have data
+                                return !result.isLoading && !hasDataForSource;
+                            }) && (
+                                    <CommandEmpty>No results found for "{debouncedSearch}".</CommandEmpty>
+                                )}
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+        </TooltipProvider>
     );
 }
 
