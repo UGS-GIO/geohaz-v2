@@ -119,8 +119,8 @@ const riparianGroupConfig: LayerProps = {
     ]
 };
 
-
-const llwwMappingLayerName = '  wetlandsapp_llww_mappingareas';
+// LLWW descriptions or metadata (calcluated project area)
+const llwwMappingLayerName = 'wetlandsapp_finalfunction_calculated_projectarea';
 const llwwMappingTitle = 'LLWW Descriptions';
 const llwwMappingConfig: WMSLayerProps = {
     type: 'wms',
@@ -173,36 +173,9 @@ const hydricSoilsConfig: LayerProps = {
     visible: false,
 };
 
-// cache project areas
-const landscapeLayerName = 'wetlandsapp_huc12_ecoregion';
-const landscapeTitle = 'Watershed (HUC12) by Ecoregion';
-const landscapeConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: landscapeTitle,
-    visible: true,
-    sublayers: [
-        {
-            name: `${WETLANDS_WORKSPACE}:${landscapeLayerName}`,
-            popupEnabled: false,
-            queryable: true,
-            popupFields: {
-            }
-        }
-    ]
-};
-
-// Landscape Group Layer
-const landscapeGroupConfig: LayerProps = {
-    type: 'group',
-    title: 'Landscape Data',
-    visible: true,
-    layers: [landscapeConfig]
-};
-
-// Wetlands WMS Layer Configurations
-const wetlandsWMSLayerName = 'wetlandsapp_assessmentLayer';
-const wetlandsWMSTitle = 'Wetland Assessment Projects';
+// Wetland Assessment Study Results  (Wetland_Condition/2)
+const wetlandsWMSLayerName = 'wetlandsapp_wetlandassessmentstudyresults';
+const wetlandsWMSTitle = 'Wetland Assessment Study Results';
 const wetlandsWMSConfig: LayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -219,7 +192,7 @@ const wetlandsWMSConfig: LayerProps = {
     ]
 };
 
-// Species Layer Configurations
+// Wetland Assessment Projects  (Wetland_Condition/0)
 const assessmentLayerName = 'wetlandsapp_wetlandassessmentprojects';
 const assessmentTitle = 'Wetland Assessment Projects';
 const assessmentConfig: WMSLayerProps = {
@@ -276,15 +249,123 @@ const wetConditionGroupConfig: LayerProps = {
     layers: [wetlandsWMSConfig, assessmentConfig, studyResultsConfig, stressorsConfig]
 };
 
-// Land Ownership Layer Configuration
+// SITLA Land Ownership Layer
 const ownershipLayerName = 'Land Ownership';
-const ownershipitle = ownershipLayerName;
+const ownershipTitle = ownershipLayerName;
 const ownershipConfig: LayerProps = {
-    type: 'map-image',
-    url: "https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer",
-    visible: false,
-    title: ownershipitle,
-    //listMode: "hide-children",
+    type: 'feature',
+    url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
+    opacity: 0.45,
+    options: {
+        popupEnabled: false,
+        title: ownershipTitle,
+        elevationInfo: [{ mode: 'on-the-ground' }],
+        visible: false,
+    },
+};
+
+// landscape ecoregions
+const huc12ecoLayerName = 'wetlandsapp_huc12_ecoregion';
+const huc12ecoTitle = 'Watershed (HUC12) by Ecoregion';
+const huc12ecoConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: huc12ecoTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${huc12ecoLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+
+// HUC 12
+const huc12LayerName = 'wetlandsapp_huc12';
+const huc12Title = 'Watershed (HUC12)';
+const huc12Config: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: huc12Title,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${huc12LayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+// HUC 8
+const huc8ecoLayerName = 'wetlandsapp_huc8_ecoregion';
+const huc8ecoTitle = 'Watershed (HUC8) by Ecoregion';
+const huc8ecoConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: huc8ecoTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${huc8ecoLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+// HUC 8
+const huc8LayerName = 'wetlandsapp_huc8';
+const huc8Title = 'Watershed (HUC8)';
+const huc8Config: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: huc8Title,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${huc8LayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+// Ecoregion
+const ecoregionLayerName = 'wetlandsapp_ecoregion';
+const ecoregionTitle = 'Egoregion';
+const ecoregionConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: ecoregionTitle,
+    visible: true,
+    sublayers: [
+        {
+            name: `${WETLANDS_WORKSPACE}:${ecoregionLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+            }
+        }
+    ]
+};
+
+// Wetlands Group Layer
+const ecoregionsGroupConfig: LayerProps = {
+    type: 'group',
+    title: 'Landscape Ecoregion Data',
+    visible: true,
+    layers: [huc12ecoConfig, huc12Config, huc8ecoConfig, huc8Config, ecoregionConfig]
 };
 
 
@@ -293,9 +374,9 @@ const layersConfig: LayerProps[] = [
     riparianGroupConfig,
     additonalGroupConfig,
     hydricSoilsConfig,
-    landscapeGroupConfig,
     wetConditionGroupConfig,
-    ownershipConfig
+    ownershipConfig,
+    ecoregionsGroupConfig
 ];
 
 export default layersConfig;
