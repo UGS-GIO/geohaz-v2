@@ -119,8 +119,8 @@ const riparianGroupConfig: LayerProps = {
     ]
 };
 
-
-const llwwMappingLayerName = '  wetlandsapp_llww_mappingareas';
+// LLWW descriptions or metadata (calcluated project area)
+const llwwMappingLayerName = 'wetlandsapp_finalfunction_calculated_projectarea';
 const llwwMappingTitle = 'LLWW Descriptions';
 const llwwMappingConfig: WMSLayerProps = {
     type: 'wms',
@@ -173,9 +173,9 @@ const hydricSoilsConfig: LayerProps = {
     visible: false,
 };
 
-// Wetlands WMS Layer Configurations
-const wetlandsWMSLayerName = 'wetlandsapp_assessmentLayer';
-const wetlandsWMSTitle = 'Wetland Assessment Projects';
+// Wetland Assessment Study Results  (Wetland_Condition/2)
+const wetlandsWMSLayerName = 'wetlandsapp_wetlandassessmentstudyresults';
+const wetlandsWMSTitle = 'Wetland Assessment Study Results';
 const wetlandsWMSConfig: LayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -192,7 +192,7 @@ const wetlandsWMSConfig: LayerProps = {
     ]
 };
 
-// Species Layer Configurations
+// Wetland Assessment Projects  (Wetland_Condition/0)
 const assessmentLayerName = 'wetlandsapp_wetlandassessmentprojects';
 const assessmentTitle = 'Wetland Assessment Projects';
 const assessmentConfig: WMSLayerProps = {
