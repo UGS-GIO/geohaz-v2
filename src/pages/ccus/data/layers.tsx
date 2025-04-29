@@ -214,7 +214,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                     fieldLabel: 'Formation Tops',
                     matchingField: 'api',
                     targetField: 'api',
-                    url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore2',
+                    url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore',
                     headers: {
                         "Accept-Profile": 'emp',
                         "Accept": "application/json",
