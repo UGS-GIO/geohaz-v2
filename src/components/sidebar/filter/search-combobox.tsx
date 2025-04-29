@@ -282,9 +282,9 @@ function SearchCombobox({
             const sourceResult = queryResults[index];
             // Ensure we only try to access properties if sourceResult and its data exist and match PostgREST type
             if (sourceResult?.data && sourceResult.type === 'postgREST' && 'features' in sourceResult.data && Array.isArray(sourceResult.data.features)) {
-                const sourceConfig = config[index]; // Get config for this index
+                const sourceConfig = config[index];
                 // Ensure config exists and is PostgREST type (safety check)
-                if (sourceConfig?.type === 'postgREST' && sourceResult.data.features.length > 0) { // Check length here too
+                if (sourceConfig?.type === 'postgREST' && sourceResult.data.features.length > 0) {
                     allVisibleFeatures = allVisibleFeatures.concat(sourceResult.data.features);
                     if (firstValidSourceIndex === -1) {
                         firstValidSourceUrl = sourceConfig.url;
@@ -302,13 +302,12 @@ function SearchCombobox({
         // Call the actual select handler provided by the parent component
         onCollectionSelect?.(combinedCollection, firstValidSourceUrl, firstValidSourceIndex, view);
 
-        // Handle UI feedback (close popover or shake input)
         if (combinedCollection !== null) {
-            setOpen(false); // Close popover if results were found and selected
+            setOpen(false);
         } else {
             // If no features were collected for this action, shake the input
             setIsShaking(true);
-            setTimeout(() => setIsShaking(false), 650); // Duration of the shake animation
+            setTimeout(() => setIsShaking(false), 650);
         }
     };
 
