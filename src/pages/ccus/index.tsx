@@ -6,71 +6,12 @@ import { cn } from '@/lib/utils'
 import MapContainer from './components/map-container'
 import Sidebar from '@/components/sidebar'
 import { useSidebar } from '@/hooks/use-sidebar'
-import { MapContext } from '@/context/map-provider'
-import { useContext } from 'react'
 import { PROD_POSTGREST_URL } from '@/lib/constants'
 import { wellWithTopsLayerName } from '@/pages/ccus/data/layers'
-import { ExtendedGeometry, SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox'
-import { getBoundingBox, zoomToExtent } from '@/lib/sidebar/filter/util'
-import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson'
-import { convertBbox } from '@/lib/mapping-utils'
-import * as turf from '@turf/turf'
-import { highlightSearchResult } from '@/lib/util/highlight-utils'
+import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleCollectionSelect, handleSearchSelect, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox'
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
-
-  const { view } = useContext(MapContext);
-
-  const handleSearchSelect = (searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null) => { // Added sourceUrl parameter back
-    const geom = searchResult?.geometry;
-
-    if (!geom) {
-      console.error("No geometry found in search result");
-      return;
-    }
-
-    if (view) {
-
-      const [xmin, ymin, xmax, ymax] = getBoundingBox(geom);
-      zoomToExtent(xmin, ymin, xmax, ymax, view);
-      highlightSearchResult(searchResult, view);
-    }
-  }
-
-  const handleCollectionSelect = (
-    collection: FeatureCollection<ExtendedGeometry, GeoJsonProperties> | null,
-  ) => {
-    view?.graphics.removeAll();
-    if (!collection?.features?.length || !view) {
-      console.warn("No features in collection or map view unavailable for collection action.");
-      return;
-    }
-
-    try {
-      // Calculate overall bbox for the collection using Turf
-      const collectionBbox = turf.bbox(collection);
-      let [xmin, ymin, xmax, ymax] = collectionBbox;
-      [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax]);
-
-      if (!collectionBbox.every(isFinite)) {
-        console.error("Invalid bounding box calculated for collection");
-        return;
-      }
-
-      // Zoom to the extent of the entire collection using your util
-      zoomToExtent(xmin, ymin, xmax, ymax, view);
-
-      // Highlight all features in the collection
-      collection.features.forEach(feature => {
-        // Pass each feature individually to the highlight function
-        highlightSearchResult(feature, view, false);
-      });
-
-    } catch (error) {
-      console.error("Error processing feature collection selection:", error);
-    }
-  };
 
   const searchConfig: SearchSourceConfig[] = [
     defaultMasqueradeConfig,
@@ -78,6 +19,7 @@ export default function Map() {
       type: 'postgREST',
       url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
       sourceName: 'API #',
+      crs: 'EPSG:26912',
       displayField: 'api',
       params: {
         select: 'shape,api',
@@ -88,7 +30,6 @@ export default function Map() {
         'Content-Type': 'application/json',
         'Accept-Profile': 'emp',
       },
-      crs: '26912'
     },
   ];
 
@@ -100,7 +41,6 @@ export default function Map() {
         className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-[32rem]'} h-full`}
       >
         <Layout>
-
           {/* ===== Top Heading ===== */}
           <Layout.Header className='flex items-center justify-between px-4 md:px-6'>
             <TopNav className="hidden md:block md:w-auto" />
