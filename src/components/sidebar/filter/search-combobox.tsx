@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -6,325 +6,724 @@ import { Command, CommandInput, CommandList, CommandItem, CommandGroup, CommandE
 import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from 'geojson';
-import { featureCollection, point as turfPoint } from '@turf/helpers'; // Use turf helpers
+import { featureCollection, point as turfPoint } from '@turf/helpers';
 import { useDebounce } from 'use-debounce';
+import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
+import { MapContext } from '@/context/map-provider';
+import { convertBbox } from '@/lib/mapping-utils';
+import { zoomToExtent } from '@/lib/sidebar/filter/util';
+import { highlightSearchResult, removeGraphics } from '@/lib/util/highlight-utils';
+import * as turf from '@turf/turf';
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from "@/hooks/use-toast";
 
-interface PostgRESTConfig {
+export const defaultMasqueradeConfig: SearchSourceConfig = {
+    type: 'masquerade',
+    url: MASQUERADE_GEOCODER_URL,
+    sourceName: 'Address Search',
+    displayField: 'text',
+    outSR: 4326 // Request WGS84
+}
+
+interface BaseConfig {
     url: string;
+    sourceName?: string; // Optional descriptive name
+    headers?: Record<string, string>;
     displayField: string;
-    params?: Params;
+}
+
+interface PostgRESTConfig extends BaseConfig {
+    type: 'postgREST';
+    crs?: string; // Optional: Coordinate Reference System (e.g., 'EPSG:26912')
+    params?: PostgRESTParams;
     functionName?: string;
     searchTerm?: string;
-    headers?: Record<string, string>;
-    sourceName?: string;
-    isGeocodeProxy?: boolean;
+    placeholder?: string;
 }
-type Params =
-    | { targetField: string; select?: string }
-    | { select: string; targetField?: never }
-    | { searchKeyParam: string, targetField?: never, select?: never };
-export interface SearchConfig { restConfig: PostgRESTConfig; placeholder?: string; buttonWidth?: string; }
+
+type PostgRESTParams =
+    | { targetField: string; select?: string } // Search specific field
+    | { select: string; targetField?: never } // Select specific columns only
+    | { searchKeyParam: string, targetField?: never, select?: never }; // Function param name (less common now?)
+
+export interface MasqueradeConfig extends BaseConfig {
+    type: 'masquerade';
+    maxSuggestions?: number;
+    outSR?: number; // e.g., 4326
+    placeholder?: string;
+    // displayField will be 'text' for suggestions, 'address' for candidates
+}
+
+export type SearchSourceConfig = PostgRESTConfig | MasqueradeConfig;
+export interface SearchConfig { config: SearchSourceConfig; }
 export type ExtendedGeometry = Geometry & { crs?: { properties: { name: string; }; type: string; }; };
 
+// Masquerade Suggestion
+interface Suggestion {
+    text: string;
+    magicKey: string;
+    isCollection?: boolean;
+}
+
+type QueryData = Suggestion[] | FeatureCollection<Geometry, GeoJsonProperties>;
+// QueryResult type
+interface QueryResultWrapper<TData = QueryData> {
+    data: TData | undefined;
+    error: Error | null;
+    isLoading: boolean;
+    isError: boolean;
+    type: SearchSourceConfig['type']; // Add type here
+}
+
+
 interface SearchComboboxProps {
-    config: SearchConfig[];
-    onFeatureSelect?: (feature: Feature<Geometry, GeoJsonProperties> | null, sourceUrl: string, sourceIndex: number) => void;
-    onCollectionSelect?: (featureCollection: FeatureCollection<Geometry, GeoJsonProperties> | null, sourceUrl: string | null, sourceIndex: number) => void;
+    config: SearchSourceConfig[];
+    // Called when a PostgREST feature OR a finalized Masquerade candidate is selected
+    onFeatureSelect?: (searchResult: Feature<Geometry, GeoJsonProperties> | null, _sourceUrl: string, sourceIndex: number, searchConfig: SearchSourceConfig[], view: __esri.MapView | __esri.SceneView | undefined) => void
+    // Called when Enter is pressed on PostgREST results
+    onCollectionSelect?: (collection: FeatureCollection<Geometry, GeoJsonProperties> | null, _sourceUrl: string | null, _sourceIndex: number, view: __esri.MapView | __esri.SceneView | undefined) => void;
+    // Called when a Masquerade suggestion is clicked
+    onSuggestionSelect?: (suggestion: Suggestion, sourceConfig: MasqueradeConfig, sourceIndex: number, view: __esri.MapView | __esri.SceneView | undefined, searchConfig: SearchSourceConfig[]) => void;
     className?: string;
+}
+
+function formatAddressCase(address: string | undefined | null): string {
+    if (!address) return '';
+    // Convert to lowercase, split into words, capitalize first letter of each, join back
+    return address.toLowerCase().split(' ')
+        .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1) : '')
+        .join(' ');
 }
 
 function SearchCombobox({
     config,
     onFeatureSelect,
     onCollectionSelect,
+    onSuggestionSelect,
     className,
 }: SearchComboboxProps) {
     const [open, setOpen] = useState(false);
-    const [dataSourcesValue, setDataSourcesValue] = useState('');
-    const [search, setSearch] = useState('');
-    const [debouncedSearch] = useDebounce(search, 500); // Increased debounce for geocoding
+    const [inputValue, setInputValue] = useState(''); // value shown in the combobox input/button
+    const [search, setSearch] = useState(''); // internal search term driving debounced queries
+    const [debouncedSearch] = useDebounce(search, 500);
     const [activeSourceIndex, setActiveSourceIndex] = useState<number | null>(null);
+    const [isShaking, setIsShaking] = useState(false);
+    const { view } = useContext(MapContext)
+    const commandRef = useRef<HTMLDivElement>(null);
+    const { toast } = useToast();
 
-    const getSearchQueries = () => {
-        return config.map((source, index) => {
-            const { restConfig } = source;
-            return useQuery<FeatureCollection<Geometry, GeoJsonProperties>, Error>({
-                queryKey: ['search-features', restConfig.url, restConfig.functionName ?? 'table', restConfig.isGeocodeProxy, debouncedSearch, index],
-                queryFn: async (): Promise<FeatureCollection<ExtendedGeometry, GeoJsonProperties>> => {
-                    const params = cleanParams(restConfig.params);
-                    const urlParams = new URLSearchParams();
-                    let apiUrl = '';
-                    const headers: HeadersInit = restConfig.headers || {};
+    function formatName(name: string): string { // Format name for display: E.g. "api" -> "API", "address_search" -> "Address Search"
+        return name
+            .replace(/_/g, ' ')
+            .replace(/([A-Z])/g, ' $1') // Add space before caps (might add extra space if already spaced)
+            .replace(/\s+/g, ' ') // Consolidate multiple spaces
+            .split(' ')
+            .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : '')
+            .join(' ')
+            .replace(/^Rpc\s/, '') // Remove "Rpc " prefix if present
+            .trim();
+    }
 
-                    if (restConfig.isGeocodeProxy) {
-                        apiUrl = restConfig.url;
-                        const searchTerm = debouncedSearch.trim();
-                        const parts = searchTerm.split(',');
-                        const street = parts[0]?.trim();
-                        const zone = parts.slice(1).join(',').trim();
+    function getSourceDisplayName(sourceConfig: SearchSourceConfig): string {
+        if (sourceConfig.sourceName) return sourceConfig.sourceName;
+        let name = '';
+        if (sourceConfig.type === 'postgREST') {
+            if (sourceConfig.functionName) name = sourceConfig.functionName;
+            else if (sourceConfig.params && 'targetField' in sourceConfig.params && sourceConfig.params.targetField) {
+                name = sourceConfig.params.targetField;
+            } else {
+                const urlParts = sourceConfig.url.split('/');
+                name = urlParts[urlParts.length - 1] || ''; // Get last part of URL as fallback
+            }
+        } else if (sourceConfig.type === 'masquerade') {
+            name = "Address Search: e.g. 123 Main St";
+        }
 
-                        if (!street || !zone) {
-                            return featureCollection([]); // Return empty if not parseable
-                        }
-                        urlParams.set('street', street);
-                        urlParams.set('zone', zone);
-                        apiUrl = `${apiUrl}?${urlParams.toString()}`;
+        if (!name) { // Fallback if name is still empty
+            const urlParts = sourceConfig.url.split('/');
+            name = urlParts[urlParts.length - 1] || 'Unknown Source';
+        }
+        return formatName(name);
+    }
 
-                        const response = await fetch(apiUrl, { method: 'GET', headers });
-                        if (!response.ok) {
-                            const errorText = await response.text();
-                            console.error(`API Error (${response.status}) from ${apiUrl}: ${errorText}`);
-                            throw new Error(`Network response was not ok (${response.status})`);
-                        }
-                        const data = await response.json();
-                        if (data && data.status === 200 && data.result?.location?.x && data.result?.location?.y) {
-                            const result = data.result;
-                            const pointGeom = turfPoint([result.location.x, result.location.y]).geometry;
-                            console.log(`Geocode result: ${pointGeom}`);
-
-                            return featureCollection([{
-                                type: "Feature", geometry: pointGeom,
-                                properties: {
-                                    matchAddress: result.matchAddress, score: result.score,
-                                    [restConfig.displayField]: result.matchAddress, // Ensure displayField property exists
-                                    geocoder: result.locator,
-                                }
-                            }]);
-                        } else {
-                            return featureCollection([]); // Return empty on geocode error/no result
-                        }
-
-                    } else {
-                        if (restConfig.functionName) {
-                            // PostgREST Function Call
-                            const functionUrl = `${restConfig.url}/rpc/${restConfig.functionName}`;
-                            const searchTerm = debouncedSearch ? `%${debouncedSearch}%` : '';
-                            const searchTermParamName = restConfig.searchTerm;
-                            if (!searchTermParamName) { throw new Error(`Missing searchTerm parameter config for function ${restConfig.functionName}`); }
-                            urlParams.set(searchTermParamName, searchTerm);
-                            apiUrl = `${functionUrl}?${urlParams.toString()}`;
-                        } else {
-                            // PostgREST Table/View Query
-                            apiUrl = `${restConfig.url}`;
-                            const searchTerm = debouncedSearch ? `%${debouncedSearch}%` : '';
-                            if ('targetField' in params && params.targetField && searchTerm) {
-                                urlParams.set(params.targetField, `ilike.${searchTerm}`);
-                            }
-                            if ('select' in params && params.select) {
-                                urlParams.set('select', params.select);
-                            } else {
-                                const defaultGeomCol = 'geometry';
-                                urlParams.set('select', `*,${defaultGeomCol}`);
-                                console.warn(`Source ${index} ('${restConfig.url}'): 'select' param missing. Defaulting to '*,${defaultGeomCol}'. Verify.`);
-                            }
-                            urlParams.set('limit', '100');
-                            apiUrl = `${apiUrl}?${urlParams.toString()}`;
-                        }
-
-                        // Fetch PostgREST endpoint (expecting FeatureCollection)
-                        const response = await fetch(apiUrl, { method: 'GET', headers });
-                        if (!response.ok) {
-                            const errorText = await response.text();
-                            console.error(`API Error (${response.status}) from ${apiUrl}: ${errorText}`);
-                            throw new Error(`Network response was not ok (${response.status})`);
-                        }
-                        const data = await response.json();
-                        if (data && data.type === 'FeatureCollection' && Array.isArray(data.features)) {
-                            return data as FeatureCollection<Geometry, GeoJsonProperties>;
-                        } else {
-                            console.warn(`API response from ${apiUrl} was not valid FeatureCollection.`, data);
-                            return featureCollection([]);
-                        }
-                    }
-                },
-                enabled: !!debouncedSearch && debouncedSearch.trim().length > 2 &&
-                    (!restConfig.isGeocodeProxy || debouncedSearch.includes(',')), // Only enable geocode if comma present and zone is provided
-                refetchOnWindowFocus: false,
-                retry: 1,
-                staleTime: 300000, // 5 minutes
-                gcTime: 600000, // 10 minutes
-            });
-        });
+    const getPlaceholderText = () => {
+        if (activeSourceIndex !== null && config[activeSourceIndex]) {
+            return `Search in ${getSourceDisplayName(config[activeSourceIndex])}...`;
+        }
+        return config[0]?.placeholder || `Search...`;
     };
 
-    const cleanParams = (params: Params | undefined): Partial<Params> => { return params || {}; };
+    const queryResults: QueryResultWrapper[] = config.map((sourceConfigWrapper, index) => {
+        const source = sourceConfigWrapper;
+        const query = useQuery<QueryData, Error>({
+            queryKey: ['search', source.url, source.type, debouncedSearch, index],
+            queryFn: async (): Promise<QueryData> => {
+                if (source.type === 'masquerade') {
 
-    const handleSelect = (
-        currentValue: string,
+                    const params = new URLSearchParams();
+                    params.set('text', debouncedSearch.trim());
+                    params.set('maxSuggestions', (source.maxSuggestions ?? 6).toString());
+                    const wkid = source.outSR ?? 4326;
+                    params.set('outSR', JSON.stringify({ wkid }));
+                    params.set('f', 'json');
+
+                    const suggestUrl = `${source.url}/suggest?${params.toString()}`;
+                    const response = await fetch(suggestUrl, { method: 'GET', headers: source.headers });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`Suggest API Error (${response.status}) from ${suggestUrl}: ${errorText}`);
+                        throw new Error(`Suggest Network response was not ok (${response.status})`);
+                    }
+                    const data = await response.json();
+                    const suggestions = (data?.suggestions || []) as Suggestion[];
+
+                    // Filter based on magicKey and only include address points
+                    const addressPointSuggestions = suggestions.filter(s =>
+                        s.magicKey?.includes('opensgid.location.address_points')
+                    );
+
+                    return addressPointSuggestions; // Type: Suggestion[]
+
+                } else if (source.type === 'postgREST') {
+                    // Fetch logic for PostgREST
+                    const params = source.params;
+                    const urlParams = new URLSearchParams();
+                    let apiUrl = '';
+                    const headers: HeadersInit = source.headers || {};
+
+                    if (source.functionName) {
+                        // PostgREST Function Call
+                        const functionUrl = `${source.url}/rpc/${source.functionName}`;
+                        const searchTermValue = debouncedSearch ? `%${debouncedSearch}%` : '';
+                        const searchTermParamName = source.searchTerm;
+                        if (!searchTermParamName) throw new Error(`Missing searchTerm parameter config for function ${source.functionName}`);
+                        urlParams.set(searchTermParamName, searchTermValue);
+
+                        if (params && 'select' in params && params.select) {
+                            urlParams.set('select', params.select);
+                        }
+                        apiUrl = `${functionUrl}?${urlParams.toString()}`;
+                    } else {
+                        // PostgREST Table/View Query
+                        apiUrl = `${source.url}`;
+                        const searchTermValue = debouncedSearch ? `%${debouncedSearch}%` : '';
+
+                        if (params && 'targetField' in params && params.targetField && searchTermValue) {
+                            urlParams.set(params.targetField, `ilike.${searchTermValue}`);
+                        }
+
+                        if (params && 'select' in params && params.select) {
+                            urlParams.set('select', params.select);
+                        } else { // Default select
+                            urlParams.set('select', `*,geometry`);
+                            if (!params || (params && !('select' in params))) {
+                                console.warn(`Source ${index} ('${source.url}'): Defaulting select to '*,geometry'.`);
+                            }
+                        }
+                        urlParams.set('limit', '100');
+                        apiUrl = `${apiUrl}?${urlParams.toString()}`;
+                    }
+
+                    // Fetch and Process
+                    const response = await fetch(apiUrl, { method: 'GET', headers });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`API Error (${response.status}) from ${apiUrl}: ${errorText}`);
+                        throw new Error(`Network response was not ok (${response.status})`);
+                    }
+                    const data = await response.json();
+
+                    // Handle different valid responses
+                    if (data && Array.isArray(data) && (data.length === 0 || (data[0]?.type === 'Feature' && data[0]?.geometry && data[0]?.properties))) {
+                        return featureCollection(data as Feature<Geometry, GeoJsonProperties>[]);
+                    } else if (data && data.type === 'FeatureCollection' && Array.isArray(data.features)) {
+                        return data as FeatureCollection<Geometry, GeoJsonProperties>;
+                    } else {
+                        console.warn(`API response from ${apiUrl} was not valid GeoJSON Feature array or FeatureCollection.`, data);
+                        return featureCollection([]);
+                    }
+                } else {
+                    throw new Error(`Unsupported source type`);
+                }
+            },
+
+            enabled: (
+                !!debouncedSearch &&
+                debouncedSearch.trim().length > 3 &&
+                (activeSourceIndex === null || activeSourceIndex === index)
+            ),
+            refetchOnWindowFocus: false,
+            retry: 1,
+            staleTime: 300000, // 5 minutes
+            gcTime: 600000, // 10 minutes
+        });
+
+        return {
+            data: query.data,
+            error: query.error,
+            isLoading: query.isLoading,
+            isError: query.isError,
+            type: source.type
+        } as QueryResultWrapper;
+    });
+
+    const handleSourceFilterSelect = (sourceIndex: number) => {
+        setActiveSourceIndex(sourceIndex === activeSourceIndex ? null : sourceIndex);
+        setInputValue('');
+        setSearch('');
+    };
+
+    const handleResultSelect = (
+        value: string,
         sourceIndex: number,
-        isSourceOnly: boolean = false
+        itemData: Feature<Geometry, GeoJsonProperties> | Suggestion,
+        searchConfig: SearchSourceConfig[]
     ) => {
-        if (isSourceOnly) {
-            setActiveSourceIndex(sourceIndex === activeSourceIndex ? null : sourceIndex);
-            setDataSourcesValue('');
-            return;
+        const sourceConfig = config[sourceIndex];
+
+        // Use type guards or property checks on itemData
+        if (sourceConfig.type === 'masquerade' && 'magicKey' in itemData) { // Check if it's a Suggestion
+            onSuggestionSelect?.(itemData, sourceConfig, sourceIndex, view, searchConfig);
+            setInputValue(formatAddressCase(itemData.text));
+        } else if (sourceConfig.type === 'postgREST' && 'type' in itemData && itemData.type === 'Feature') {
+            const displayValue = String(itemData.properties?.[sourceConfig.displayField] ?? '');
+            setInputValue(displayValue || value);
+            onFeatureSelect?.(itemData, sourceConfig.url, sourceIndex, searchConfig, view);
+        } else {
+            console.error("Mismatched item data type or config type in handleResultSelect", itemData, sourceConfig);
+            setInputValue(value);
         }
 
-        const source = config[sourceIndex];
-        const displayField = source.restConfig.displayField;
-        const currentFeatureCollection = queryResults[sourceIndex]?.data;
-
-        let selectedFeature: Feature<Geometry, GeoJsonProperties> | null = null;
-
-        if (displayField && currentFeatureCollection?.features) {
-            selectedFeature = currentFeatureCollection.features.find(feature => {
-                const properties = feature.properties || {};
-                return String(properties[displayField]) === currentValue;
-            }) ?? null;
-        }
-
-        setDataSourcesValue(currentValue);
         setOpen(false);
-        onFeatureSelect?.(selectedFeature, source.restConfig.url, sourceIndex);
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
-            event.preventDefault();
+            // Find the currently highlighted item, if any
+            const selectedItem = commandRef.current?.querySelector('[role="option"][data-selected="true"]');
 
-            let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
-            let firstValidSourceUrl: string | null = null;
-            let firstValidSourceIndex: number = -1;
+            // Check if the selected item is one of the source filters
+            const isSourceFilterSelected = selectedItem?.getAttribute('value')?.startsWith('##source-');
 
-            const indicesToCheck = activeSourceIndex !== null ? [activeSourceIndex] : config.map((_, i) => i);
+            // If nothing is selected OR a source filter is selected,
+            // prevent default selection/submission and run the collection search.
+            if (!selectedItem || isSourceFilterSelected) {
+                event.preventDefault(); // Prevent cmdk from acting on Enter
+                executeCollectionSearch(search);
+            }
+        }
+    };
 
-            indicesToCheck.forEach(index => {
-                const sourceResult = queryResults[index];
-                if (sourceResult?.data?.features?.length) {
+    const executeCollectionSearch = (currentSearchTerm: string) => {
+        let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
+        let firstValidSourceUrl: string | null = null;
+        let firstValidSourceIndex: number = -1;
+        const indicesToCheck = activeSourceIndex !== null ? [activeSourceIndex] : config.map((_, index) => index);
+
+        indicesToCheck.forEach(index => {
+            const sourceResult = queryResults[index];
+            // Ensure we only try to access properties if sourceResult and its data exist and match PostgREST type
+            if (sourceResult?.data && sourceResult.type === 'postgREST' && 'features' in sourceResult.data && Array.isArray(sourceResult.data.features)) {
+                const sourceConfig = config[index];
+                // Ensure config exists and is PostgREST type (safety check)
+                if (sourceConfig?.type === 'postgREST' && sourceResult.data.features.length > 0) {
                     allVisibleFeatures = allVisibleFeatures.concat(sourceResult.data.features);
                     if (firstValidSourceIndex === -1) {
-                        firstValidSourceUrl = config[index].restConfig.url;
+                        firstValidSourceUrl = sourceConfig.url;
                         firstValidSourceIndex = index;
                     }
                 }
-            });
-
-            let combinedCollection: FeatureCollection | null = null;
-            if (allVisibleFeatures.length > 0) {
-                combinedCollection = featureCollection(allVisibleFeatures);
             }
-            onCollectionSelect?.(combinedCollection, firstValidSourceUrl, firstValidSourceIndex);
+        });
+
+        let combinedCollection: FeatureCollection | null = null;
+        if (allVisibleFeatures.length > 0) {
+            combinedCollection = featureCollection(allVisibleFeatures);
+        }
+
+        // Call the actual select handler provided by the parent component
+        onCollectionSelect?.(combinedCollection, firstValidSourceUrl, firstValidSourceIndex, view);
+
+        if (combinedCollection !== null) {
             setOpen(false);
-        }
-    };
-
-    // --- Helper Functions ---
-    function getSourceDisplayName(source: SearchConfig): string {
-        if (source.restConfig.sourceName) return source.restConfig.sourceName;
-        if (source.restConfig.functionName) return formatName(source.restConfig.functionName);
-        if (source.restConfig.params && 'targetField' in source.restConfig.params && source.restConfig.params.targetField) {
-            return formatName(source.restConfig.params.targetField);
-        }
-        const urlParts = source.restConfig.url.split('/');
-        return formatName(urlParts[urlParts.length - 1] || 'Unknown Source');
-    }
-    function formatName(name: string): string {
-        return name.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ').trim();
-    }
-
-    const queryResults = getSearchQueries().map((query, index) => { // Renamed function call
-        const { data, isLoading, error } = query;
-        return {
-            data: data ?? featureCollection([]),
-            isLoading,
-            error,
-            sourceName: config[index].restConfig.sourceName || getSourceDisplayName(config[index])
+            setInputValue(`Results for "${currentSearchTerm}"`);
+        } else {
+            // If no features were collected for this action, shake the input
+            const errorMessage = `${currentSearchTerm === '' ? 'Please enter a search term' : `No results for "${currentSearchTerm}. If searching for an address, please select a suggestion.`}`;
+            const shakingDuration = 650;
+            setIsShaking(true);
+            toast({
+                variant: "destructive",
+                title: "Search Failed",
+                description: errorMessage,
+                duration: shakingDuration * 3,
+            });
+            setInputValue('');
+            setTimeout(() => {
+                setIsShaking(false);
+            }, shakingDuration);
         };
-    });
 
-    const getPlaceholderText = () => {
-        if (activeSourceIndex !== null) {
-            return `Search in ${queryResults[activeSourceIndex]?.sourceName ?? 'selected source'}...`;
-        }
-        const sourceNames = config.map(c => c.restConfig.sourceName || getSourceDisplayName(c)).join(' or ');
-        return `Search ${sourceNames}...`;
-    };
+    }
+
+    const isLoading = queryResults.some(result => result.isLoading);
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className={cn(className, 'w-full', 'justify-between')}
-                    aria-label={`Search ${getPlaceholderText()}`}
-                >
-                    <span className="truncate">
-                        {dataSourcesValue || (activeSourceIndex !== null ?
-                            `Search in ${queryResults[activeSourceIndex]?.sourceName}...` :
-                            'Search...')}
-                    </span>
-                    <span className='flex-shrink-0'>
-                        {queryResults.some(result => result.isLoading) && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-                        {!queryResults.some(result => result.isLoading) && <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />}
-                    </span>
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="end">
-                <Command shouldFilter={false}>
-                    <CommandInput
-                        placeholder={getPlaceholderText()}
-                        className="h-9"
-                        value={search}
-                        onValueChange={setSearch}
-                        onKeyDown={handleKeyDown}
-                    />
-                    <CommandList>
-                        {/* TODO: customize the heading to say Filter or Search based on what the mode is */}
-                        {/* Data Sources */}
-                        <CommandGroup heading="Search by Data Source">
-                            {config.map((source, idx) => (
-                                <CommandItem
-                                    key={`source-${idx}`}
-                                    value={`##source-${idx}`}
-                                    onSelect={() => handleSelect(`##source-${idx}`, idx, true)}
-                                    className="cursor-pointer" >
-                                    {source.restConfig.sourceName || getSourceDisplayName(source)}
-                                    <Check className={cn('ml-auto h-4 w-4', activeSourceIndex === idx ? 'opacity-100' : 'opacity-0')} />
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                        <CommandSeparator />
-                        {/* Results */}
-                        {queryResults.map((sourceResults, sourceIndex) => {
-                            if (activeSourceIndex !== null && activeSourceIndex !== sourceIndex) return null;
-                            const displayField = config[sourceIndex].restConfig.displayField;
-                            if (!displayField) return <CommandItem key={`error-config-${sourceIndex}`} disabled className="text-destructive">Config Error</CommandItem>;
-                            if (sourceResults.isLoading && debouncedSearch.trim().length > 2) return <CommandItem key={`loading-${sourceIndex}`} disabled>Loading...</CommandItem>;
-                            if (sourceResults.error) return <CommandItem key={`error-fetch-${sourceIndex}`} disabled className="text-destructive">Error</CommandItem>;
-                            if (debouncedSearch.trim().length > 2 && !sourceResults.data?.features?.length && !sourceResults.isLoading) return <CommandEmpty key={`empty-${sourceIndex}`}>No results found.</CommandEmpty>;
-                            if (!sourceResults.data?.features?.length) return null;
+        <TooltipProvider>
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className={cn(className,
+                            'w-full',
+                            'justify-between',
+                            'text-left h-auto min-h-10',
+                        )}
+                        aria-label={getPlaceholderText()}
+                    >
+                        <Tooltip
+                            delayDuration={300}
+                        >
+                            <TooltipTrigger asChild>
+                                <span
+                                    className={cn(
+                                        'truncate',
+                                        isShaking && 'animate-shake text-destructive'
+                                    )}
+                                >
+                                    {inputValue || getPlaceholderText()}
+                                </span>
+                            </TooltipTrigger>
+                            <TooltipContent side='bottom' className="z-60 max-w-[--radix-popover-trigger-width] bg-secondary text-base text-secondary-foreground">
+                                <p>{inputValue || getPlaceholderText()}</p>
+                                <TooltipArrow className="fill-secondary" />
+                            </TooltipContent>
+                        </Tooltip>
+                        <span className='ml-2 flex-shrink-0'>
+                            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                            {!isLoading && <ChevronsUpDown className="h-4 w-4 opacity-50" />}
+                        </span>
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="end">
+                    <Command ref={commandRef} shouldFilter={false} className='max-h-[400px]'>
+                        <CommandInput
+                            placeholder={getPlaceholderText()}
+                            className="h-9"
+                            value={search}
+                            onValueChange={setSearch}
+                            onKeyDown={handleKeyDown}
+                            aria-label="Search input"
+                        />
+                        <CommandList>
+                            {/* Data Sources Filter */}
+                            {config.length > 1 && ( // Only show source filter if more than one source
+                                <>
+                                    <CommandGroup heading="Filter by Data Source">
+                                        <CommandItem
+                                            key="hidden-enter-trigger"
+                                            value="##hidden-enter-trigger"
+                                            onSelect={() => executeCollectionSearch(search)}
+                                            className="hidden"
+                                            aria-hidden="true"
+                                        />
+                                        {config.map((sourceConfigWrapper, idx) => (
+                                            <CommandItem
+                                                key={`source-${idx}`}
+                                                value={`##source-${idx}`}
+                                                onSelect={() => handleSourceFilterSelect(idx)}
+                                                className="cursor-pointer"
+                                            >
+                                                {getSourceDisplayName(sourceConfigWrapper)}
+                                                <Check className={cn('ml-auto h-4 w-4', activeSourceIndex === idx ? 'opacity-100' : 'opacity-0')} />
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                    <CommandSeparator />
+                                </>
+                            )}
 
-                            return (
-                                <React.Fragment key={sourceIndex}>
-                                    {sourceIndex > 0 && activeSourceIndex === null && <CommandSeparator />}
-                                    <CommandGroup heading={sourceResults.sourceName}>
-                                        {sourceResults.data.features.map((feature: Feature<Geometry, GeoJsonProperties>, featureIndex: number) => {
-                                            const properties = feature.properties || {};
-                                            const displayValue = String(properties[displayField] ?? '');
+                            {/* Results Area */}
+                            {queryResults.map((sourceResult, sourceIndex) => {
+                                // Skip rendering if a filter is active and it's not the active source
+                                if (activeSourceIndex !== null && activeSourceIndex !== sourceIndex) return null;
+
+                                const source = config[sourceIndex];
+
+                                // Loading State: check if query is loading AND search term is valid length
+                                const isSearchLongEnough = debouncedSearch.trim().length > 3;
+                                if (sourceResult.isLoading && isSearchLongEnough) {
+                                    return (
+                                        <CommandItem key={`loading-${sourceIndex}`} disabled className="opacity-50 italic">
+                                            Loading {getSourceDisplayName(source)}...
+                                        </CommandItem>
+                                    );
+                                }
+
+                                // Error State
+                                if (sourceResult.isError) {
+                                    return (
+                                        <CommandItem key={`error-fetch-${sourceIndex}`} disabled className="text-destructive">
+                                            Error loading {getSourceDisplayName(source)}.
+                                        </CommandItem>
+                                    );
+                                }
+
+                                const hasData = sourceResult.data &&
+                                    ((sourceResult.type === 'masquerade' && Array.isArray(sourceResult.data) && sourceResult.data.length > 0) ||
+                                        (sourceResult.type === 'postgREST' && 'features' in sourceResult.data && sourceResult.data.features.length > 0));
+
+                                // Empty State
+                                if (isSearchLongEnough && !sourceResult.isLoading && !hasData) {
+                                    return <CommandEmpty key={`empty-${sourceIndex}`}>No results found for "{debouncedSearch}" in {getSourceDisplayName(source)}.</CommandEmpty>;
+                                }
+
+                                // return null for no data
+                                if (!hasData) {
+                                    return null;
+                                }
+
+                                return (
+                                    <CommandGroup key={sourceIndex} heading={getSourceDisplayName(source)}>
+                                        {/* Type guard for Masquerade results */}
+                                        {sourceResult.type === 'masquerade' && Array.isArray(sourceResult.data) && sourceResult.data.map((suggestion, sugIndex) => {
+                                            return (
+                                                <CommandItem
+                                                    key={`${suggestion.magicKey}-${sugIndex}`}
+                                                    value={suggestion.text}
+                                                    onSelect={(currentValue) => handleResultSelect(currentValue, sourceIndex, suggestion, config)}
+                                                    className="cursor-pointer"
+                                                >
+                                                    <span className='text-wrap'>{formatAddressCase(suggestion.text)}</span>
+                                                </CommandItem>
+                                            )
+                                        }
+                                        )}
+
+                                        {/* Type guard for PostgREST results */}
+                                        {sourceResult.type === 'postgREST' && sourceResult.data && 'features' in sourceResult.data && sourceResult.data.features.map((feature, featureIndex) => {
+                                            const displayValue = String(feature.properties?.[source.displayField] ?? '');
                                             if (!displayValue) return null;
+
                                             return (
                                                 <CommandItem
                                                     key={feature.id ?? `${displayValue}-${featureIndex}-${sourceIndex}`}
                                                     value={displayValue}
-                                                    onSelect={() => handleSelect(displayValue, sourceIndex, false)}
-                                                    className="cursor-pointer" >
+                                                    onSelect={(currentValue) => handleResultSelect(currentValue, sourceIndex, feature, config)}
+                                                    className="cursor-pointer"
+                                                >
                                                     <span className="text-wrap">{displayValue}</span>
-                                                    <Check className={cn('ml-auto h-4 w-4', dataSourcesValue === displayValue ? 'opacity-100' : 'opacity-0')} />
                                                 </CommandItem>
                                             );
                                         })}
                                     </CommandGroup>
-                                </React.Fragment>
-                            );
-                        })}
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+                                );
+                            })}
+
+                            {/* Empty State Check */}
+                            {!isLoading && debouncedSearch.trim().length > 1 && queryResults.every(result => {
+                                // Check if this specific source is loading or has data
+                                const hasDataForSource = result.data &&
+                                    ((result.type === 'masquerade' && Array.isArray(result.data) && result.data.length > 0) ||
+                                        (result.type === 'postgREST' && 'features' in result.data && result.data.features.length > 0));
+                                // The condition for .every is true if the source is NOT loading AND it does NOT have data
+                                return !result.isLoading && !hasDataForSource;
+                            }) && (
+                                    <CommandEmpty>No results found for "{debouncedSearch}".</CommandEmpty>
+                                )}
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+        </TooltipProvider>
     );
 }
 
-export { SearchCombobox };
+// Handler for Masquerade Suggestion Selection
+const handleSuggestionSelect = async (
+    suggestion: Suggestion,
+    sourceConfig: SearchSourceConfig,
+    sourceIndex: number,
+    view: __esri.MapView | __esri.SceneView | undefined,
+    searchConfig: SearchSourceConfig[],
+) => {
+
+    if (sourceConfig.type !== 'masquerade' || !view) {
+        return;
+    }
+
+    view.graphics.removeAll();
+
+    // findAddressCandidates
+    try {
+        const params = new URLSearchParams();
+        params.set('magicKey', suggestion.magicKey);
+        params.set('outFields', '*');
+        params.set('maxLocations', '1');
+        params.set('outSR', JSON.stringify({ wkid: sourceConfig.outSR ?? 4326 }));
+        params.set('f', 'json');
+
+        const candidatesUrl = `${sourceConfig.url}/findAddressCandidates?${params.toString()}`;
+        const response = await fetch(candidatesUrl, { method: 'GET', headers: sourceConfig.headers });
+
+        if (!response.ok) {
+            throw new Error(`findAddressCandidates failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data?.candidates?.length > 0) {
+            const bestCandidate = data.candidates[0];
+
+            // Format Candidate into GeoJSON Feature
+            const pointGeom = turfPoint([bestCandidate.location.x, bestCandidate.location.y]).geometry;
+            const feature: Feature<Geometry, GeoJsonProperties> = {
+                type: "Feature",
+                geometry: pointGeom,
+                properties: {
+                    ...bestCandidate.attributes, // Include attributes from geocoder
+                    matchAddress: bestCandidate.address, // Add matched address
+                    score: bestCandidate.score,
+                    // Use the specific displayField requested by the source if needed,
+                    // otherwise default to address for display consistency post-selection
+                    [sourceConfig.displayField || 'address']: bestCandidate.address
+                }
+            };
+
+            handleSearchSelect(feature, sourceConfig.url, sourceIndex, searchConfig, view);
+
+        } else {
+            console.warn("No candidates found for magicKey:", suggestion.magicKey);
+        }
+    } catch (error) {
+        console.error("Error fetching/processing address candidates:", error);
+        // Handle error appropriately (e.g., show notification)
+    }
+};
+
+// PostgREST results or finalized Candidate)
+const handleSearchSelect = (
+    searchResult: Feature<Geometry, GeoJsonProperties> | null,
+    _sourceUrl: string,
+    sourceIndex: number,
+    searchConfig: SearchSourceConfig[],
+    view: __esri.MapView | __esri.SceneView | undefined,
+) => {
+    const geom = searchResult?.geometry;
+    const sourceConfigWrapper = searchConfig[sourceIndex];
+    const sourceConfig = sourceConfigWrapper;
+
+    if (!geom || !view || !sourceConfig) {
+        console.warn("No geometry, view, or valid source config for single feature select.", { geom, view, sourceConfig, sourceIndex });
+        return;
+    }
+    view.graphics.removeAll();
+
+    try {
+        let sourceCRS: string | undefined | null = null;
+
+        if (sourceConfig.type === 'postgREST') {
+
+            // use CRS from config if provided
+            sourceCRS = sourceConfig.crs;
+            if (!sourceCRS) {
+                // fallback: check for embedded CRS in the geometry
+                sourceCRS = (geom as ExtendedGeometry).crs?.properties?.name;
+                if (sourceCRS) {
+                    // console.log("Using embedded CRS from PostgREST feature:", sourceCRS);
+                } else {
+                    sourceCRS = "EPSG:26912";
+                    console.warn(`No CRS configured or embedded for PostgREST source ${sourceIndex}. Assuming ${sourceCRS}. This could be incorreect!`);
+                }
+            }
+        } else if (sourceConfig.type === 'masquerade') {
+            sourceCRS = `EPSG:${sourceConfig.outSR ?? 4326}`; // Default to WGS84 if not specified
+        } else {
+            console.error(`Unknown source config type at index ${sourceIndex}`);
+            return;
+        }
+
+        // if sourceCRS is still null or undefined, log an error and return
+        if (!sourceCRS) {
+            console.error(`Could not determine source CRS for index ${sourceIndex}. Aborting selection.`);
+            return;
+        }
+
+        if (!(geom as ExtendedGeometry).crs && sourceCRS) {
+            (geom as ExtendedGeometry).crs = { type: "name", properties: { name: sourceCRS } };
+        } else if ((geom as ExtendedGeometry).crs && sourceCRS && (geom as ExtendedGeometry).crs?.properties?.name !== sourceCRS) {
+            // Optional: Overwrite embedded CRS if config CRS is different (config takes priority)
+            console.warn(`Overwriting embedded CRS (${(geom as ExtendedGeometry).crs?.properties?.name}) with configured CRS (${sourceCRS})`);
+            (geom as ExtendedGeometry).crs = { type: "name", properties: { name: sourceCRS } };
+        }
+
+        highlightSearchResult(searchResult as Feature<ExtendedGeometry, GeoJsonProperties>, view, false);
+
+        const featureBbox = turf.bbox(geom);
+        if (!featureBbox || !featureBbox.every(isFinite)) {
+            console.error("Invalid bounding box calculated by turf.bbox:", featureBbox);
+            return;
+        }
+
+
+        let [xmin, ymin, xmax, ymax] = featureBbox;
+        const targetCRS = "EPSG:4326";
+        if (sourceCRS.toUpperCase() !== targetCRS && sourceCRS.toUpperCase() !== 'WGS84') {
+            try {
+                [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax], sourceCRS, targetCRS);
+            } catch (bboxError) {
+                console.error("Error converting bounding box:", bboxError);
+                return;
+            }
+        }
+
+        const shouldAddScaleValue = geom.type === "Point" ? 13000 : undefined;
+
+        // Zoom to the extent of the feature
+        zoomToExtent(xmin, ymin, xmax, ymax, view, shouldAddScaleValue); // Use the WGS84 bbox
+
+    } catch (error) {
+        console.error("Error processing single feature selection:", error);
+    }
+};
+
+// PostgREST Enter key
+const handleCollectionSelect = (
+    collection: FeatureCollection<Geometry, GeoJsonProperties> | null,
+    _sourceUrl: string | null,
+    _sourceIndex: number,
+    view: __esri.MapView | __esri.SceneView | undefined,
+) => {
+    if (!collection?.features?.length || !view) {
+        console.warn("No features/view for collection select.");
+        return;
+    }
+    removeGraphics(view);
+
+    try {
+        // Calculate overall bbox for the collection using Turf
+        const collectionBbox = turf.bbox(collection);
+        let [xmin, ymin, xmax, ymax] = collectionBbox;
+        [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax]);
+
+        if (!collectionBbox.every(isFinite)) {
+            console.error("Invalid bounding box calculated for collection");
+            return;
+        }
+
+        zoomToExtent(xmin, ymin, xmax, ymax, view);
+
+        // Highlight all features in the collection
+        collection.features.forEach(feature => {
+            highlightSearchResult(feature, view, false);
+        });
+
+    } catch (error) {
+        console.error("Error processing feature collection selection:", error);
+    }
+};
+
+export { SearchCombobox, handleSearchSelect, handleCollectionSelect, handleSuggestionSelect };

@@ -221,7 +221,7 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
                         "Cache-Control": "no-cache",
                     },
                     displayFields: [
-                        { field: 'formation_name', label: 'Formation Name' },
+                        { field: 'formation_alias', label: 'Formation Name' },
                         { field: 'formation_depth', label: 'Formation Depth (ft)' },
                     ],
                     sortBy: 'formation_depth',

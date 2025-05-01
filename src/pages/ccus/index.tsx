@@ -6,112 +6,55 @@ import { cn } from '@/lib/utils'
 import MapContainer from './components/map-container'
 import Sidebar from '@/components/sidebar'
 import { useSidebar } from '@/hooks/use-sidebar'
-import { MapContext } from '@/context/map-provider'
-import { useContext } from 'react'
 import { PROD_POSTGREST_URL } from '@/lib/constants'
 import { wellWithTopsLayerName } from '@/pages/ccus/data/layers'
-import { ExtendedGeometry, SearchCombobox, SearchConfig } from '@/components/sidebar/filter/search-combobox'
-import { getBoundingBox, zoomToExtent, highlightSearchResult } from '@/lib/sidebar/filter/util'
-import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson'
-import { convertBbox } from '@/lib/mapping-utils'
-import * as turf from '@turf/turf'
+import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleCollectionSelect, handleSearchSelect, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox'
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
 
-  const { view } = useContext(MapContext);
-
-  const handleSearchSelect = (searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null) => { // Added sourceUrl parameter back
-    const geom = searchResult?.geometry;
-
-    if (!geom) {
-      console.error("No geometry found in search result");
-      return;
-    }
-
-    if (view) {
-
-      const [xmin, ymin, xmax, ymax] = getBoundingBox(geom);
-      zoomToExtent(xmin, ymin, xmax, ymax, view);
-      highlightSearchResult(searchResult, view);
-    }
-  }
-
-  const handleCollectionSelect = (
-    collection: FeatureCollection<ExtendedGeometry, GeoJsonProperties> | null,
-  ) => {
-    view?.graphics.removeAll();
-    if (!collection?.features?.length || !view) {
-      console.warn("No features in collection or map view unavailable for collection action.");
-      return;
-    }
-
-    try {
-      // Calculate overall bbox for the collection using Turf
-      const collectionBbox = turf.bbox(collection);
-      let [xmin, ymin, xmax, ymax] = collectionBbox;
-      [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax]);
-
-      if (!collectionBbox.every(isFinite)) {
-        console.error("Invalid bounding box calculated for collection");
-        return;
-      }
-
-      // Zoom to the extent of the entire collection using your util
-      zoomToExtent(xmin, ymin, xmax, ymax, view);
-
-      // Highlight all features in the collection
-      collection.features.forEach(feature => {
-        // Pass each feature individually to the highlight function
-        highlightSearchResult(feature, view, false);
-      });
-
-    } catch (error) {
-      console.error("Error processing feature collection selection:", error);
-    }
-  };
-
-  const searchConfig: SearchConfig[] = [
+  const searchConfig: SearchSourceConfig[] = [
+    defaultMasqueradeConfig,
     {
-      restConfig: {
-        url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
-        sourceName: 'API #',
-        displayField: 'api',
-        params: {
-          select: 'shape, api',
-          targetField: 'api',
-        },
-        headers: {
-          'content-type': 'application/json',
-          'accept-profile': 'emp',
-          'accept': 'application/geo+json',
-        }
-      }
+      type: 'postgREST',
+      url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
+      sourceName: 'API #',
+      crs: 'EPSG:26912',
+      displayField: 'api',
+      params: {
+        select: 'shape,api',
+        targetField: 'api',
+      },
+      headers: {
+        'Accept': 'application/geo+json',
+        'Content-Type': 'application/json',
+        'Accept-Profile': 'emp',
+      },
     },
   ];
+
   return (
     <div className="relative h-full overflow-hidden bg-background">
       <Sidebar />
       <main
         id="content"
-        className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-[32rem]'
-          } h-full`}
+        className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-[32rem]'} h-full`}
       >
         <Layout>
-
           {/* ===== Top Heading ===== */}
           <Layout.Header className='flex items-center justify-between px-4 md:px-6'>
-            <TopNav className="hidden md:block md:w-auto w-1/12" />
-            <div className='flex items-center w-10/12 md:w-1/4 md:ml-auto space-x-2'>
-              <div className="flex-1 min-w-0 max-w-4/5">
+            <TopNav className="hidden md:block md:w-auto" />
+            <div className='flex items-center flex-1 min-w-0 md:flex-initial md:w-1/3 md:ml-auto space-x-2'>
+              <div className="flex-1 min-w-0">
                 <SearchCombobox
                   config={searchConfig}
                   onFeatureSelect={handleSearchSelect}
                   onCollectionSelect={handleCollectionSelect}
+                  onSuggestionSelect={handleSuggestionSelect}
                   className="w-full"
                 />
               </div>
-              <div className="w-1/12 flex-none">
+              <div className="flex-shrink-0">
                 <ThemeSwitch />
               </div>
             </div>
