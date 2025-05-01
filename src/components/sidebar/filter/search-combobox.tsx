@@ -14,7 +14,8 @@ import { convertBbox } from '@/lib/mapping-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
 import { highlightSearchResult, removeGraphics } from '@/lib/util/highlight-utils';
 import * as turf from '@turf/turf';
-import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // Import Tooltip components
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from "@/hooks/use-toast";
 
 export const defaultMasqueradeConfig: SearchSourceConfig = {
     type: 'masquerade',
@@ -109,6 +110,48 @@ function SearchCombobox({
     const [isShaking, setIsShaking] = useState(false);
     const { view } = useContext(MapContext)
     const commandRef = useRef<HTMLDivElement>(null);
+    const { toast } = useToast();
+
+    function formatName(name: string): string { // Format name for display: E.g. "api" -> "API", "address_search" -> "Address Search"
+        return name
+            .replace(/_/g, ' ')
+            .replace(/([A-Z])/g, ' $1') // Add space before caps (might add extra space if already spaced)
+            .replace(/\s+/g, ' ') // Consolidate multiple spaces
+            .split(' ')
+            .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : '')
+            .join(' ')
+            .replace(/^Rpc\s/, '') // Remove "Rpc " prefix if present
+            .trim();
+    }
+
+    function getSourceDisplayName(sourceConfig: SearchSourceConfig): string {
+        if (sourceConfig.sourceName) return sourceConfig.sourceName;
+        let name = '';
+        if (sourceConfig.type === 'postgREST') {
+            if (sourceConfig.functionName) name = sourceConfig.functionName;
+            else if (sourceConfig.params && 'targetField' in sourceConfig.params && sourceConfig.params.targetField) {
+                name = sourceConfig.params.targetField;
+            } else {
+                const urlParts = sourceConfig.url.split('/');
+                name = urlParts[urlParts.length - 1] || ''; // Get last part of URL as fallback
+            }
+        } else if (sourceConfig.type === 'masquerade') {
+            name = "Address Search: e.g. 123 Main St";
+        }
+
+        if (!name) { // Fallback if name is still empty
+            const urlParts = sourceConfig.url.split('/');
+            name = urlParts[urlParts.length - 1] || 'Unknown Source';
+        }
+        return formatName(name);
+    }
+
+    const getPlaceholderText = () => {
+        if (activeSourceIndex !== null && config[activeSourceIndex]) {
+            return `Search in ${getSourceDisplayName(config[activeSourceIndex])}...`;
+        }
+        return config[0]?.placeholder || `Search...`;
+    };
 
     const queryResults: QueryResultWrapper[] = config.map((sourceConfigWrapper, index) => {
         const source = sourceConfigWrapper;
@@ -307,53 +350,24 @@ function SearchCombobox({
             setInputValue(`Results for "${currentSearchTerm}"`);
         } else {
             // If no features were collected for this action, shake the input
+            const errorMessage = `${currentSearchTerm === '' ? 'Please enter a search term' : `No results for "${currentSearchTerm}. If searching for an address, please select a suggestion.`}`;
+            const shakingDuration = 650;
             setIsShaking(true);
-            setTimeout(() => setIsShaking(false), 650);
-        }
-    };
+            toast({
+                variant: "destructive",
+                title: "Search Failed",
+                description: errorMessage,
+                duration: shakingDuration * 3,
+            });
+            setInputValue('');
+            setTimeout(() => {
+                setIsShaking(false);
+            }, shakingDuration);
+        };
 
-    function getSourceDisplayName(sourceConfig: SearchSourceConfig): string {
-        if (sourceConfig.sourceName) return sourceConfig.sourceName;
-        let name = '';
-        if (sourceConfig.type === 'postgREST') {
-            if (sourceConfig.functionName) name = sourceConfig.functionName;
-            else if (sourceConfig.params && 'targetField' in sourceConfig.params && sourceConfig.params.targetField) {
-                name = sourceConfig.params.targetField;
-            } else {
-                const urlParts = sourceConfig.url.split('/');
-                name = urlParts[urlParts.length - 1] || ''; // Get last part of URL as fallback
-            }
-        } else if (sourceConfig.type === 'masquerade') {
-            name = "Address Search: e.g. 123 Main St";
-        }
-
-        if (!name) { // Fallback if name is still empty
-            const urlParts = sourceConfig.url.split('/');
-            name = urlParts[urlParts.length - 1] || 'Unknown Source';
-        }
-        return formatName(name);
-    }
-
-    function formatName(name: string): string { // Format name for display: E.g. "api" -> "API", "address_search" -> "Address Search"
-        return name
-            .replace(/_/g, ' ')
-            .replace(/([A-Z])/g, ' $1') // Add space before caps (might add extra space if already spaced)
-            .replace(/\s+/g, ' ') // Consolidate multiple spaces
-            .split(' ')
-            .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : '')
-            .join(' ')
-            .replace(/^Rpc\s/, '') // Remove "Rpc " prefix if present
-            .trim();
     }
 
     const isLoading = queryResults.some(result => result.isLoading);
-
-    const getPlaceholderText = () => {
-        if (activeSourceIndex !== null && config[activeSourceIndex]) {
-            return `Search in ${getSourceDisplayName(config[activeSourceIndex])}...`;
-        }
-        return config[0]?.placeholder || `Search...`;
-    };
 
     return (
         <TooltipProvider>
@@ -367,21 +381,25 @@ function SearchCombobox({
                             'w-full',
                             'justify-between',
                             'text-left h-auto min-h-10',
-                            isShaking && 'animate-shake border-destructive',
                         )}
                         aria-label={getPlaceholderText()}
                     >
-                        <Tooltip>
+                        <Tooltip
+                            delayDuration={300}
+                        >
                             <TooltipTrigger asChild>
-                                <span className="truncate">
-                                    <span className="truncate">
-                                        {inputValue || getPlaceholderText()}
-                                    </span>
+                                <span
+                                    className={cn(
+                                        'truncate',
+                                        isShaking && 'animate-shake text-destructive'
+                                    )}
+                                >
+                                    {inputValue || getPlaceholderText()}
                                 </span>
                             </TooltipTrigger>
-                            <TooltipContent side='top' className="z-60 bg-secondary text-base text-secondary-foreground">
+                            <TooltipContent side='bottom' className="z-60 max-w-[--radix-popover-trigger-width] bg-secondary text-base text-secondary-foreground">
                                 <p>{inputValue || getPlaceholderText()}</p>
-                                <TooltipArrow className="fill-current text-secondary" />
+                                <TooltipArrow className="fill-secondary" />
                             </TooltipContent>
                         </Tooltip>
                         <span className='ml-2 flex-shrink-0'>
@@ -611,9 +629,7 @@ const handleSearchSelect = (
 
             // use CRS from config if provided
             sourceCRS = sourceConfig.crs;
-            if (sourceCRS) {
-                // console.log(`Using configured CRS for PostgREST source: ${sourceCRS}`);
-            } else {
+            if (!sourceCRS) {
                 // fallback: check for embedded CRS in the geometry
                 sourceCRS = (geom as ExtendedGeometry).crs?.properties?.name;
                 if (sourceCRS) {
@@ -630,6 +646,7 @@ const handleSearchSelect = (
             return;
         }
 
+        // if sourceCRS is still null or undefined, log an error and return
         if (!sourceCRS) {
             console.error(`Could not determine source CRS for index ${sourceIndex}. Aborting selection.`);
             return;
