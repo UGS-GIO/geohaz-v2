@@ -18,10 +18,10 @@ const wetMetaConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Image Year': { field: 'image_year', type: 'string' },
+                'Image Year': { field: 'image_yr', type: 'string' },
                 'Image Date': { field: 'image_date', type: 'string' },
-                'Image Decade': { field: 'image_decade', type: 'string' },
-                'Image Scale': { field: 'image_scale', type: 'string' },
+                'Image Decade': { field: 'decade', type: 'string' },
+                'Image Scale': { field: 'all_scales', type: 'string' },
                 'Supplemental Map Info': { field: 'suppmapinfo', type: 'string' }
             }
         }
@@ -41,7 +41,7 @@ const wetNonRiverineConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Cowardin Attribute': { field: 'cowattribute', type: 'string' },
+                'Cowardin Attribute': { field: 'attribute', type: 'string' },
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
                 'Acres': { field: 'acres', type: 'string' },
                 'Image Year': { field: 'image_yr', type: 'string' },
@@ -64,7 +64,7 @@ const riverineConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Cowardin Attribute': { field: 'cowattribute', type: 'string' },
+                'Cowardin Attribute': { field: 'attribute', type: 'string' },
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
                 'Acres': { field: 'acres', type: 'string' },
                 'Image Year': { field: 'image_yr', type: 'string' },
@@ -99,10 +99,10 @@ const ripMetaConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Image Year': { field: 'image_year', type: 'string' },
+                'Image Year': { field: 'image_yr', type: 'string' },
                 'Image Date': { field: 'image_date', type: 'string' },
-                'Image Decade': { field: 'image_decade', type: 'string' },
-                'Image Scale': { field: 'image_scale', type: 'string' },
+                'Image Decade': { field: 'decade', type: 'string' },
+                'Image Scale': { field: 'all_scales', type: 'string' },
                 'Supplemental Map Info': { field: 'suppmapinfo', type: 'string' }
             }
         }
@@ -349,7 +349,6 @@ const huc12Config: WMSLayerProps = {
             popupFields: {
                 'Watershed Name:': { field: 'huc12_name', type: 'string' },
                 'Watershed Identifier:': { field: 'huc12', type: 'string' },
-                'Ecoregion:': { field: 'ecoregion', type: 'string' },
                 'Surface Water Plot:': { field: 'surface_water_plot', type: 'string' }
             }
         }
@@ -396,7 +395,6 @@ const huc8Config: WMSLayerProps = {
             popupFields: {
                 'Sub-basin Name:': { field: 'huc8_name', type: 'string' },
                 'Sub-basin Identifier:': { field: 'huc8', type: 'string' },
-                'Ecoregion:': { field: 'ecoregion', type: 'string' },
                 'Surface Water Plot:': { field: 'surface_water_plot', type: 'string' }
             }
         }
