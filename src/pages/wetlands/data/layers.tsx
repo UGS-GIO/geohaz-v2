@@ -235,6 +235,7 @@ const assessmentConfig: WMSLayerProps = {
                 'Target population comparison': { field: 'target_population_comparison', type: 'string' },
                 'Sample frame': { field: 'sample_frame', type: 'string' },
                 'Site selection': { field: 'site_selection', type: 'string' }
+            }
         },
     ]
 };
