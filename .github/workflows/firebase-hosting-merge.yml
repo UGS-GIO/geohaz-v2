@@ -1,73 +1,108 @@
 name: Deploy to Firebase Hosting and Release on merge
-'on':
+
+# Trigger on pushes to master or develop branches
+on:
   push:
     branches:
       - master
       - develop
+
 jobs:
   build_deploy_release:
+    # Permissions needed for semantic-release to push tags/releases
     permissions:
       contents: write
       issues: write
       pull-requests: write
+
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      # Checkout code - fetch-depth: 0 is needed for semantic-release
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Important for semantic-release to access all commits
-      
-      - uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
+          node-version: '20'
           cache: npm
-          node-version: lts/*
-      
-      - name: Install dependencies
+
+      - name: Install Dependencies
         run: npm ci
-      
-      - name: Build
+
+      - name: Build Project
         run: npm run build
-      
-      # Global Release
-      - name: Global Release
-        if: github.ref == 'refs/heads/master' # only run release on master
+
+      # === Semantic Release Steps (Only on master branch) ===
+      # These steps create GitHub releases and tags based on commit messages
+      - name: Global Release (if master)
+        if: github.ref == 'refs/heads/master'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
-      
-      # App-specific releases
-      - name: Hazards App Release
+
+      - name: Hazards App Release (if master)
         if: github.ref == 'refs/heads/master'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release --extends ./release-config-hazards.js
-      
-      - name: Minerals App Release
+
+      - name: Minerals App Release (if master)
         if: github.ref == 'refs/heads/master'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release --extends ./release-config-minerals.js
-      
-      - name: CCUS App Release
+
+      - name: CCUS App Release (if master)
         if: github.ref == 'refs/heads/master'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release --extends ./release-config-ccus.js
-      
-      # Firebase deployment - set environment variables
-      - name: Set Firebase project ID
+
+      # === Firebase Deployment ===
+      # Set correct Firebase Service Account and Project ID based on the branch
+      - name: Set Firebase Environment Variables
+        id: set_firebase_env
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_PROD" >> $GITHUB_ENV
+            echo "FIREBASE_SERVICE_ACCOUNT_SECRET_NAME=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_PROD" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-maps-prod" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV" >> $GITHUB_ENV
+            echo "FIREBASE_SERVICE_ACCOUNT_SECRET_NAME=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV" >> $GITHUB_ENV
             echo "PROJECT_ID=ut-dnr-ugs-maps-dev" >> $GITHUB_ENV
           fi
-      
-      # Deploy to all configured hosting targets in firebase.json
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+
+      # --- Deploy to DEVELOPMENT Project (if develop branch) ---
+      - name: Deploy SPA to Develop Environment (live channel)
+        if: github.ref == 'refs/heads/develop'
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
+          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT_SECRET_NAME] }}'
+          projectId: '${{ env.PROJECT_ID }}' # ut-dnr-ugs-maps-dev
+          channelId: live # Deploy to the main site for the dev project
+          target: main-site
+
+      # --- Deploy to PRODUCTION Project (if master branch) ---
+      - name: Deploy SPA to Production Environment (live channel)
+        if: github.ref == 'refs/heads/master'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT_SECRET_NAME] }}'
+          projectId: '${{ env.PROJECT_ID }}' # ut-dnr-ugs-maps-prod
           channelId: live
-          projectId: '${{ env.PROJECT_ID }}'
+          target: main-site 
+
+      # --- Deploy the production redirector configurations ---
+      - name: Deploy Hazards Redirector to Production (live channel)
+        if: github.ref == 'refs/heads/master'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT_SECRET_NAME] }}'
+          projectId: '${{ env.PROJECT_ID }}' # ut-dnr-ugs-maps-prod
+          channelId: live
+          target: hazards-subdomain

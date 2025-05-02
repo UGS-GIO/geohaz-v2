@@ -1,25 +1,33 @@
-name: Deploy to Firebase Hosting on PR
-'on': pull_request
+name: Deploy to Firebase Hosting on PR Preview
+on: pull_request
+
 jobs:
   build_and_preview:
+    # Only run on PRs from the same repository, not external forks
     if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - run: npm ci && npm run build
-      - name: Set Firebase service account and project ID
-        id: vars
-        run: |
-          if [[ "${{ github.base_ref }}" == "master" ]]; then
-            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_PROD" >> $GITHUB_ENV
-            echo "PROJECT_ID=ut-dnr-ugs-maps-prod" >> $GITHUB_ENV
-          else
-            echo "FIREBASE_SERVICE_ACCOUNT=FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV" >> $GITHUB_ENV
-            echo "PROJECT_ID=ut-dnr-ugs-maps-dev" >> $GITHUB_ENV
-          fi
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20' 
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Deploy to Firebase Hosting Preview Channel (Dev Project)
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets[env.FIREBASE_SERVICE_ACCOUNT] }}'
-          projectId: '${{ env.PROJECT_ID }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV }}'
+          projectId: 'ut-dnr-ugs-maps-dev'
+          target: main-site
+          channelId: pr-${{ github.event.number }}
           expires: 6d
