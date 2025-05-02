@@ -14,9 +14,7 @@ import Polyline from "@arcgis/core/geometry/Polyline.js";
 import { Feature, GeoJsonProperties, Geometry } from 'geojson';
 import { createEsriSymbol } from '@/lib/legend/symbol-generator';
 import { Legend } from '@/lib/types/geoserver-types';
-import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
 import Point from "@arcgis/core/geometry/Point.js";
-import { MAP_PIN_ICON } from '@/assets/icons';
 import Polygon from '@arcgis/core/geometry/Polygon';
 import proj4 from 'proj4';
 import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
@@ -464,32 +462,6 @@ export function convertDDToDMS(dd: number, isLongitude: boolean = false) {
     return `${degreesStr}° ${minutesStr}' ${secondsStr}" ${dir}`;
 }
 
-// Create a graphic to display a point on the map
-export function createGraphic(lat: number, long: number, view: SceneView | MapView) {
-    // Create a symbol for drawing the point
-    const markerSymbol = new PictureMarkerSymbol({
-        url: `${MAP_PIN_ICON}`,
-        width: "20px",
-        height: "20px",
-        yoffset: 10
-    });
-    // Create a graphic and add the geometry and symbol to it
-    const pointGraphic = new Graphic({
-        geometry: new Point({
-            longitude: long,
-            latitude: lat
-        }),
-        symbol: markerSymbol
-    });
-
-    // Add the graphics to the view's graphics layer
-    view.graphics.add(pointGraphic);
-}
-
-// Remove all graphics from the view
-export function removeGraphics(view: SceneView | MapView) {
-    view.graphics.removeAll();
-}
 
 
 interface Bbox {
@@ -718,20 +690,20 @@ export const convertCoordinates = (coordinates: number[][][]): number[][] => {
     );
 };
 
-export const extractCoordinates = (feature: Feature<Geometry, GeoJsonProperties>): number[][][] => {
-    switch (feature.geometry.type) {
+export const extractCoordinates = (geometry: Geometry): number[][][] => {
+    switch (geometry.type) {
         case 'Point':
-            return [[feature.geometry.coordinates as number[]]];
+            return [[geometry.coordinates as number[]]];
         case 'LineString':
-            return [feature.geometry.coordinates as number[][]];
+            return [geometry.coordinates as number[][]];
         case 'MultiLineString':
-            return feature.geometry.coordinates as number[][][];
+            return geometry.coordinates as number[][][];
         case 'Polygon':
-            return feature.geometry.coordinates;
+            return geometry.coordinates;
         case 'MultiPolygon':
-            return feature.geometry.coordinates.flatMap(polygon => polygon);
+            return geometry.coordinates.flatMap(polygon => polygon);
         default:
-            console.warn('Unsupported geometry type', feature.geometry.type);
+            console.warn('Unsupported geometry type', geometry.type);
             return [];
     }
 };
@@ -758,7 +730,7 @@ export const createHighlightGraphic = (
     options: HighlightOptions = {}
 ): Graphic[] => {
     const mergedOptions = { ...defaultSearchResultHighlightOptions, ...options };
-    const coordinates = extractCoordinates(feature);
+    const coordinates = extractCoordinates(feature.geometry);
     const convertedCoordinates = convertCoordinates(coordinates);
     const graphics: Graphic[] = [];
 
@@ -863,7 +835,7 @@ export const highlightFeature = async (
     graphics.forEach(graphic => view.graphics.add(graphic));
 
     // Return the converted coordinates if needed
-    const coordinates = extractCoordinates(targetFeature);
+    const coordinates = extractCoordinates(targetFeature.geometry);
     return convertCoordinates(coordinates);
 }
 
