@@ -11,21 +11,11 @@
         ],
         "hazards-subdomain": [
           "hazards-geology-utah-gov"
-        ],
-        "ccus-subdomain": [
-          "ccus-geology-utah-gov"
-        ],
-        "minerals-subdomain": [
-          "minerals-geology-utah-gov"
-        ],
-        "wetlands-subdomain": [
-          "wetlands-geology-utah-gov"
         ]
       }
     },
     "ut-dnr-ugs-maps-dev": {
       "hosting": {
-        
         "main-site": [
           "ut-dnr-ugs-maps-dev"
         ]

@@ -41,54 +41,6 @@
           "type": 302
         }
       ]
-    },
-    {
-      "target": "ccus-subdomain",
-      "public": "dist",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "redirects": [
-        {
-          "source": "**",
-          "destination": "https://maps.geology.utah.gov/ccus",
-          "type": 302
-        }
-      ]
-    },
-    {
-      "target": "minerals-subdomain",
-      "public": "dist",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "redirects": [
-        {
-          "source": "**",
-          "destination": "https://maps.geology.utah.gov/minerals",
-          "type": 302
-        }
-      ]
-    },
-    {
-      "target": "wetlands-subdomain",
-      "public": "dist",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "redirects": [
-        {
-          "source": "**",
-          "destination": "https://maps.geology.utah.gov/wetlands",
-          "type": 302
-        }
-      ]
     }
   ],
   "functions": [
