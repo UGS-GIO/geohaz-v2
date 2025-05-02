@@ -1,6 +1,7 @@
 {
   "projects": {
-    "default": "ut-dnr-ugs-maps-dev"
+    "default": "ut-dnr-ugs-maps-dev",
+    "production": "ut-dnr-ugs-maps-prod"
   },
   "targets": {
     "ut-dnr-ugs-maps-prod": {
@@ -20,26 +21,16 @@
         "wetlands-subdomain": [
           "wetlands-geology-utah-gov"
         ]
-      }},
-      "ut-dnr-ugs-maps-dev": {
-        "hosting": {
-          "main": [
-            "ut-dnr-ugs-maps-dev"
-          ],
-          "hazards": [
-            "hazards-geology-utah-gov"
-          ],
-          "ccus": [
-            "ccus-geology-utah-gov"
-          ],
-          "minerals": [
-            "minerals-geology-utah-gov"
-          ],
-          "wetlands-subdomain": [
-            "wetlands-geology-utah-gov"
-          ]
-        }
       }
     },
-    "etags": {}
-  }
+    "ut-dnr-ugs-maps-dev": {
+      "hosting": {
+        
+        "main-site": [
+          "ut-dnr-ugs-maps-dev"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
