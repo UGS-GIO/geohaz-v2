@@ -39,8 +39,11 @@ const LegendAccordion = ({ layerId, url, triggerBtn, openLegend }: LegendAccordi
                             {isLoading && <div>Loading legend...</div>}
                             {error && <div>Error loading legend: {error.message}</div>}
                             {preview?.map((previewItem, index) => (
-                                <div key={index} className='flex items-center space-x-4 py-1'>
-                                    <span className='flex items-center' dangerouslySetInnerHTML={{ __html: previewItem?.html?.outerHTML || '' }} />
+                                <div key={index} className="flex items-center space-x-2 py-1">
+                                    <span
+                                        className="flex items-center justify-center w-8 min-w-8"
+                                        dangerouslySetInnerHTML={{ __html: previewItem?.html?.outerHTML || '' }}
+                                    />
                                     <span>{previewItem?.label}</span>
                                 </div>
                             ))}
