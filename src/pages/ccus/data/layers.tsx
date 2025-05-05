@@ -411,6 +411,27 @@ const wildernessStudyAreasWMSConfig: WMSLayerProps = {
     ],
 };
 
+
+const sitlaReportsLayerName = 'ccus_sitla_reports';
+const sitlaReportsWMSTitle = 'SITLA Reports';
+const sitlaReportsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: sitlaReportsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${sitlaReportsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Name': { field: 'new_block_', type: 'string' },
+                'Description': { field: 'description', type: 'string' },
+            },
+        }
+    ],
+};
+
 // Energy and Minerals Group Layer
 const ccusResourcesConfig: LayerProps = {
     type: 'group',
@@ -422,7 +443,8 @@ const ccusResourcesConfig: LayerProps = {
         wellWithTopsWMSConfig,
         oilGasFieldsWMSConfig,
         co2SourcesWMSConfig,
-        wildernessStudyAreasWMSConfig
+        wildernessStudyAreasWMSConfig,
+        sitlaReportsWMSConfig
     ]
 }
 
