@@ -380,7 +380,6 @@ const ccusResourcesConfig: LayerProps = {
         basinNamesWMSConfig,
         wellWithTopsWMSConfig,
         oilGasFieldsWMSConfig,
-        coresAndCuttingsWMSConfig,
     ]
 }
 
@@ -402,7 +401,8 @@ const geologicalInformationConfig: LayerProps = {
     layers: [
         qFaultsWMSConfig,
         faultsWMSConfig,
-        seamlessGeolunitsWMSConfig
+        seamlessGeolunitsWMSConfig,
+        coresAndCuttingsWMSConfig
     ]
 }
 
