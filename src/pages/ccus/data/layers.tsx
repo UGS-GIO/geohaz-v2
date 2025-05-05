@@ -370,6 +370,27 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
     ],
 };
 
+const co2SourcesLayerName = 'ccus_co2_sources';
+const co2SourcesWMSTitle = 'CO₂ Sources';
+const co2SourcesWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: co2SourcesWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${co2SourcesLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Facility Name': { field: 'facility_name', type: 'string' },
+                'Reporting Year': { field: 'reporting_year', type: 'string' },
+                'Description': { field: 'description', type: 'string' },
+            },
+        }
+    ],
+};
+
 // Energy and Minerals Group Layer
 const ccusResourcesConfig: LayerProps = {
     type: 'group',
@@ -380,6 +401,7 @@ const ccusResourcesConfig: LayerProps = {
         basinNamesWMSConfig,
         wellWithTopsWMSConfig,
         oilGasFieldsWMSConfig,
+        co2SourcesWMSConfig
     ]
 }
 
