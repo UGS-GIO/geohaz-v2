@@ -349,6 +349,27 @@ const qFaultsWMSConfig: WMSLayerProps = {
     ],
 };
 
+const coresAndCuttingsLayerName = 'cores';
+const coresAndCuttingsWMSTitle = 'Cores and Cuttings';
+const coresAndCuttingsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: coresAndCuttingsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${coresAndCuttingsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Well Name': { field: 'well_name', type: 'string' },
+                'Type': { field: 'type', type: 'string' },
+                'County': { field: 'county_long', type: 'string' },
+            },
+        }
+    ],
+};
+
 // Energy and Minerals Group Layer
 const ccusResourcesConfig: LayerProps = {
     type: 'group',
@@ -359,6 +380,7 @@ const ccusResourcesConfig: LayerProps = {
         basinNamesWMSConfig,
         wellWithTopsWMSConfig,
         oilGasFieldsWMSConfig,
+        coresAndCuttingsWMSConfig,
     ]
 }
 
