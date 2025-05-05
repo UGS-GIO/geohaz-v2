@@ -349,6 +349,89 @@ const qFaultsWMSConfig: WMSLayerProps = {
     ],
 };
 
+const coresAndCuttingsLayerName = 'cores';
+const coresAndCuttingsWMSTitle = 'Cores and Cuttings';
+const coresAndCuttingsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: coresAndCuttingsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${coresAndCuttingsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Well Name': { field: 'well_name', type: 'string' },
+                'Type': { field: 'type', type: 'string' },
+                'County': { field: 'county_long', type: 'string' },
+            },
+        }
+    ],
+};
+
+const co2SourcesLayerName = 'ccus_co2_sources';
+const co2SourcesWMSTitle = 'CO₂ Sources';
+const co2SourcesWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: co2SourcesWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${co2SourcesLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Facility Name': { field: 'facility_name', type: 'string' },
+                'Reporting Year': { field: 'reporting_year', type: 'string' },
+                'Description': { field: 'description', type: 'string' },
+            },
+        }
+    ],
+};
+
+const wildernessStudyAreasLayerName = 'ccus_wsa';
+const wildernessStudyAreasWMSTitle = 'Wilderness Study Areas';
+const wildernessStudyAreasWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: wildernessStudyAreasWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${wildernessStudyAreasLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'NLCS Name': { field: 'nlcs_name', type: 'string' },
+                'NLCS ID': { field: 'nlcs_id', type: 'string' },
+            },
+        }
+    ],
+};
+
+
+const sitlaReportsLayerName = 'ccus_sitla_reports';
+const sitlaReportsWMSTitle = 'SITLA Reports';
+const sitlaReportsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: sitlaReportsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${sitlaReportsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Name': { field: 'new_block_', type: 'string' },
+                'Description': { field: 'description', type: 'string' },
+            },
+        }
+    ],
+};
+
 // Energy and Minerals Group Layer
 const ccusResourcesConfig: LayerProps = {
     type: 'group',
@@ -359,6 +442,9 @@ const ccusResourcesConfig: LayerProps = {
         basinNamesWMSConfig,
         wellWithTopsWMSConfig,
         oilGasFieldsWMSConfig,
+        co2SourcesWMSConfig,
+        wildernessStudyAreasWMSConfig,
+        sitlaReportsWMSConfig
     ]
 }
 
@@ -380,7 +466,8 @@ const geologicalInformationConfig: LayerProps = {
     layers: [
         qFaultsWMSConfig,
         faultsWMSConfig,
-        seamlessGeolunitsWMSConfig
+        seamlessGeolunitsWMSConfig,
+        coresAndCuttingsWMSConfig
     ]
 }
 
