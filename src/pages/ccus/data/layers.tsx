@@ -391,6 +391,26 @@ const co2SourcesWMSConfig: WMSLayerProps = {
     ],
 };
 
+const wildernessStudyAreasLayerName = 'ccus_wsa';
+const wildernessStudyAreasWMSTitle = 'Wilderness Study Areas';
+const wildernessStudyAreasWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: wildernessStudyAreasWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${wildernessStudyAreasLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'NLCS Name': { field: 'nlcs_name', type: 'string' },
+                'NLCS ID': { field: 'nlcs_id', type: 'string' },
+            },
+        }
+    ],
+};
+
 // Energy and Minerals Group Layer
 const ccusResourcesConfig: LayerProps = {
     type: 'group',
@@ -401,7 +421,8 @@ const ccusResourcesConfig: LayerProps = {
         basinNamesWMSConfig,
         wellWithTopsWMSConfig,
         oilGasFieldsWMSConfig,
-        co2SourcesWMSConfig
+        co2SourcesWMSConfig,
+        wildernessStudyAreasWMSConfig
     ]
 }
 
