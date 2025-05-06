@@ -1,9 +1,17 @@
+import { LayerFetchConfig, getLayerFetchConfig } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
+import { useGetCurrentPage } from "@/hooks/use-get-current-page";
 
-const fetchLayerDescriptions = async () => {
-    const outfieds = 'content,title';
-    const url = `https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/hazlayerinfo?select=${outfieds}`;
-    const acceptProfile = 'hazards';
+const fetchLayerDescriptions = async (config: LayerFetchConfig | null) => {
+    if (!config) {
+        console.warn("No valid layer fetch configuration found.");
+        return [];
+    }
+
+    const { tableName, acceptProfile } = config;
+    const outfields = 'content,title';
+
+    const url = `https://postgrest-seamlessgeolmap-734948684426.us-central1.run.app/${tableName}?select=${outfields}`;
 
     const response = await fetch(url, {
         headers: {
@@ -14,18 +22,27 @@ const fetchLayerDescriptions = async () => {
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to fetch layer descriptions: ${response.statusText}`);
+        throw new Error(`Failed to fetch layer descriptions from ${tableName}: ${response.status} ${response.statusText}`);
     }
 
     return await response.json();
 };
 
-const useFetchLayerDescriptions = () => {
+interface CombinedResult {
+    data: Record<string, string>;
+    isLoading: boolean;
+    error: Error | null;
+}
 
-    const { data = [], isLoading, error } = useQuery({
-        queryKey: ['layerDescriptions'],
-        queryFn: fetchLayerDescriptions,
-        staleTime: 1000 * 60 * 60 * 1, // Cache for 1 hour
+const useFetchLayerDescriptions = (): CombinedResult => {
+    const currentPage = useGetCurrentPage();
+    const fetchConfig = getLayerFetchConfig(currentPage);
+
+    const { data = [], isLoading, error } = useQuery<FeatureAttributes[], Error>({
+        queryKey: ['layerDescriptions', currentPage, fetchConfig?.tableName, fetchConfig?.acceptProfile],
+        queryFn: () => fetchLayerDescriptions(fetchConfig),
+        enabled: !!fetchConfig,
+        staleTime: 1000 * 60 * 60 * 1, // 1 hour
     });
 
     type FeatureAttributes = {
