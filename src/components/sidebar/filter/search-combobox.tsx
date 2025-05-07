@@ -113,6 +113,26 @@ function SearchCombobox({
     const commandRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
 
+    const ensureLayerVisibleByTitle = (
+        layerTitle: string | undefined,
+        contextMessage: string
+    ) => {
+        if (!map) {
+            console.error(`Map is not defined. Cannot ensure layer visibility for ${contextMessage}.`);
+            return;
+        }
+        if (!layerTitle) {
+            return;
+        }
+
+        const foundLayer = findLayerByTitle(map, layerTitle);
+        if (foundLayer) {
+            foundLayer.visible = true;
+        } else {
+            console.warn(`Layer "${layerTitle}" not found in the map (context: ${contextMessage}).`);
+        }
+    }
+
     function formatName(name: string): string { // Format name for display: E.g. "api" -> "API", "address_search" -> "Address Search"
         return name
             .replace(/_/g, ' ')
@@ -292,19 +312,8 @@ function SearchCombobox({
             const typedConfig = searchConfig[sourceIndex] as PostgRESTConfig;
             setInputValue(displayValue || value);
 
-            const targetLayerTitle = typedConfig.layerName;
 
-            if (!map || !targetLayerTitle) {
-                console.error("Map is not defined");
-                return null;
-            }
-            const foundLayer = findLayerByTitle(map, targetLayerTitle);
-
-            // if foundLayer is not null, set its visibility to true
-            // this updates the layer's visibility in the map and layer list
-            if (foundLayer) {
-                foundLayer.visible = true;
-            }
+            ensureLayerVisibleByTitle(typedConfig.layerName, `PostgREST feature select (source index ${sourceIndex})`);
 
             onFeatureSelect?.(itemData, sourceConfig.url, sourceIndex, searchConfig, view);
         } else {
@@ -332,6 +341,7 @@ function SearchCombobox({
         }
     };
 
+
     const executeCollectionSearch = (currentSearchTerm: string) => {
         let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
         let firstValidSourceUrl: string | null = null;
@@ -350,6 +360,8 @@ function SearchCombobox({
                         firstValidSourceUrl = sourceConfig.url;
                         firstValidSourceIndex = index;
                     }
+
+                    ensureLayerVisibleByTitle(sourceConfig.layerName, `PostgREST collection search (source index ${index})`);
                 }
             }
         });
