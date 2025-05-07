@@ -194,7 +194,7 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
 };
 
 export const wellWithTopsLayerName = 'wellswithtops_hascore';
-const wellWithTopsWMSTitle = 'Wells Database';
+export const wellWithTopsWMSTitle = 'Wells Database';
 const wellWithTopsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,

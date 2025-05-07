@@ -10,7 +10,7 @@ import { featureCollection, point as turfPoint } from '@turf/helpers';
 import { useDebounce } from 'use-debounce';
 import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
 import { MapContext } from '@/context/map-provider';
-import { convertBbox } from '@/lib/mapping-utils';
+import { convertBbox, findLayerByTitle } from '@/lib/mapping-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
 import { highlightSearchResult, removeGraphics } from '@/lib/util/highlight-utils';
 import * as turf from '@turf/turf';
@@ -34,6 +34,7 @@ interface BaseConfig {
 
 interface PostgRESTConfig extends BaseConfig {
     type: 'postgREST';
+    layerName?: string; // corresponds to the map layer name
     crs?: string; // Optional: Coordinate Reference System (e.g., 'EPSG:26912')
     params?: PostgRESTParams;
     functionName?: string;
@@ -108,7 +109,7 @@ function SearchCombobox({
     const [debouncedSearch] = useDebounce(search, 500);
     const [activeSourceIndex, setActiveSourceIndex] = useState<number | null>(null);
     const [isShaking, setIsShaking] = useState(false);
-    const { view } = useContext(MapContext)
+    const { view, map } = useContext(MapContext)
     const commandRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
 
@@ -288,7 +289,23 @@ function SearchCombobox({
             setInputValue(formatAddressCase(itemData.text));
         } else if (sourceConfig.type === 'postgREST' && 'type' in itemData && itemData.type === 'Feature') {
             const displayValue = String(itemData.properties?.[sourceConfig.displayField] ?? '');
+            const typedConfig = searchConfig[sourceIndex] as PostgRESTConfig;
             setInputValue(displayValue || value);
+
+            const targetLayerTitle = typedConfig.layerName;
+
+            if (!map || !targetLayerTitle) {
+                console.error("Map is not defined");
+                return null;
+            }
+            const foundLayer = findLayerByTitle(map, targetLayerTitle);
+
+            // if foundLayer is not null, set its visibility to true
+            // this updates the layer's visibility in the map and layer list
+            if (foundLayer) {
+                foundLayer.visible = true;
+            }
+
             onFeatureSelect?.(itemData, sourceConfig.url, sourceIndex, searchConfig, view);
         } else {
             console.error("Mismatched item data type or config type in handleResultSelect", itemData, sourceConfig);
