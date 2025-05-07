@@ -185,13 +185,30 @@ export const findLayerById = (layers: __esri.Collection<__esri.Layer>, id: strin
     return foundLayer;
 };
 
+export function findLayerByTitle(mapInstance: __esri.Map, title: string): __esri.Layer | null {
+    let foundLayer: __esri.Layer | null = null;
+    mapInstance.layers.forEach(layer => {
+        if (layer.title === title) {
+            foundLayer = layer;
+        } else if (layer.type === 'group') {
+            const groupLayer = layer as __esri.GroupLayer;
+            // Search within sublayers of a group layer
+            const subLayer = groupLayer.layers.find(childLayer => childLayer.title === title);
+            if (subLayer) {
+                foundLayer = subLayer;
+            }
+        }
+    });
+    return foundLayer;
+}
+
 export function init(
     container: HTMLDivElement,
     isMobile: boolean,
     { zoom, center }: { zoom: number, center: [number, number] },
     layers: LayerProps[],
     initialView?: 'map' | 'scene',
-): SceneView | MapView {
+): { map: __esri.Map, view: __esri.MapView | __esri.SceneView } {
     // Destroy the view if it exists
     if (app.view) {
         app.view.destroy();
@@ -212,7 +229,7 @@ export function init(
     // Expand widget handler
     expandClickHandlers(view);
 
-    return view;
+    return { map, view };
 }
 
 // Create a new map

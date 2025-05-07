@@ -164,9 +164,17 @@ const ChildLayerAccordion = ({ layer, isTopLevel, forceUpdate, onVisibilityChang
 };
 
 const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index: number }) => {
-    const { handleToggleAll, handleChildLayerToggle, handleGroupVisibilityToggle, localState, accordionTriggerRef } = useLayerVisibilityManager(layer);
+    const {
+        handleToggleAll,
+        handleChildLayerToggle,
+        handleGroupVisibilityToggle,
+        activeGroupVisibility,
+        selectAllChildren,
+        accordionTriggerRef
+    } = useLayerVisibilityManager(layer);
+
     const invertedChildLayers = [...layer.layers].reverse(); // inverse the order of the layers to match the order in the map
-    const defaultValues = [`${localState.groupVisibility ? `item-${index}` : ''}`]; // if group is visible, expand the accordion
+    const defaultValues = [`${activeGroupVisibility ? `item-${index}` : ''}`]; // if group is visible, expand the accordion
 
     return (
         <div className="mr-2 border border-secondary rounded my-2">
@@ -174,7 +182,7 @@ const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index
                 <AccordionItem value={`item-${index}`}>
                     <AccordionHeader>
                         <Switch
-                            checked={localState.groupVisibility}
+                            checked={activeGroupVisibility}
                             onCheckedChange={handleGroupVisibilityToggle}
                             className="mx-2"
                         />
@@ -187,7 +195,7 @@ const GroupLayerAccordion = ({ layer, index }: { layer: __esri.GroupLayer; index
                     <AccordionContent>
                         <div className="flex items-center space-x-2 ml-2">
                             <Checkbox
-                                checked={localState.selectAllChecked}
+                                checked={selectAllChildren}
                                 onCheckedChange={(checked: boolean) => handleToggleAll(checked)}
                             />
                             <label className="text-sm font-medium italic">Select All</label>

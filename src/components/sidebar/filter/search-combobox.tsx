@@ -10,7 +10,7 @@ import { featureCollection, point as turfPoint } from '@turf/helpers';
 import { useDebounce } from 'use-debounce';
 import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
 import { MapContext } from '@/context/map-provider';
-import { convertBbox } from '@/lib/mapping-utils';
+import { convertBbox, findLayerByTitle } from '@/lib/mapping-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
 import { highlightSearchResult, removeGraphics } from '@/lib/util/highlight-utils';
 import * as turf from '@turf/turf';
@@ -34,6 +34,7 @@ interface BaseConfig {
 
 interface PostgRESTConfig extends BaseConfig {
     type: 'postgREST';
+    layerName?: string; // corresponds to the map layer name
     crs?: string; // Optional: Coordinate Reference System (e.g., 'EPSG:26912')
     params?: PostgRESTParams;
     functionName?: string;
@@ -108,9 +109,29 @@ function SearchCombobox({
     const [debouncedSearch] = useDebounce(search, 500);
     const [activeSourceIndex, setActiveSourceIndex] = useState<number | null>(null);
     const [isShaking, setIsShaking] = useState(false);
-    const { view } = useContext(MapContext)
+    const { view, map } = useContext(MapContext)
     const commandRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
+
+    const ensureLayerVisibleByTitle = (
+        layerTitle: string | undefined,
+        contextMessage: string
+    ) => {
+        if (!map) {
+            console.error(`Map is not defined. Cannot ensure layer visibility for ${contextMessage}.`);
+            return;
+        }
+        if (!layerTitle) {
+            return;
+        }
+
+        const foundLayer = findLayerByTitle(map, layerTitle);
+        if (foundLayer) {
+            foundLayer.visible = true;
+        } else {
+            console.warn(`Layer "${layerTitle}" not found in the map (context: ${contextMessage}).`);
+        }
+    }
 
     function formatName(name: string): string { // Format name for display: E.g. "api" -> "API", "address_search" -> "Address Search"
         return name
@@ -288,7 +309,12 @@ function SearchCombobox({
             setInputValue(formatAddressCase(itemData.text));
         } else if (sourceConfig.type === 'postgREST' && 'type' in itemData && itemData.type === 'Feature') {
             const displayValue = String(itemData.properties?.[sourceConfig.displayField] ?? '');
+            const typedConfig = searchConfig[sourceIndex] as PostgRESTConfig;
             setInputValue(displayValue || value);
+
+
+            ensureLayerVisibleByTitle(typedConfig.layerName, `PostgREST feature select (source index ${sourceIndex})`);
+
             onFeatureSelect?.(itemData, sourceConfig.url, sourceIndex, searchConfig, view);
         } else {
             console.error("Mismatched item data type or config type in handleResultSelect", itemData, sourceConfig);
@@ -315,6 +341,7 @@ function SearchCombobox({
         }
     };
 
+
     const executeCollectionSearch = (currentSearchTerm: string) => {
         let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
         let firstValidSourceUrl: string | null = null;
@@ -333,6 +360,8 @@ function SearchCombobox({
                         firstValidSourceUrl = sourceConfig.url;
                         firstValidSourceIndex = index;
                     }
+
+                    ensureLayerVisibleByTitle(sourceConfig.layerName, `PostgREST collection search (source index ${index})`);
                 }
             }
         });
