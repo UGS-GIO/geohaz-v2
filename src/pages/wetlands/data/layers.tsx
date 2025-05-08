@@ -23,6 +23,20 @@ const wetMetaConfig: WMSLayerProps = {
                 'Image Decade': { field: 'decade', type: 'string' },
                 'Image Scale': { field: 'all_scales', type: 'string' },
                 'Supplemental Map Info': { field: 'suppmapinfo', type: 'string' }
+            },
+            linkFields: {
+                'suppmapinfo': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const parts = value.split("/").pop()
+                        const transformedValues = {
+                            href: value,
+                            label: `${parts}`
+                        };
+                        return [transformedValues];
+                    }
+                }
             }
         }
     ]
@@ -43,11 +57,16 @@ const wetNonRiverineConfig: WMSLayerProps = {
             popupFields: {
                 'Cowardin Attribute': { field: 'attribute', type: 'string' },
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
-                'Acres': { field: 'acres', type: 'string' },
+                'Acres': {
+                    field: 'acres', type: 'number',
+                    transform: (value: number) => {
+                        return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
+                    }
+                },
                 'Image Year': { field: 'image_yr', type: 'string' },
                 'Additional Attributes Available': { field: 'llww', type: 'string' }
             }
-        },
+        }
     ]
 };
 
@@ -66,7 +85,12 @@ const riverineConfig: WMSLayerProps = {
             popupFields: {
                 'Cowardin Attribute': { field: 'attribute', type: 'string' },
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
-                'Acres': { field: 'acres', type: 'string' },
+                'Acres': {
+                    field: 'acres', type: 'number',
+                    transform: (value: number) => {
+                        return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
+                    }
+                },
                 'Image Year': { field: 'image_yr', type: 'string' },
                 'Additional Attributes Available': { field: 'llww', type: 'string' }
             }
@@ -104,6 +128,20 @@ const ripMetaConfig: WMSLayerProps = {
                 'Image Decade': { field: 'decade', type: 'string' },
                 'Image Scale': { field: 'all_scales', type: 'string' },
                 'Supplemental Map Info': { field: 'suppmapinfo', type: 'string' }
+            },
+            linkFields: {
+                'suppmapinfo': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const parts = value.split("/").pop()
+                        const transformedValues = {
+                            href: value,
+                            label: `${parts}`
+                        };
+                        return [transformedValues];
+                    }
+                }
             }
         }
     ]
@@ -125,7 +163,12 @@ const
                 popupFields: {
                     'Attribute': { field: 'attribute', type: 'string' },
                     'Riparian Type': { field: 'wetland_type', type: 'string' },
-                    'Acres': { field: 'acres', type: 'string' },
+                    'Acres': {
+                        field: 'acres', type: 'number',
+                        transform: (value: number) => {
+                            return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
+                        }
+                    },
                     'Image Year': { field: 'image_yr', type: 'string' }
                 }
             }
@@ -187,7 +230,21 @@ const cacheProjectsConfig: WMSLayerProps = {
                 'Project Name': { field: 'projectname', type: 'string' },
                 'Organization': { field: 'organization', type: 'string' },
                 'Base Imagery': { field: 'baseimagery', type: 'string' },
-                'Supplemental Report': { field: 'report', type: 'string' }
+                'Supplemental Report': { field: 'report', type: 'string' },
+            },
+            linkFields: {
+                'report': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const parts = value.split("/").pop()
+                        const transformedValues = {
+                            href: value,
+                            label: `${parts}`
+                        };
+                        return [transformedValues];
+                    }
+                }
             }
         }
     ]
@@ -235,6 +292,20 @@ const assessmentConfig: WMSLayerProps = {
                 'Target population comparison': { field: 'target_population_comparison', type: 'string' },
                 'Sample frame': { field: 'sample_frame', type: 'string' },
                 'Site selection': { field: 'site_selection', type: 'string' }
+            },
+            linkFields: {
+                'projectreport': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const parts = value.split("/").pop()
+                        const transformedValues = {
+                            href: value,
+                            label: `${parts}`
+                        };
+                        return [transformedValues];
+                    }
+                }
             }
         }
     ]
@@ -255,12 +326,20 @@ const wetlandsWMSConfig: LayerProps = {
             queryable: true,
             popupFields: {
                 'Project Name': { field: 'project', type: 'string' },
-                'Stratum Name': { field: 'years', type: 'string' },
-                'Stratum Ecoregion': { field: 'projectreport', type: 'string' },
-                'Sites Surveyed (#)': { field: 'target_population', type: 'string' },
-                'Very High Condition Score (%)': { field: 'target_population_comparison', type: 'string' },
-                'High Condition Score (%)': { field: 'sample_frame', type: 'string' },
-                'Medium Condition Score (%)': { field: 'site_selection', type: 'string' }
+                'Stratum Name': { field: 'stratum_name', type: 'string' },
+                'Stratum Ecoregion': { field: 'stratum_ecoregion', type: 'string' },
+                'Sites Surveyed (#)': { field: 'sites_surveyed', type: 'string' },
+                'Very High Condition Score (%)': { field: 'pct_very_high_condition', type: 'string' },
+                'High Condition Score (%)': { field: 'pct_high_condition', type: 'string' },
+                'Medium Condition Score (%)': { field: 'pct_medium_condition', type: 'string' },
+                'Low Condition Score (%)': { field: 'pct_low_condition', type: 'string' },
+                'Stressors Absent (%)': { field: 'pct_absent_oveall_stress', type: 'string' },
+                'Stressors Low (%)': { field: 'pct_low_overall_stress', type: 'string' },
+                'Stressors Medium (%)': { field: 'pct_med_overall_stress', type: 'string' },
+                'Stressors High (%)': { field: 'pct_high_overall_stress', type: 'string' },
+                'Stressors Very High (%)': { field: 'pct_very_high_overall_stress', type: 'string' },
+                'Mean Relative Native Plant Cover (%)': { field: 'mean_rel_native_cover', type: 'string' },
+                'Mean Absolute Noxious Plant Cover (%)': { field: 'mean_abs_nox_cover', type: 'string' }
             }
         }
     ]
@@ -280,8 +359,7 @@ const stressorsConfig: WMSLayerProps = {
             name: `${WETLANDS_WORKSPACE}:${stressorsLayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {
-            },
+            // no popups for this layer
         }
     ]
 };
@@ -291,7 +369,7 @@ const wetConditionGroupConfig: LayerProps = {
     type: 'group',
     title: 'Wetland Condition',
     visible: false,
-    layers: [wetlandsWMSConfig, assessmentConfig, stressorsConfig]
+    layers: [assessmentConfig, wetlandsWMSConfig, stressorsConfig]
 };
 
 // SITLA Land Ownership Layer
@@ -324,9 +402,24 @@ const huc12ecoConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Watershed Name:': { field: 'huc12_name', type: 'string' },
-                'Watershed Identifier::': { field: 'huc12', type: 'string' },
-                'Ecoregion::': { field: 'ecoregion', type: 'string' },
-                'Surface Water Plot::': { field: 'surface_water_plot', type: 'string' }
+                'Watershed Identifier:': { field: 'huc12', type: 'string' },
+                'Ecoregion:': { field: 'ecoregion', type: 'string' },
+                'Surface Water Plot:': { field: 'surface_water_plot', type: 'string' }
+            },
+            linkFields: {
+                'surface_water_plot': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // if the value is blank, change it to null
+                        // const data = (transformedValues = ' ') ? transformedValues : null;
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const transformedValues = {
+                            href: value,
+                            label: `open in a new tab`
+                        };
+                        return [transformedValues];
+                    }
+                }
             }
         }
     ]
@@ -350,6 +443,19 @@ const huc12Config: WMSLayerProps = {
                 'Watershed Name:': { field: 'huc12_name', type: 'string' },
                 'Watershed Identifier:': { field: 'huc12', type: 'string' },
                 'Surface Water Plot:': { field: 'surface_water_plot', type: 'string' }
+            },
+            linkFields: {
+                'surface_water_plot': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const transformedValues = {
+                            href: value,
+                            label: `open in a new tab`
+                        };
+                        return [transformedValues];
+                    }
+                }
             }
         }
     ]
@@ -357,7 +463,7 @@ const huc12Config: WMSLayerProps = {
 
 // HUC 8
 const huc8ecoLayerName = 'wetlandsapp_huc8_ecoregion';
-const huc8ecoTitle = 'Watershed (HUC8) by Ecoregion';
+const huc8ecoTitle = 'Sub-Basin (HUC8) by Ecoregion';
 const huc8ecoConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -373,6 +479,19 @@ const huc8ecoConfig: WMSLayerProps = {
                 'Sub-basin Identifier:': { field: 'huc8', type: 'string' },
                 'Ecoregion:': { field: 'ecoregion', type: 'string' },
                 'Surface Water Plot:': { field: 'surface_water_plot', type: 'string' }
+            },
+            linkFields: {
+                'surface_water_plot': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const transformedValues = {
+                            href: value,
+                            label: `open in a new tab`
+                        };
+                        return [transformedValues];
+                    }
+                }
             }
         }
     ]
@@ -381,7 +500,7 @@ const huc8ecoConfig: WMSLayerProps = {
 
 // HUC 8
 const huc8LayerName = 'wetlandsapp_huc8';
-const huc8Title = 'Watershed (HUC8)';
+const huc8Title = 'Sub-Basin (HUC8)';
 const huc8Config: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -396,6 +515,19 @@ const huc8Config: WMSLayerProps = {
                 'Sub-basin Name:': { field: 'huc8_name', type: 'string' },
                 'Sub-basin Identifier:': { field: 'huc8', type: 'string' },
                 'Surface Water Plot:': { field: 'surface_water_plot', type: 'string' }
+            },
+            linkFields: {
+                'surface_water_plot': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const transformedValues = {
+                            href: value,
+                            label: `open in a new tab`
+                        };
+                        return [transformedValues];
+                    }
+                }
             }
         }
     ]
@@ -415,12 +547,7 @@ const ecoregionConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Image Year:': { field: 'image_yr', type: 'string' },
-                'Image Date:': { field: 'image_date', type: 'string' },
-                'Image Decade:': { field: 'decade', type: 'string' },
-                'Image Scale:': { field: 'all_scales', type: 'string' },
-                'Data Source:': { field: 'data_source', type: 'string' },
-                'Supplemental Map Info:': { field: 'supmapinfo', type: 'string' }
+                'Ecoregion:': { field: 'ecoregion', type: 'string' }
             }
         }
     ]
