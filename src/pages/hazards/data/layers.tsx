@@ -195,7 +195,7 @@ export interface QFaultsFeatureType {
 
 }
 export const qFaultsLayerName = 'quaternaryfaults_current';
-const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults - Statewide';
+export const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults - Statewide';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,

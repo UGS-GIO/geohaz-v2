@@ -7,7 +7,7 @@ import MapContainer from './components/map-container'
 import Sidebar from '@/components/sidebar'
 import { useSidebar } from '@/hooks/use-sidebar'
 import { PROD_POSTGREST_URL } from '@/lib/constants'
-import { wellWithTopsLayerName } from '@/pages/ccus/data/layers'
+import { wellWithTopsLayerName, wellWithTopsWMSTitle } from '@/pages/ccus/data/layers'
 import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleCollectionSelect, handleSearchSelect, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox'
 
 export default function Map() {
@@ -21,6 +21,7 @@ export default function Map() {
       sourceName: 'API #',
       crs: 'EPSG:26912',
       displayField: 'api',
+      layerName: wellWithTopsWMSTitle,
       params: {
         select: 'shape,api',
         targetField: 'api',

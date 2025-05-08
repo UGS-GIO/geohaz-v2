@@ -6,6 +6,7 @@ import { LayerProps } from "@/lib/types/mapping-types";
 
 type MapContextProps = {
     view?: SceneView | MapView,
+    map?: __esri.Map,
     activeLayers?: __esri.Collection<__esri.Layer>, // add a layers property to the context
     loadMap?: (container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }, layers: LayerProps[]) => Promise<void>
     setActiveLayers?: (layers: __esri.Collection<__esri.Layer>) => void
@@ -37,6 +38,7 @@ export const MapContext = createContext<MapContextProps>({
     coordinates: { x: "000.000", y: "000.000" },
     setCoordinates: () => { },
     view: undefined,
+    map: undefined,
     activeLayers: undefined,
     loadMap: async () => { },
     setActiveLayers: () => { },
@@ -49,6 +51,7 @@ export const MapContext = createContext<MapContextProps>({
 
 export function MapProvider({ children }: { children: React.ReactNode }) {
     const [view, setView] = useState<SceneView | MapView>();
+    const [map, setMap] = useState<__esri.Map>();
     const [activeLayers, setActiveLayers] = useState<__esri.Collection<__esri.Layer>>();
     const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "000.000", y: "000.000" });
     const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -78,13 +81,15 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     async function loadMap(container: HTMLDivElement, { zoom, center }: { zoom: number, center: [number, number] }, layers: LayerProps[]) {
         if (view) return;
         const { init } = await import("@/lib/mapping-utils")
-        setView(init(container, isMobile, { zoom, center }, layers, 'map'));
+        const { view: initView, map } = init(container, isMobile, { zoom, center }, layers, 'map')
+        setView(initView);
+        setMap(map);
     }
 
 
 
     return (
-        <MapContext.Provider value={{ view, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates, isSketching, setIsSketching }}>
+        <MapContext.Provider value={{ view, map, loadMap, activeLayers, setActiveLayers, isMobile, setIsMobile, isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates, isSketching, setIsSketching }}>
             {children}
         </MapContext.Provider>
     )
