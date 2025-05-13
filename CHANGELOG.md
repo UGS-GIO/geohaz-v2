@@ -1,3 +1,18 @@
+## [1.9.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.8.0...v1.9.0) (2025-05-13)
+
+
+### ccus
+
+* **✨ Features**(`ccus`): add cores, ccus_co2_sources, ccus_wsa, ccus_sitla_reports layers ([#222](https://github.com/UGS-GIO/geohaz-v2/issues/222))
+
+### common
+
+* **♻️ Refactors**(`common`): ensure all legend symbol icons are aligned ([#221](https://github.com/UGS-GIO/geohaz-v2/issues/221))* **👷 CI/CD**(`common`): make changelog include commit type ([#219](https://github.com/UGS-GIO/geohaz-v2/issues/219))* **♻️ Refactors**(`common`): make useFetchLayerDescriptions more dynamic by page ([#223](https://github.com/UGS-GIO/geohaz-v2/issues/223))* **👷 CI/CD**(`common`): relax the commit length rules ([#217](https://github.com/UGS-GIO/geohaz-v2/issues/217))* **✨ Features**(`common`): turn on layers when searching for in searchbox ([#227](https://github.com/UGS-GIO/geohaz-v2/issues/227))
+
+### wetlands
+
+* **✨ Features**(`wetlands`): added popup info ([#224](https://github.com/UGS-GIO/geohaz-v2/issues/224))* **✨ Features**(`wetlands`): added popup info ([#226](https://github.com/UGS-GIO/geohaz-v2/issues/226))
+
 ## [1.8.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.7.0...v1.8.0) (2025-05-02)
 
 
