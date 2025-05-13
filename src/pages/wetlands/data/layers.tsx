@@ -30,18 +30,18 @@ const wetMetaConfig: WMSLayerProps = {
                     transform: (value: string) => {
                         if (value === 'None') {
                             const transformedValues = {
-                                href: '#',
-                                label: `Not currently available`
+                                href: '',
+                                label: 'Not currently available'
                             };
                             return [transformedValues];
                         } else {
-                        // the value is a url that needs to be transformed into href and label for the link
-                        const parts = value.split("/").pop()
-                        const transformedValues = {
-                            href: value,
-                            label: `${parts}`
-                        };
-                        return [transformedValues];
+                            // the value is a url that needs to be transformed into href and label for the link
+                            const parts = value.split("/").pop()
+                            const transformedValues = {
+                                href: value,
+                                label: `${parts}`
+                            };
+                            return [transformedValues];
                         }
                     }
                 }
