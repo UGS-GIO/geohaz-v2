@@ -419,7 +419,6 @@ const huc12ecoConfig: WMSLayerProps = {
                     baseUrl: '',
                     transform: (value: string) => {
                         // if the value is blank, change it to null
-                        // const data = (transformedValues = ' ') ? transformedValues : null;
                         // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
