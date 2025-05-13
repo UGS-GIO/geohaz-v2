@@ -1,13 +1,9 @@
 import { MapWidgets } from '@/pages/ccus/components/map-widgets';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
-import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
 import { useMapContainer } from "@/hooks/use-map-container";
 
 export default function ArcGISMap() {
-    const layerOrderConfigs: LayerOrderConfig[] = [
-    ];
-
     const {
         mapRef,
         contextMenuTriggerRef,
@@ -23,7 +19,6 @@ export default function ArcGISMap() {
         setCoordinates,
     } = useMapContainer({
         wmsUrl: 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms',
-        layerOrderConfigs
     });
 
     return (
