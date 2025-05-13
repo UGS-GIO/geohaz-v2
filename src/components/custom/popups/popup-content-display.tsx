@@ -158,6 +158,13 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                     {hrefs.map((item, index) => {
                         if (item.href === null) {
                             return null;
+                        } else if (item.href === '') {
+                            // If the href is empty, just display the label
+                            return (
+                                <div key={`${item.href}-${index}`} className="flex gap-2">
+                                    <span className="break-all inline-block">{item.label}</span>
+                                </div>
+                            );
                         }
 
                         return (
