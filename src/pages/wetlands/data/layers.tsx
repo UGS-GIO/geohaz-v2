@@ -36,7 +36,7 @@ const wetMetaConfig: WMSLayerProps = {
                             return [transformedValues];
                         } else {
                             // the value is a url that needs to be transformed into href and label for the link
-                            const parts = value.split("/").pop()
+                            const parts = value.split("/").pop() || 'Unknown';
                             const transformedValues = {
                                 href: value,
                                 label: `${parts}`
