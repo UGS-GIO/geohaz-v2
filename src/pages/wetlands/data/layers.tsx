@@ -346,8 +346,8 @@ const wetlandsWMSConfig: LayerProps = {
                 'Stressors Medium (%)': { field: 'pct_med_overall_stress', type: 'string' },
                 'Stressors High (%)': { field: 'pct_high_overall_stress', type: 'string' },
                 'Stressors Very High (%)': { field: 'pct_very_high_overall_stress', type: 'string' },
-                'Mean Relative Native Plant Cover (%)': { field: 'mean_rel_native_cover', type: 'string' },
-                'Mean Absolute Noxious Plant Cover (%)': { field: 'mean_abs_nox_cover', type: 'string' }
+                'Mean Relative Native Plant Cover (%)': { field: 'mean_rel_native_cov', type: 'string' },
+                'Mean Absolute Noxious Plant Cover (%)': { field: 'mean_abs_nox_cov', type: 'string' }
             }
         }
     ]
@@ -422,7 +422,7 @@ const huc12ecoConfig: WMSLayerProps = {
                         // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
-                            label: `open in a new tab`
+                            label: `Open in a new tab`
                         };
                         return [transformedValues];
                     }
@@ -458,7 +458,7 @@ const huc12Config: WMSLayerProps = {
                         // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
-                            label: `open in a new tab`
+                            label: `Open in a new tab`
                         };
                         return [transformedValues];
                     }
@@ -494,7 +494,7 @@ const huc8ecoConfig: WMSLayerProps = {
                         // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
-                            label: `open in a new tab`
+                            label: `Open in a new tab`
                         };
                         return [transformedValues];
                     }
@@ -530,7 +530,7 @@ const huc8Config: WMSLayerProps = {
                         // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
-                            label: `open in a new tab`
+                            label: `Open in a new tab`
                         };
                         return [transformedValues];
                     }
