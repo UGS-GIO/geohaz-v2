@@ -117,8 +117,12 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
             });
 
             if (featureInfo) {
+                // Filter out layers that are not visible
+                var filteredVisibleLayersMap = Object.fromEntries(Object.entries(visibleLayersMap).filter(([_key, value]) => {
+                    return value.visible === true;
+                }));
                 const layerInfo = await Promise.all(
-                    Object.entries(visibleLayersMap).map(async ([key, value]): Promise<any> => {
+                    Object.entries(filteredVisibleLayersMap).map(async ([key, value]): Promise<any> => {
                         const baseLayerInfo: any = {
                             visible: value.visible,
                             layerTitle: value.layerTitle,
