@@ -362,9 +362,13 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
+                'API': { field: 'apishort', type: 'string' },
+                'UWI': { field: 'uwi', type: 'string' },
                 'Well Name': { field: 'well_name', type: 'string' },
-                'Type': { field: 'type', type: 'string' },
-                'County': { field: 'county_long', type: 'string' },
+                'Sample Types': { field: 'all_type', type: 'string' },
+                'Purpose': { field: 'purpose_description', type: 'string' },
+                'Cored Formations': { field: 'formation', type: 'string' },   //should autohide if empty
+                // Additional information is available from the Utah Core Research Center Inventory 
             },
         }
     ],
@@ -384,8 +388,10 @@ const co2SourcesWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Facility Name': { field: 'facility_name', type: 'string' },
-                'Reporting Year': { field: 'reporting_year', type: 'string' },
                 'Description': { field: 'description', type: 'string' },
+                'Greenhouse Gas Emissions': { field: 'ghg_quantity__metric_tons_co2e', type: 'string' },
+                // add metric tons CO<sub>2</sub>
+                'Reporting Year': { field: 'year', type: 'string' },
             },
         }
     ],
@@ -404,8 +410,10 @@ const wildernessStudyAreasWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'NLCS Name': { field: 'nlcs_name', type: 'string' },
+                'Name': { field: 'nlcs_name', type: 'string' },
+                'Type': { field: 'wsa_values', type: 'string' },
                 'NLCS ID': { field: 'nlcs_id', type: 'string' },
+                'WSA Number ': { field: 'wsa_number', type: 'string' }
             },
         }
     ],
@@ -426,8 +434,42 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Name': { field: 'new_block_', type: 'string' },
+                'Ranking': { field: 'ranking', type: 'string' }, 
                 'Description': { field: 'description', type: 'string' },
+                'Report': { field: 'linktoreport', type: 'string' }
             },
+            linkFields: {
+                'linktoreport': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        if (value === 'None') {
+                            const transformedValues = {
+                                href: '',
+                                label: 'Not currently available'
+                            };
+                            return [transformedValues];
+                        } else {
+                            const transformedValues = {
+                                href: value,
+                                label: `View`
+                            };
+                            return [transformedValues];
+                        }
+                    }
+                },
+                'ranking': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        if (value === 'None') {
+                            const transformedValues = {
+                                href: '',
+                                label: 'Not evaluated'
+                            };
+                            return [transformedValues];
+                        } 
+                    }
+                },
+            }
         }
     ],
 };
