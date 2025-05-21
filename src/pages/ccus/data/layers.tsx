@@ -294,7 +294,7 @@ const faultsWMSConfig: WMSLayerProps = {
                 'Scale': {
                     field: 'scale',
                     type: 'string',
-                    transform: (value: string) => {
+                    transform: (value) => {
                         if (value === 'small') return '1:500,000'
                         return ''
                     }
@@ -434,7 +434,16 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Name': { field: 'new_block_', type: 'string' },
-                'Ranking': { field: 'ranking', type: 'string' }, 
+                'Ranking': {
+                    field: 'ranking', type: 'string',
+                    transform: (value) => {
+                        if (value === 'None' || value === null) {
+                            return 'Not evaluated';
+                        } else {
+                            return value;
+                        }
+                    }
+                },
                 'Description': { field: 'description', type: 'string' },
                 'Report': { field: 'linktoreport', type: 'string' }
             },
@@ -455,18 +464,6 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
                             };
                             return [transformedValues];
                         }
-                    }
-                },
-                'ranking': {
-                    baseUrl: '',
-                    transform: (value: string) => {
-                        if (value === 'None') {
-                            const transformedValues = {
-                                href: '',
-                                label: 'Not evaluated'
-                            };
-                            return [transformedValues];
-                        } 
                     }
                 },
             }

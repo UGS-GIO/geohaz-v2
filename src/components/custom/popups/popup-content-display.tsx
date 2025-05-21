@@ -282,56 +282,72 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
     }[] = [];
 
     // Process feature fields while keeping track of original order
-    featureEntries.forEach(([label, field], index) => {
-        // Special handling for custom field (in both linkFields and popupFields)
-        if (field && field.field === 'custom') {
+    featureEntries.forEach(([label, fieldFromEntry], index) => {
+        // Special handling for 'custom' field (its transform takes the whole 'properties' object)
+        if (fieldFromEntry && typeof fieldFromEntry === 'object' && 'field' in fieldFromEntry && fieldFromEntry.field === 'custom') {
+            const customConfig = fieldFromEntry as FieldConfig; // Assuming fieldFromEntry is the FieldConfig for custom
+            let transformedCustomValue = '';
+            if (customConfig.transform) {
+                // Assuming the intent is to call this transform specifically with null
+                transformedCustomValue = customConfig.transform(null);
+            }
+
             const content = (
                 <div key={`feature-${index}`} className="flex flex-col">
                     <p className="font-bold underline text-primary">{label}</p>
                     <div className="break-words">
-                        {linkFields?.['custom']
-                            ? createLink('', 'custom')  // For custom field in linkFields
-                            : (popupFields && field.transform ? field.transform(properties) : '') // Regular handling if it's in popupFields
+                        {linkFields?.['custom'] && linkFields['custom'].transform && fieldFromEntry.field === 'custom'
+                            ? createLink(properties[fieldFromEntry.field] ?? '', 'custom') // Pass original value or empty string to createLink for custom linkFields
+                            : transformedCustomValue
                         }
-                        {linkFields?.['custom'] && field.transform && field.transform(properties)}
                     </div>
                 </div>
             );
 
-            const isLongContent = String(field.transform(properties)).split(/\s+/).length > 20;
+            const isLongContent = String(transformedCustomValue).split(/\s+/).length > 20;
             contentItems.push({ content, isLongContent, originalIndex: index });
             return;
         }
 
-        const fieldConfig = popupFields ? field : { field, type: 'string' as const };
+        const fieldConfig: FieldConfig = (popupFields && typeof fieldFromEntry === 'object' && fieldFromEntry !== null && 'type' in fieldFromEntry)
+            ? fieldFromEntry // Already a FieldConfig from popupFields
+            : { field: String(fieldFromEntry), type: 'string' }; // Default config for other cases
 
-        // Special handling for raster value
-        const value = label === `${rasterSource?.valueLabel}`
-            ? rasterSource?.transform ? rasterSource.transform(rasterValue) : rasterValue
-            : properties[fieldConfig.field];
+        let finalDisplayValue: string;
 
-        if (value === null || value === ' ') {
+        if (label === `${rasterSource?.valueLabel}`) {
+            // Handle Raster Value
+            const currentRasterValue = rasterValue;
+            finalDisplayValue = rasterSource?.transform
+                ? rasterSource.transform(currentRasterValue)
+                : String(currentRasterValue ?? ''); // Default to empty string if rasterValue is null/undefined
+        } else {
+            const rawPropertyValue = properties[fieldConfig.field];
+
+            if (fieldConfig.transform && rawPropertyValue === null) {
+                // rawPropertyValue is null, use transform so we can display a default value that is set in the layer config
+                finalDisplayValue = fieldConfig.transform(null);
+            } else {
+                finalDisplayValue = processFieldValue(fieldConfig, rawPropertyValue);
+            }
+        }
+
+        // Skip rendering if the processed value is considered not displayable
+        if (!shouldDisplayValue(finalDisplayValue)) {
             return;
         }
 
-        const processedValue = processFieldValue(fieldConfig, value);
-
-        // Skip if the value shouldn't be displayed
-        if (!shouldDisplayValue(processedValue)) {
-            return;
-        }
-
+        // Create the content for display
         const content = (
-            <div key={`feature-${index}`} className="flex flex-col" style={applyColor(fieldConfig.field, processedValue)}>
+            <div key={`feature-${index}`} className="flex flex-col" style={applyColor(fieldConfig.field, finalDisplayValue)}>
                 <p className="font-bold underline text-primary">{label}</p>
                 <p className="break-words">
-                    {createLink(processedValue, fieldConfig.field)}
+                    {createLink(finalDisplayValue, typeof fieldConfig.field === 'string' ? fieldConfig.field : label)}
                 </p>
             </div>
         );
 
-        // Check if this is long content
-        const isLongContent = String(processedValue).split(/\s+/).length > 20;
+        const isLongContent = String(finalDisplayValue).split(/\s+/).length > 20;
         contentItems.push({ content, isLongContent, originalIndex: index });
     });
 
