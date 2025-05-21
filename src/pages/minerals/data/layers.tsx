@@ -382,11 +382,14 @@ const miningDistrictsConfig: WMSLayerProps = {
                         const numValue = parseFloat(value);
                         if (isNaN(numValue)) return value;
 
-                        // Format with commas and 2 decimal places
-                        return numValue.toLocaleString('en-US', {
+                        const localStr = numValue.toLocaleString('en-US', {
                             style: 'currency',
                             currency: 'USD',
                         });
+
+
+                        // Format with commas and 2 decimal places
+                        return localStr
                     }
                 },
             },

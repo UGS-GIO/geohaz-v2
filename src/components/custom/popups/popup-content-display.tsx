@@ -42,14 +42,14 @@ const processFieldValue = (field: FieldConfig, value: unknown): string => {
     if (isNumberField(field)) {
         const numberValue = Number(value);
         if (field.transform) {
-            return field.transform(numberValue);
+            return field.transform(numberValue) || '';
         }
         return getDefaultTransform(field)(numberValue);
     }
 
     // String field
     if (field.transform) {
-        return field.transform(String(value));
+        return field.transform(String(value)) || '';
     }
 
     return String(value);
@@ -289,7 +289,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
             let transformedCustomValue = '';
             if (customConfig.transform) {
                 // Assuming the intent is to call this transform specifically with null
-                transformedCustomValue = customConfig.transform(null);
+                transformedCustomValue = customConfig.transform(null) || '';
             }
 
             const content = (
@@ -326,7 +326,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
             if (fieldConfig.transform && rawPropertyValue === null) {
                 // rawPropertyValue is null, use transform so we can display a default value that is set in the layer config
-                finalDisplayValue = fieldConfig.transform(null);
+                finalDisplayValue = fieldConfig.transform(null) || '';
             } else {
                 finalDisplayValue = processFieldValue(fieldConfig, rawPropertyValue);
             }

@@ -50,7 +50,7 @@ interface BaseFieldConfig {
 // String-specific field configuration
 interface StringFieldConfig extends BaseFieldConfig {
     type: 'string';
-    transform?: (value: string | null) => string;
+    transform?: (value: string | null) => string | null;
 }
 
 // Number-specific field configuration
@@ -58,7 +58,7 @@ export interface NumberFieldConfig extends BaseFieldConfig {
     type: 'number';
     decimalPlaces?: number;
     unit?: string;
-    transform?: (value: number | null) => string;
+    transform?: (value: number | null) => string | null;
 }
 
 // Union type of all possible field configurations
