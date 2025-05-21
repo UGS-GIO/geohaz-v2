@@ -67,7 +67,10 @@ const wetNonRiverineConfig: WMSLayerProps = {
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
                 'Acres': {
                     field: 'acres', type: 'number',
-                    transform: (value: number) => {
+                    transform: (value) => {
+                        if (value === null) {
+                            return null;
+                        }
                         return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
                     }
                 },
@@ -95,7 +98,10 @@ const riverineConfig: WMSLayerProps = {
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
                 'Acres': {
                     field: 'acres', type: 'number',
-                    transform: (value: number) => {
+                    transform: (value) => {
+                        if (value === null) {
+                            return null;
+                        }
                         return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
                     }
                 },
@@ -173,7 +179,10 @@ const
                     'Riparian Type': { field: 'wetland_type', type: 'string' },
                     'Acres': {
                         field: 'acres', type: 'number',
-                        transform: (value: number) => {
+                        transform: (value) => {
+                            if (value === null) {
+                                return null;
+                            }
                             return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
                         }
                     },
