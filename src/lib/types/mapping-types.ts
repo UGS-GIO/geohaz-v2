@@ -7,6 +7,7 @@ import TileLayer from "@arcgis/core/layers/TileLayer"
 import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
+import { GeoJsonProperties } from "geojson"
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -44,25 +45,33 @@ export type RasterValueMetadata = Pick<RasterSource, 'valueField' | 'valueLabel'
 interface BaseFieldConfig {
     label?: string;
     field: string;
-    type: 'string' | 'number';
+    type: 'string' | 'number' | 'custom';
 }
 
 // String-specific field configuration
-interface StringFieldConfig extends BaseFieldConfig {
+export interface StringPopupFieldConfig extends BaseFieldConfig {
     type: 'string';
     transform?: (value: string | null) => string | null;
 }
 
 // Number-specific field configuration
-export interface NumberFieldConfig extends BaseFieldConfig {
+export interface NumberPopupFieldConfig extends BaseFieldConfig {
     type: 'number';
+    // 'field' here is the key of the property in feature.properties
     decimalPlaces?: number;
     unit?: string;
     transform?: (value: number | null) => string | null;
 }
 
-// Union type of all possible field configurations
-export type FieldConfig = StringFieldConfig | NumberFieldConfig;
+// Custom-specific field configuration
+export interface CustomPopupFieldConfig extends BaseFieldConfig {
+    type: 'custom';
+    field: 'custom';
+    transform?: (properties: GeoJsonProperties | null | undefined) => string;
+}
+
+// Your main FieldConfig is a discriminated union of these specific types
+export type FieldConfig = StringPopupFieldConfig | NumberPopupFieldConfig | CustomPopupFieldConfig;
 
 type CustomSublayerProps = {
     popupFields?: Record<string, FieldConfig>; // Maps field labels to attribute names

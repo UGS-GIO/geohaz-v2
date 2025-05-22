@@ -286,9 +286,12 @@ const faultsWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Description': {
                     field: 'custom',
-                    type: 'string',
-                    transform: (popupFields: any) => {
-                        return `${popupFields['subtype']} ${popupFields['type']}, ${popupFields['modifier']}`;
+                    type: 'custom',
+                    transform: (props) => {
+                        const subtype = props?.['subtype'];
+                        const type = props?.['type'];
+                        const modifier = props?.['modifier'];
+                        return `${subtype} ${type}, ${modifier}`;
                     }
                 },
                 'Scale': {
