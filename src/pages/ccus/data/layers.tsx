@@ -1,6 +1,7 @@
 import { Link } from "@/components/custom/link";
 import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
+import { addCommas } from "@/lib/utils";
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -368,19 +369,30 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 'API': { field: 'apishort', type: 'string' },
                 'UWI': { field: 'uwi', type: 'string' },
                 'Well Name': { field: 'well_name', type: 'string' },
-                'Depth': { field: 'depth', type: 'string' },
+                'Depth': {
+                    field: 'custom', type: 'custom',
+                    transform: (props) => {
+                        const top = props?.['top_ft'];
+                        const bottom = props?.['bottom_ft'];
+                        const topFt = addCommas(top);
+                        const bottomFt = addCommas(bottom);
+                        return `${topFt} - ${bottomFt} ft`;
+                    }
+                },
                 'Sample Types': { field: 'all_types', type: 'string' },
                 'Purpose': { field: 'purpose_description', type: 'string' },
-                'Cored Formations': { field: 'formation', type: 'string' },   
-                'Additional information is available from the ': { 
-                    field: 'custom', type: 'string',
+                // add the depth field 
+                'Cored Formations': { field: 'formation', type: 'string' },
+                'Additional information is available from the ': {
+                    field: 'custom',
+                    type: 'string',
                     transform: () => {
                         return 'Utah Core Research Center Inventory';
-                            // const transformedValues = {
-                            //     href: 'https://geology.utah.gov/apps/rockcore/',
-                            //     label: 'Utah Core Research Center Inventory'
-                            // };
-                            // return [transformedValues];
+                        // const transformedValues = {
+                        //     href: 'https://geology.utah.gov/apps/rockcore/',
+                        //     label: 'Utah Core Research Center Inventory'
+                        // };
+                        // return [transformedValues];
                     }
                 }
             }
@@ -403,7 +415,16 @@ const co2SourcesWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Facility Name': { field: 'facility_name', type: 'string' },
                 'Description': { field: 'description', type: 'string' },
-                'Greenhouse Gas Emissions': { field: 'ghg_quantity__metric_tons_co2e', type: 'string' },
+                'Greenhouse Gas Emissions': {
+                    field: 'ghg_quantity__metric_tons_co2e_',
+                    type: 'string',
+                    transform: (value) => {
+                        if (value === null) {
+                            return 'No Data';
+                        }
+                        return addCommas(value);
+                    }
+                },
                 // add metric tons CO<sub>2</sub>
                 'Reporting Year': { field: 'reporting_year', type: 'string' },
             },
