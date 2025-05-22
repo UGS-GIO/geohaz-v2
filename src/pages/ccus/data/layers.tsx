@@ -365,11 +365,22 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 'API': { field: 'apishort', type: 'string' },
                 'UWI': { field: 'uwi', type: 'string' },
                 'Well Name': { field: 'well_name', type: 'string' },
-                'Sample Types': { field: 'all_type', type: 'string' },
+                'Depth': { field: 'depth', type: 'string' },
+                'Sample Types': { field: 'all_types', type: 'string' },
                 'Purpose': { field: 'purpose_description', type: 'string' },
-                'Cored Formations': { field: 'formation', type: 'string' },   //should autohide if empty
-                // Additional information is available from the Utah Core Research Center Inventory 
-            },
+                'Cored Formations': { field: 'formation', type: 'string' },   
+                'Additional information is available from the ': { 
+                    field: 'custom', type: 'string',
+                    transform: () => {
+                        return 'Utah Core Research Center Inventory';
+                            // const transformedValues = {
+                            //     href: 'https://geology.utah.gov/apps/rockcore/',
+                            //     label: 'Utah Core Research Center Inventory'
+                            // };
+                            // return [transformedValues];
+                    }
+                }
+            }
         }
     ],
 };
@@ -391,7 +402,7 @@ const co2SourcesWMSConfig: WMSLayerProps = {
                 'Description': { field: 'description', type: 'string' },
                 'Greenhouse Gas Emissions': { field: 'ghg_quantity__metric_tons_co2e', type: 'string' },
                 // add metric tons CO<sub>2</sub>
-                'Reporting Year': { field: 'year', type: 'string' },
+                'Reporting Year': { field: 'reporting_year', type: 'string' },
             },
         }
     ],
@@ -445,7 +456,7 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
                     }
                 },
                 'Description': { field: 'description', type: 'string' },
-                'Report': { field: 'linktoreport', type: 'string' }
+                'Report': { field: 'linktoreport', type: 'string' },
             },
             linkFields: {
                 'linktoreport': {
