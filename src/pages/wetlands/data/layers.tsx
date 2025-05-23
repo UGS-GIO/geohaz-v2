@@ -69,7 +69,10 @@ const wetNonRiverineConfig: WMSLayerProps = {
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
                 'Acres': {
                     field: 'acres', type: 'number',
-                    transform: (value: number) => {
+                    transform: (value) => {
+                        if (value === null) {
+                            return null;
+                        }
                         return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
                     }
                 },
@@ -98,7 +101,10 @@ const riverineConfig: WMSLayerProps = {
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
                 'Acres': {
                     field: 'acres', type: 'number',
-                    transform: (value: number) => {
+                    transform: (value) => {
+                        if (value === null) {
+                            return null;
+                        }
                         return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
                     }
                 },
@@ -178,7 +184,10 @@ const
                     'Riparian Type': { field: 'wetland_type', type: 'string' },
                     'Acres': {
                         field: 'acres', type: 'number',
-                        transform: (value: number) => {
+                        transform: (value) => {
+                            if (value === null) {
+                                return null;
+                            }
                             return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
                         }
                     },
@@ -427,8 +436,6 @@ const huc12ecoConfig: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // if the value is blank, change it to null
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
@@ -464,7 +471,6 @@ const huc12Config: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
@@ -500,7 +506,6 @@ const huc8ecoConfig: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
@@ -536,7 +541,6 @@ const huc8Config: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`

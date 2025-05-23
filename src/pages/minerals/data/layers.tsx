@@ -1,7 +1,8 @@
 import { PROD_GEOSERVER_URL, ENERGY_MINERALS_WORKSPACE } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
+import { addCommas } from "@/lib/utils";
 
-// Industrial Minerals WMS Layer Configurations
+// --- Industrial Minerals WMS Layer Configurations ---
 const aluniteLayerName = 'metalmineralapp_im_alunite';
 const aluniteWMSTitle = 'Alunite';
 const aluniteWMSConfig: WMSLayerProps = {
@@ -18,18 +19,21 @@ const aluniteWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Name': { field: 'name', type: 'string' },
                 'Deposit Type': { field: 'deposit_type', type: 'string' },
+                '': {
+                    field: 'info_link',
+                    type: 'custom',
+                    transform: () => 'Alunite Information'
+                },
             },
             linkFields: {
-                'custom': { // use 'custom' to create a custom hardcoded link
-                    baseUrl: '',
-                    transform: () => {
+                'info_link': {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Alunite.pdf'
                             }
                         ];
-
                     }
                 }
             },
@@ -53,14 +57,18 @@ const bentoniteWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
                 'Unit Name': { field: 'unitname', type: 'string' },
+                '': {
+                    field: 'info_link',
+                    type: 'custom',
+                    transform: () => 'Bentonite Information'
+                },
             },
             linkFields: {
-                'custom': { // use 'custom' to create a custom hardcoded link
-                    baseUrl: '',
-                    transform: () => {
+                'info_link': {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Bentonite.pdf'
                             }
                         ]
@@ -86,15 +94,19 @@ const dolomiteWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unitname', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' },
+                '': {
+                    field: 'info_link',
+                    type: 'custom',
+                    transform: () => 'Dolomite Information'
+                },
             },
             linkFields: {
-                'custom': { // use 'custom' to create a custom hardcoded link
-                    baseUrl: '',
-                    transform: () => {
+                'info_link': {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Dolomite.pdf'
                             }
                         ];
@@ -120,15 +132,19 @@ const gypsumWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unitname', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' },
+                '': {
+                    field: 'info_link',
+                    type: 'custom',
+                    transform: () => 'Gypsum Information'
+                },
             },
             linkFields: {
-                'custom': { // use 'custom' to create a custom hardcoded link
-                    baseUrl: '',
-                    transform: () => {
+                'info_link': {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Gypsum.pdf'
                             }
                         ];
@@ -154,15 +170,19 @@ const limestoneWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unitname', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' },
+                '': {
+                    field: 'info_link',
+                    type: 'custom',
+                    transform: () => 'Limestone Information'
+                },
             },
             linkFields: {
-                'custom': { // use 'custom' to create a custom hardcoded link
-                    baseUrl: '',
-                    transform: () => {
+                'info_link': {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Limestone.pdf'
                             }
                         ];
@@ -188,15 +208,19 @@ const phosphateWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unitname', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' },
+                '': {
+                    field: 'info_link',
+                    type: 'custom',
+                    transform: () => 'Phosphate Information'
+                },
             },
             linkFields: {
-                'custom': { // use 'custom' to create a custom hardcoded link
-                    baseUrl: '',
-                    transform: () => {
+                'info_link': {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Phosphate.pdf'
                             }
                         ];
@@ -222,20 +246,24 @@ const potashWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Name': { field: 'name', type: 'string' },
-                'Deposit Type': { field: 'deposit_type', type: 'string' }
+                'Deposit Type': { field: 'deposit_type', type: 'string' },
+                '': {
+                    field: 'info_link',
+                    type: 'custom',
+                    transform: () => 'Potash Information'
+                },
             },
             linkFields: {
-                'custom': { // use 'custom' to create a custom hardcoded link
-                    baseUrl: '',
-                    transform: () => {
+                'info_link': {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Potash.pdf'
                             }
                         ];
                     }
-                }
+                },
             }
         }
     ]
@@ -256,15 +284,19 @@ const silicaWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
-                'Unit Name': { field: 'unitname', type: 'string' }
+                'Unit Name': { field: 'unitname', type: 'string' },
+                '': {
+                    field: 'info_link',
+                    type: 'custom',
+                    transform: () => 'Silica Information'
+                },
             },
             linkFields: {
-                'custom': { // use 'custom' to create a custom hardcoded link
-                    baseUrl: '',
-                    transform: () => {
+                'info_link': {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Silica.pdf'
                             }
                         ];
@@ -275,7 +307,7 @@ const silicaWMSConfig: WMSLayerProps = {
     ]
 };
 
-// Industrial Minerals Group Layer
+// --- Industrial Minerals Group Layer ---
 const industrialMineralsGroupConfig: LayerProps = {
     type: 'group',
     title: 'Industrial Mineral Resource Potential',
@@ -292,7 +324,7 @@ const industrialMineralsGroupConfig: LayerProps = {
     ]
 };
 
-// Critical Minerals WMS Layer Configurations
+// --- Critical Minerals WMS Layer Configurations ---
 const criticalMineralOccurrencesWMSLayerName = 'metalmineralapp_criticalmineralpoints';
 const criticalMineralOccurrencesWMSTitle = 'Critical Mineral Occurrences';
 const criticalMineralOccurrencesWMSConfig: WMSLayerProps = {
@@ -310,11 +342,11 @@ const criticalMineralOccurrencesWMSConfig: WMSLayerProps = {
                 'Commodity': { field: 'commodity', type: 'string' },
                 'Label': { field: 'label', type: 'string' }
             }
+
         }
     ]
 };
 
-// Critical Minerals Areas WMS Layer Configurations
 const criticalMineralsAreasWMSLayerName = 'metalmineralapp_criticalmineralpolygons';
 const criticalMineralsAreasWMSTitle = 'Critical Mineral Areas';
 const criticalMineralsAreasWMSConfig: WMSLayerProps = {
@@ -333,11 +365,12 @@ const criticalMineralsAreasWMSConfig: WMSLayerProps = {
                 'Commodity': { field: 'commodity', type: 'string' },
                 'Label': { field: 'label', type: 'string' }
             }
+
         }
     ]
 };
 
-// Critical Minerals group layer
+// --- Critical Minerals group layer ---
 const criticalMineralsGroupConfig: LayerProps = {
     type: 'group',
     title: 'Critical Minerals',
@@ -347,6 +380,8 @@ const criticalMineralsGroupConfig: LayerProps = {
         criticalMineralOccurrencesWMSConfig
     ]
 };
+
+// --- Other Layers ---
 
 const miningDistrictsLayerName = 'metalmineralapp_mining_districts';
 const miningDistrictsTitle = 'Metalliferous Mining Districts';
@@ -367,22 +402,17 @@ const miningDistrictsConfig: WMSLayerProps = {
                 'Productive': { field: 'productive', type: 'string' },
                 'Short Tons': {
                     field: 'short_tons', type: 'string', transform: (value) => {
-                        // if value is 0, return empty string so popup doesn't show the field
-                        if (value === '0') return '';
-                        return value;
+                        if (value === '0' || !value) return null;
+                        return addCommas(value);
                     },
                 },
                 'Total Dollar Value': {
                     field: 'total_dollar_value',
                     type: 'string',
                     transform: (value) => {
-                        if (!value) return value;
-
-                        // Convert to number, round to 2 decimal places
+                        if (!value || value === '0') return null;
                         const numValue = parseFloat(value);
                         if (isNaN(numValue)) return value;
-
-                        // Format with commas and 2 decimal places
                         return numValue.toLocaleString('en-US', {
                             style: 'currency',
                             currency: 'USD',
@@ -415,18 +445,21 @@ const umosWMSConfig: WMSLayerProps = {
                 'Deposit Size': { field: 'dep_size', type: 'string' },
                 'Mining District': { field: 'district', type: 'string' },
                 'County': { field: 'county', type: 'string' },
+                '': {
+                    field: 'info_link',
+                    type: 'custom',
+                    transform: () => 'UMOS Explanation'
+                },
             },
             linkFields: {
-                'custom': { // use 'custom' to create a custom hardcoded link
-                    baseUrl: '',
-                    transform: () => {
+                'info_link': {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'UMOS Explanation',
+                                label: `${value}`,
                                 href: 'https://geology.utah.gov/apps/blm_mineral/appfiles/UMOS%20Explanation.pdf'
                             }
                         ];
-
                     }
                 }
             },
@@ -448,18 +481,20 @@ const landAssessmentWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'WSA': { field: 'wsa', type: 'string' },
-                '': { field: 'url', type: 'string' },
+                'URL': { field: 'url', type: 'string' }, // Keep this field, but maybe hide if desired
             },
             linkFields: {
-                'url': {
-                    baseUrl: '',
+                'url': { // This links based on the 'url' field value
                     transform: (value) => {
-                        return [
-                            {
-                                label: 'Download Mineral Land Assessment for Wilderness Study Area',
-                                href: value
-                            }
-                        ];
+                        if (value && typeof value === 'string' && value.startsWith('http')) {
+                            return [
+                                {
+                                    label: 'Download Mineral Land Assessment for Wilderness Study Area',
+                                    href: value
+                                }
+                            ];
+                        }
+                        return []; // Return empty array if no valid URL
                     }
                 }
             }
@@ -467,7 +502,7 @@ const landAssessmentWMSConfig: WMSLayerProps = {
     ],
 }
 
-// SITLA Land Ownership Layer
+// --- SITLA Land Ownership Layer ---
 const SITLAConfig: LayerProps = {
     type: 'feature',
     url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
@@ -480,6 +515,7 @@ const SITLAConfig: LayerProps = {
     },
 };
 
+// --- Final Export ---
 const layersConfig: LayerProps[] = [
     umosWMSConfig,
     criticalMineralsGroupConfig,

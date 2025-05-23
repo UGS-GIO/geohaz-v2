@@ -1,10 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { useRelatedTable } from "@/hooks/use-related-table";
-import { Feature, Geometry, GeoJsonProperties } from "geojson";
+import { ProcessedRelatedData, useRelatedTable } from "@/hooks/use-related-table";
+import { Feature, Geometry, GeoJsonProperties, FeatureCollection } from "geojson";
 import { ExternalLink } from "lucide-react";
 import { LayerContentProps } from "@/components/custom/popups/popup-content-with-pagination";
 import { Link } from "@/components/custom/link";
-import { FieldConfig, NumberFieldConfig } from "@/lib/types/mapping-types";
+import {
+    FieldConfig,
+    StringPopupFieldConfig,
+    NumberPopupFieldConfig,
+    CustomPopupFieldConfig,
+    RasterValueMetadata,
+    LinkFields,
+    ColorCodingRecordFunction,
+    RelatedTable,
+    LinkConfig,
+    LinkDefinition
+} from "@/lib/types/mapping-types";
 
 type PopupContentDisplayProps = {
     layer: LayerContentProps;
@@ -12,391 +23,285 @@ type PopupContentDisplayProps = {
     layout?: "grid" | "stacked";
 };
 
-// Type guard for number fields
-const isNumberField = (field: FieldConfig): field is NumberFieldConfig =>
-    field.type === 'number';
+interface LabelValuePair { label: string; value: string | number; }
 
-// Utility function to format numbers with significant figures
+// --- Type Guards ---
+const isNumberField = (field: FieldConfig | undefined): field is NumberPopupFieldConfig =>
+    !!field && field.type === 'number';
+
+const isStringField = (field: FieldConfig | undefined): field is StringPopupFieldConfig =>
+    !!field && field.type === 'string';
+
+const isCustomField = (field: FieldConfig | undefined): field is CustomPopupFieldConfig =>
+    !!field && field.type === 'custom';
+
+// --- Utility Functions ---
 const formatWithSigFigs = (value: number, decimalPlaces: number): string => {
     if (isNaN(value)) return 'N/A';
     return Number(value.toFixed(decimalPlaces)).toString();
 };
 
-// Default transforms based on field configuration
-const getDefaultTransform = (config: NumberFieldConfig): ((value: number) => string) => {
+const getDefaultTransform = (config: NumberPopupFieldConfig): ((value: number) => string) => {
     return (value: number) => {
+        const numericValue = typeof value === 'number' && !isNaN(value) ? value : 0;
         let formatted = config.decimalPlaces
-            ? formatWithSigFigs(value, config.decimalPlaces)
-            : value.toString();
+            ? formatWithSigFigs(numericValue, config.decimalPlaces)
+            : numericValue.toString();
 
         if (config.unit) {
             formatted += ` ${config.unit}`;
         }
-
         return formatted;
     };
 };
 
-// Process field value with type safety
-const processFieldValue = (field: FieldConfig, value: unknown): string => {
-    if (isNumberField(field)) {
-        const numberValue = Number(value);
+const processFieldValue = (field: StringPopupFieldConfig | NumberPopupFieldConfig, rawValue: unknown): string => {
+    if (field.type === 'number') {
+        const numberForTransform = rawValue === null ? null : Number(rawValue);
+        const numberForDefault = Number(rawValue ?? 0);
+
         if (field.transform) {
-            return field.transform(numberValue);
+            return field.transform(numberForTransform) || '';
         }
-        return getDefaultTransform(field)(numberValue);
+        return getDefaultTransform(field)(numberForDefault);
     }
 
-    // String field
     if (field.transform) {
-        return field.transform(String(value));
+        return field.transform(rawValue === null ? null : String(rawValue)) || '';
     }
-
-    return String(value);
+    return String(rawValue ?? '');
 };
 
+const getRasterFeatureValue = (rasterSource: (FeatureCollection<Geometry, GeoJsonProperties> & RasterValueMetadata) | undefined) => {
+    if (!rasterSource) return null;
+    const valueField = rasterSource.valueField;
+    if ('type' in rasterSource && rasterSource.type === 'FeatureCollection') {
+        return rasterSource.features[0]?.properties?.[valueField];
+    }
+    if (Array.isArray(rasterSource.features)) {
+        return rasterSource.features[0]?.properties?.[valueField];
+    }
+    return null;
+};
+
+const applyColor = (colorCodingMap: ColorCodingRecordFunction | undefined, fieldKey: string, value: string | number) => {
+    if (colorCodingMap && colorCodingMap[fieldKey]) {
+        const colorFunction = colorCodingMap[fieldKey];
+        return { color: colorFunction(value) };
+    }
+    return {};
+};
+
+const getRelatedTableValues = (groupedLayerIndex: number, data: ProcessedRelatedData[][], relatedTables: RelatedTable[] | undefined, properties: { [name: string]: any; }): LabelValuePair[][] => {
+    if (!data?.length) return [[{ label: "", value: "No data available" }]];
+    const groupedValues: LabelValuePair[][] = [];
+    const table = relatedTables?.[groupedLayerIndex];
+    if (!table) return [[{ label: "Invalid index", value: "Invalid index" }]];
+    const targetField = properties[table.targetField];
+    if (data[groupedLayerIndex]) {
+        const tableMatches: LabelValuePair[] = [];
+        (data[groupedLayerIndex] as any[]).forEach((item: any) => {
+            if (String(item[table.matchingField]) === String(targetField) && item.labelValuePairs) {
+                tableMatches.push(...item.labelValuePairs);
+            }
+        });
+        if (tableMatches.length > 0) groupedValues.push(tableMatches);
+    }
+    return groupedValues.length ? groupedValues : [[{ label: "", value: "No data available" }]];
+};
+
+const shouldDisplayValue = (value: string): boolean => {
+    if (value === null || value === undefined) return false;
+    const trimmedValue = String(value).trim();
+    return !(trimmedValue === '' || trimmedValue.toLowerCase() === 'null' || trimmedValue.toLowerCase() === 'undefined');
+};
+
+// --- Refactored Link/Content Rendering ---
+const renderFieldContent = (
+    value: string,
+    fieldKey: string,
+    properties: GeoJsonProperties | undefined,
+    linkFields: LinkFields | undefined,
+    urlPattern: RegExp
+): JSX.Element | string => {
+
+    const linkConfig: LinkConfig | undefined = linkFields?.[fieldKey];
+    const props = properties || {};
+
+    // 1. Check for specific Link Configuration
+    if (linkConfig) {
+        // Use transform if available, otherwise generate based on baseUrl.
+        // Ensure properties are passed if transform needs them.
+        const hrefs: LinkDefinition[] = linkConfig.transform
+            ? linkConfig.transform(value, props)
+            : (linkConfig.baseUrl ? [{ label: value, href: `${linkConfig.baseUrl}${value}` }] : [{ label: value, href: null }]);
+
+        return (
+            <>
+                {hrefs.map((item, i) => {
+                    if (item.href === null || item.href === '') {
+                        return <div key={`${item.label}-${i}`}><span className="break-all inline-block">{item.label}</span></div>;
+                    }
+                    return (
+                        <div key={`${item.href}-${i}`} className="flex gap-2">
+                            <Link
+                                to={item.href}
+                                className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
+                                variant='primary'
+                            >
+                                <span className="break-all inline-block">{item.label}</span>
+                                <ExternalLink className="flex-shrink-0 ml-1" size={16} />
+                            </Link>
+                        </div>
+                    );
+                })}
+            </>
+        );
+    }
+
+    // 2. Check for generic URL pattern
+    if (urlPattern.test(value)) {
+        return (
+            <Button
+                className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-start max-w-full"
+                variant="link"
+                onClick={() => window.open(value, '_blank')}
+            >
+                <span className="break-all inline-block">{value}</span>
+                <ExternalLink className="flex-shrink-0 ml-1 mt-1" size={16} />
+            </Button>
+        );
+    }
+
+    // 3. Fallback: Display as plain text
+    return value ?? "N/A";
+};
+
+// --- Main Component ---
 const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProps) => {
     const { relatedTables, popupFields, linkFields, colorCodingMap, rasterSource } = layer;
     const { data, isLoading, error } = useRelatedTable(relatedTables || [], feature || null);
 
-    // Extract raster value if it exists
-    const getRasterValue = () => {
-        if (!rasterSource) return null;
-        const valueField = rasterSource.valueField;
+    const rasterValue = getRasterFeatureValue(rasterSource);
 
-        // Handle full FeatureCollection response
-        if ('type' in rasterSource && rasterSource.type === 'FeatureCollection') {
-            const value = rasterSource.features[0]?.properties?.[valueField];
-            return value;
-        }
-
-        // Handle features array response
-        if (Array.isArray(rasterSource.features)) {
-            const value = rasterSource.features[0]?.properties?.[valueField];
-            return value;
-        }
-
-        return null;
-    };
-
-    const rasterValue = getRasterValue();
-
-    // Loading and error states
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error: {String(error)}</p>;
 
-    // If we only have raster data and no feature
+    // Handle Raster-Only Display
     if (!feature && rasterValue !== null && rasterSource !== undefined) {
-        let value = rasterSource.transform ? rasterSource.transform(rasterValue) : rasterSource.features[0]?.properties?.[rasterSource.valueField];
+        let displayValue = rasterSource.transform
+            ? rasterSource.transform(rasterValue)
+            : rasterSource.features[0]?.properties?.[rasterSource.valueField];
         return (
             <div className="space-y-4">
                 <div className="flex flex-col">
                     <p className="font-bold underline text-primary">{rasterSource?.valueLabel}</p>
-                    <p className="break-words">{value}</p>
+                    <p className="break-words">{String(displayValue ?? 'N/A')}</p>
                 </div>
             </div>
         );
     }
 
-    // Return null if no feature and no raster value
     if (!feature) return null;
 
     const properties = feature.properties || {};
     const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/;
 
-    // Helper function to apply color based on the field value
-    const applyColor = (field: string, value: string | number) => {
-        if (colorCodingMap && colorCodingMap[field]) {
-            const colorFunction = colorCodingMap[field];
-            return { color: colorFunction(value) };
-        }
-        return {};
-    };
+    const sourceEntries: Array<[string, any]> = popupFields
+        ? Object.entries(popupFields)
+        : Object.entries(properties);
 
-    const createLink = (value: string, field: string) => {
-        // Check if we have a special 'custom' key in linkFields
-        if (linkFields?.['custom']) {
-            const customLinks = linkFields['custom'];
-
-            if (field === 'custom' && customLinks.transform) {
-                const hrefs = customLinks.transform(value);
-
-                return (
-                    <>
-                        {hrefs.map((item, index) => {
-                            if (item.href === null) {
-                                return null;
-                            }
-
-                            return (
-                                <div key={`${item.href}-${index}`} className="flex gap-2">
-                                    <Link
-                                        to={item.href}
-                                        className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
-                                        variant='primary'
-                                    >
-                                        <span className="break-all inline-block">{item.label}</span>
-                                        <ExternalLink className="flex-shrink-0 ml-1" size={16} />
-                                    </Link>
-                                </div>
-                            )
-                        })}
-                    </>
-                );
-            }
-        }
-
-        const linkConfig = linkFields?.[field];
-
-        if (linkConfig) {
-            const hrefs = linkConfig.transform
-                ? linkConfig.transform(value)
-                : [{ label: value, href: `${linkConfig.baseUrl}${value}` }];
-
-            return (
-                <>
-                    {hrefs.map((item, index) => {
-                        if (item.href === null) {
-                            return null;
-                        } else if (item.href === '') {
-                            // If the href is empty, just display the label
-                            return (
-                                <div key={`${item.href}-${index}`} className="flex gap-2">
-                                    <span className="break-all inline-block">{item.label}</span>
-                                </div>
-                            );
-                        }
-
-                        return (
-                            <div key={`${item.href}-${index}`} className="flex gap-2">
-                                <Link
-                                    to={item.href}
-                                    className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
-                                    variant='primary'
-                                >
-                                    <span className="break-all inline-block">{item.label}</span>
-                                    <ExternalLink className="flex-shrink-0 ml-1" size={16} />
-                                </Link>
-                            </div>
-                        )
-                    })}
-                </>
-            );
-        }
-
-        if (urlPattern.test(value)) {
-            return (
-                <Button
-                    className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-start max-w-full"
-                    variant="link"
-                    onClick={() => window.open(value, '_blank')}
-                >
-                    <span className="break-all inline-block">{value}</span>
-                    <ExternalLink className="flex-shrink-0 ml-1 mt-1" size={16} />
-                </Button>
-            );
-        }
-
-        return value ?? "N/A";
-    };
-
-    interface LabelValuePair {
-        label: string;
-        value: string | number;
-    }
-
-    const getRelatedTableValues = (groupedLayerIndex: number) => {
-        if (!data?.length) {
-            return [[{ label: "", value: "No data available" }]];
-        }
-
-        const groupedValues: LabelValuePair[][] = [];
-
-        // Check if the provided groupedLayerIndex is valid
-        const table = relatedTables?.[groupedLayerIndex];
-        if (!table) {
-            return [[{ label: "Invalid index", value: "Invalid index" }]];
-        }
-
-        // Get the target value for matching for the specific table
-        const targetField = properties[table.targetField];
-
-        // Process the related table for the provided groupedLayerIndex
-        if (data[groupedLayerIndex]) {
-            // Create a new group for this table's matches
-            const tableMatches: LabelValuePair[] = [];
-
-            data[groupedLayerIndex].forEach((item) => {
-                // Convert both to strings before comparing
-                if (String(item[table.matchingField]) === String(targetField) && item.labelValuePairs) {
-                    // Add these pairs to this table's matches
-                    tableMatches.push(...item.labelValuePairs);
-                }
-            });
-
-            // Only add non-empty matches to the grouped values
-            if (tableMatches.length > 0) {
-                groupedValues.push(tableMatches);
-            }
-        }
-
-        return groupedValues.length
-            ? groupedValues
-            : [[{ label: "", value: "No data available" }]];
-    };
-
-    // Get entries from popupFields or properties
-    const baseFeatureEntries = popupFields ? Object.entries(popupFields) : Object.entries(properties);
-
-    // Use the same entries but handle special cases while preserving order
-    const featureEntries = baseFeatureEntries.map(([label, field]) => {
-        // For each entry in baseFeatureEntries, check if we need to replace it with a special field
-        if (linkFields?.['custom'] && field.field === 'custom') {
-            // If this is a custom field with linkFields['custom'], use the original entry to preserve position
-            return [label, { field: 'custom', type: 'string' }];
-        }
-        return [label, field];
+    // Simplified mapping - No special 'custom' link check here.
+    const mappedFeatureEntries = sourceEntries.map(([label, configOrValue]) => {
+        return [label, configOrValue] as [string, any];
     });
 
-    // Only add raster value at the end if it exists
     if (rasterValue !== null && rasterSource?.valueLabel) {
-        featureEntries.push([`${rasterSource.valueLabel}`, rasterValue]);
+        mappedFeatureEntries.push([rasterSource.valueLabel, rasterValue]);
     }
 
-    const shouldDisplayValue = (value: string): boolean => {
-        // Cases where we don't want to display the value:
-        const isEmptyOrWhitespace = value.trim() === '';
-        const isNullOrUndefined = value === 'null' || value === 'undefined';
+    const contentItems: { content: JSX.Element; isLongContent: boolean; originalIndex: number; }[] = [];
 
-        // We want to display the value if it's not empty/whitespace/null/undefined
-        // This naturally handles '0' as a valid value to display
-        return !isEmptyOrWhitespace && !isNullOrUndefined;
-    };
+    mappedFeatureEntries.forEach(([label, entryData], index) => {
+        let currentConfig: FieldConfig | undefined = undefined;
+        let isRasterEntry = false;
+        let valueFromPropertiesDirectly: any = undefined;
 
-    // Create an ordered array of content sections that maintains the original order
-    // but still separates long content for better display
-    const contentItems: {
-        content: JSX.Element;
-        isLongContent: boolean;
-        originalIndex: number;
-    }[] = [];
-
-    // Process feature fields while keeping track of original order
-    featureEntries.forEach(([label, field], index) => {
-        // Special handling for custom field (in both linkFields and popupFields)
-        if (field && field.field === 'custom') {
-            const content = (
-                <div key={`feature-${index}`} className="flex flex-col">
-                    <p className="font-bold underline text-primary">{label}</p>
-                    <div className="break-words">
-                        {linkFields?.['custom']
-                            ? createLink('', 'custom')  // For custom field in linkFields
-                            : (popupFields && field.transform ? field.transform(properties) : '') // Regular handling if it's in popupFields
-                        }
-                        {linkFields?.['custom'] && field.transform && field.transform(properties)}
-                    </div>
-                </div>
-            );
-
-            const isLongContent = String(field.transform(properties)).split(/\s+/).length > 20;
-            contentItems.push({ content, isLongContent, originalIndex: index });
-            return;
+        if (label === rasterSource?.valueLabel && entryData === rasterValue) {
+            isRasterEntry = true;
+        } else if (popupFields) {
+            currentConfig = entryData as FieldConfig;
+        } else {
+            valueFromPropertiesDirectly = entryData;
+            currentConfig = { field: label, type: 'string', label } as StringPopupFieldConfig;
         }
 
-        const fieldConfig = popupFields ? field : { field, type: 'string' as const };
+        let finalDisplayValue: string;
+        const fieldKey = currentConfig?.field || label;
 
-        // Special handling for raster value
-        const value = label === `${rasterSource?.valueLabel}`
-            ? rasterSource?.transform ? rasterSource.transform(rasterValue) : rasterValue
-            : properties[fieldConfig.field];
-
-        if (value === null || value === ' ') {
-            return;
+        if (isRasterEntry) {
+            finalDisplayValue = rasterSource?.transform
+                ? rasterSource.transform(rasterValue) || ''
+                : String(rasterValue ?? '');
+        } else if (currentConfig && isCustomField(currentConfig)) {
+            finalDisplayValue = currentConfig.transform?.(properties) || '';
+        } else if (currentConfig && (isStringField(currentConfig) || isNumberField(currentConfig))) {
+            const rawValue = popupFields ? properties[currentConfig.field] : valueFromPropertiesDirectly;
+            finalDisplayValue = processFieldValue(currentConfig, rawValue);
+        } else {
+            finalDisplayValue = String(entryData ?? '');
         }
 
-        const processedValue = processFieldValue(fieldConfig, value);
-
-        // Skip if the value shouldn't be displayed
-        if (!shouldDisplayValue(processedValue)) {
+        if (!shouldDisplayValue(finalDisplayValue)) {
             return;
         }
 
         const content = (
-            <div key={`feature-${index}`} className="flex flex-col" style={applyColor(fieldConfig.field, processedValue)}>
+            <div key={`feature-item-${label}-${index}`} className="flex flex-col" style={applyColor(colorCodingMap, fieldKey, finalDisplayValue)}>
                 <p className="font-bold underline text-primary">{label}</p>
                 <p className="break-words">
-                    {createLink(processedValue, fieldConfig.field)}
+                    {renderFieldContent(finalDisplayValue, fieldKey, properties, linkFields, urlPattern)}
                 </p>
             </div>
         );
 
-        // Check if this is long content
-        const isLongContent = String(processedValue).split(/\s+/).length > 20;
+        const isLongContent = String(finalDisplayValue).split(/\s+/).length > 20;
         contentItems.push({ content, isLongContent, originalIndex: index });
     });
 
-    // Process related table content
+    // Handle Related Tables
     (relatedTables || []).forEach((table, tableIndex) => {
-        const groupedValues = getRelatedTableValues(tableIndex);
-
-        const content = (
-            <div key={`related-${tableIndex}`} className="flex flex-col space-y-2">
+        const groupedValues = getRelatedTableValues(tableIndex, data, relatedTables, properties);
+        const relatedContent = (
+            <div key={`related-${table.fieldLabel}-${tableIndex}`} className="flex flex-col space-y-2">
                 <p className="font-bold underline text-primary">
                     {properties[table.fieldLabel] || table.fieldLabel}
                 </p>
                 {groupedValues.map((group, groupIdx) => (
-                    <div key={groupIdx} className="flex flex-col">
-                        {group.map((value, valueIdx) => (
-                            <div key={valueIdx} className="flex flex-row gap-x-2">
-                                {value.label && <span className="font-bold">{value.label}: </span>}
-                                <span>{value.value}</span>
+                    <div key={`group-${groupIdx}`} className="flex flex-col">
+                        {group.map((valueItem, valueIdx) => (
+                            <div key={`value-${valueItem.label}-${valueIdx}`} className="flex flex-row gap-x-2">
+                                {valueItem.label && <span className="font-bold">{valueItem.label}: </span>}
+                                <span>{valueItem.value}</span>
                             </div>
                         ))}
                     </div>
                 ))}
             </div>
         );
-
-        // Calculate total words across all groups
-        const totalWords = groupedValues
-            .flat()
-            .map(v => String(v.value))
-            .join(" ")
-            .split(/\s+/).length;
-
-        const isLongContent = totalWords > 20;
-        // Use a high index for related content to ensure it comes after feature content
-        contentItems.push({
-            content,
-            isLongContent,
-            originalIndex: 1000 + tableIndex
-        });
+        const totalWords = groupedValues.flat().map(v => String(v.value)).join(" ").split(/\s+/).length;
+        contentItems.push({ content: relatedContent, isLongContent: totalWords > 20, originalIndex: 1000 + tableIndex });
     });
 
-    // Separate long content and regular content while preserving original order within each group
-    const longContent = contentItems
-        .filter(item => item.isLongContent)
-        .sort((a, b) => a.originalIndex - b.originalIndex)
-        .map(item => item.content);
-
-    const regularContent = contentItems
-        .filter(item => !item.isLongContent)
-        .sort((a, b) => a.originalIndex - b.originalIndex)
-        .map(item => item.content);
-
+    // --- Layout Rendering ---
+    const longContent = contentItems.filter(item => item.isLongContent).sort((a, b) => a.originalIndex - b.originalIndex).map(item => item.content);
+    const regularContent = contentItems.filter(item => !item.isLongContent).sort((a, b) => a.originalIndex - b.originalIndex).map(item => item.content);
     const useGridLayout = layout === "grid" || regularContent.length > 5;
 
     return (
         <div className="space-y-4">
-            {longContent.length > 0 && (
-                <div className="space-y-4 col-span-full">
-                    {longContent}
-                </div>
-            )}
-
-            <div className={useGridLayout ? "grid grid-cols-2 gap-4" : "space-y-4"}>
-                {regularContent}
-            </div>
+            {longContent.length > 0 && <div className="space-y-4 col-span-full">{longContent}</div>}
+            <div className={useGridLayout ? "grid grid-cols-2 gap-4" : "space-y-4"}>{regularContent}</div>
         </div>
     );
 };
