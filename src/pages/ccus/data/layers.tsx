@@ -370,10 +370,15 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 'UWI': { field: 'uwi', type: 'string' },
                 'Well Name': { field: 'well_name', type: 'string' },
                 'Depth': {
-                    field: 'custom', type: 'custom',
+                    field: 'depth_display',
+                    type: 'custom',
                     transform: (props) => {
                         const top = props?.['top_ft'];
                         const bottom = props?.['bottom_ft'];
+
+                        if (top == null || bottom == null) {
+                            return 'Depth N/A';
+                        }
                         const topFt = addCommas(top);
                         const bottomFt = addCommas(bottom);
                         return `${topFt} - ${bottomFt} ft`;
@@ -381,18 +386,22 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 },
                 'Sample Types': { field: 'all_types', type: 'string' },
                 'Purpose': { field: 'purpose_description', type: 'string' },
-                // add the depth field 
                 'Cored Formations': { field: 'formation', type: 'string' },
-                'Additional information is available from the ': {
-                    field: 'custom',
-                    type: 'string',
+                '': {
+                    field: 'inventory_link',
+                    type: 'custom',
+                    transform: () => 'Utah Core Research Center Inventory'
+                },
+            },
+            linkFields: {
+                'inventory_link': {
                     transform: () => {
-                        return 'Utah Core Research Center Inventory';
-                        // const transformedValues = {
-                        //     href: 'https://geology.utah.gov/apps/rockcore/',
-                        //     label: 'Utah Core Research Center Inventory'
-                        // };
-                        // return [transformedValues];
+                        return [
+                            {
+                                label: 'Utah Core Research Center Inventory',
+                                href: 'https://geology.utah.gov/apps/rockcore/'
+                            }
+                        ];
                     }
                 }
             }
