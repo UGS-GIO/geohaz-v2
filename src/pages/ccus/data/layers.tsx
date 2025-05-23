@@ -386,7 +386,7 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 },
                 'Sample Types': { field: 'all_types', type: 'string' },
                 'Purpose': { field: 'purpose_description', type: 'string' },
-                'Cored Formations': { field: 'formation', type: 'string' },
+                'Formation': { field: 'formation', type: 'string' },
                 '': {
                     field: 'inventory_link',
                     type: 'custom',
@@ -395,10 +395,10 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'inventory_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Utah Core Research Center Inventory',
+                                label: `${value}`,
                                 href: 'https://geology.utah.gov/apps/rockcore/'
                             }
                         ];
@@ -431,10 +431,9 @@ const co2SourcesWMSConfig: WMSLayerProps = {
                         if (value === null) {
                             return 'No Data';
                         }
-                        return addCommas(value);
+                        return `${addCommas(value)} mtCO₂e`;
                     }
                 },
-                // add metric tons CO<sub>2</sub>
                 'Reporting Year': { field: 'reporting_year', type: 'string' },
             },
         }
@@ -462,7 +461,6 @@ const wildernessStudyAreasWMSConfig: WMSLayerProps = {
         }
     ],
 };
-
 
 const sitlaReportsLayerName = 'ccus_sitla_reports';
 const sitlaReportsWMSTitle = 'SITLA Reports';
