@@ -19,7 +19,7 @@ const aluniteWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Name': { field: 'name', type: 'string' },
                 'Deposit Type': { field: 'deposit_type', type: 'string' },
-                'Layer Information': {
+                '': {
                     field: 'info_link',
                     type: 'custom',
                     transform: () => 'Alunite Information'
@@ -57,7 +57,7 @@ const bentoniteWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
                 'Unit Name': { field: 'unitname', type: 'string' },
-                'Layer Information': {
+                '': {
                     field: 'info_link',
                     type: 'custom',
                     transform: () => 'Bentonite Information'
@@ -95,7 +95,7 @@ const dolomiteWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
                 'Unit Name': { field: 'unitname', type: 'string' },
-                'Layer Information': {
+                '': {
                     field: 'info_link',
                     type: 'custom',
                     transform: () => 'Dolomite Information'
@@ -133,7 +133,7 @@ const gypsumWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
                 'Unit Name': { field: 'unitname', type: 'string' },
-                'Layer Information': {
+                '': {
                     field: 'info_link',
                     type: 'custom',
                     transform: () => 'Gypsum Information'
@@ -171,7 +171,7 @@ const limestoneWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
                 'Unit Name': { field: 'unitname', type: 'string' },
-                'Layer Information': {
+                '': {
                     field: 'info_link',
                     type: 'custom',
                     transform: () => 'Limestone Information'
@@ -209,7 +209,7 @@ const phosphateWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
                 'Unit Name': { field: 'unitname', type: 'string' },
-                'Layer Information': {
+                '': {
                     field: 'info_link',
                     type: 'custom',
                     transform: () => 'Phosphate Information'
@@ -247,14 +247,14 @@ const potashWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Name': { field: 'name', type: 'string' },
                 'Deposit Type': { field: 'deposit_type', type: 'string' },
-                'Layer Information': { // Updated for consistency
+                '': {
                     field: 'info_link',
                     type: 'custom',
                     transform: () => 'Potash Information'
                 },
             },
             linkFields: {
-                'info_link': { // Updated for consistency
+                'info_link': {
                     transform: () => {
                         return [
                             {
@@ -285,7 +285,7 @@ const silicaWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Age': { field: 'age', type: 'string' },
                 'Unit Name': { field: 'unitname', type: 'string' },
-                'Layer Information': {
+                '': {
                     field: 'info_link',
                     type: 'custom',
                     transform: () => 'Silica Information'
@@ -445,7 +445,7 @@ const umosWMSConfig: WMSLayerProps = {
                 'Deposit Size': { field: 'dep_size', type: 'string' },
                 'Mining District': { field: 'district', type: 'string' },
                 'County': { field: 'county', type: 'string' },
-                'Layer Information': {
+                '': {
                     field: 'info_link',
                     type: 'custom',
                     transform: () => 'UMOS Explanation'
