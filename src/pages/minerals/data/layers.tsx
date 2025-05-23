@@ -27,10 +27,10 @@ const aluniteWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'info_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Alunite.pdf'
                             }
                         ];
@@ -65,10 +65,10 @@ const bentoniteWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'info_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Bentonite.pdf'
                             }
                         ]
@@ -103,10 +103,10 @@ const dolomiteWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'info_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Dolomite.pdf'
                             }
                         ];
@@ -141,10 +141,10 @@ const gypsumWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'info_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Gypsum.pdf'
                             }
                         ];
@@ -179,10 +179,10 @@ const limestoneWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'info_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Limestone.pdf'
                             }
                         ];
@@ -217,10 +217,10 @@ const phosphateWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'info_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Phosphate.pdf'
                             }
                         ];
@@ -255,10 +255,10 @@ const potashWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'info_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Potash.pdf'
                             }
                         ];
@@ -293,10 +293,10 @@ const silicaWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'info_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'Layer Information',
+                                label: `${value}`,
                                 href: 'https://ugspub.nr.utah.gov/publications/blm_mineral_resources/Silica.pdf'
                             }
                         ];
@@ -453,10 +453,10 @@ const umosWMSConfig: WMSLayerProps = {
             },
             linkFields: {
                 'info_link': {
-                    transform: () => {
+                    transform: (value) => {
                         return [
                             {
-                                label: 'UMOS Explanation',
+                                label: `${value}`,
                                 href: 'https://geology.utah.gov/apps/blm_mineral/appfiles/UMOS%20Explanation.pdf'
                             }
                         ];

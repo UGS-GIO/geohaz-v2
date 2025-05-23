@@ -489,11 +489,10 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
                     }
                 },
                 'Description': { field: 'description', type: 'string' },
-                'Report': { field: 'linktoreport', type: 'string' },
+                '': { field: 'linktoreport', type: 'string', transform: (value) => value },
             },
             linkFields: {
                 'linktoreport': {
-                    baseUrl: '',
                     transform: (value: string) => {
                         if (value === 'None') {
                             const transformedValues = {
@@ -504,7 +503,7 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
                         } else {
                             const transformedValues = {
                                 href: value,
-                                label: `View`
+                                label: `Report`
                             };
                             return [transformedValues];
                         }

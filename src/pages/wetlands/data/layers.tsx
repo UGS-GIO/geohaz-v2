@@ -427,8 +427,6 @@ const huc12ecoConfig: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // if the value is blank, change it to null
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
@@ -464,7 +462,6 @@ const huc12Config: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
@@ -500,7 +497,6 @@ const huc8ecoConfig: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
@@ -536,7 +532,6 @@ const huc8Config: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
