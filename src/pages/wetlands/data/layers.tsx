@@ -12,6 +12,7 @@ const wetMetaConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: wetMetaTitle,
     visible: false,
+    opacity: 0.75,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${wetMetaLayerName}`,
@@ -57,6 +58,7 @@ const wetNonRiverineConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: wetNonRiverineTitle,
     visible: true,
+    opacity: 0.75,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${wetNonRiverineLayerName}`,
@@ -67,7 +69,10 @@ const wetNonRiverineConfig: WMSLayerProps = {
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
                 'Acres': {
                     field: 'acres', type: 'number',
-                    transform: (value: number) => {
+                    transform: (value) => {
+                        if (value === null) {
+                            return null;
+                        }
                         return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
                     }
                 },
@@ -85,6 +90,7 @@ const riverineConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: riverineTitle,
     visible: false,
+    opacity: 0.75,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${riverineLayerName}`,
@@ -95,7 +101,10 @@ const riverineConfig: WMSLayerProps = {
                 'Wetland Type': { field: 'wetland_type', type: 'string' },
                 'Acres': {
                     field: 'acres', type: 'number',
-                    transform: (value: number) => {
+                    transform: (value) => {
+                        if (value === null) {
+                            return null;
+                        }
                         return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
                     }
                 },
@@ -123,8 +132,9 @@ const ripMetaTitle = 'Riparian Project Information';
 const ripMetaConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
-    visible: false,
     title: ripMetaTitle,
+    visible: false,
+    opacity: 0.75,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${ripMetaLayerName}`,
@@ -163,6 +173,7 @@ const
         url: `${PROD_GEOSERVER_URL}/wms`,
         title: ripDataTitle,
         visible: true,
+        opacity: 0.75,
         sublayers: [
             {
                 name: `${WETLANDS_WORKSPACE}:${ripDataLayerName}`,
@@ -173,7 +184,10 @@ const
                     'Riparian Type': { field: 'wetland_type', type: 'string' },
                     'Acres': {
                         field: 'acres', type: 'number',
-                        transform: (value: number) => {
+                        transform: (value) => {
+                            if (value === null) {
+                                return null;
+                            }
                             return (Math.round((value + Number.EPSILON) * 100) / 100).toString();
                         }
                     },
@@ -202,6 +216,7 @@ const llwwMappingConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: llwwMappingTitle,
     visible: true,
+    opacity: 0.75,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${llwwMappingLayerName}`,
@@ -229,6 +244,7 @@ const cacheProjectsConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: cacheProjectsTitle,
     visible: true,
+    opacity: 0.75,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${cacheProjectsLayerName}`,
@@ -275,6 +291,7 @@ const hydricSoilsConfig: LayerProps = {
     url: "https://utility.arcgis.com/usrsvcs/servers/771b11ef2a574ce9a3a2351b758498fa/rest/services/USA_Soils_Hydric_Class/ImageServer",
     title: hydricSoilsTitle,
     visible: false,
+    opacity: 0.7,
 };
 */
 
@@ -327,6 +344,7 @@ const wetlandsWMSConfig: LayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: wetlandsWMSTitle,
     visible: false,
+    opacity: 0.6,
     sublayers: [
         {
             name: `${WETLANDS_WORKSPACE}:${wetlandsWMSLayerName}`,
@@ -359,8 +377,8 @@ const stressorsTitle = 'Wetland Stressors';
 const stressorsConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
-    visible: false,
     title: stressorsTitle,
+    visible: false,
     opacity: 0.6,
     sublayers: [
         {
@@ -418,8 +436,6 @@ const huc12ecoConfig: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // if the value is blank, change it to null
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
@@ -455,7 +471,6 @@ const huc12Config: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
@@ -491,7 +506,6 @@ const huc8ecoConfig: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
@@ -527,7 +541,6 @@ const huc8Config: WMSLayerProps = {
                 'surface_water_plot': {
                     baseUrl: '',
                     transform: (value: string) => {
-                        // the value is a url that needs to be transformed into href and label for the link
                         const transformedValues = {
                             href: value,
                             label: `Open in a new tab`
