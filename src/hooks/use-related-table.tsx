@@ -11,7 +11,7 @@ interface LabelValuePair {
     value: any;
 }
 
-interface ProcessedRelatedData extends RelatedData {
+export interface ProcessedRelatedData extends RelatedData {
     labelValuePairs?: LabelValuePair[];
 }
 
