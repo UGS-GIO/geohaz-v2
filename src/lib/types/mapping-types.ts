@@ -7,6 +7,7 @@ import TileLayer from "@arcgis/core/layers/TileLayer"
 import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
+import { GeoJsonProperties } from "geojson"
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -19,13 +20,19 @@ interface BaseLayerProps {
     opacity?: number;
 }
 
-export interface LinkField {
-    baseUrl: string;
-    transform?: (id: any) => { label: string, href: string }[];
+
+export interface LinkDefinition {
+    label: string;
+    href: string | null;
 }
 
-export type LinkFields = {
-    [key: string]: LinkField;
+export interface LinkConfig {
+    baseUrl?: string;
+    transform?: (value: any, properties?: GeoJsonProperties) => LinkDefinition[];
+}
+
+export interface LinkFields {
+    [fieldKey: string]: LinkConfig;
 };
 
 export type ColorCodingRecordFunction = Record<string, (value: string | number) => string>;
@@ -44,25 +51,30 @@ export type RasterValueMetadata = Pick<RasterSource, 'valueField' | 'valueLabel'
 interface BaseFieldConfig {
     label?: string;
     field: string;
-    type: 'string' | 'number';
+    type: 'string' | 'number' | 'custom';
 }
 
 // String-specific field configuration
-interface StringFieldConfig extends BaseFieldConfig {
+export interface StringPopupFieldConfig extends BaseFieldConfig {
     type: 'string';
     transform?: (value: string) => string;
 }
 
 // Number-specific field configuration
-export interface NumberFieldConfig extends BaseFieldConfig {
+export interface NumberPopupFieldConfig extends BaseFieldConfig {
     type: 'number';
     decimalPlaces?: number;
     unit?: string;
     transform?: (value: number) => string;
 }
 
-// Union type of all possible field configurations
-export type FieldConfig = StringFieldConfig | NumberFieldConfig;
+export interface CustomPopupFieldConfig extends BaseFieldConfig {
+    type: 'custom';
+    field: 'custom';
+    transform?: (properties: GeoJsonProperties | null | undefined) => string;
+}
+
+export type FieldConfig = StringPopupFieldConfig | NumberPopupFieldConfig | CustomPopupFieldConfig;
 
 type CustomSublayerProps = {
     popupFields?: Record<string, FieldConfig>; // Maps field labels to attribute names
