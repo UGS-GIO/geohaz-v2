@@ -55,9 +55,9 @@ const getDefaultTransform = (config: NumberPopupFieldConfig): ((value: number) =
     };
 };
 
-const processFieldValue = (field: StringPopupFieldConfig | NumberPopupFieldConfig, rawValue: unknown): string => {
+const processFieldValue = (field: StringPopupFieldConfig | NumberPopupFieldConfig, rawValue: string): string => {
     if (field.type === 'number') {
-        const numberForTransform = rawValue === null ? null : Number(rawValue);
+        const numberForTransform = Number(rawValue);
         const numberForDefault = Number(rawValue ?? 0);
 
         if (field.transform) {
@@ -67,7 +67,7 @@ const processFieldValue = (field: StringPopupFieldConfig | NumberPopupFieldConfi
     }
 
     if (field.transform) {
-        return field.transform(rawValue === null ? null : String(rawValue)) || '';
+        return field.transform(rawValue) || '';
     }
     return String(rawValue ?? '');
 };
