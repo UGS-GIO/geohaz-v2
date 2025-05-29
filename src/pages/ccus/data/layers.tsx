@@ -369,6 +369,9 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 'API': { field: 'apishort', type: 'string' },
                 'UWI': { field: 'uwi', type: 'string' },
                 'Well Name': { field: 'well_name', type: 'string' },
+                'Sample Types': { field: 'all_types', type: 'string' },
+                'Purpose': { field: 'purpose_description', type: 'string' },
+                'Operator': { field: 'operator', type: 'string' },
                 'Depth': {
                     field: 'depth_display',
                     type: 'custom',
@@ -384,8 +387,7 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                         return `${topFt} - ${bottomFt} ft`;
                     }
                 },
-                'Sample Types': { field: 'all_types', type: 'string' },
-                'Purpose': { field: 'purpose_description', type: 'string' },
+                'Cored Intervals': { field: 'cored_formation', type: 'string' },
                 'Formation': { field: 'formation', type: 'string' },
                 '': {
                     field: 'inventory_link',
@@ -393,6 +395,25 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                     transform: () => 'Utah Core Research Center Inventory'
                 },
             },
+            relatedTables: [
+                {
+                    fieldLabel: 'Formation Tops',
+                    matchingField: 'api',
+                    targetField: 'apishort',
+                    url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore',
+                    headers: {
+                        "Accept-Profile": 'emp',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'formation_alias', label: 'Formation Name' },
+                        { field: 'formation_depth', label: 'Formation Depth (ft)' },
+                    ],
+                    sortBy: 'formation_depth',
+                    sortDirection: 'asc'
+                },
+            ],
             linkFields: {
                 'inventory_link': {
                     transform: (value) => {
