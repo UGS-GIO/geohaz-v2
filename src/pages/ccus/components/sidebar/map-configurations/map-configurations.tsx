@@ -151,7 +151,7 @@ function MapConfigurations() {
         const isDD = value === "Decimal Degrees";
         if (setIsDecimalDegrees) setIsDecimalDegrees(isDD);
         navigate({
-            search: (prev) => ({ ...prev, coordFmt: isDD ? 'dd' : 'dms' }),
+            search: (prev) => ({ ...prev, coordinateFormat: isDD ? 'dd' : 'dms' }),
             replace: true,
         });
     };

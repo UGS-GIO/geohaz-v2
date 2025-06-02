@@ -39,13 +39,13 @@ export function useMapCoordinates() {
     const lastDecimalCoordinates = useRef<{ x: string; y: string }>({ x: "", y: "" });
 
     useEffect(() => {
-        const urlCoordFmt = search.coordFmt;
+        const urlCoordFmt = search.coordinateFormat;
         if (setContextIsDecimalDegrees) {
             if (urlCoordFmt !== undefined) {
                 setContextIsDecimalDegrees(urlCoordFmt === 'dd');
             }
         }
-    }, [search.coordFmt, setContextIsDecimalDegrees]);
+    }, [search.coordinateFormat, setContextIsDecimalDegrees]);
 
     const locationCoordinateFormat = isDecimalDegrees ? "Decimal Degrees" : "Degrees, Minutes, Seconds";
 
@@ -136,7 +136,7 @@ export function useMapCoordinates() {
             to: ".",
             search: {
                 ...search,
-                coordFmt: newIsDecimalDegrees ? 'dd' : 'dms',
+                coordinateFormat: newIsDecimalDegrees ? 'dd' : 'dms',
             },
             replace: true,
         });
