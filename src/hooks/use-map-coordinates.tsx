@@ -133,10 +133,11 @@ export function useMapCoordinates() {
             setContextIsDecimalDegrees(newIsDecimalDegrees);
         }
         navigate({
+            to: ".",
             search: {
                 ...search,
                 coordFmt: newIsDecimalDegrees ? 'dd' : 'dms',
-            } as any,
+            },
             replace: true,
         });
     }, [setContextIsDecimalDegrees, navigate, search]);
