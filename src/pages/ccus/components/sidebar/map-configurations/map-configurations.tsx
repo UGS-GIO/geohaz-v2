@@ -25,7 +25,7 @@ import { useMapCoordinates } from '@/hooks/use-map-coordinates';
 import { MapContext } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/mapping-utils';
-import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers'; // Assuming this path is correct for the layer title constant
+import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
 
 const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
