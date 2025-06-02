@@ -1,7 +1,7 @@
 import { Link } from "@/components/custom/link";
 import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
-import { addCommas } from "@/lib/utils";
+import { addCommas, toTitleCase } from "@/lib/utils";
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -422,7 +422,7 @@ const co2SourcesWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Facility Name': { field: 'facility_name', type: 'string' },
+                'Facility Name': { field: 'facility_name', type: 'string', transform: (value) => toTitleCase(value || '') },
                 'Description': { field: 'description', type: 'string' },
                 'Greenhouse Gas Emissions': {
                     field: 'ghg_quantity__metric_tons_co2e_',
@@ -435,7 +435,24 @@ const co2SourcesWMSConfig: WMSLayerProps = {
                     }
                 },
                 'Reporting Year': { field: 'reporting_year', type: 'string' },
+                '': {
+                    field: 'inventory_link',
+                    type: 'custom',
+                    transform: () => 'View data from the U.S. Environmental Protection Agency'
+                },
             },
+            linkFields: {
+                'inventory_link': {
+                    transform: (value) => {
+                        return [
+                            {
+                                label: `${value}`,
+                                href: 'https://www.epa.gov/ghgemissions/sources-greenhouse-gas-emissions/'
+                            }
+                        ];
+                    }
+                }
+            }
         }
     ],
 };
