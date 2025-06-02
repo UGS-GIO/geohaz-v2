@@ -1,101 +1,152 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { MapContext } from '@/context/map-provider';
 import { convertDDToDMS } from '@/lib/mapping-utils';
 import * as webMercatorUtils from '@arcgis/core/geometry/support/webMercatorUtils';
 import Point from '@arcgis/core/geometry/Point';
 
-// Custom hook to provide the sidebar context data
+const COORD_PRECISION = 3;
+
+const formatCoord = (coord: number | undefined | null): string => {
+    const num = Number(coord);
+    if (isNaN(num)) return "";
+    return num.toFixed(COORD_PRECISION);
+};
+
+const convertToDisplayFormat = (x: string, y: string, isDD: boolean, convertDDToDMSFn: typeof convertDDToDMS) => {
+    if (!x || !y) return { x: "", y: "" };
+    if (isDD) {
+        return { x, y };
+    } else {
+        const dmsX = convertDDToDMSFn(parseFloat(x), true);
+        const dmsY = convertDDToDMSFn(parseFloat(y));
+        return { x: dmsX, y: dmsY };
+    }
+};
+
 export function useMapCoordinates() {
-
     const context = useContext(MapContext);
-    const { isDecimalDegrees, setIsDecimalDegrees } = context;
-    const [scale, setScale] = useState<number>(context.view?.scale || 0);
-    const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({
-        x: "",
-        y: "",
-    });
-    const lastPointerPosition = useRef<{ x: string; y: string }>({
-        x: "",
-        y: "",
-    });
-    const locationCoordinateFormat = context.isDecimalDegrees ? "Decimal Degrees" : "Degrees, Minutes, Seconds"
+    if (!context) {
+        throw new Error('useMapCoordinates must be used within the scope of MapContextProvider');
+    }
+    const { view, isDecimalDegrees, setIsDecimalDegrees: setContextIsDecimalDegrees, isMobile } = context;
 
-    // Function to convert coordinates based on the format (DD or DMS)
-    const convertCoordinates = useCallback(
-        (x: string, y: string) => {
-            if (isDecimalDegrees) {
-                return { x, y }; // Return decimal degrees
-            } else {
-                const dmsX = convertDDToDMS(parseFloat(x), true);
-                const dmsY = convertDDToDMS(parseFloat(y));
-                return { x: dmsX, y: dmsY }; // Return DMS format
-            }
-        },
-        [isDecimalDegrees]
-    );
+    const navigate = useNavigate();
+    const search = useSearch({ from: '__root__' });
 
-    // Update the coordinates format when `isDecimalDegrees` changes
+    const [scale, setScale] = useState<number>(view?.scale || 0);
+    const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "", y: "" });
+    const lastDecimalCoordinates = useRef<{ x: string; y: string }>({ x: "", y: "" });
+
     useEffect(() => {
-        const { x, y } = lastPointerPosition.current;
-        const convertedCoords = convertCoordinates(x, y);
-        setCoordinates(convertedCoords);
-    }, [isDecimalDegrees, convertCoordinates, lastPointerPosition, setCoordinates]);
+        const urlCoordFmt = search.coordFmt;
+        if (setContextIsDecimalDegrees) {
+            if (urlCoordFmt !== undefined) {
+                setContextIsDecimalDegrees(urlCoordFmt === 'dd');
+            }
+        }
+    }, [search.coordFmt, setContextIsDecimalDegrees]);
 
+    const locationCoordinateFormat = isDecimalDegrees ? "Decimal Degrees" : "Degrees, Minutes, Seconds";
 
-    // Update coordinates when pointer moves or zoom changes for desktop view
+    useEffect(() => {
+        const { x, y } = lastDecimalCoordinates.current;
+        if (x && y) {
+            setCoordinates(convertToDisplayFormat(x, y, isDecimalDegrees, convertDDToDMS));
+        }
+    }, [isDecimalDegrees]);
+
+    const updateDisplayedCoordinatesAndScale = useCallback((point: __esri.Point | nullish, currentScale: number) => {
+        if (point && typeof point.x === 'number' && typeof point.y === 'number') {
+            const geoPoint = webMercatorUtils.webMercatorToGeographic(point) as Point;
+            if (geoPoint && typeof geoPoint.x === 'number' && typeof geoPoint.y === 'number') {
+                lastDecimalCoordinates.current = {
+                    x: formatCoord(geoPoint.x),
+                    y: formatCoord(geoPoint.y),
+                };
+                setCoordinates(convertToDisplayFormat(lastDecimalCoordinates.current.x, lastDecimalCoordinates.current.y, isDecimalDegrees, convertDDToDMS));
+            }
+        }
+        setScale(currentScale);
+    }, [isDecimalDegrees]);
+
     const handleDesktopViewChange = useCallback(
-        ({ view }: { view: __esri.MapView | __esri.SceneView }) => {
+        (currentView: __esri.MapView | __esri.SceneView) => {
             let zoomWatcher: __esri.WatchHandle;
             let pointerMoveHandler: __esri.WatchHandle;
 
-            view.when(() => {
-                zoomWatcher = view.watch("zoom", () => {
-                    const { x, y } = lastPointerPosition.current;
-                    const convertedCoords = convertCoordinates(x, y);
-                    setCoordinates(convertedCoords);
-                    setScale(view.scale);
+            currentView.when(() => {
+                updateDisplayedCoordinatesAndScale(currentView.center, currentView.scale);
+
+                zoomWatcher = currentView.watch("zoom", () => {
+                    updateDisplayedCoordinatesAndScale(
+                        currentView.toMap(currentView.center) || currentView.center, // Use current center for last known point
+                        currentView.scale
+                    );
                 });
 
-                pointerMoveHandler = view.on(
-                    "pointer-move",
-                    (event: __esri.ViewPointerMoveEvent) => {
-                        const mapPoint = view.toMap({ x: event.x, y: event.y }) || new Point();
-                        const mp: __esri.Point = webMercatorUtils.webMercatorToGeographic(
-                            mapPoint
-                        ) as __esri.Point;
-
-                        const xyPoint = {
-                            x: mp.x.toFixed(3),
-                            y: mp.y.toFixed(3),
-                        };
-
-                        lastPointerPosition.current = xyPoint; // Store the last pointer position
-                        const convertedCoords = convertCoordinates(xyPoint.x, xyPoint.y);
-                        setCoordinates(convertedCoords);
-                        setScale(view.scale);
-                    }
-                );
+                pointerMoveHandler = currentView.on("pointer-move", (event: __esri.ViewPointerMoveEvent) => {
+                    const mapPoint = currentView.toMap({ x: event.x, y: event.y });
+                    updateDisplayedCoordinatesAndScale(mapPoint, currentView.scale);
+                });
             });
-
             return () => {
-                if (zoomWatcher && zoomWatcher.remove) {
-                    zoomWatcher.remove();
-                }
-
-                if (pointerMoveHandler && pointerMoveHandler.remove) {
-                    pointerMoveHandler.remove();
-                }
+                if (zoomWatcher?.remove) zoomWatcher.remove();
+                if (pointerMoveHandler?.remove) pointerMoveHandler.remove();
             };
         },
-        [convertCoordinates]
+        [updateDisplayedCoordinatesAndScale]
     );
 
-    // Ensure the hook is used within the SidebarContextProvider
-    if (!context) {
-        throw new Error(
-            'useMapCoordinates must be used within the scope of MapContextProvider'
-        );
-    }
+    const handleMobileViewChange = useCallback(
+        (currentView: __esri.MapView | __esri.SceneView) => {
+            let stationaryWatcher: __esri.WatchHandle;
+            currentView.when(() => {
+                updateDisplayedCoordinatesAndScale(currentView.center, currentView.scale);
+                stationaryWatcher = currentView.watch("stationary", (isStationary) => {
+                    if (isStationary) {
+                        updateDisplayedCoordinatesAndScale(currentView.center, currentView.scale);
+                    }
+                });
+            });
+            return () => {
+                if (stationaryWatcher?.remove) stationaryWatcher.remove();
+            };
+        },
+        [updateDisplayedCoordinatesAndScale]
+    );
 
-    return { isDecimalDegrees, setIsDecimalDegrees, coordinates, setCoordinates, scale, setScale, lastPointerPosition, locationCoordinateFormat, handleDesktopViewChange };
+    useEffect(() => {
+        if (view) {
+            let cleanupFunction: () => void;
+            if (isMobile) {
+                cleanupFunction = handleMobileViewChange(view);
+            } else {
+                cleanupFunction = handleDesktopViewChange(view);
+            }
+            return cleanupFunction;
+        }
+    }, [view, isMobile, handleDesktopViewChange, handleMobileViewChange]);
+
+    const setCoordinateFormat = useCallback((newIsDecimalDegrees: boolean) => {
+        if (setContextIsDecimalDegrees) {
+            setContextIsDecimalDegrees(newIsDecimalDegrees);
+        }
+        navigate({
+            search: {
+                ...search,
+                coordFmt: newIsDecimalDegrees ? 'dd' : 'dms',
+            } as any,
+            replace: true,
+        });
+    }, [setContextIsDecimalDegrees, navigate, search]);
+
+    return {
+        isDecimalDegrees,
+        setIsDecimalDegrees: setCoordinateFormat,
+        coordinates,
+        setCoordinates,
+        scale,
+        locationCoordinateFormat,
+    };
 }

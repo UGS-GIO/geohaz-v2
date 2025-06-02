@@ -1,15 +1,11 @@
 import { Switch } from "@/components/ui/switch";
-import { MapContext } from "@/context/map-provider";
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { addCommas } from "@/lib/utils";
-import { useContext, useEffect } from "react";
 
 const MapCoordinates = () => {
-    const { view, isMobile } = useContext(MapContext);
     const {
         coordinates,
         scale,
-        handleDesktopViewChange,
         isDecimalDegrees,
         setIsDecimalDegrees,
     } = useMapCoordinates();
@@ -21,24 +17,6 @@ const MapCoordinates = () => {
             setIsDecimalDegrees(true)
         }
     }
-
-    // Use desktop or mobile view handlers based on device type
-    useEffect(() => {
-        let viewChangeHandler: () => void;
-
-        if (view) {
-
-            if (isMobile) {
-                // viewChangeHandler = handleMobileViewChange({ view });
-            } else {
-                viewChangeHandler = handleDesktopViewChange({ view });
-            }
-        }
-
-        return () => {
-            if (viewChangeHandler) viewChangeHandler();
-        };
-    }, [view, isMobile, handleDesktopViewChange]);
 
     const UnitSwitch = () => (
         <>
