@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,13 +20,12 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
 import { MapContext } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/mapping-utils';
-import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
+import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers'; // Assuming this path is correct for the layer title constant
 
 const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
@@ -33,7 +33,7 @@ const findAndApplyWMSFilter = (
     cqlFilter: string | null
 ) => {
     if (!mapInstance) {
-        console.warn("[DEMO] Map instance is not available. Cannot apply filter.");
+        console.warn("[MapConfigurations] Map instance is not available. Cannot apply filter.");
         return;
     }
     const layer = findLayerByTitle(mapInstance, layerTitle);
@@ -50,13 +50,13 @@ const findAndApplyWMSFilter = (
             if (JSON.stringify(wmsLayer.customParameters) !== JSON.stringify(newCustomParameters)) {
                 wmsLayer.customParameters = newCustomParameters;
                 wmsLayer.refresh();
-                console.log(`[DEMO] Layer "${layerTitle}" refreshed with CQL: ${cqlFilter}`);
+                console.log(`[MapConfigurations] Layer "${layerTitle}" refreshed with CQL: ${cqlFilter || 'none'}`);
             }
         } else {
-            console.warn(`[DEMO] Layer "${layerTitle}" found, but it's not a WMS layer. Type: ${layer.type}`);
+            console.warn(`[MapConfigurations] Layer "${layerTitle}" found, but it's not a WMS layer. Type: ${layer.type}`);
         }
     } else {
-        console.warn(`[DEMO] Layer "${layerTitle}" not found.`);
+        console.warn(`[MapConfigurations] Layer "${layerTitle}" not found.`);
     }
 };
 
@@ -81,68 +81,54 @@ const formationNameMappingConfig = {
 };
 
 interface FormationMapping {
-    value: string;
-    label: string;
+    value: string; // GeoServer column name (e.g., 'fm_greenriver')
+    label: string; // user-friendly alias (e.g., 'Green River')
 }
+
+const fetchFormationData = async (): Promise<FormationMapping[]> => {
+    const { postgrestUrl, tableName, fieldsToSelect, displayField, columnNameField, acceptProfile } = formationNameMappingConfig;
+    const url = `${postgrestUrl}/${tableName}?select=${fieldsToSelect}`;
+    const response = await fetch(url, {
+        headers: {
+            "Accept-Profile": acceptProfile,
+            "Accept": "application/json",
+            "Cache-Control": "no-cache",
+        },
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error fetching formation mappings! status: ${response.status}`);
+    }
+    const data: Array<Record<string, any>> = await response.json();
+    const uniqueMappings: FormationMapping[] = [];
+    const seenAliases = new Set<string>();
+    data.forEach(item => {
+        const alias = item[displayField];
+        const columnName = item[columnNameField];
+        if (alias && columnName && !seenAliases.has(alias)) {
+            uniqueMappings.push({ value: columnName, label: alias });
+            seenAliases.add(alias);
+        }
+    });
+    return uniqueMappings.sort((a, b) => a.label.localeCompare(b.label));
+};
 
 function MapConfigurations() {
     const { setIsDecimalDegrees, locationCoordinateFormat } = useMapCoordinates();
     const { map } = useContext(MapContext);
+
     const navigate = useNavigate({ from: '/ccus' });
-    const search = useSearch({ from: '/ccus/' })
+    const search = useSearch({ from: '/ccus/' });
 
     const [hasCoreFilter, setHasCoreFilter] = useState<YesNoAll>(search.core ?? "all");
     const [selectedFormationColumn, setSelectedFormationColumn] = useState<string>(search.formation ?? "");
-    const [formationMappings, setFormationMappings] = useState<FormationMapping[]>([]);
     const [formationDropdownOpen, setFormationDropdownOpen] = useState(false);
-    const [isLoadingFormations, setIsLoadingFormations] = useState(false);
 
-    useEffect(() => {
-        const fetchFormationMappings = async () => {
-            setIsLoadingFormations(true);
-            const { postgrestUrl, tableName, fieldsToSelect, displayField, columnNameField, acceptProfile } = formationNameMappingConfig;
-            const url = `${postgrestUrl}/${tableName}?select=${fieldsToSelect}`;
-            try {
-                const response = await fetch(url, {
-                    headers: {
-                        "Accept-Profile": acceptProfile,
-                        "Accept": "application/json",
-                        "Cache-Control": "no-cache",
-                    },
-                });
-                if (!response.ok)
-                    throw new Error(`HTTP error fetching formation mappings! status: ${response.status}`);
-                const data: Array<Record<string, any>> = await response.json();
-
-                const uniqueMappings: FormationMapping[] = [];
-                const seenAliases = new Set<string>();
-
-                data.forEach(item => {
-                    const alias = item[displayField];
-                    const columnName = item[columnNameField];
-                    if (alias && columnName && !seenAliases.has(alias)) {
-                        uniqueMappings.push({ value: columnName, label: alias });
-                        seenAliases.add(alias);
-                    }
-                });
-                setFormationMappings(uniqueMappings.sort((a, b) => a.label.localeCompare(b.label)));
-            } catch (error) {
-                console.error("Failed to fetch formation mappings:", error);
-                setFormationMappings([]);
-            }
-            finally {
-                setIsLoadingFormations(false);
-            }
-        };
-        fetchFormationMappings();
-    }, []);
-
-    // Update decimal degrees state based on search parameter
-    useEffect(() => {
-        if (search.coordFmt && setIsDecimalDegrees) {
-            setIsDecimalDegrees(search.coordFmt === 'dd');
-        }
-    }, [setIsDecimalDegrees, search.coordFmt]);
+    const { data: formationMappings = [], isLoading: isLoadingFormations, error: formationError } = useQuery({
+        queryKey: ['formationMappings'],
+        queryFn: fetchFormationData,
+        staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+        refetchOnWindowFocus: false,
+    });
 
     useEffect(() => {
         if (!map) return;
@@ -222,12 +208,9 @@ function MapConfigurations() {
                     </CardContent>
                 </Card>
 
-                {/* Filters Card */}
                 <Card>
                     <CardHeader className="py-3 px-4"><CardTitle className="text-base">Filter Wells Database (Demo)</CardTitle></CardHeader>
                     <CardContent className="p-4 space-y-4">
-
-                        { /* Has Core Filter */}
                         <div>
                             <Label htmlFor="has-core-filter-group" className="text-sm font-medium text-muted-foreground mb-2 block">{wellsHasCoreFilterConfig.label}</Label>
                             <RadioGroup id="has-core-filter-group" value={hasCoreFilter} onValueChange={handleHasCoreChange} className="grid grid-cols-3 gap-2">
@@ -240,11 +223,7 @@ function MapConfigurations() {
                             </RadioGroup>
                         </div>
                         <div>
-                            <Label htmlFor="formation-present-combobox"
-                                className="text-sm font-medium text-muted-foreground mb-2 block"
-                            >
-                                {formationNameMappingConfig.label}
-                            </Label>
+                            <Label htmlFor="formation-present-combobox" className="text-sm font-medium text-muted-foreground mb-2 block">{formationNameMappingConfig.label}</Label>
                             <Popover open={formationDropdownOpen} onOpenChange={setFormationDropdownOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -265,7 +244,7 @@ function MapConfigurations() {
                                     <Command>
                                         <CommandInput placeholder="Search formation..." className="h-8 text-xs" />
                                         <CommandList>
-                                            <CommandEmpty>{isLoadingFormations ? "Loading..." : "No formations found."}</CommandEmpty>
+                                            <CommandEmpty>{isLoadingFormations ? "Loading..." : (formationError ? "Error loading data" : "No formations found.")}</CommandEmpty>
                                             <CommandGroup>
                                                 <CommandItem
                                                     key="all-formations"
@@ -278,9 +257,9 @@ function MapConfigurations() {
                                                 </CommandItem>
                                                 {formationMappings.map((mapping) => (
                                                     <CommandItem
-                                                        key={mapping.value} // geoserver column name
-                                                        value={mapping.value} // geoserver column name
-                                                        onSelect={(currentValue) => { // currentValue is the geoserver column name
+                                                        key={mapping.value}
+                                                        value={mapping.value}
+                                                        onSelect={(currentValue) => {
                                                             handleFormationChange(currentValue === selectedFormationColumn ? "" : currentValue);
                                                         }}
                                                         className="text-xs"
