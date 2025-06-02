@@ -50,7 +50,6 @@ const findAndApplyWMSFilter = (
             if (JSON.stringify(wmsLayer.customParameters) !== JSON.stringify(newCustomParameters)) {
                 wmsLayer.customParameters = newCustomParameters;
                 wmsLayer.refresh();
-                console.log(`[MapConfigurations] Layer "${layerTitle}" refreshed with CQL: ${cqlFilter || 'none'}`);
             }
         } else {
             console.warn(`[MapConfigurations] Layer "${layerTitle}" found, but it's not a WMS layer. Type: ${layer.type}`);
