@@ -20,7 +20,6 @@ interface BaseLayerProps {
     opacity?: number;
 }
 
-
 export interface LinkDefinition {
     label: string;
     href: string | null;
@@ -28,12 +27,13 @@ export interface LinkDefinition {
 
 export interface LinkConfig {
     baseUrl?: string;
+    // Transform takes the field's value AND all properties, returns an array of links.
     transform?: (value: any, properties?: GeoJsonProperties) => LinkDefinition[];
 }
 
 export interface LinkFields {
     [fieldKey: string]: LinkConfig;
-};
+}
 
 export type ColorCodingRecordFunction = Record<string, (value: string | number) => string>;
 export interface RasterSource {
@@ -47,7 +47,8 @@ export interface RasterSource {
 
 export type RasterValueMetadata = Pick<RasterSource, 'valueField' | 'valueLabel' | 'transform'>;
 
-// Base configuration that applies to all field types
+
+// Base configuration
 interface BaseFieldConfig {
     label?: string;
     field: string;
@@ -57,7 +58,7 @@ interface BaseFieldConfig {
 // String-specific field configuration
 export interface StringPopupFieldConfig extends BaseFieldConfig {
     type: 'string';
-    transform?: (value: string) => string;
+    transform?: (value: string | null) => string | null;
 }
 
 // Number-specific field configuration
@@ -65,18 +66,19 @@ export interface NumberPopupFieldConfig extends BaseFieldConfig {
     type: 'number';
     decimalPlaces?: number;
     unit?: string;
-    transform?: (value: number) => string;
+    transform?: (value: number | null) => string | null;
 }
 
+// Custom-specific field configuration
 export interface CustomPopupFieldConfig extends BaseFieldConfig {
     type: 'custom';
-    field: 'custom';
-    transform?: (properties: GeoJsonProperties | null | undefined) => string;
+    transform?: (properties: GeoJsonProperties | any | null | undefined) => string;
 }
 
+// Your main FieldConfig is a discriminated union of these specific types
 export type FieldConfig = StringPopupFieldConfig | NumberPopupFieldConfig | CustomPopupFieldConfig;
 
-type CustomSublayerProps = {
+export type CustomSublayerProps = {
     popupFields?: Record<string, FieldConfig>; // Maps field labels to attribute names
     relatedTables?: RelatedTable[];
     linkFields?: LinkFields;
