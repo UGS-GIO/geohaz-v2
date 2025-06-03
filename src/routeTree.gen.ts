@@ -17,6 +17,7 @@ import { Route as rootRoute } from './routes/__root'
 // Create Virtual Routes
 
 const WetlandsIndexLazyImport = createFileRoute('/wetlands/')()
+const WetlandplantsIndexLazyImport = createFileRoute('/wetlandplants/')()
 const MineralsIndexLazyImport = createFileRoute('/minerals/')()
 const HazardsIndexLazyImport = createFileRoute('/hazards/')()
 const CcusIndexLazyImport = createFileRoute('/ccus/')()
@@ -36,6 +37,14 @@ const WetlandsIndexLazyRoute = WetlandsIndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() =>
   import('./routes/wetlands/index.lazy').then((d) => d.Route),
+)
+
+const WetlandplantsIndexLazyRoute = WetlandplantsIndexLazyImport.update({
+  id: '/wetlandplants/',
+  path: '/wetlandplants/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./routes/wetlandplants/index.lazy').then((d) => d.Route),
 )
 
 const MineralsIndexLazyRoute = MineralsIndexLazyImport.update({
@@ -110,6 +119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MineralsIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/wetlandplants/': {
+      id: '/wetlandplants/'
+      path: '/wetlandplants'
+      fullPath: '/wetlandplants'
+      preLoaderRoute: typeof WetlandplantsIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/wetlands/': {
       id: '/wetlands/'
       path: '/wetlands'
@@ -161,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/ccus': typeof CcusIndexLazyRoute
   '/hazards': typeof HazardsIndexLazyRoute
   '/minerals': typeof MineralsIndexLazyRoute
+  '/wetlandplants': typeof WetlandplantsIndexLazyRoute
   '/wetlands': typeof WetlandsIndexLazyRoute
   '/hazards/report/$aoi': typeof HazardsReportAoiLazyRoute
   '/hazards/report/newreport': typeof HazardsReportNewreportLazyRouteWithChildren
@@ -171,6 +188,7 @@ export interface FileRoutesByTo {
   '/ccus': typeof CcusIndexLazyRoute
   '/hazards': typeof HazardsIndexLazyRoute
   '/minerals': typeof MineralsIndexLazyRoute
+  '/wetlandplants': typeof WetlandplantsIndexLazyRoute
   '/wetlands': typeof WetlandsIndexLazyRoute
   '/hazards/report/$aoi': typeof HazardsReportAoiLazyRoute
   '/hazards/report/newreport': typeof HazardsReportNewreportIndexLazyRoute
@@ -181,6 +199,7 @@ export interface FileRoutesById {
   '/ccus/': typeof CcusIndexLazyRoute
   '/hazards/': typeof HazardsIndexLazyRoute
   '/minerals/': typeof MineralsIndexLazyRoute
+  '/wetlandplants/': typeof WetlandplantsIndexLazyRoute
   '/wetlands/': typeof WetlandsIndexLazyRoute
   '/hazards/report/$aoi': typeof HazardsReportAoiLazyRoute
   '/hazards/report/newreport': typeof HazardsReportNewreportLazyRouteWithChildren
@@ -193,6 +212,7 @@ export interface FileRouteTypes {
     | '/ccus'
     | '/hazards'
     | '/minerals'
+    | '/wetlandplants'
     | '/wetlands'
     | '/hazards/report/$aoi'
     | '/hazards/report/newreport'
@@ -202,6 +222,7 @@ export interface FileRouteTypes {
     | '/ccus'
     | '/hazards'
     | '/minerals'
+    | '/wetlandplants'
     | '/wetlands'
     | '/hazards/report/$aoi'
     | '/hazards/report/newreport'
@@ -210,6 +231,7 @@ export interface FileRouteTypes {
     | '/ccus/'
     | '/hazards/'
     | '/minerals/'
+    | '/wetlandplants/'
     | '/wetlands/'
     | '/hazards/report/$aoi'
     | '/hazards/report/newreport'
@@ -221,6 +243,7 @@ export interface RootRouteChildren {
   CcusIndexLazyRoute: typeof CcusIndexLazyRoute
   HazardsIndexLazyRoute: typeof HazardsIndexLazyRoute
   MineralsIndexLazyRoute: typeof MineralsIndexLazyRoute
+  WetlandplantsIndexLazyRoute: typeof WetlandplantsIndexLazyRoute
   WetlandsIndexLazyRoute: typeof WetlandsIndexLazyRoute
   HazardsReportAoiLazyRoute: typeof HazardsReportAoiLazyRoute
   HazardsReportNewreportLazyRoute: typeof HazardsReportNewreportLazyRouteWithChildren
@@ -230,6 +253,7 @@ const rootRouteChildren: RootRouteChildren = {
   CcusIndexLazyRoute: CcusIndexLazyRoute,
   HazardsIndexLazyRoute: HazardsIndexLazyRoute,
   MineralsIndexLazyRoute: MineralsIndexLazyRoute,
+  WetlandplantsIndexLazyRoute: WetlandplantsIndexLazyRoute,
   WetlandsIndexLazyRoute: WetlandsIndexLazyRoute,
   HazardsReportAoiLazyRoute: HazardsReportAoiLazyRoute,
   HazardsReportNewreportLazyRoute: HazardsReportNewreportLazyRouteWithChildren,
@@ -248,6 +272,7 @@ export const routeTree = rootRoute
         "/ccus/",
         "/hazards/",
         "/minerals/",
+        "/wetlandplants/",
         "/wetlands/",
         "/hazards/report/$aoi",
         "/hazards/report/newreport"
@@ -261,6 +286,9 @@ export const routeTree = rootRoute
     },
     "/minerals/": {
       "filePath": "minerals/index.lazy.tsx"
+    },
+    "/wetlandplants/": {
+      "filePath": "wetlandplants/index.lazy.tsx"
     },
     "/wetlands/": {
       "filePath": "wetlands/index.lazy.tsx"
