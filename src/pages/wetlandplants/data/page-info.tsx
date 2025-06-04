@@ -61,7 +61,7 @@ const dataSources = (
       <h4><strong>Central Basin and Range</strong></h4>
       <p>Data from 204 sites surveyed in the Central Basin and Range by the UGS between 2013 and 2018 were used to develop seven initial wetland classes that take into account dominant overstory life form, water regime, salinity tolerance, and landscape position. More information about the initial development of the Central Basin and Range classes can be found <a href="https://geodata.geology.utah.gov/pages/view.php?ref=63232" target="_blank">here</a>. After the initial development, we separated meadows into saline meadow and fresh meadow classes and narrowed our definition of mudflats.</p>
 
-      <table border="1">
+      <table>
         <tbody>
           <tr>
             <td><strong>Wetland Class</strong></td>
@@ -105,7 +105,7 @@ const dataSources = (
       <h4><strong>Wasatch and Uinta Mountains (including Wyoming Basin)</strong></h4>
       <p>We classified wetland sites in the Wasatch and Uinta Mountains and Wyoming Basin ecoregions into ten classes based on the UGS's analysis of wetland vegetation in this region. The classification is based on dominant overstory life form, water regime, and location within level IV ecoregions.</p>
 
-      <table border="1">
+      <table>
         <tbody>
           <tr>
             <td><strong>Wetland Class</strong></td>
@@ -124,7 +124,7 @@ const dataSources = (
           </tr>
           <tr>
             <td>Wet Meadow (Valley/Foothill)</td>
-            <td rowspan="4">Wetland dominated by emergent forbs and graminoids, typically with =10% cover of woody species. Sites frequently supported by high groundwater or shallow inundation of a few centimeters.</td>
+            <td>Wetland dominated by emergent forbs and graminoids, typically with =10% cover of woody species. Sites frequently supported by high groundwater or shallow inundation of a few centimeters.</td>
             <td>Mountain Valleys, Semiarid Foothills, Foothill Shrublands and Low Mountains</td>
           </tr>
           <tr>
@@ -141,7 +141,7 @@ const dataSources = (
           </tr>
           <tr>
             <td>Shrubland (Valley/Foothills)</td>
-            <td rowspan="3">Wetland dominated by shrubs, typically with =25% cover of shrubs and higher shrub cover than tree cover.</td>
+            <td>Wetland dominated by shrubs, typically with =25% cover of shrubs and higher shrub cover than tree cover.</td>
             <td>Mountain Valleys, Semiarid Foothills</td>
           </tr>
           <tr>
