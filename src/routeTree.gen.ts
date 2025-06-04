@@ -13,13 +13,13 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as CcusIndexImport } from './routes/ccus/index'
 
 // Create Virtual Routes
 
 const WetlandsIndexLazyImport = createFileRoute('/wetlands/')()
 const MineralsIndexLazyImport = createFileRoute('/minerals/')()
 const HazardsIndexLazyImport = createFileRoute('/hazards/')()
-const CcusIndexLazyImport = createFileRoute('/ccus/')()
 const HazardsReportNewreportLazyImport = createFileRoute(
   '/hazards/report/newreport',
 )()
@@ -52,7 +52,7 @@ const HazardsIndexLazyRoute = HazardsIndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/hazards/index.lazy').then((d) => d.Route))
 
-const CcusIndexLazyRoute = CcusIndexLazyImport.update({
+const CcusIndexRoute = CcusIndexImport.update({
   id: '/ccus/',
   path: '/ccus/',
   getParentRoute: () => rootRoute,
@@ -93,7 +93,7 @@ declare module '@tanstack/react-router' {
       id: '/ccus/'
       path: '/ccus'
       fullPath: '/ccus'
-      preLoaderRoute: typeof CcusIndexLazyImport
+      preLoaderRoute: typeof CcusIndexImport
       parentRoute: typeof rootRoute
     }
     '/hazards/': {
@@ -158,7 +158,7 @@ const HazardsReportNewreportLazyRouteWithChildren =
   )
 
 export interface FileRoutesByFullPath {
-  '/ccus': typeof CcusIndexLazyRoute
+  '/ccus': typeof CcusIndexRoute
   '/hazards': typeof HazardsIndexLazyRoute
   '/minerals': typeof MineralsIndexLazyRoute
   '/wetlands': typeof WetlandsIndexLazyRoute
@@ -168,7 +168,7 @@ export interface FileRoutesByFullPath {
 }
 
 export interface FileRoutesByTo {
-  '/ccus': typeof CcusIndexLazyRoute
+  '/ccus': typeof CcusIndexRoute
   '/hazards': typeof HazardsIndexLazyRoute
   '/minerals': typeof MineralsIndexLazyRoute
   '/wetlands': typeof WetlandsIndexLazyRoute
@@ -178,7 +178,7 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/ccus/': typeof CcusIndexLazyRoute
+  '/ccus/': typeof CcusIndexRoute
   '/hazards/': typeof HazardsIndexLazyRoute
   '/minerals/': typeof MineralsIndexLazyRoute
   '/wetlands/': typeof WetlandsIndexLazyRoute
@@ -218,7 +218,7 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
-  CcusIndexLazyRoute: typeof CcusIndexLazyRoute
+  CcusIndexRoute: typeof CcusIndexRoute
   HazardsIndexLazyRoute: typeof HazardsIndexLazyRoute
   MineralsIndexLazyRoute: typeof MineralsIndexLazyRoute
   WetlandsIndexLazyRoute: typeof WetlandsIndexLazyRoute
@@ -227,7 +227,7 @@ export interface RootRouteChildren {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  CcusIndexLazyRoute: CcusIndexLazyRoute,
+  CcusIndexRoute: CcusIndexRoute,
   HazardsIndexLazyRoute: HazardsIndexLazyRoute,
   MineralsIndexLazyRoute: MineralsIndexLazyRoute,
   WetlandsIndexLazyRoute: WetlandsIndexLazyRoute,
@@ -254,7 +254,7 @@ export const routeTree = rootRoute
       ]
     },
     "/ccus/": {
-      "filePath": "ccus/index.lazy.tsx"
+      "filePath": "ccus/index.tsx"
     },
     "/hazards/": {
       "filePath": "hazards/index.lazy.tsx"

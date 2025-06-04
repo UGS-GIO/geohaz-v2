@@ -1,10 +1,12 @@
 import { useEffect, useCallback, useRef, useState } from "react";
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import Point from "@arcgis/core/geometry/Point.js";
-
 
 const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) => {
     const navigate = useNavigate();
+    const search = useSearch({
+        from: "__root__",
+    });
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [mapState, setMapState] = useState({ zoom: 8, center: [-112, 39.5] });
 
@@ -22,11 +24,16 @@ const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) =>
 
             navigate({
                 to: ".",
-                search: { zoom: zoom, lat: formattedLatitude, lon: formattedLongitude },
+                search: {
+                    ...search,
+                    zoom: zoom,
+                    lat: formattedLatitude,
+                    lon: formattedLongitude
+                },
                 replace: true,
             });
         }
-    }, [view, navigate]);
+    }, [view, navigate, search]);
 
     // Set up watchers for zoom and center changes
     useEffect(() => {
@@ -53,11 +60,10 @@ const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) =>
 
     // Initialize map view based on URL parameters
     useEffect(() => {
-        if (view) {
-            const urlParams = new URLSearchParams(window.location.search);
-            const zoom = parseFloat(urlParams.get('zoom') || '');
-            const lat = parseFloat(urlParams.get('lat') || '');
-            const lon = parseFloat(urlParams.get('lon') || '');
+        if (view && search) {
+            const zoom = typeof search.zoom === 'number' ? search.zoom : parseFloat(search.zoom || '');
+            const lat = typeof search.lat === 'number' ? search.lat : parseFloat(search.lat || '');
+            const lon = typeof search.lon === 'number' ? search.lon : parseFloat(search.lon || '');
 
             // Only go to if zoom and coordinates are valid numbers
             if (!isNaN(zoom) && !isNaN(lat) && !isNaN(lon)) {
@@ -71,10 +77,9 @@ const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) =>
                     });
                     view.zoom = zoom;
                 }
-                view.zoom = zoom;
             }
         }
-    }, [view]);
+    }, [view, search]);
 
     // Return the current map state
     return { zoom: mapState.zoom, center: mapState.center as [number, number] };
