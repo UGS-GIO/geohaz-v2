@@ -53,16 +53,6 @@ function MapConfigurations() {
                         </RadioGroup>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>
-                            Filter by
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        SearchBox goes here to filter data
-                    </CardContent>
-                </Card>
             </div>
         </>
     );
