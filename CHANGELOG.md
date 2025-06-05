@@ -1,3 +1,20 @@
+## [1.10.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.9.0...v1.10.0) (2025-06-05)
+
+
+### ccus
+
+* **✨ Features**(`ccus`): add wells filter, add formation name filter ([#232](https://github.com/UGS-GIO/geohaz-v2/issues/232))* **✨ Features**(`ccus`): added popup attributes ([#231](https://github.com/UGS-GIO/geohaz-v2/issues/231))* **♻️ Refactors**(`ccus`): altering popup format, add link to epa data ([#234](https://github.com/UGS-GIO/geohaz-v2/issues/234))
+
+### common
+
+* **♻️ Refactors**(`common`): comment out unused filter cards
+
+* **✨ Features**: allow us to specify specific cql with map calls ([#236](https://github.com/UGS-GIO/geohaz-v2/issues/236))
+
+### wetlands
+
+* **✨ Features**(`wetlands`): added opacity settings ([#229](https://github.com/UGS-GIO/geohaz-v2/issues/229))
+
 ## [1.9.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.8.0...v1.9.0) (2025-05-13)
 
 
