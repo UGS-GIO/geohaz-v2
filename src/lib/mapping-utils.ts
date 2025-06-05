@@ -305,6 +305,7 @@ function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
             visible: typedLayer.visible,
             sublayers: typedLayer.sublayers,
             opacity: layer.opacity,
+            customLayerParameters: typedLayer.customLayerParameters,
         });
     }
 
