@@ -2,6 +2,8 @@ import { PROD_GEOSERVER_URL, HAZARDS_WORKSPACE, PROD_POSTGREST_URL, GEN_GIS_WORK
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 import GeoJSON from "geojson";
 
+const IS_CURRENT_CQL = `is_current = 'Y'`;
+
 export const landslideLegacyLayerName = 'landslidelegacy_current';
 const landslideLegacyWMSTitle = 'Legacy Landslide Compilation - Statewide';
 const landslideLegacyWMSConfig: WMSLayerProps = {
@@ -42,6 +44,9 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
     title: landslideInventoryWMSTitle,
     visible: false,
     opacity: 0.75,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideInventoryLayerName}`,
@@ -86,6 +91,9 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
     title: landslideSusceptibilityWMSTitle,
     visible: false,
     opacity: 0.75,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideSusceptibilityLayerName}`,
@@ -124,6 +132,9 @@ const liquefactionWMSConfig: WMSLayerProps = {
     title: liquefactionWMSTitle,
     visible: false,
     opacity: 0.75,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${liquefactionLayerName}`,
@@ -162,6 +173,9 @@ const groundshakingWMSConfig: WMSLayerProps = {
     title: groundshakingWMSTitle,
     visible: false,
     opacity: 0.5,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${groundshakingLayerName}`,
@@ -201,6 +215,9 @@ const qFaultsWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: qFaultsWMSTitle,
     visible: true,
+    customLayerParameters: {
+        cql_filter: `is_current	= 'Y'`,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${qFaultsLayerName}`,
@@ -219,7 +236,19 @@ const qFaultsWMSConfig: WMSLayerProps = {
                 'Slip Rate': { field: 'sliprate', type: 'string' },
                 'Structure Class': { field: 'faultclass', type: 'string' },
                 'Structure Age': { field: 'faultage', type: 'string' },
-                'Detailed Report': { field: 'usgs_link', type: 'string' },
+                '': { field: 'usgs_link', type: 'string', transform: (link) => link },
+            },
+            linkFields: {
+                'usgs_link': {
+                    transform: (usgsLink) => {
+                        return [
+                            {
+                                label: 'Detailed Report',
+                                href: `${usgsLink}`
+                            }
+                        ];
+                    }
+                }
             },
             schema: 'hazards'
         },
@@ -235,6 +264,9 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
     title: surfaceFaultRuptureWMSTitle,
     visible: false,
     opacity: 0.75,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${surfaceFaultRuptureLayerName}`,
@@ -271,6 +303,9 @@ const windBlownSandWMSConfig: WMSLayerProps = {
     title: windBlownSandWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${windBlownSandLayerName}`,
@@ -305,6 +340,9 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
     title: saltTectonicsDeformationWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${saltTectonicsDeformationLayerName}`,
@@ -341,6 +379,9 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
     title: shallowBedrockWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${shallowBedrockLayerName}`,
@@ -377,6 +418,9 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
     title: rockfallHazardWMSTitle,
     visible: false,
     opacity: 0.75,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${rockfallHazardLayerName}`,
@@ -413,6 +457,9 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
     title: pipingAndErosionWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${pipingAndErosionLayerName}`,
@@ -449,6 +496,9 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
     title: expansiveSoilRockWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${expansiveSoilRockLayerName}`,
@@ -485,6 +535,9 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
     title: shallowGroundwaterWMSTitle,
     visible: false,
     opacity: 0.75,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${shallowGroundwaterLayerName}`,
@@ -522,6 +575,9 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
     title: radonSusceptibilityWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${radonSusceptibilityLayerName}`,
@@ -558,6 +614,9 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
     title: corrosiveSoilRockWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${corrosiveSoilRockLayerName}`,
@@ -594,6 +653,9 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
     title: collapsibleSoilWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${collapsibleSoilLayerName}`,
@@ -630,6 +692,9 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
     title: solubleSoilAndRockWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${solubleSoilAndRockLayerName}`,
@@ -666,6 +731,9 @@ const alluvialFanWMSConfig: WMSLayerProps = {
     title: alluvialFanWMSTitle,
     visible: false,
     opacity: 0.75,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${alluvialFanLayerName}`,
@@ -701,6 +769,9 @@ const earthFissureWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: earthFissureWMSTitle,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${earthFissureLayerName}`,
@@ -737,6 +808,9 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
     title: erosionHazardZoneWMSTitle,
     opacity: 0.75,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${erosionHazardZoneLayerName}`,
@@ -772,6 +846,9 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: karstFeaturesWMSTitle,
     visible: false,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${karstFeaturesLayerName}`,
@@ -822,6 +899,9 @@ const studyAreasWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: studyAreasWMSTitle,
+    customLayerParameters: {
+        cql_filter: IS_CURRENT_CQL,
+    },
     visible: true,
     sublayers: [
         {

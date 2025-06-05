@@ -7,25 +7,25 @@ export interface LayerOrderConfig {
     position: 'start' | 'end' | number;
 }
 
+// Function to find a layer by name in a nested structure
+export const findLayerByName = (layers: LayerProps[], name: string): { layer: LayerProps; parent: LayerProps[] | null } | null => {
+    for (const layer of layers) {
+        if (layer.title === name) {
+            return { layer, parent: layers };
+        }
+
+        // Check in group layers
+        if ('layers' in layer && Array.isArray(layer.layers)) {
+            const result = findLayerByName(layer.layers, name);
+            if (result) return result;
+        }
+    }
+    return null;
+};
+
 const useGetLayerConfig = (layerOrderConfigs?: LayerOrderConfig[]) => {
     const currentPage = useGetCurrentPage();
     const [layerConfig, setLayerConfig] = useState<LayerProps[] | null>(null);
-
-    // Function to find a layer by name in a nested structure
-    const findLayerByName = (layers: LayerProps[], name: string): { layer: LayerProps; parent: LayerProps[] | null } | null => {
-        for (const layer of layers) {
-            if (layer.title === name) {
-                return { layer, parent: layers };
-            }
-
-            // Check in group layers
-            if ('layers' in layer && Array.isArray(layer.layers)) {
-                const result = findLayerByName(layer.layers, name);
-                if (result) return result;
-            }
-        }
-        return null;
-    };
 
     // Memoize the layerOrderConfigs to prevent unnecessary re-renders
     const memoizedLayerOrderConfigs = useMemo(() => layerOrderConfigs, [JSON.stringify(layerOrderConfigs)]);

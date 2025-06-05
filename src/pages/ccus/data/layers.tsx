@@ -1,6 +1,7 @@
 import { Link } from "@/components/custom/link";
 import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
+import { addCommas, toTitleCase } from "@/lib/utils";
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -286,15 +287,18 @@ const faultsWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Description': {
                     field: 'custom',
-                    type: 'string',
-                    transform: (popupFields: any) => {
-                        return `${popupFields['subtype']} ${popupFields['type']}, ${popupFields['modifier']}`;
+                    type: 'custom',
+                    transform: (props) => {
+                        const subtype = props?.['subtype'];
+                        const type = props?.['type'];
+                        const modifier = props?.['modifier'];
+                        return `${subtype} ${type}, ${modifier}`;
                     }
                 },
                 'Scale': {
                     field: 'scale',
                     type: 'string',
-                    transform: (value: string) => {
+                    transform: (value) => {
                         if (value === 'small') return '1:500,000'
                         return ''
                     }
@@ -362,10 +366,45 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
+                'API': { field: 'apishort', type: 'string' },
+                'UWI': { field: 'uwi', type: 'string' },
                 'Well Name': { field: 'well_name', type: 'string' },
-                'Type': { field: 'type', type: 'string' },
-                'County': { field: 'county_long', type: 'string' },
+                'Depth': {
+                    field: 'depth_display',
+                    type: 'custom',
+                    transform: (props) => {
+                        const top = props?.['top_ft'];
+                        const bottom = props?.['bottom_ft'];
+
+                        if (top == null || bottom == null) {
+                            return 'Depth N/A';
+                        }
+                        const topFt = addCommas(top);
+                        const bottomFt = addCommas(bottom);
+                        return `${topFt} - ${bottomFt} ft`;
+                    }
+                },
+                'Sample Types': { field: 'all_types', type: 'string' },
+                'Purpose': { field: 'purpose_description', type: 'string' },
+                'Formation': { field: 'formation', type: 'string' },
+                '': {
+                    field: 'inventory_link',
+                    type: 'custom',
+                    transform: () => 'Utah Core Research Center Inventory'
+                },
             },
+            linkFields: {
+                'inventory_link': {
+                    transform: (value) => {
+                        return [
+                            {
+                                label: `${value}`,
+                                href: 'https://geology.utah.gov/apps/rockcore/'
+                            }
+                        ];
+                    }
+                }
+            }
         }
     ],
 };
@@ -383,10 +422,37 @@ const co2SourcesWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Facility Name': { field: 'facility_name', type: 'string' },
-                'Reporting Year': { field: 'reporting_year', type: 'string' },
+                'Facility Name': { field: 'facility_name', type: 'string', transform: (value) => toTitleCase(value || '') },
                 'Description': { field: 'description', type: 'string' },
+                'Greenhouse Gas Emissions': {
+                    field: 'ghg_quantity__metric_tons_co2e_',
+                    type: 'string',
+                    transform: (value) => {
+                        if (value === null) {
+                            return 'No Data';
+                        }
+                        return `${addCommas(value)} mtCO₂e`;
+                    }
+                },
+                'Reporting Year': { field: 'reporting_year', type: 'string' },
+                '': {
+                    field: 'inventory_link',
+                    type: 'custom',
+                    transform: () => 'View data from the U.S. Environmental Protection Agency'
+                },
             },
+            linkFields: {
+                'inventory_link': {
+                    transform: (value) => {
+                        return [
+                            {
+                                label: `${value}`,
+                                href: 'https://www.epa.gov/ghgemissions/sources-greenhouse-gas-emissions/'
+                            }
+                        ];
+                    }
+                }
+            }
         }
     ],
 };
@@ -404,13 +470,14 @@ const wildernessStudyAreasWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'NLCS Name': { field: 'nlcs_name', type: 'string' },
+                'Name': { field: 'nlcs_name', type: 'string' },
+                'Type': { field: 'wsa_values', type: 'string' },
                 'NLCS ID': { field: 'nlcs_id', type: 'string' },
+                'WSA Number ': { field: 'wsa_number', type: 'string' }
             },
         }
     ],
 };
-
 
 const sitlaReportsLayerName = 'ccus_sitla_reports';
 const sitlaReportsWMSTitle = 'SITLA Reports';
@@ -426,8 +493,38 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
             queryable: true,
             popupFields: {
                 'Name': { field: 'new_block_', type: 'string' },
+                'Ranking': {
+                    field: 'ranking', type: 'string',
+                    transform: (value) => {
+                        if (value === 'None' || value === null) {
+                            return 'Not evaluated';
+                        } else {
+                            return value;
+                        }
+                    }
+                },
                 'Description': { field: 'description', type: 'string' },
+                '': { field: 'linktoreport', type: 'string', transform: (value) => value },
             },
+            linkFields: {
+                'linktoreport': {
+                    transform: (value: string) => {
+                        if (value === 'None') {
+                            const transformedValues = {
+                                href: '',
+                                label: 'Not currently available'
+                            };
+                            return [transformedValues];
+                        } else {
+                            const transformedValues = {
+                                href: value,
+                                label: `Report`
+                            };
+                            return [transformedValues];
+                        }
+                    }
+                },
+            }
         }
     ],
 };

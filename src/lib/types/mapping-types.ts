@@ -7,6 +7,7 @@ import TileLayer from "@arcgis/core/layers/TileLayer"
 import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
+import { GeoJsonProperties } from "geojson"
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -19,14 +20,20 @@ interface BaseLayerProps {
     opacity?: number;
 }
 
-export interface LinkField {
-    baseUrl: string;
-    transform?: (id: any) => { label: string, href: string }[];
+export interface LinkDefinition {
+    label: string;
+    href: string | null;
 }
 
-export type LinkFields = {
-    [key: string]: LinkField;
-};
+export interface LinkConfig {
+    baseUrl?: string;
+    // Transform takes the field's value AND all properties, returns an array of links.
+    transform?: (value: any, properties?: GeoJsonProperties) => LinkDefinition[];
+}
+
+export interface LinkFields {
+    [fieldKey: string]: LinkConfig;
+}
 
 export type ColorCodingRecordFunction = Record<string, (value: string | number) => string>;
 export interface RasterSource {
@@ -40,31 +47,38 @@ export interface RasterSource {
 
 export type RasterValueMetadata = Pick<RasterSource, 'valueField' | 'valueLabel' | 'transform'>;
 
-// Base configuration that applies to all field types
+
+// Base configuration
 interface BaseFieldConfig {
     label?: string;
     field: string;
-    type: 'string' | 'number';
+    type: 'string' | 'number' | 'custom';
 }
 
 // String-specific field configuration
-interface StringFieldConfig extends BaseFieldConfig {
+export interface StringPopupFieldConfig extends BaseFieldConfig {
     type: 'string';
-    transform?: (value: string) => string;
+    transform?: (value: string | null) => string | null;
 }
 
 // Number-specific field configuration
-export interface NumberFieldConfig extends BaseFieldConfig {
+export interface NumberPopupFieldConfig extends BaseFieldConfig {
     type: 'number';
     decimalPlaces?: number;
     unit?: string;
-    transform?: (value: number) => string;
+    transform?: (value: number | null) => string | null;
 }
 
-// Union type of all possible field configurations
-export type FieldConfig = StringFieldConfig | NumberFieldConfig;
+// Custom-specific field configuration
+export interface CustomPopupFieldConfig extends BaseFieldConfig {
+    type: 'custom';
+    transform?: (properties: GeoJsonProperties | any | null | undefined) => string;
+}
 
-type CustomSublayerProps = {
+// Your main FieldConfig is a discriminated union of these specific types
+export type FieldConfig = StringPopupFieldConfig | NumberPopupFieldConfig | CustomPopupFieldConfig;
+
+export type CustomSublayerProps = {
     popupFields?: Record<string, FieldConfig>; // Maps field labels to attribute names
     relatedTables?: RelatedTable[];
     linkFields?: LinkFields;
@@ -81,6 +95,7 @@ type ExtendedSublayerProperties =
 export interface WMSLayerProps extends BaseLayerProps {
     type: 'wms';
     sublayers: __esri.CollectionProperties<ExtendedSublayerProperties>;
+    customLayerParameters?: object | null | undefined
 }
 
 export interface GroupLayerProps extends BaseLayerProps {

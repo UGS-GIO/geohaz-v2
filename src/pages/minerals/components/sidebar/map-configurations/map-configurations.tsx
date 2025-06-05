@@ -55,7 +55,7 @@ function MapConfigurations() {
                         </RadioGroup>
                     </CardContent>
                 </Card>
-                <Card>
+                {/* <Card>
                     <CardHeader>
                         <CardTitle>
                             Filter by
@@ -64,7 +64,7 @@ function MapConfigurations() {
                     <CardContent>
                         Filter SearchBox goes here
                     </CardContent>
-                </Card>
+                </Card> */}
             </div>
         </>
     );

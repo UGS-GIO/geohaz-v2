@@ -24,7 +24,7 @@ export default function Map() {
                     <Layout.Header>
                         <TopNav />
                         <div className='ml-auto flex items-center space-x-4'>
-                            Search Combobox goes here
+                            {/* Search Combobox goes here */}
                             <ThemeSwitch />
                         </div>
                     </Layout.Header>
