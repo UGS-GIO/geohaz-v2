@@ -47,16 +47,4 @@ export const sidelinks: SideLink[] = [
   //   icon: <Database />,
   //   component: GeologicalUnitSearch, // Direct component reference
   // },
-  {
-    title: 'Report Generator',
-    label: '',
-    icon: <FileText className='stroke-foreground' />,
-    component: ReportGenerator,
-  },
-  {
-    title: 'Feedback',
-    label: '',
-    href: 'https://forms.gle/RnwEi6a92grdqqFk9',
-    icon: <MessageSquare className='text-ring' />,
-  }
 ];
