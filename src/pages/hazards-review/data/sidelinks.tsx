@@ -1,8 +1,7 @@
-import { FileText, House, Info as InfoIcon, Layers as LayersIcon, MessageSquare, Settings } from 'lucide-react'
+import { House, Info as InfoIcon, Layers as LayersIcon, Settings } from 'lucide-react'
 import Info from '@/components/sidebar/info'
 import Layers from '@/components/sidebar/layers'
 import MapConfigurations from '@/pages/hazards/components/sidebar/map-configurations/map-configurations'
-import ReportGenerator from '@/pages/hazards/components/sidebar/report-generator'
 export interface NavLink {
   title: string
   label?: string
