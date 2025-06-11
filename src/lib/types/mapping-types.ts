@@ -95,6 +95,7 @@ type ExtendedSublayerProperties =
 export interface WMSLayerProps extends BaseLayerProps {
     type: 'wms';
     sublayers: __esri.CollectionProperties<ExtendedSublayerProperties>;
+    customLayerParameters?: object | null | undefined
 }
 
 export interface GroupLayerProps extends BaseLayerProps {
