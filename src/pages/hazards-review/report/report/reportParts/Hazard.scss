@@ -1,0 +1,12 @@
+@import '../variables';
+
+.hazard {
+  &__heading {
+    text-align: center;
+    margin-top: -1em;
+    font-size: 1.3rem;
+  }
+  &__static-legend {
+    width: $mapScreenWidth
+  }
+}
