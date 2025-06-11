@@ -1,6 +1,6 @@
 import { Link } from "@/components/custom/link";
 
-const appTitle = 'Geologic Hazards Portal';
+const appTitle = 'Hazards Data Review (Internal Use Only)';
 
 const references = (
     <div>
