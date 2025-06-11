@@ -18,6 +18,7 @@ import { Route as CcusIndexImport } from './routes/ccus/index'
 // Create Virtual Routes
 
 const WetlandsIndexLazyImport = createFileRoute('/wetlands/')()
+const WetlandplantsIndexLazyImport = createFileRoute('/wetlandplants/')()
 const MineralsIndexLazyImport = createFileRoute('/minerals/')()
 const HazardsIndexLazyImport = createFileRoute('/hazards/')()
 const HazardsReviewIndexLazyImport = createFileRoute('/hazards-review/')()
@@ -43,6 +44,14 @@ const WetlandsIndexLazyRoute = WetlandsIndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() =>
   import('./routes/wetlands/index.lazy').then((d) => d.Route),
+)
+
+const WetlandplantsIndexLazyRoute = WetlandplantsIndexLazyImport.update({
+  id: '/wetlandplants/',
+  path: '/wetlandplants/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./routes/wetlandplants/index.lazy').then((d) => d.Route),
 )
 
 const MineralsIndexLazyRoute = MineralsIndexLazyImport.update({
@@ -153,6 +162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MineralsIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/wetlandplants/': {
+      id: '/wetlandplants/'
+      path: '/wetlandplants'
+      fullPath: '/wetlandplants'
+      preLoaderRoute: typeof WetlandplantsIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/wetlands/': {
       id: '/wetlands/'
       path: '/wetlands'
@@ -219,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/hazards-review': typeof HazardsReviewIndexLazyRoute
   '/hazards': typeof HazardsIndexLazyRoute
   '/minerals': typeof MineralsIndexLazyRoute
+  '/wetlandplants': typeof WetlandplantsIndexLazyRoute
   '/wetlands': typeof WetlandsIndexLazyRoute
   '/hazards-review/report/$aoi': typeof HazardsReviewReportAoiLazyRoute
   '/hazards-review/report/newreport': typeof HazardsReviewReportNewreportLazyRoute
@@ -232,6 +249,7 @@ export interface FileRoutesByTo {
   '/hazards-review': typeof HazardsReviewIndexLazyRoute
   '/hazards': typeof HazardsIndexLazyRoute
   '/minerals': typeof MineralsIndexLazyRoute
+  '/wetlandplants': typeof WetlandplantsIndexLazyRoute
   '/wetlands': typeof WetlandsIndexLazyRoute
   '/hazards-review/report/$aoi': typeof HazardsReviewReportAoiLazyRoute
   '/hazards-review/report/newreport': typeof HazardsReviewReportNewreportLazyRoute
@@ -245,6 +263,7 @@ export interface FileRoutesById {
   '/hazards-review/': typeof HazardsReviewIndexLazyRoute
   '/hazards/': typeof HazardsIndexLazyRoute
   '/minerals/': typeof MineralsIndexLazyRoute
+  '/wetlandplants/': typeof WetlandplantsIndexLazyRoute
   '/wetlands/': typeof WetlandsIndexLazyRoute
   '/hazards-review/report/$aoi': typeof HazardsReviewReportAoiLazyRoute
   '/hazards-review/report/newreport': typeof HazardsReviewReportNewreportLazyRoute
@@ -260,6 +279,7 @@ export interface FileRouteTypes {
     | '/hazards-review'
     | '/hazards'
     | '/minerals'
+    | '/wetlandplants'
     | '/wetlands'
     | '/hazards-review/report/$aoi'
     | '/hazards-review/report/newreport'
@@ -272,6 +292,7 @@ export interface FileRouteTypes {
     | '/hazards-review'
     | '/hazards'
     | '/minerals'
+    | '/wetlandplants'
     | '/wetlands'
     | '/hazards-review/report/$aoi'
     | '/hazards-review/report/newreport'
@@ -283,6 +304,7 @@ export interface FileRouteTypes {
     | '/hazards-review/'
     | '/hazards/'
     | '/minerals/'
+    | '/wetlandplants/'
     | '/wetlands/'
     | '/hazards-review/report/$aoi'
     | '/hazards-review/report/newreport'
@@ -297,6 +319,7 @@ export interface RootRouteChildren {
   HazardsReviewIndexLazyRoute: typeof HazardsReviewIndexLazyRoute
   HazardsIndexLazyRoute: typeof HazardsIndexLazyRoute
   MineralsIndexLazyRoute: typeof MineralsIndexLazyRoute
+  WetlandplantsIndexLazyRoute: typeof WetlandplantsIndexLazyRoute
   WetlandsIndexLazyRoute: typeof WetlandsIndexLazyRoute
   HazardsReviewReportAoiLazyRoute: typeof HazardsReviewReportAoiLazyRoute
   HazardsReviewReportNewreportLazyRoute: typeof HazardsReviewReportNewreportLazyRoute
@@ -309,6 +332,7 @@ const rootRouteChildren: RootRouteChildren = {
   HazardsReviewIndexLazyRoute: HazardsReviewIndexLazyRoute,
   HazardsIndexLazyRoute: HazardsIndexLazyRoute,
   MineralsIndexLazyRoute: MineralsIndexLazyRoute,
+  WetlandplantsIndexLazyRoute: WetlandplantsIndexLazyRoute,
   WetlandsIndexLazyRoute: WetlandsIndexLazyRoute,
   HazardsReviewReportAoiLazyRoute: HazardsReviewReportAoiLazyRoute,
   HazardsReviewReportNewreportLazyRoute: HazardsReviewReportNewreportLazyRoute,
@@ -330,6 +354,7 @@ export const routeTree = rootRoute
         "/hazards-review/",
         "/hazards/",
         "/minerals/",
+        "/wetlandplants/",
         "/wetlands/",
         "/hazards-review/report/$aoi",
         "/hazards-review/report/newreport",
@@ -348,6 +373,9 @@ export const routeTree = rootRoute
     },
     "/minerals/": {
       "filePath": "minerals/index.lazy.tsx"
+    },
+    "/wetlandplants/": {
+      "filePath": "wetlandplants/index.lazy.tsx"
     },
     "/wetlands/": {
       "filePath": "wetlands/index.lazy.tsx"
