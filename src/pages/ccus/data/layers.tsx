@@ -80,7 +80,6 @@ const pipelinesWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Operator': { field: 'operator', type: 'string' },
                 'Commodity': { field: 'commodity', type: 'string' },
-                'Diameter': { field: 'diameter', type: 'number', },
                 'Acronym': { field: 'acronym', type: 'string' },
                 'Code Remarks': { field: 'coderemarks', type: 'string' }
             },
