@@ -177,7 +177,7 @@ const riversWMSConfig: WMSLayerProps = {
 
 // Seamless Geological Units WMS Layer
 const seamlessGeolunitsLayerName = 'seamlessgeolunits';
-const seamlessGeolunitsWMSTitle = 'Seamless Geological Units (500k)';
+const seamlessGeolunitsWMSTitle = 'Geological Units (500k)';
 const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -189,7 +189,32 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
             name: `${MAPPING_WORKSPACE}:${seamlessGeolunitsLayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {},
+            popupFields: {
+                'Unit': {
+                    field: 'custom',
+                    type: 'custom',
+                    transform: (props) => {
+                        const unitName = props?.['unit_name'];
+                        const unitSymbol = props?.['unit_symbol'];
+                        return `${unitName}, ${unitSymbol}`;
+                    }
+                },
+                'Unit Description': { field: 'unit_description', type: 'string' },
+                'Source': { field: 'series_id', type: 'string' },
+            },
+            linkFields: {
+                'series_id': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const transformedValues = {
+                            href: `https://doi.org/10.34191/${value}`,
+                            label: `${value}`
+                        };
+                        return [transformedValues];
+                    }
+                }
+            }
         },
     ],
 };
