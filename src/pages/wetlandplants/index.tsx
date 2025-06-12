@@ -23,10 +23,10 @@ export default function Map() {
                     {/* ===== Top Heading ===== */}
                     <Layout.Header>
                         <TopNav />
-                        <div className='ml-auto flex items-center space-x-4'>
+                        {/* <div className='ml-auto flex items-center space-x-4'>
                             Search Combobox goes here
                             <ThemeSwitch />
-                        </div>
+                        </div> */}
                     </Layout.Header>
 
                     {/* ===== Main ===== */}
