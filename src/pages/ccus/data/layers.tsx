@@ -166,9 +166,8 @@ const riversWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Name': { field: 'name', type: 'string' },
-                'Description': { field: 'description', type: 'string' },
-                'Report Link': { field: 'reportlink', type: 'string' }
+                'Name': { field: 'name', type: 'string', transform: (value) => toTitleCase(value || '') },
+                'Water Right Area': { field: 'drainage_a', type: 'number' }
             },
         },
     ],
