@@ -553,6 +553,30 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
     ],
 };
 
+
+const geothermalPowerplantsLayerName = 'ccus_geothermalpowerplants';
+const geothermalPowerplantsWMSTitle = 'Geothermal Powerplants';
+const geothermalPowerplantsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: geothermalPowerplantsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${geothermalPowerplantsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Name': { field: 'plant', type: 'string', transform: (value) => toTitleCase(value || '') },
+                'Capacity (MW)': { field: 'capacity_mw', type: 'number' },
+                'Operator': { field: 'operator', type: 'string' },
+                'City': { field: 'city', type: 'string' },
+                'County': { field: 'county', type: 'string' },
+            },
+        }
+    ],
+};
+
 // Energy and Minerals Group Layer
 const ccusResourcesConfig: LayerProps = {
     type: 'group',
@@ -574,6 +598,7 @@ const infrastructureAndLandUseConfig: LayerProps = {
     title: 'Infrastructure and Land Use',
     visible: false,
     layers: [
+        geothermalPowerplantsWMSConfig,
         pipelinesWMSConfig,
         riversWMSConfig,
         SITLAConfig
