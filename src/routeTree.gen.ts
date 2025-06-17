@@ -22,9 +22,6 @@ const WetlandplantsIndexLazyImport = createFileRoute('/wetlandplants/')()
 const MineralsIndexLazyImport = createFileRoute('/minerals/')()
 const HazardsIndexLazyImport = createFileRoute('/hazards/')()
 const HazardsReviewIndexLazyImport = createFileRoute('/hazards-review/')()
-const HazardsReportNewreportLazyImport = createFileRoute(
-  '/hazards/report/newreport',
-)()
 const HazardsReportAoiLazyImport = createFileRoute('/hazards/report/$aoi')()
 const HazardsReviewReportNewreportLazyImport = createFileRoute(
   '/hazards-review/report/newreport',
@@ -242,73 +239,40 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-  | '/ccus'
-  | '/hazards-review'
-  | '/hazards'
-  | '/minerals'
-  | '/wetlandplants'
-  | '/wetlands'
-  | '/hazards-review/report/$aoi'
-  | '/hazards-review/report/newreport'
-  | '/hazards/report/$aoi'
-  | '/hazards/report/newreport'
-  | '/hazards/report/newreport/'
+    | '/ccus'
+    | '/hazards-review'
+    | '/hazards'
+    | '/minerals'
+    | '/wetlandplants'
+    | '/wetlands'
+    | '/hazards-review/report/$aoi'
+    | '/hazards-review/report/newreport'
+    | '/hazards/report/$aoi'
+    | '/hazards/report/newreport'
   fileRoutesByTo: FileRoutesByTo
   to:
-  | '/ccus'
-  | '/hazards-review'
-  | '/hazards'
-  | '/minerals'
-  | '/wetlandplants'
-  | '/wetlands'
-  | '/hazards-review/report/$aoi'
-  | '/hazards-review/report/newreport'
-  | '/hazards/report/$aoi'
-  | '/hazards/report/newreport'
+    | '/ccus'
+    | '/hazards-review'
+    | '/hazards'
+    | '/minerals'
+    | '/wetlandplants'
+    | '/wetlands'
+    | '/hazards-review/report/$aoi'
+    | '/hazards-review/report/newreport'
+    | '/hazards/report/$aoi'
+    | '/hazards/report/newreport'
   id:
-  | '__root__'
-  | '/ccus/'
-  | '/hazards-review/'
-  | '/hazards/'
-  | '/minerals/'
-  | '/wetlandplants/'
-  | '/wetlands/'
-  | '/hazards-review/report/$aoi'
-  | '/hazards-review/report/newreport'
-  | '/hazards/report/$aoi'
-  | '/hazards/report/newreport'
-  | '/hazards/report/newreport/'
-  | '/ccus'
-  | '/hazards-review'
-  | '/hazards'
-  | '/minerals'
-  | '/wetlands'
-  | '/hazards-review/report/$aoi'
-  | '/hazards-review/report/newreport'
-  | '/hazards/report/$aoi'
-  | '/hazards/report/newreport'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-  | '/ccus'
-  | '/hazards-review'
-  | '/hazards'
-  | '/minerals'
-  | '/wetlands'
-  | '/hazards-review/report/$aoi'
-  | '/hazards-review/report/newreport'
-  | '/hazards/report/$aoi'
-  | '/hazards/report/newreport'
-  id:
-  | '__root__'
-  | '/ccus/'
-  | '/hazards-review/'
-  | '/hazards/'
-  | '/minerals/'
-  | '/wetlands/'
-  | '/hazards-review/report/$aoi'
-  | '/hazards-review/report/newreport'
-  | '/hazards/report/$aoi'
-  | '/hazards/report/newreport/'
+    | '__root__'
+    | '/ccus/'
+    | '/hazards-review/'
+    | '/hazards/'
+    | '/minerals/'
+    | '/wetlandplants/'
+    | '/wetlands/'
+    | '/hazards-review/report/$aoi'
+    | '/hazards-review/report/newreport'
+    | '/hazards/report/$aoi'
+    | '/hazards/report/newreport/'
   fileRoutesById: FileRoutesById
 }
 
