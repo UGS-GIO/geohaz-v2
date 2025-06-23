@@ -286,13 +286,17 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
 
 // SITLA Land Ownership Layer
 const SITLAConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
+    type: 'map-image',
+    url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer',
     opacity: 0.5,
     options: {
-        title: 'SITLA Land Ownership',
+        title: 'Landownership',
         elevationInfo: [{ mode: 'on-the-ground' }],
         visible: false,
+        sublayers: [{
+            id: 0,
+            visible: true,
+        }],
     },
 };
 

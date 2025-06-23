@@ -81,17 +81,19 @@ const getGroupLayerRenderer = async (layer: __esri.GroupLayer) => {
 const getMapImageLayerRenderer = async (layer: __esri.MapImageLayer) => {
     const response = await fetch(`${layer.url}/legend?f=pjson`);
     const legend: MapImageLayerType = await response.json();
+    const legendEntries = legend.layers[0]?.legend;
 
-    const firstLegendElement = legend.layers[0]?.legend[0];
-    if (firstLegendElement) {
-        return {
+    if (legendEntries && legendEntries.length > 0) {
+        const allRenderers = legendEntries.map(entry => ({
             type: 'map-image-renderer',
-            label: firstLegendElement.label,
-            imageData: firstLegendElement.imageData,
-            id: '0',
+            label: entry.label,
+            imageData: entry.imageData,
+            id: layer.id,
             url: layer.url,
-            title: legend.layers[0].layerName,
-        };
+            title: layer.title,
+        }));
+
+        return allRenderers;
     }
 
     console.error('No legend data found for MapImageLayer.');
