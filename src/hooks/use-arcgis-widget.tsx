@@ -10,10 +10,11 @@ import Point from "@arcgis/core/geometry/Point";
 // Define a type for the widget constructors
 type WidgetConstructor<T extends __esri.Widget> = new (args: any) => T;
 
+// --- CHANGE 1: Loosen the 'position' prop to accept any string ---
 interface ArcGISWidgetProps {
     WrappedWidget: WidgetConstructor<__esri.Widget>;
-    position?: UIPositionOptions;
-    config?: object; // Use `unknown` instead of `any`
+    position?: string; // Changed from UIPositionOptions to string
+    config?: object;
 }
 
 interface FeatureHandleTypes {
@@ -41,7 +42,6 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
             position: UIPositionOptions,
             config: object = {}
         ) => {
-
             const widget = new WrappedWidget({
                 view,
                 ...config,
@@ -108,25 +108,20 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
                 ({ WrappedWidget, position = "top-left", config = {} }) => {
                     const { widget, widgetId } = createWidget(
                         WrappedWidget,
-                        position,
+                        position as UIPositionOptions,
                         config
                     );
                     widgetRefValue = widgetInstances.current;
                     widgetIds.add(widgetId);
 
-                    // Use the type guard to check if the widget is a Feature widget
                     if (isFeatureWidget(widget)) {
                         let viewChangeHandler: () => void;
-
                         if (isMobile) {
                             viewChangeHandler = handleMobileViewChange({ view, widget });
                         } else {
                             viewChangeHandler = handleDesktopViewChange({ view, widget });
                         }
 
-                        return () => {
-                            viewChangeHandler();
-                        };
                     }
                 }
             );
@@ -135,13 +130,11 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
         // Cleanup
         return () => {
             widgetIds.forEach((widgetId) => {
-                const widget = widgetRefValue?.get(widgetId); // Use widgetRefValue instead of widgetInstances.current
-
+                const widget = widgetRefValue?.get(widgetId);
                 if (widget) {
                     view?.ui.remove(widget);
                 }
-
-                widgetRefValue?.delete(widgetId); // Use widgetRefValue instead of widgetInstances.current
+                widgetRefValue?.delete(widgetId);
             });
         };
     }, [
@@ -151,7 +144,6 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
         createWidget,
         handleMobileViewChange,
         handleDesktopViewChange,
-        // updatePopupTemplate,
     ]);
 
     return widgetInstances;
