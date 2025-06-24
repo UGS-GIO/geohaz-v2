@@ -103,6 +103,8 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
     useEffect(() => {
         const widgetIds = new Set<symbol>();
         let widgetRefValue: Map<symbol, __esri.Widget> | null = null;
+        const cleanupHandlers: (() => void)[] = [];
+
         if (view) {
             widgets.forEach(
                 ({ WrappedWidget, position = "top-left", config = {} }) => {
@@ -115,13 +117,11 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
                     widgetIds.add(widgetId);
 
                     if (isFeatureWidget(widget)) {
-                        let viewChangeHandler: () => void;
                         if (isMobile) {
-                            viewChangeHandler = handleMobileViewChange({ view, widget });
+                            cleanupHandlers.push(handleMobileViewChange({ view, widget }));
                         } else {
-                            viewChangeHandler = handleDesktopViewChange({ view, widget });
+                            cleanupHandlers.push(handleDesktopViewChange({ view, widget }));
                         }
-
                     }
                 }
             );
@@ -129,6 +129,7 @@ function useArcGISWidget(widgets: ArcGISWidgetProps[]) {
 
         // Cleanup
         return () => {
+            cleanupHandlers.forEach((handler) => handler());
             widgetIds.forEach((widgetId) => {
                 const widget = widgetRefValue?.get(widgetId);
                 if (widget) {
