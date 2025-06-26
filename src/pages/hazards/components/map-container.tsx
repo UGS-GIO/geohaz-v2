@@ -1,4 +1,4 @@
-import { MapWidgets } from '@/pages/ccus/components/map-widgets';
+import { MapWidgets } from '@/pages/hazards/components/map-widgets';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
