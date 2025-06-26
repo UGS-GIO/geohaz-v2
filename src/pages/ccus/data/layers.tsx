@@ -416,6 +416,15 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 },
                 'Cored Intervals': { field: 'cored_formation', type: 'string' },
                 'Formation': { field: 'formation', type: 'string' },
+                'Cored Formation Table': {
+                    field: 'custom',
+                    type: 'custom',
+                    transform: (props) => {
+                        const formation = props?.['formation'];
+                        const coredFormation = props?.['cored_formation'];
+                        return `${formation} ${coredFormation}, todo, make table from this data`;
+                    }
+                },
                 '': {
                     field: 'inventory_link',
                     type: 'custom',
