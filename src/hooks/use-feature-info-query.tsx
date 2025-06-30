@@ -17,9 +17,6 @@ interface UseFeatureInfoQueryProps {
 export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrderConfigs }: UseFeatureInfoQueryProps) {
     const [mapPoint, setMapPoint] = useState<Point | null>(null);
 
-    console.log('view:', view);
-
-
     const queryFn = async () => {
         if (!view || !mapPoint) return null;
 
