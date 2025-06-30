@@ -140,7 +140,7 @@ const renderFieldContent = (
             <>
                 {hrefs.map((item, i) => {
                     if (item.href === null || item.href === '') {
-                        return <div key={`${item.label}-${i}`}><span className="break-all inline-block">{item.label}</span></div>;
+                        return <div key={`${item.label}-${i}`}><span className="break-words inline-block">{item.label}</span></div>;
                     }
                     return (
                         <div key={`${item.href}-${i}`} className="flex gap-2">
@@ -149,8 +149,7 @@ const renderFieldContent = (
                                 className="p-0 h-auto whitespace-normal text-left font-normal inline-flex items-center max-w-full gap-1"
                                 variant='primary'
                             >
-                                <span className="break-all inline-block">{item.label}</span>
-                                <ExternalLink className="flex-shrink-0 ml-1" size={16} />
+                                <span className="break-words inline-flex underline decoration-1">{item.label}</span>
                             </Link>
                         </div>
                     );
@@ -244,7 +243,9 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                 ? rasterSource.transform(rasterValue) || ''
                 : String(rasterValue ?? '');
         } else if (currentConfig && isCustomField(currentConfig)) {
-            finalDisplayValue = currentConfig.transform?.(properties) || '';
+            console.log('reached a certain spot');
+
+            finalDisplayValue = currentConfig.transform?.(properties)?.toString() || '';
         } else if (currentConfig && (isStringField(currentConfig) || isNumberField(currentConfig))) {
             const rawValue = popupFields ? properties[currentConfig.field] : valueFromPropertiesDirectly;
             finalDisplayValue = processFieldValue(currentConfig, rawValue);

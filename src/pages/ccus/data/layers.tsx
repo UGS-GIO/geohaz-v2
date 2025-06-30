@@ -396,6 +396,9 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 'API': { field: 'apishort', type: 'string' },
                 'UWI': { field: 'uwi', type: 'string' },
                 'Well Name': { field: 'well_name', type: 'string' },
+                'Sample Types': { field: 'all_types', type: 'string' },
+                'Purpose': { field: 'purpose_description', type: 'string' },
+                'Operator': { field: 'operator', type: 'string' },
                 'Depth': {
                     field: 'depth_display',
                     type: 'custom',
@@ -411,15 +414,43 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                         return `${topFt} - ${bottomFt} ft`;
                     }
                 },
-                'Sample Types': { field: 'all_types', type: 'string' },
-                'Purpose': { field: 'purpose_description', type: 'string' },
+                'Cored Intervals': { field: 'cored_formation', type: 'string' },
                 'Formation': { field: 'formation', type: 'string' },
+                'Formation at TD': { field: 'form_td', type: 'string' },
+                'Cored Formation Table': {
+                    field: 'custom',
+                    type: 'custom',
+                    transform: (props) => {
+                        const formation = props?.['formation'];
+                        const coredFormation = props?.['cored_formation'];
+                        return `${formation} ${coredFormation}, todo, make table from this data`;
+                    }
+                },
                 '': {
                     field: 'inventory_link',
                     type: 'custom',
                     transform: () => 'Utah Core Research Center Inventory'
                 },
             },
+            relatedTables: [
+                {
+                    fieldLabel: 'Formation Tops',
+                    matchingField: 'api',
+                    targetField: 'apishort',
+                    url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore',
+                    headers: {
+                        "Accept-Profile": 'emp',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'formation_alias', label: 'Formation Name' },
+                        { field: 'formation_depth', label: 'Formation Depth (ft)' },
+                    ],
+                    sortBy: 'formation_depth',
+                    sortDirection: 'asc'
+                },
+            ],
             linkFields: {
                 'inventory_link': {
                     transform: (value) => {
