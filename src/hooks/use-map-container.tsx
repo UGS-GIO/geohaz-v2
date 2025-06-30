@@ -6,19 +6,9 @@ import { useMapUrlParams } from "@/hooks/use-map-url-params";
 import { LayerOrderConfig, useGetLayerConfig } from "@/hooks/use-get-layer-config";
 import { highlightFeature } from '@/lib/mapping-utils';
 import Point from '@arcgis/core/geometry/Point';
-import { Feature } from 'geojson';
-import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
-
-interface PopupContent {
-    features: Feature[];
-    visible: boolean;
-    layerTitle: string;
-    groupLayerTitle: string;
-    popupFields?: Record<string, FieldConfig>;
-    relatedTables?: RelatedTable[];
-}
+import { LayerContentProps } from '@/components/custom/popups/popup-content-with-pagination';
 
 interface MapContainerHookResult {
     mapRef: React.RefObject<HTMLDivElement>;
@@ -26,7 +16,7 @@ interface MapContainerHookResult {
     drawerTriggerRef: React.RefObject<HTMLButtonElement>;
     popupContainer: HTMLDivElement | null;
     setPopupContainer: (container: HTMLDivElement | null) => void;
-    popupContent: PopupContent[];
+    popupContent: LayerContentProps[];
     clickOrDragHandlers: {
         onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
         onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
