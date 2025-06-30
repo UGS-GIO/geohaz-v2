@@ -416,7 +416,7 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 },
                 'Cored Intervals': { field: 'cored_formation', type: 'string' },
                 'Formation': { field: 'formation', type: 'string' },
-                'Formation at TD': { field: 'formation_td', type: 'string' },
+                'Formation at TD': { field: 'form_td', type: 'string' },
                 'Cored Formation Table': {
                     field: 'custom',
                     type: 'custom',
