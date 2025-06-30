@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ProcessedRelatedData, useRelatedTable } from "@/hooks/use-related-table";
-import { Feature, Geometry, GeoJsonProperties, FeatureCollection } from "geojson";
+import { Feature, Geometry, GeoJsonProperties } from "geojson";
 import { ExternalLink } from "lucide-react";
 import { LayerContentProps } from "@/components/custom/popups/popup-content-with-pagination";
 import { Link } from "@/components/custom/link";
@@ -9,7 +9,7 @@ import {
     StringPopupFieldConfig,
     NumberPopupFieldConfig,
     CustomPopupFieldConfig,
-    RasterValueMetadata,
+    ProcessedRasterSource,
     LinkFields,
     ColorCodingRecordFunction,
     RelatedTable,
@@ -72,16 +72,10 @@ const processFieldValue = (field: StringPopupFieldConfig | NumberPopupFieldConfi
     return String(rawValue ?? '');
 };
 
-const getRasterFeatureValue = (rasterSource: (FeatureCollection<Geometry, GeoJsonProperties> & RasterValueMetadata) | undefined) => {
-    if (!rasterSource) return null;
+const getRasterFeatureValue = (rasterSource: ProcessedRasterSource | undefined): number | null => {
+    if (!rasterSource?.data?.features?.length) return null;
     const valueField = rasterSource.valueField;
-    if ('type' in rasterSource && rasterSource.type === 'FeatureCollection') {
-        return rasterSource.features[0]?.properties?.[valueField];
-    }
-    if (Array.isArray(rasterSource.features)) {
-        return rasterSource.features[0]?.properties?.[valueField];
-    }
-    return null;
+    return rasterSource.data.features[0]?.properties?.[valueField];
 };
 
 const applyColor = (colorCodingMap: ColorCodingRecordFunction | undefined, fieldKey: string, value: string | number) => {
@@ -189,14 +183,15 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
 
     // Handle Raster-Only Display
     if (!feature && rasterValue !== null && rasterSource !== undefined) {
-        let displayValue = rasterSource.transform
+        const displayValue = rasterSource.transform
             ? rasterSource.transform(rasterValue)
-            : rasterSource.features[0]?.properties?.[rasterSource.valueField];
+            : String(rasterValue ?? 'N/A');
+
         return (
             <div className="space-y-4">
                 <div className="flex flex-col">
-                    <p className="font-bold underline text-primary">{rasterSource?.valueLabel}</p>
-                    <p className="break-words">{String(displayValue ?? 'N/A')}</p>
+                    <p className="font-bold underline text-primary">{rasterSource.valueLabel}</p>
+                    <p className="break-words">{displayValue}</p>
                 </div>
             </div>
         );
@@ -240,7 +235,7 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
         const fieldKey = currentConfig?.field || label;
 
         if (isRasterEntry) {
-            finalDisplayValue = rasterSource?.transform
+            finalDisplayValue = rasterSource?.transform && rasterValue !== null
                 ? rasterSource.transform(rasterValue) || ''
                 : String(rasterValue ?? '');
         } else if (currentConfig && isCustomField(currentConfig)) {

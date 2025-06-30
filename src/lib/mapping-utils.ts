@@ -5,9 +5,6 @@ import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
 import Map from '@arcgis/core/Map'
 import { LayerProps, layerTypeMapping } from "@/lib/types/mapping-types";
-import * as promiseUtils from "@arcgis/core/core/promiseUtils.js";
-import BasemapGallery from "@arcgis/core/widgets/BasemapGallery";
-import Expand from "@arcgis/core/widgets/Expand";
 import Popup from "@arcgis/core/widgets/Popup";
 import Graphic from "@arcgis/core/Graphic.js";
 import Polyline from "@arcgis/core/geometry/Polyline.js";
@@ -26,6 +23,7 @@ import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
 import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer.js";
+import { LayerOrderConfig } from '@/hooks/use-get-layer-config';
 
 // Create a global app object to store the view
 const app: MapApp = {};
@@ -228,9 +226,6 @@ export function init(
     // Prevent collision with the edges of the view
     setPopupAlignment(view);
 
-    // Expand widget handler
-    expandClickHandlers(view);
-
     return { map, view };
 }
 
@@ -383,11 +378,6 @@ export function setPopupAlignment(view: SceneView | MapView) {
     });
 }
 
-export interface LayerOrderConfig {
-    layerName: string;
-    position: "start" | "end" | number;
-}
-
 // Reorder layers based on the specified order config. this is useful for reordering layers in the popup
 export const reorderLayers = (layerInfo: any[], layerOrderConfigs: LayerOrderConfig[]) => {
 
@@ -418,51 +408,6 @@ export const reorderLayers = (layerInfo: any[], layerOrderConfigs: LayerOrderCon
         return aPosition - bPosition;
     });
 };
-
-
-export function expandClickHandlers(view: SceneView | MapView) {
-    view.when().then(() => {
-        const bgExpand = view.ui.find("basemap-gallery-expand") as Expand | undefined;
-
-        if (bgExpand) {
-            bgExpand.when().then(() => {
-                const basemapGallery = bgExpand?.content as BasemapGallery;
-                // Watch for changes on the active basemap and collapse the expand widget if the view is mobile size
-                reactiveUtils.watch(
-                    () => basemapGallery.activeBasemap,
-                    () => {
-                        const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
-                        if (mobileSize) {
-                            bgExpand.collapse();
-                        }
-                    }
-                );
-            });
-        }
-
-        // Debounce the update to prevent the expand widget from opening and closing rapidly
-        const debouncedUpdate = promiseUtils.debounce(async () => {
-            if (bgExpand) {
-                const typedExpand = bgExpand as Expand;
-                typedExpand.collapse();
-            }
-        });
-
-        const handleEvent = () => {
-            debouncedUpdate().catch((err) => {
-                if (!promiseUtils.isAbortError(err)) {
-                    console.error(err);
-                }
-            });
-        };
-
-        view.on("click", handleEvent);
-        view.on("double-click", handleEvent);
-        view.on("drag", handleEvent);
-    });
-}
-
-
 
 export function convertDDToDMS(dd: number, isLongitude: boolean = false) {
     const dir = dd < 0
@@ -528,6 +473,7 @@ interface WMSQueryProps {
     infoFormat?: string;
     buffer?: number;
     featureCount?: number;
+    cql_filter?: string | null;
 }
 
 export async function fetchWMSFeatureInfo({
@@ -539,8 +485,10 @@ export async function fetchWMSFeatureInfo({
     headers = {},
     infoFormat = 'application/json',
     buffer = 10,
-    featureCount = 50
+    featureCount = 50,
+    cql_filter = null
 }: WMSQueryProps) {
+
     if (layers.length === 0) {
         console.warn('No layers specified to query.');
         return null;
@@ -581,6 +529,10 @@ export async function fetchWMSFeatureInfo({
     } else {
         params.set('x', Math.round(view.width / 2).toString());
         params.set('y', Math.round(view.height / 2).toString());
+    }
+
+    if (cql_filter) {
+        params.set('cql_filter', cql_filter);
     }
 
     const response = await fetch(`${url}?${params.toString()}`, { headers });

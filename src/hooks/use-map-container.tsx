@@ -1,14 +1,15 @@
-import { useRef, useContext, useState, useCallback, useEffect } from "react";
-import { Feature } from "geojson";
+import { useRef, useContext, useState, useEffect } from 'react';
 import { MapContext } from '@/context/map-provider';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapUrlParams } from "@/hooks/use-map-url-params";
-import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
+import { LayerOrderConfig, useGetLayerConfig } from "@/hooks/use-get-layer-config";
+import { highlightFeature } from '@/lib/mapping-utils';
+import Point from '@arcgis/core/geometry/Point';
+import { Feature } from 'geojson';
 import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
-import { fetchWMSFeatureInfo, highlightFeature, reorderLayers } from "@/lib/mapping-utils";
-import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
-import Point from "@arcgis/core/geometry/Point";
+import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
+import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 
 interface PopupContent {
     features: Feature[];
@@ -26,9 +27,11 @@ interface MapContainerHookResult {
     popupContainer: HTMLDivElement | null;
     setPopupContainer: (container: HTMLDivElement | null) => void;
     popupContent: PopupContent[];
-    handleMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
-    handleMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
-    handleMouseUp: (e: React.MouseEvent<HTMLDivElement>) => void;
+    clickOrDragHandlers: {
+        onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
+        onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
+        onMouseUp: (e: React.MouseEvent<HTMLDivElement>) => void;
+    };
     handleOnContextMenu: (
         e: React.MouseEvent<HTMLDivElement>,
         triggerRef: React.RefObject<HTMLDivElement>,
@@ -37,7 +40,7 @@ interface MapContainerHookResult {
     coordinates: { x: string; y: string };
     setCoordinates: (coords: { x: string; y: string }) => void;
     view: __esri.MapView | __esri.SceneView | undefined;
-    layersConfig: any; // Replace 'any' with your actual layers config type
+    layersConfig: any;
 }
 
 interface UseMapContainerProps {
@@ -53,150 +56,54 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null);
     const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
     const drawerTriggerRef = useRef<HTMLButtonElement>(null);
-    const [popupContent, setPopupContent] = useState<PopupContent[]>([]);
-    const [isDragging, setIsDragging] = useState(false);
-    const [startPos, setStartPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-    const dragThreshold = 5;
     const { zoom, center } = useMapUrlParams(view);
     const layersConfig = useGetLayerConfig();
+    const [visibleLayersMap, setVisibleLayersMap] = useState({});
 
-    // Initialize map when dependencies are ready
+    const { clickOrDragHandlers } = useMapClickOrDrag({
+        onClick: (e) => {
+            if (!view || isSketching) return;
+            view.graphics.removeAll();
+
+            const layers = getVisibleLayers({ view });
+            setVisibleLayersMap(layers.layerVisibilityMap);
+
+            const mapPoint = view.toMap({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY }) || new Point();
+            featureInfoQuery.fetchForPoint(mapPoint);
+        }
+    });
+
+    const featureInfoQuery = useFeatureInfoQuery({
+        view,
+        wmsUrl,
+        visibleLayersMap,
+        layerOrderConfigs
+    });
+
+    useEffect(() => {
+        if (featureInfoQuery.isSuccess) {
+            const popupContent = featureInfoQuery.data || [];
+            const hasFeatures = popupContent.length > 0;
+            const firstFeature = popupContent[0]?.features[0];
+            const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
+
+            if (hasFeatures && firstFeature && view) {
+                highlightFeature(firstFeature, view);
+            }
+
+            if (!hasFeatures && drawerState === 'open') {
+                drawerTriggerRef.current?.click();
+            } else if (hasFeatures && drawerState !== 'open') {
+                drawerTriggerRef.current?.click();
+            }
+        }
+    }, [featureInfoQuery.isSuccess, featureInfoQuery.data, view]);
+
     useEffect(() => {
         if (mapRef.current && loadMap && zoom && center && layersConfig) {
             loadMap(mapRef.current, { zoom, center }, layersConfig);
         }
     }, [loadMap, zoom, center, layersConfig]);
-
-    const updatePopupContent = useCallback(
-        (newContent: PopupContent[]) => {
-            setPopupContent((prevContent) => {
-                if (JSON.stringify(prevContent) !== JSON.stringify(newContent)) {
-                    return newContent;
-                }
-                return prevContent;
-            });
-        },
-        [setPopupContent]
-    );
-
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-        setStartPos({ x: e.clientX, y: e.clientY });
-        setIsDragging(false);
-    };
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        const distance = Math.sqrt(
-            Math.pow(e.clientX - startPos.x, 2) + Math.pow(e.clientY - startPos.y, 2)
-        );
-        if (distance > dragThreshold) {
-            setIsDragging(true);
-        }
-    };
-
-    const handleMapClick = async (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!view || isDragging || isSketching) return;
-
-        view?.graphics.removeAll();
-
-        if (e.button === 0) {
-            const layers = getVisibleLayers({ view });
-            const visibleLayersMap = layers.layerVisibilityMap;
-
-            const { offsetX: x, offsetY: y } = e.nativeEvent;
-            const mapPoint = view.toMap({ x, y }) || new Point();
-
-            const keys = Object.entries(visibleLayersMap)
-                .filter(([_, layerInfo]) => layerInfo.visible && layerInfo.queryable)
-                .map(([key]) => key);
-
-            const featureInfo = await fetchWMSFeatureInfo({
-                mapPoint,
-                view,
-                layers: keys,
-                url: wmsUrl
-            });
-
-            if (featureInfo) {
-                // Filter out layers that are not visible
-                const filteredVisibleLayersMap = Object.fromEntries(Object.entries(visibleLayersMap).filter(([_key, value]) => {
-                    return value.visible === true;
-                }));
-                const layerInfo = await Promise.all(
-                    Object.entries(filteredVisibleLayersMap).map(async ([key, value]): Promise<any> => {
-                        const baseLayerInfo: any = {
-                            visible: value.visible,
-                            layerTitle: value.layerTitle,
-                            groupLayerTitle: value.groupLayerTitle,
-                            features: featureInfo.features.filter((feature: Feature) =>
-                                feature.id?.toString().includes(key.split(':')[0]) ||
-                                feature.id?.toString().split('.')[0].includes(key.split(':')[1])
-                            ),
-                            ...(value.popupFields && { popupFields: value.popupFields }),
-                            ...(value.linkFields && { linkFields: value.linkFields }),
-                            ...(value.colorCodingMap && { colorCodingMap: value.colorCodingMap }),
-                            ...(value.relatedTables && value.relatedTables.length > 0 && {
-                                relatedTables: value.relatedTables.map(table => ({
-                                    ...table,
-                                    matchingField: table.matchingField || "",
-                                    fieldLabel: table.fieldLabel || ""
-                                }))
-                            }),
-                            ...(value.schema && { schema: value.schema }),
-                        };
-
-                        if (value.rasterSource) {
-                            const rasterFeatureInfo = await fetchWMSFeatureInfo({
-                                mapPoint,
-                                view,
-                                layers: [value.rasterSource.layerName],
-                                url: value.rasterSource.url,
-                            });
-                            baseLayerInfo.rasterSource = {
-                                ...value.rasterSource,
-                                ...rasterFeatureInfo
-                            };
-                        }
-
-                        return baseLayerInfo;
-                    })
-                );
-
-                const layerInfoFiltered = layerInfo.filter(layer => layer.features.length > 0);
-                const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
-
-                // Only highlight if we have features
-                if (featureInfo.features.length > 0) {
-                    highlightFeature(featureInfo.features[0], view);
-                }
-
-                // Close the drawer if no features found
-                if (layerInfoFiltered.length === 0) {
-                    const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
-                    if (drawerState === 'open') {
-                        drawerTriggerRef.current?.click(); // Close the drawer
-                    }
-                    return;
-                }
-
-                const orderedLayerInfo = layerOrderConfigs.length > 0
-                    ? reorderLayers(layerInfoFiltered, layerOrderConfigs)
-                    : layerInfoFiltered;
-
-                updatePopupContent(orderedLayerInfo);
-
-                if (drawerState === 'open') {
-                    drawerTriggerRef.current?.click();
-                    setTimeout(() => drawerTriggerRef.current?.click(), 50);
-                } else {
-                    drawerTriggerRef.current?.click();
-                }
-            }
-        }
-    };
-
-    const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-        handleMapClick(e);
-    };
 
     return {
         mapRef,
@@ -204,10 +111,8 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         drawerTriggerRef,
         popupContainer,
         setPopupContainer,
-        popupContent,
-        handleMouseDown,
-        handleMouseMove,
-        handleMouseUp,
+        popupContent: featureInfoQuery.data || [],
+        clickOrDragHandlers,
         handleOnContextMenu,
         coordinates,
         setCoordinates,

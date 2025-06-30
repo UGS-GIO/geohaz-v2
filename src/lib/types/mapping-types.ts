@@ -7,7 +7,7 @@ import TileLayer from "@arcgis/core/layers/TileLayer"
 import MapView from "@arcgis/core/views/MapView"
 import SceneView from "@arcgis/core/views/SceneView"
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
-import { GeoJsonProperties } from "geojson"
+import { FeatureCollection, GeoJsonProperties } from "geojson"
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -47,6 +47,9 @@ export interface RasterSource {
 
 export type RasterValueMetadata = Pick<RasterSource, 'valueField' | 'valueLabel' | 'transform'>;
 
+export type ProcessedRasterSource = RasterSource & {
+    data: FeatureCollection | null;
+};
 
 // Base configuration
 interface BaseFieldConfig {
