@@ -2,6 +2,7 @@ import { MapWidgets } from '@/pages/ccus/components/map-widgets';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
+import { PROD_GEOSERVER_URL } from '@/lib/constants';
 
 export default function ArcGISMap() {
     const {
@@ -11,14 +12,12 @@ export default function ArcGISMap() {
         popupContainer,
         setPopupContainer,
         popupContent,
-        handleMouseDown,
-        handleMouseMove,
-        handleMouseUp,
+        clickOrDragHandlers,
         handleOnContextMenu,
         coordinates,
         setCoordinates,
     } = useMapContainer({
-        wmsUrl: 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wms'
+        wmsUrl: `${PROD_GEOSERVER_URL}wms`
     });
 
     return (
@@ -28,9 +27,7 @@ export default function ArcGISMap() {
                 className="relative w-full h-full"
                 ref={mapRef}
                 onContextMenu={e => handleOnContextMenu(e, contextMenuTriggerRef, setCoordinates)}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
+                {...clickOrDragHandlers}
             >
                 <MapWidgets />
             </div>

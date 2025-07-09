@@ -80,7 +80,6 @@ const pipelinesWMSConfig: WMSLayerProps = {
             popupFields: {
                 'Operator': { field: 'operator', type: 'string' },
                 'Commodity': { field: 'commodity', type: 'string' },
-                'Diameter': { field: 'diameter', type: 'number', },
                 'Acronym': { field: 'acronym', type: 'string' },
                 'Code Remarks': { field: 'coderemarks', type: 'string' }
             },
@@ -167,9 +166,8 @@ const riversWMSConfig: WMSLayerProps = {
             popupEnabled: false,
             queryable: true,
             popupFields: {
-                'Name': { field: 'name', type: 'string' },
-                'Description': { field: 'description', type: 'string' },
-                'Report Link': { field: 'reportlink', type: 'string' }
+                'Name': { field: 'name', type: 'string', transform: (value) => toTitleCase(value || '') },
+                'Water Right Area': { field: 'drainage_a', type: 'number' }
             },
         },
     ],
@@ -177,7 +175,7 @@ const riversWMSConfig: WMSLayerProps = {
 
 // Seamless Geological Units WMS Layer
 const seamlessGeolunitsLayerName = 'seamlessgeolunits';
-const seamlessGeolunitsWMSTitle = 'Seamless Geological Units (500k)';
+const seamlessGeolunitsWMSTitle = 'Geological Units (500k)';
 const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -189,7 +187,32 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
             name: `${MAPPING_WORKSPACE}:${seamlessGeolunitsLayerName}`,
             popupEnabled: false,
             queryable: true,
-            popupFields: {},
+            popupFields: {
+                'Unit': {
+                    field: 'custom',
+                    type: 'custom',
+                    transform: (props) => {
+                        const unitName = props?.['unit_name'];
+                        const unitSymbol = props?.['unit_symbol'];
+                        return `${unitName} (${unitSymbol})`;
+                    }
+                },
+                'Unit Description': { field: 'unit_description', type: 'string' },
+                'Source': { field: 'series_id', type: 'string' },
+            },
+            linkFields: {
+                'series_id': {
+                    baseUrl: '',
+                    transform: (value: string) => {
+                        // the value is a url that needs to be transformed into href and label for the link
+                        const transformedValues = {
+                            href: `https://doi.org/10.34191/${value}`,
+                            label: `${value}`
+                        };
+                        return [transformedValues];
+                    }
+                }
+            }
         },
     ],
 };
@@ -262,13 +285,17 @@ const wellWithTopsWMSConfig: WMSLayerProps = {
 
 // SITLA Land Ownership Layer
 const SITLAConfig: LayerProps = {
-    type: 'feature',
-    url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
+    type: 'map-image',
+    url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer',
     opacity: 0.5,
     options: {
-        title: 'SITLA Land Ownership',
+        title: 'Landownership',
         elevationInfo: [{ mode: 'on-the-ground' }],
         visible: false,
+        sublayers: [{
+            id: 0,
+            visible: true,
+        }],
     },
 };
 
@@ -369,6 +396,9 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 'API': { field: 'apishort', type: 'string' },
                 'UWI': { field: 'uwi', type: 'string' },
                 'Well Name': { field: 'well_name', type: 'string' },
+                'Sample Types': { field: 'all_types', type: 'string' },
+                'Purpose': { field: 'purpose_description', type: 'string' },
+                'Operator': { field: 'operator', type: 'string' },
                 'Depth': {
                     field: 'depth_display',
                     type: 'custom',
@@ -384,15 +414,43 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                         return `${topFt} - ${bottomFt} ft`;
                     }
                 },
-                'Sample Types': { field: 'all_types', type: 'string' },
-                'Purpose': { field: 'purpose_description', type: 'string' },
+                'Cored Intervals': { field: 'cored_formation', type: 'string' },
                 'Formation': { field: 'formation', type: 'string' },
+                'Formation at TD': { field: 'form_td', type: 'string' },
+                'Cored Formation Table': {
+                    field: 'custom',
+                    type: 'custom',
+                    transform: (props) => {
+                        const formation = props?.['formation'];
+                        const coredFormation = props?.['cored_formation'];
+                        return `${formation} ${coredFormation}, todo, make table from this data`;
+                    }
+                },
                 '': {
                     field: 'inventory_link',
                     type: 'custom',
                     transform: () => 'Utah Core Research Center Inventory'
                 },
             },
+            relatedTables: [
+                {
+                    fieldLabel: 'Formation Tops',
+                    matchingField: 'api',
+                    targetField: 'apishort',
+                    url: PROD_POSTGREST_URL + '/view_wellswithtops_hascore',
+                    headers: {
+                        "Accept-Profile": 'emp',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'formation_alias', label: 'Formation Name' },
+                        { field: 'formation_depth', label: 'Formation Depth (ft)' },
+                    ],
+                    sortBy: 'formation_depth',
+                    sortDirection: 'asc'
+                },
+            ],
             linkFields: {
                 'inventory_link': {
                     transform: (value) => {
@@ -529,6 +587,30 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
     ],
 };
 
+
+const geothermalPowerplantsLayerName = 'ccus_geothermalpowerplants';
+const geothermalPowerplantsWMSTitle = 'Geothermal Powerplants';
+const geothermalPowerplantsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: geothermalPowerplantsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${geothermalPowerplantsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Name': { field: 'plant', type: 'string', transform: (value) => toTitleCase(value || '') },
+                'Capacity (MW)': { field: 'capacity_mw', type: 'number' },
+                'Operator': { field: 'operator', type: 'string' },
+                'City': { field: 'city', type: 'string' },
+                'County': { field: 'county', type: 'string' },
+            },
+        }
+    ],
+};
+
 // Energy and Minerals Group Layer
 const ccusResourcesConfig: LayerProps = {
     type: 'group',
@@ -550,6 +632,7 @@ const infrastructureAndLandUseConfig: LayerProps = {
     title: 'Infrastructure and Land Use',
     visible: false,
     layers: [
+        geothermalPowerplantsWMSConfig,
         pipelinesWMSConfig,
         riversWMSConfig,
         SITLAConfig

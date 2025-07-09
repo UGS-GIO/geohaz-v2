@@ -1,28 +1,19 @@
 import * as React from "react";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
-import { Feature } from "geojson";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { ExtendedFeature, PopupContentWithPagination } from "./popup-content-with-pagination";
-import { FieldConfig, RelatedTable } from "@/lib/types/mapping-types";
+import { LayerContentProps, PopupContentWithPagination } from "@/components/custom/popups/popup-content-with-pagination";
 import useScreenSize from "@/hooks/use-screen-size";
 import { XIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { clearGraphics } from "@/lib/mapping-utils";
 import { MapContext } from "@/context/map-provider";
 
-interface PopupContent {
-    features: Feature[];
-    visible: boolean;
-    groupLayerTitle: string;
-    layerTitle: string;
-}
-
 interface CombinedSidebarDrawerProps {
     container: HTMLDivElement | null;
-    popupContent: PopupContent[];
+    popupContent: LayerContentProps[];
     drawerTriggerRef: React.RefObject<HTMLButtonElement>;
     popupTitle: string;
 }
@@ -161,7 +152,7 @@ function PopupDrawer({
                         >
                             <PopupContentWithPagination
                                 key={JSON.stringify(layerContent)}
-                                layerContent={layerContent as unknown as { groupLayerTitle: string; layerTitle: string; features: ExtendedFeature[]; popupFields?: Record<string, FieldConfig> | undefined; relatedTables?: RelatedTable[] | undefined; }[]} // TODO: fix this
+                                layerContent={layerContent}
                                 onSectionChange={onSectionChange}
                             />
                         </div>
