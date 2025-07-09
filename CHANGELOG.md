@@ -1,3 +1,22 @@
+## [1.11.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.10.0...v1.11.0) (2025-07-09)
+
+
+### ccus
+
+* **✨ Features**(`ccus`): add geothermal powerplants layer ([#243](https://github.com/UGS-GIO/geohaz-v2/issues/243))* **♻️ Refactors**(`ccus`): add popupfields to 500k layer ([#240](https://github.com/UGS-GIO/geohaz-v2/issues/240))* **♻️ Refactors**(`ccus`): changing some popups ([#233](https://github.com/UGS-GIO/geohaz-v2/issues/233))* **♻️ Refactors**(`ccus`): implement map-image legend for sitla landownership ([#242](https://github.com/UGS-GIO/geohaz-v2/issues/242))* **♻️ Refactors**(`ccus`): remove unused diameter field for pipelines layer ([#239](https://github.com/UGS-GIO/geohaz-v2/issues/239))* **♻️ Refactors**(`ccus`): update Major Rivers layer popup ([#241](https://github.com/UGS-GIO/geohaz-v2/issues/241))
+
+### common
+
+* **🐛 Bug Fixes**(`common`): prevent the constant rerendering when moving the mouse ([#244](https://github.com/UGS-GIO/geohaz-v2/issues/244))* **♻️ Refactors**(`common`): refactor use-map-container into more hooks, integrate react-query more ([#245](https://github.com/UGS-GIO/geohaz-v2/issues/245))
+
+### data-reviewer
+
+* **✨ Features**(`data-reviewer`): add data reviewer app ([#237](https://github.com/UGS-GIO/geohaz-v2/issues/237))
+
+### hazards
+
+* **✨ Features**(`hazards`): set up new report gen page ([#238](https://github.com/UGS-GIO/geohaz-v2/issues/238))
+
 ## [1.10.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.9.0...v1.10.0) (2025-06-05)
 
 
