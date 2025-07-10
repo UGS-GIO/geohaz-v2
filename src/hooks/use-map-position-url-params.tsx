@@ -2,7 +2,7 @@ import { useEffect, useCallback, useRef, useState } from "react";
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import Point from "@arcgis/core/geometry/Point.js";
 
-const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) => {
+const useMapPositionUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) => {
     const navigate = useNavigate();
     const search = useSearch({
         from: "__root__",
@@ -28,7 +28,7 @@ const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) =>
                     ...search,
                     zoom: zoom,
                     lat: formattedLatitude,
-                    lon: formattedLongitude
+                    lon: formattedLongitude,
                 },
                 replace: true,
             });
@@ -37,6 +37,7 @@ const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) =>
 
     // Set up watchers for zoom and center changes
     useEffect(() => {
+
         if (!view) return;
 
         const handleUpdate = () => {
@@ -85,4 +86,4 @@ const useMapUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) =>
     return { zoom: mapState.zoom, center: mapState.center as [number, number] };
 };
 
-export { useMapUrlParams };
+export { useMapPositionUrlParams };
