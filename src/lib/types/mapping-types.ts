@@ -11,14 +11,6 @@ import { FeatureCollection, GeoJsonProperties } from "geojson"
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-interface BaseLayerProps {
-    type: 'feature' | 'tile' | 'map-image' | 'geojson' | 'imagery' | 'wms' | 'group';
-    url?: string;
-    title?: string;
-    visible?: boolean;
-    options?: any;
-    opacity?: number;
-}
 
 export interface LinkDefinition {
     label: string;
@@ -94,6 +86,17 @@ type ExtendedSublayerProperties =
     __esri.SublayerProperties &
     __esri.WMSSublayerProperties &
     CustomSublayerProps;
+
+
+
+interface BaseLayerProps {
+    type: 'feature' | 'tile' | 'map-image' | 'geojson' | 'imagery' | 'wms' | 'group';
+    url?: string;
+    title?: string;
+    visible?: boolean;
+    options?: any;
+    opacity?: number;
+}
 
 export interface WMSLayerProps extends BaseLayerProps {
     type: 'wms';
