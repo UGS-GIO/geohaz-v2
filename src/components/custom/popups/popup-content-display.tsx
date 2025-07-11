@@ -238,8 +238,6 @@ const PopupContentDisplay = ({ feature, layout, layer }: PopupContentDisplayProp
                 ? rasterSource.transform(rasterValue) || ''
                 : String(rasterValue ?? '');
         } else if (currentConfig && isCustomField(currentConfig)) {
-            console.log('reached a certain spot');
-
             finalDisplayValue = currentConfig.transform?.(properties)?.toString() || '';
         } else if (currentConfig && (isStringField(currentConfig) || isNumberField(currentConfig))) {
             const rawValue = popupFields ? properties[currentConfig.field] : valueFromPropertiesDirectly;

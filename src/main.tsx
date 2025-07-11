@@ -48,12 +48,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
       <QueryClientProvider client={queryClient}>
         <SidebarProvider>
-          <LayerListProvider>
-            <MapProvider>
-              <RouterProvider router={router} />
-              <Toaster />
-            </MapProvider>
-          </LayerListProvider>
+          <MapProvider>
+            <RouterProvider router={router} />
+            <Toaster />
+          </MapProvider>
         </SidebarProvider>
       </QueryClientProvider>
     </ThemeProvider>
