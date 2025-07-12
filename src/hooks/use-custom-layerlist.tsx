@@ -28,10 +28,6 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     }, [view, view?.map.allLayers, layerConfig.title]);
     const { refetch: fetchExtent, data: cachedExtent, isLoading: isExtentLoading } = useLayerExtent(liveLayer || new Layer());
 
-    console.log(liveLayer?.type);
-
-
-
     const handleOpacityChange = (value: number) => {
         if (liveLayer) {
             liveLayer.opacity = value / 100;
