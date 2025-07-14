@@ -5,7 +5,6 @@ import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from '@/context/theme-provider'
 import { MapProvider } from '@/context/map-provider'
 import { SidebarProvider } from '@/context/sidebar-provider'
-import { LayerListProvider } from '@/context/layerlist-provider'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { initializeApp } from 'firebase/app'
@@ -48,12 +47,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
       <QueryClientProvider client={queryClient}>
         <SidebarProvider>
-          <LayerListProvider>
-            <MapProvider>
-              <RouterProvider router={router} />
-              <Toaster />
-            </MapProvider>
-          </LayerListProvider>
+          <MapProvider>
+            <RouterProvider router={router} />
+            <Toaster />
+          </MapProvider>
         </SidebarProvider>
       </QueryClientProvider>
     </ThemeProvider>

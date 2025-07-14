@@ -2,35 +2,30 @@ import { useRef, useContext, useState, useEffect } from 'react';
 import { MapContext } from '@/context/map-provider';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
-import { useMapUrlParams } from "@/hooks/use-map-url-params";
+import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
 import { LayerOrderConfig, useGetLayerConfig } from "@/hooks/use-get-layer-config";
 import { highlightFeature } from '@/lib/mapping-utils';
 import Point from '@arcgis/core/geometry/Point';
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
-import { LayerContentProps } from '@/components/custom/popups/popup-content-with-pagination';
+import { LayerProps } from '@/lib/types/mapping-types';
+import { useLayerUrl } from '@/context/layer-url-provider';
 
-interface MapContainerHookResult {
-    mapRef: React.RefObject<HTMLDivElement>;
-    contextMenuTriggerRef: React.RefObject<HTMLDivElement>;
-    drawerTriggerRef: React.RefObject<HTMLButtonElement>;
-    popupContainer: HTMLDivElement | null;
-    setPopupContainer: (container: HTMLDivElement | null) => void;
-    popupContent: LayerContentProps[];
-    clickOrDragHandlers: {
-        onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
-        onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
-        onMouseUp: (e: React.MouseEvent<HTMLDivElement>) => void;
-    };
-    handleOnContextMenu: (
-        e: React.MouseEvent<HTMLDivElement>,
-        triggerRef: React.RefObject<HTMLDivElement>,
-        setCoords: (coords: { x: string; y: string }) => void
-    ) => void;
-    coordinates: { x: string; y: string };
-    setCoordinates: (coords: { x: string; y: string }) => void;
-    view: __esri.MapView | __esri.SceneView | undefined;
-    layersConfig: any;
+/**
+ * Recursively updates the visibility of layers based on a set of visible titles.
+ * This function should live in a utility file (e.g., /lib/mapping-utils.ts)
+ */
+const preprocessLayerVisibility = (layers: LayerProps[], visibleLayerTitles: Set<string>): LayerProps[] => {
+    return layers.map(layer => {
+        // Handle group layers recursively
+        if (layer.type === 'group' && 'layers' in layer) {
+            const newChildLayers = preprocessLayerVisibility(layer.layers || [], visibleLayerTitles);
+            const isGroupVisible = newChildLayers.some(child => child.visible);
+            return { ...layer, visible: isGroupVisible, layers: newChildLayers };
+        }
+        // Handle single layers
+        return { ...layer, visible: visibleLayerTitles.has(layer.title || '') };
+    });
 }
 
 interface UseMapContainerProps {
@@ -38,7 +33,7 @@ interface UseMapContainerProps {
     layerOrderConfigs?: LayerOrderConfig[];
 }
 
-export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContainerProps): MapContainerHookResult {
+export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContainerProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const { loadMap, view, isSketching } = useContext(MapContext);
     const { coordinates, setCoordinates } = useMapCoordinates();
@@ -46,18 +41,17 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null);
     const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
     const drawerTriggerRef = useRef<HTMLButtonElement>(null);
-    const { zoom, center } = useMapUrlParams(view);
+    const { zoom, center } = useMapPositionUrlParams(view);
     const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
+    const { visibleLayerTitles } = useLayerUrl();
 
     const { clickOrDragHandlers } = useMapClickOrDrag({
         onClick: (e) => {
             if (!view || isSketching) return;
             view.graphics.removeAll();
-
             const layers = getVisibleLayers({ view });
             setVisibleLayersMap(layers.layerVisibilityMap);
-
             const mapPoint = view.toMap({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY }) || new Point();
             featureInfoQuery.fetchForPoint(mapPoint);
         }
@@ -80,7 +74,6 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
             if (hasFeatures && firstFeature && view) {
                 highlightFeature(firstFeature, view);
             }
-
             if (!hasFeatures && drawerState === 'open') {
                 drawerTriggerRef.current?.click();
             } else if (hasFeatures && drawerState !== 'open') {
@@ -91,9 +84,15 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
 
     useEffect(() => {
         if (mapRef.current && loadMap && zoom && center && layersConfig) {
-            loadMap(mapRef.current, { zoom, center }, layersConfig);
+            const finalLayersConfig = preprocessLayerVisibility(layersConfig, visibleLayerTitles);
+            loadMap({
+                container: mapRef.current,
+                zoom,
+                center,
+                layers: finalLayersConfig,
+            });
         }
-    }, [loadMap, zoom, center, layersConfig]);
+    }, [loadMap, zoom, center, layersConfig, visibleLayerTitles]);
 
     return {
         mapRef,

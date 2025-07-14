@@ -288,6 +288,7 @@ const SITLAConfig: LayerProps = {
     type: 'map-image',
     url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer',
     opacity: 0.5,
+    title: 'Landownership',
     options: {
         title: 'Landownership',
         elevationInfo: [{ mode: 'on-the-ground' }],
