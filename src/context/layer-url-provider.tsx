@@ -1,22 +1,37 @@
-import { createContext, useContext, useCallback, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useCallback, ReactNode, useMemo, useEffect } from 'react';
 import { useSearch, useNavigate } from '@tanstack/react-router';
-import { GroupLayerProps, LayerProps } from '@/lib/types/mapping-types';
+import { LayerProps } from '@/lib/types/mapping-types';
+import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 
 interface LayerUrlContextType {
     visibleLayerTitles: Set<string>;
     updateLayerVisibility: (titles: string | string[], shouldBeVisible: boolean) => void;
-    initializeDefaultLayers: (layersConfig: LayerProps[]) => void;
 }
 
 const LayerUrlContext = createContext<LayerUrlContextType | undefined>(undefined);
 
-// Helper to get all default visible layer titles from the config
+// Helper functions (can be moved to a utils file)
+const getAllValidTitles = (layers: LayerProps[]): Set<string> => {
+    const titles = new Set<string>();
+    const traverse = (layerArray: LayerProps[]) => {
+        for (const layer of layerArray) {
+            if (layer.title) {
+                titles.add(layer.title);
+            }
+            if (layer.type === 'group' && 'layers' in layer && layer.layers) {
+                traverse(layer.layers);
+            }
+        }
+    };
+    traverse(layers);
+    return titles;
+};
+
 const getDefaultVisible = (layers: LayerProps[]): string[] => {
     let visible: string[] = [];
     layers.forEach(layer => {
-        if (layer.type === 'group') {
-            const groupLayer = layer as GroupLayerProps;
-            visible = [...visible, ...getDefaultVisible(groupLayer.layers || [])];
+        if (layer.type === 'group' && 'layers' in layer && layer.layers) {
+            visible = [...visible, ...getDefaultVisible(layer.layers)];
         } else if (layer.visible && layer.title) {
             visible.push(layer.title);
         }
@@ -26,24 +41,64 @@ const getDefaultVisible = (layers: LayerProps[]): string[] => {
 
 export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
     const navigate = useNavigate();
-    const search = useSearch({ from: '__root__' });
-    const urlLayers = search.layers;
+    const { layers: urlLayers } = useSearch({ from: '__root__' });
+    const layersConfig = useGetLayerConfig();
 
-    const visibleLayerTitles = useMemo(() => new Set(urlLayers || []), [urlLayers]);
+    const allValidTitles = useMemo(() => {
+        if (!layersConfig) return new Set<string>();
+        return getAllValidTitles(layersConfig);
+    }, [layersConfig]);
 
-    // initialize the default layers if not set in the URL
-    const initializeDefaultLayers = useCallback((layersConfig: LayerProps[]) => {
-        if (urlLayers === undefined) {
+    const visibleLayerTitles = useMemo(() => {
+        if (!urlLayers) return new Set<string>();
+        const layersArray = Array.isArray(urlLayers) ? urlLayers : [urlLayers];
+        return new Set(layersArray.filter(title => allValidTitles.has(title)));
+    }, [urlLayers, allValidTitles]);
+
+    useEffect(() => {
+        if (!layersConfig) return;
+
+        const layersParamExists = new URL(window.location.href).searchParams.has('layers');
+
+        // Case 1: The `layers` parameter is not in the URL at all.
+        if (!layersParamExists) {
             const defaults = getDefaultVisible(layersConfig);
             if (defaults.length > 0) {
                 navigate({
                     to: '.',
-                    search: (prev) => ({ ...prev, layers: defaults }),
-                    replace: true,
+                    search: (prev) => ({ ...prev, layers: defaults }), replace: true
+                });
+            }
+            return;
+        }
+
+        // Case 2: The `layers` parameter IS present. We validate its contents.
+        const urlLayersArray = Array.isArray(urlLayers) ? urlLayers : (urlLayers ? [urlLayers].filter(Boolean) : []);
+        const validatedTitles = urlLayersArray.filter(title => allValidTitles.has(title));
+
+        // If, after validation, the list is empty (because the param was empty OR all titles were invalid),
+        // we populate the defaults.
+        if (validatedTitles.length === 0) {
+            const defaults = getDefaultVisible(layersConfig);
+            // Only update if there are defaults, to prevent an infinite loop on `?layers=`
+            if (defaults.length > 0) {
+                navigate({
+                    to: '.',
+                    search: (prev) => ({ ...prev, layers: defaults }), replace: true
                 });
             }
         }
-    }, [urlLayers, navigate]);
+        // Otherwise, if the list isn't empty, but we removed some invalid titles, we clean the URL.
+        else if (validatedTitles.length < urlLayersArray.length) {
+            navigate({
+                to: '.',
+                search: (prev) => ({ ...prev, layers: validatedTitles }), replace: true
+            });
+        }
+        // If the URL was already clean and valid, we do nothing.
+    }, [layersConfig, urlLayers, allValidTitles, navigate]);
+
+
 
     const updateLayerVisibility = useCallback((titles: string | string[], shouldBeVisible: boolean) => {
         const titlesToUpdate = Array.isArray(titles) ? titles : [titles];
@@ -55,15 +110,31 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
             titlesToUpdate.forEach(title => newVisibleSet.delete(title));
         }
 
-        navigate({
-            to: '.',
-            search: (prev) => ({ ...prev, layers: Array.from(newVisibleSet) }),
-            replace: true,
-        });
+        const newLayers = Array.from(newVisibleSet);
+
+        // If the final list of layers is empty, remove the 'layers' key from the URL.
+        if (newLayers.length === 0) {
+            navigate({
+                to: '.',
+                search: (prev) => {
+                    const { layers, ...rest } = prev; // Create a new object without the 'layers' key
+                    return rest;
+                },
+                replace: true,
+            });
+        } else {
+            // Otherwise, update the URL with the new list.
+            navigate({
+                to: '.',
+                search: (prev) => ({ ...prev, layers: newLayers }),
+                replace: true,
+            });
+        }
+
     }, [navigate, visibleLayerTitles]);
 
     return (
-        <LayerUrlContext.Provider value={{ visibleLayerTitles, updateLayerVisibility, initializeDefaultLayers }}>
+        <LayerUrlContext.Provider value={{ visibleLayerTitles, updateLayerVisibility }}>
             {children}
         </LayerUrlContext.Provider>
     );

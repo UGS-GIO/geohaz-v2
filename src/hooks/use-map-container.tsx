@@ -9,7 +9,7 @@ import Point from '@arcgis/core/geometry/Point';
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { LayerProps } from '@/lib/types/mapping-types';
-import { useLayerUrl } from '@/context/layer-url-provider'; // Import the new central state hook
+import { useLayerUrl } from '@/context/layer-url-provider';
 
 /**
  * Recursively updates the visibility of layers based on a set of visible titles.
@@ -44,7 +44,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const { zoom, center } = useMapPositionUrlParams(view);
     const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
-    const { visibleLayerTitles, initializeDefaultLayers } = useLayerUrl();
+    const { visibleLayerTitles } = useLayerUrl();
 
     const { clickOrDragHandlers } = useMapClickOrDrag({
         onClick: (e) => {
@@ -74,7 +74,6 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
             if (hasFeatures && firstFeature && view) {
                 highlightFeature(firstFeature, view);
             }
-
             if (!hasFeatures && drawerState === 'open') {
                 drawerTriggerRef.current?.click();
             } else if (hasFeatures && drawerState !== 'open') {
@@ -85,13 +84,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
 
     useEffect(() => {
         if (mapRef.current && loadMap && zoom && center && layersConfig) {
-            // 1. On initial load, this sets the URL to match defaults if no layers are specified.
-            initializeDefaultLayers(layersConfig);
-
-            // 2. Preprocess the base config using the definitive list of titles from the URL.
             const finalLayersConfig = preprocessLayerVisibility(layersConfig, visibleLayerTitles);
-
-            // 3. Load the map with the correctly configured layers.
             loadMap({
                 container: mapRef.current,
                 zoom,
@@ -99,7 +92,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
                 layers: finalLayersConfig,
             });
         }
-    }, [loadMap, zoom, center, layersConfig, visibleLayerTitles, initializeDefaultLayers]);
+    }, [loadMap, zoom, center, layersConfig, visibleLayerTitles]);
 
     return {
         mapRef,
