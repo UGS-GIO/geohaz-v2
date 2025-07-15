@@ -19,6 +19,7 @@ const rootSearchSchema = z.object({
     lon: z.coerce.number().optional().catch(undefined),
     coordinate_format: z.enum(['dd', 'dms']).optional().catch(undefined),
     layers: z.array(z.string()).optional(),
+    filters: z.record(z.string()).optional(),
 }).catchall(z.unknown());
 
 export type RootSearch = z.infer<typeof rootSearchSchema>;
