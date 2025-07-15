@@ -1,4 +1,5 @@
 import { useRef, useContext, useState, useEffect } from 'react';
+import { useSearch } from '@tanstack/react-router';
 import { MapContext } from '@/context/map-provider';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
@@ -10,14 +11,12 @@ import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { LayerProps } from '@/lib/types/mapping-types';
 import { useLayerUrl } from '@/context/layer-url-provider';
+import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
+import { findAndApplyWMSFilter } from '@/pages/ccus/components/sidebar/map-configurations/map-configurations';
 
-/**
- * Recursively updates the visibility of layers based on a set of visible titles.
- * This function should live in a utility file (e.g., /lib/mapping-utils.ts)
- */
 const preprocessLayerVisibility = (layers: LayerProps[], visibleLayerTitles: Set<string>): LayerProps[] => {
     return layers.map(layer => {
-        // Handle group layers recursively
+        // Handle group layers
         if (layer.type === 'group' && 'layers' in layer) {
             const newChildLayers = preprocessLayerVisibility(layer.layers || [], visibleLayerTitles);
             const isGroupVisible = newChildLayers.some(child => child.visible);
@@ -44,7 +43,15 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const { zoom, center } = useMapPositionUrlParams(view);
     const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
-    const { visibleLayerTitles } = useLayerUrl();
+    const search = useSearch({ from: '__root__' });
+    const { visibleLayerTitles, updateLayerVisibility } = useLayerUrl();
+
+    const featureInfoQuery = useFeatureInfoQuery({
+        view,
+        wmsUrl,
+        visibleLayersMap,
+        layerOrderConfigs
+    });
 
     const { clickOrDragHandlers } = useMapClickOrDrag({
         onClick: (e) => {
@@ -57,13 +64,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         }
     });
 
-    const featureInfoQuery = useFeatureInfoQuery({
-        view,
-        wmsUrl,
-        visibleLayersMap,
-        layerOrderConfigs
-    });
-
+    // This useEffect handles opening/closing the feature info drawer
     useEffect(() => {
         if (featureInfoQuery.isSuccess) {
             const popupContent = featureInfoQuery.data || [];
@@ -81,6 +82,18 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
             }
         }
     }, [featureInfoQuery.isSuccess, featureInfoQuery.data, view]);
+
+    // apply filters on initial load
+    useEffect(() => {
+        // Wait for the map and filters to be ready
+        if (!view || !view.map) return;
+        const filtersFromUrl = search.filters ?? {};
+        const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
+        findAndApplyWMSFilter(view.map, wellWithTopsWMSTitle, wellFilter);
+        if (wellFilter) {
+            updateLayerVisibility(wellWithTopsWMSTitle, true);
+        }
+    }, [view, search.filters, updateLayerVisibility]);
 
     useEffect(() => {
         if (mapRef.current && loadMap && zoom && center && layersConfig) {

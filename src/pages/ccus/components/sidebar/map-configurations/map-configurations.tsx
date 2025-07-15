@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -22,12 +22,10 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
-import { MapContext } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/mapping-utils';
-import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
 
-const findAndApplyWMSFilter = (
+export const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
     layerTitle: string,
     cqlFilter: string | null
@@ -38,24 +36,18 @@ const findAndApplyWMSFilter = (
     }
     const layer = findLayerByTitle(mapInstance, layerTitle);
 
-    if (layer) {
-        if (layer.type === 'wms') {
-            const wmsLayer = layer as WMSLayer;
-            const newCustomParameters = { ...(wmsLayer.customParameters || {}) };
-            if (cqlFilter) {
-                newCustomParameters.cql_filter = cqlFilter;
-            } else {
-                delete newCustomParameters.cql_filter;
-            }
-            if (JSON.stringify(wmsLayer.customParameters) !== JSON.stringify(newCustomParameters)) {
-                wmsLayer.customParameters = newCustomParameters;
-                wmsLayer.refresh();
-            }
+    if (layer?.type === 'wms') {
+        const wmsLayer = layer as WMSLayer;
+        const newCustomParameters = { ...(wmsLayer.customParameters || {}) };
+        if (cqlFilter) {
+            newCustomParameters.cql_filter = cqlFilter;
         } else {
-            console.warn(`[MapConfigurations] Layer "${layerTitle}" found, but it's not a WMS layer. Type: ${layer.type}`);
+            delete newCustomParameters.cql_filter;
         }
-    } else {
-        console.warn(`[MapConfigurations] Layer "${layerTitle}" not found.`);
+        if (JSON.stringify(wmsLayer.customParameters) !== JSON.stringify(newCustomParameters)) {
+            wmsLayer.customParameters = newCustomParameters;
+            wmsLayer.refresh();
+        }
     }
 };
 
@@ -112,14 +104,10 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
 };
 
 function MapConfigurations() {
-    const { setIsDecimalDegrees, locationCoordinateFormat } = useMapCoordinates();
-    const { map } = useContext(MapContext);
-
+    const { setIsDecimalDegrees } = useMapCoordinates();
     const navigate = useNavigate({ from: '/ccus' });
     const search = useSearch({ from: '/ccus/' });
 
-    const [hasCoreFilter, setHasCoreFilter] = useState<YesNoAll>(search.core ?? "all");
-    const [selectedFormationColumn, setSelectedFormationColumn] = useState<string>(search.formation ?? "");
     const [formationDropdownOpen, setFormationDropdownOpen] = useState(false);
 
     const { data: formationMappings = [], isLoading: isLoadingFormations, error: formationError } = useQuery({
@@ -128,24 +116,6 @@ function MapConfigurations() {
         staleTime: 1000 * 60 * 30, // Cache for 30 minutes
         refetchOnWindowFocus: false,
     });
-
-    useEffect(() => {
-        if (!map) return;
-        const wellFilterParts: string[] = [];
-        const { attribute: hasCoreAttr, trueValue: hcTrue, falseValue: hcFalse } = wellsHasCoreFilterConfig;
-        if (hasCoreFilter === "yes") {
-            const value = typeof hcTrue === 'string' ? `'${hcTrue}'` : hcTrue;
-            wellFilterParts.push(`${hasCoreAttr} = ${value}`);
-        } else if (hasCoreFilter === "no") {
-            const value = typeof hcFalse === 'string' ? `'${hcFalse}'` : hcFalse;
-            wellFilterParts.push(`${hasCoreAttr} = ${value}`);
-        }
-        if (selectedFormationColumn) {
-            wellFilterParts.push(`${selectedFormationColumn} IS NOT NULL`);
-        }
-        const combinedWellFilter = wellFilterParts.length > 0 ? wellFilterParts.join(' AND ') : null;
-        findAndApplyWMSFilter(map, wellWithTopsWMSTitle, combinedWellFilter);
-    }, [hasCoreFilter, selectedFormationColumn, map]);
 
     const handleCoordFormatChange = (value: string) => {
         const isDD = value === "Decimal Degrees";
@@ -158,7 +128,6 @@ function MapConfigurations() {
 
     const handleHasCoreChange = (value: string) => {
         const newCoreValue = value as YesNoAll;
-        setHasCoreFilter(newCoreValue);
         navigate({
             search: (prev) => ({ ...prev, core: newCoreValue === "all" ? undefined : newCoreValue }),
             replace: true,
@@ -166,7 +135,6 @@ function MapConfigurations() {
     };
 
     const handleFormationChange = (newFormationValue: string) => {
-        setSelectedFormationColumn(newFormationValue);
         navigate({
             search: (prev) => ({ ...prev, formation: newFormationValue === "" ? undefined : newFormationValue }),
             replace: true,
@@ -174,7 +142,9 @@ function MapConfigurations() {
         setFormationDropdownOpen(false);
     };
 
-    const coordFormatRadioValue = locationCoordinateFormat === "Decimal Degrees" ? "Decimal Degrees" : "Degrees, Minutes, Seconds";
+    const coordFormatRadioValue = search.coordinate_format === "dms" ? "Degrees, Minutes, Seconds" : "Decimal Degrees";
+    const coreFilterValue = search.core ?? "all";
+    const selectedFormationValue = search.formation ?? "";
 
     return (
         <>
@@ -212,7 +182,7 @@ function MapConfigurations() {
                     <CardContent className="p-4 space-y-4">
                         <div>
                             <Label htmlFor="has-core-filter-group" className="text-sm font-medium text-muted-foreground mb-2 block">{wellsHasCoreFilterConfig.label}</Label>
-                            <RadioGroup id="has-core-filter-group" value={hasCoreFilter} onValueChange={handleHasCoreChange} className="grid grid-cols-3 gap-2">
+                            <RadioGroup id="has-core-filter-group" value={coreFilterValue} onValueChange={handleHasCoreChange} className="grid grid-cols-3 gap-2">
                                 {wellsHasCoreFilterConfig.options.map(option => (
                                     <div className="flex" key={`hascore-${option.value}`}>
                                         <RadioGroupItem value={option.value} id={`hascore-filter-${option.value}`} className="peer sr-only" />
@@ -232,8 +202,8 @@ function MapConfigurations() {
                                         aria-expanded={formationDropdownOpen}
                                         className="w-full justify-between text-xs h-9"
                                     >
-                                        {selectedFormationColumn
-                                            ? formationMappings.find((f) => f.value === selectedFormationColumn)?.label
+                                        {selectedFormationValue
+                                            ? formationMappings.find((f) => f.value === selectedFormationValue)?.label
                                             : "Select formation..."
                                         }
                                         <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
@@ -251,7 +221,7 @@ function MapConfigurations() {
                                                     onSelect={() => handleFormationChange("")}
                                                     className="text-xs"
                                                 >
-                                                    <Check className={cn("mr-2 h-3 w-3", selectedFormationColumn === "" ? "opacity-100" : "opacity-0")} />
+                                                    <Check className={cn("mr-2 h-3 w-3", selectedFormationValue === "" ? "opacity-100" : "opacity-0")} />
                                                     All Formations
                                                 </CommandItem>
                                                 {formationMappings.map((mapping) => (
@@ -259,11 +229,11 @@ function MapConfigurations() {
                                                         key={mapping.value}
                                                         value={mapping.value}
                                                         onSelect={(currentValue) => {
-                                                            handleFormationChange(currentValue === selectedFormationColumn ? "" : currentValue);
+                                                            handleFormationChange(currentValue === selectedFormationValue ? "" : currentValue);
                                                         }}
                                                         className="text-xs"
                                                     >
-                                                        <Check className={cn("mr-2 h-3 w-3", selectedFormationColumn === mapping.value ? "opacity-100" : "opacity-0")} />
+                                                        <Check className={cn("mr-2 h-3 w-3", selectedFormationValue === mapping.value ? "opacity-100" : "opacity-0")} />
                                                         {mapping.label}
                                                     </CommandItem>
                                                 ))}
