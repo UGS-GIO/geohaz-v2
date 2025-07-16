@@ -39,7 +39,6 @@ const getDefaultVisible = (layers: LayerProps[]): string[] => {
     return visible;
 };
 
-
 export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
     const navigate = useNavigate();
     const { layers: urlLayers } = useSearch({ from: '__root__' });
@@ -57,7 +56,6 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
         return new Set(layersArray.filter(title => allValidTitles.has(title)));
     }, [urlLayers, allValidTitles]);
 
-    // This effect now correctly runs its logic only once.
     useEffect(() => {
         // 1. Exit if the config isn't ready or if we have already run this setup.
         if (!layersConfig || hasInitialized.current) {
@@ -76,14 +74,10 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
                 });
             }
         }
-        // NOTE: The validation logic for bad layer names on initial load is intentionally
-        // removed for this fix, as it was causing a race condition with the `useRef` flag.
-        // The URL is now trusted on initial load, and bad layers are filtered out by `visibleLayerTitles`.
 
         // 2. Mark initialization as complete. This is the crucial step.
         hasInitialized.current = true;
 
-        // 3. The dependency array is now minimal. It only cares about when the config becomes available.
     }, [layersConfig, navigate]);
 
 
