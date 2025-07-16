@@ -6,7 +6,7 @@ import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 import { useLayerItemState } from '@/hooks/use-layer-item-state';
 import { LayerProps } from '@/lib/types/mapping-types';
 import { MapContext } from '@/context/map-provider';
-import { findLayerByTitle } from '@/lib/mapping-utils'; // Assuming you have this helper
+import { findLayerByTitle } from '@/lib/mapping-utils';
 import { useLayerExtent } from '@/hooks/use-layer-extent';
 import { useFetchLayerDescriptions } from '@/hooks/use-fetch-layer-descriptions';
 import { useSidebar } from '@/hooks/use-sidebar';
