@@ -1,7 +1,6 @@
 import Extent from "@arcgis/core/geometry/Extent";
 import { useQuery } from "@tanstack/react-query";
 import { XMLParser } from "fast-xml-parser";
-import { TypeNarrowedLayer } from "@/hooks/use-custom-layerlist";
 
 const parseCapabilitiesExtent = (xml: string, targetLayerName: string): Extent | null => {
     const parser = new XMLParser({
@@ -71,12 +70,12 @@ const parseCapabilitiesExtent = (xml: string, targetLayerName: string): Extent |
     }
 };
 
-const fetchLayerExtent = async (layer: TypeNarrowedLayer): Promise<__esri.Extent> => {
+const fetchLayerExtent = async (layer: __esri.Layer): Promise<__esri.Extent> => {
     if (layer.type === 'wms') {
         const wmsLayer = layer as __esri.WMSLayer;
         const sublayer = wmsLayer.allSublayers.getItemAt(0);
 
-        if (!sublayer || !layer.url) {
+        if (!sublayer || !wmsLayer.url) {
             console.warn('No sublayer or URL found for WMS layer:', layer);
             return wmsLayer.fullExtent || new Extent();
         }
@@ -86,7 +85,7 @@ const fetchLayerExtent = async (layer: TypeNarrowedLayer): Promise<__esri.Extent
         const [namespace, _name] = layerName.split(':');
 
         // Construct GetCapabilities URL with version (1.3.0 is most current)
-        const capabilitiesUrl = new URL(layer.url);
+        const capabilitiesUrl = new URL(wmsLayer.url);
         capabilitiesUrl.searchParams.set('service', 'WMS');
         capabilitiesUrl.searchParams.set('version', '1.3.0');
         capabilitiesUrl.searchParams.set('request', 'GetCapabilities');
@@ -136,7 +135,7 @@ const fetchLayerExtent = async (layer: TypeNarrowedLayer): Promise<__esri.Extent
     return new Extent();
 };
 
-const useLayerExtent = (layer: TypeNarrowedLayer) => {
+const useLayerExtent = (layer: __esri.Layer) => {
     return useQuery({
         queryKey: ['layerExtent', layer.id],
         queryFn: () => fetchLayerExtent(layer),
