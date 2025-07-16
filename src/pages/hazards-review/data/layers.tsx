@@ -2,7 +2,7 @@ import { PROD_GEOSERVER_URL, HAZARDS_WORKSPACE, PROD_POSTGREST_URL, GEN_GIS_WORK
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 import GeoJSON from "geojson";
 
-const IS_CURRENT_CQL = `is_current IN ('Y', 'N')`;
+const IS_CURRENT_CQL = `is_current IN ('Y', 'R')`;
 
 export const landslideLegacyLayerName = 'landslidelegacy_current';
 const landslideLegacyWMSTitle = 'Legacy Landslide Compilation - Statewide';
