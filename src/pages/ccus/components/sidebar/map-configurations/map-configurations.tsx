@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -22,8 +22,11 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
+import { MapContext } from '@/context/map-provider';
+import { useLayerUrl } from '@/context/layer-url-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/mapping-utils';
+import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
 
 export const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
@@ -105,15 +108,21 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
 
 function MapConfigurations() {
     const { setIsDecimalDegrees } = useMapCoordinates();
+    const { map } = useContext(MapContext);
     const navigate = useNavigate({ from: '/ccus' });
     const search = useSearch({ from: '/ccus/' });
+    const { visibleLayerTitles } = useLayerUrl();
 
     const [formationDropdownOpen, setFormationDropdownOpen] = useState(false);
 
-    const { data: formationMappings = [], isLoading: isLoadingFormations, error: formationError } = useQuery({
+    const {
+        data: formationMappings = [],
+        isLoading: isLoadingFormations,
+        error: formationError
+    } = useQuery({
         queryKey: ['formationMappings'],
         queryFn: fetchFormationData,
-        staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+        staleTime: 1000 * 60 * 60, // Cache for 60 minutes
         refetchOnWindowFocus: false,
     });
 
@@ -125,6 +134,57 @@ function MapConfigurations() {
             replace: true,
         });
     };
+
+    // Step 1: Isolate the filter CALCULATION using useMemo.
+    // This is a pure calculation based on the URL state.
+    const combinedWellFilter = useMemo(() => {
+        const wellFilterParts: string[] = [];
+        const { attribute: hasCoreAttr, trueValue: hcTrue, falseValue: hcFalse } = wellsHasCoreFilterConfig;
+        if (search.core === "yes") wellFilterParts.push(`${hasCoreAttr} = '${hcTrue}'`);
+        if (search.core === "no") wellFilterParts.push(`${hasCoreAttr} = '${hcFalse}'`);
+        if (search.formation) wellFilterParts.push(`${search.formation} IS NOT NULL`);
+        return wellFilterParts.length > 0 ? wellFilterParts.join(' AND ') : null;
+    }, [search.core, search.formation]);
+
+    useEffect(() => {
+        if (!map) return;
+
+        const isWellsLayerVisible = visibleLayerTitles.has(wellWithTopsWMSTitle);
+
+        // If the layer is OFF, clean up any lingering filter state.
+        if (!isWellsLayerVisible) {
+            findAndApplyWMSFilter(map, wellWithTopsWMSTitle, null);
+            if (search.core || search.formation || search.filters?.[wellWithTopsWMSTitle]) {
+                navigate({
+                    search: (prev) => {
+                        const newFilters = { ...prev.filters };
+                        delete newFilters[wellWithTopsWMSTitle];
+                        return { ...prev, core: undefined, formation: undefined, filters: Object.keys(newFilters).length > 0 ? newFilters : undefined };
+                    },
+                    replace: true,
+                });
+            }
+            return;
+        }
+
+        // If the layer is ON, apply the filter and sync the URL.
+        findAndApplyWMSFilter(map, wellWithTopsWMSTitle, combinedWellFilter);
+
+        const currentFilters = search.filters || {};
+        const newFilters = { ...currentFilters };
+        if (combinedWellFilter) {
+            newFilters[wellWithTopsWMSTitle] = combinedWellFilter;
+        } else {
+            delete newFilters[wellWithTopsWMSTitle];
+        }
+
+        if (JSON.stringify(currentFilters) !== JSON.stringify(newFilters)) {
+            navigate({
+                search: (prev) => ({ ...prev, filters: Object.keys(newFilters).length > 0 ? newFilters : undefined }),
+                replace: true,
+            });
+        }
+    }, [map, search, combinedWellFilter, visibleLayerTitles, navigate]);
 
     const handleHasCoreChange = (value: string) => {
         const newCoreValue = value as YesNoAll;

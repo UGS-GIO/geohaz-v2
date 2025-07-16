@@ -6,7 +6,7 @@ import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 import { useLayerItemState } from '@/hooks/use-layer-item-state';
 import { LayerProps } from '@/lib/types/mapping-types';
 import { MapContext } from '@/context/map-provider';
-import { findLayerByTitle } from '@/lib/mapping-utils'; // Assuming you have this helper
+import { findLayerByTitle } from '@/lib/mapping-utils';
 import { useLayerExtent } from '@/hooks/use-layer-extent';
 import { useFetchLayerDescriptions } from '@/hooks/use-fetch-layer-descriptions';
 import { useSidebar } from '@/hooks/use-sidebar';
@@ -54,7 +54,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
 
     // Group Layer Rendering
     if (layerConfig.type === 'group' && 'layers' in layerConfig) {
-        const invertedChildLayers = [...(layerConfig.layers || [])].reverse();
+        const childLayers = [...(layerConfig.layers || [])];
 
         return (
             <div className="mr-2 border border-secondary rounded my-2">
@@ -75,7 +75,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                                 />
                                 <label className="text-sm font-medium italic">Select All</label>
                             </div>
-                            {invertedChildLayers.map((child) => (
+                            {childLayers.map((child) => (
                                 <div className="ml-4" key={`${child.title}`}>
                                     <LayerAccordionItem layerConfig={child} isTopLevel={false} />
                                 </div>
