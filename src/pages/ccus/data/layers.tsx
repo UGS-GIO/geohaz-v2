@@ -193,6 +193,26 @@ const roadsWMSConfig: WMSLayerProps = {
     ],
 };
 
+// Railroads WMS Layer
+const railroadsLayerName = 'ccus_railroads';
+const railroadsWMSTitle = 'Railroads';
+const railroadsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: railroadsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${railroadsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Name': { field: 'railroad', type: 'string', transform: (value) => toTitleCase(value || '') },
+            },
+        },
+    ],
+};
+
 // Seamless Geological Units WMS Layer
 const seamlessGeolunitsLayerName = 'seamlessgeolunits';
 const seamlessGeolunitsWMSTitle = 'Geological Units (500k)';
@@ -658,6 +678,7 @@ const infrastructureAndLandUseConfig: LayerProps = {
         riversWMSConfig,
         SITLAConfig,
         roadsWMSConfig,
+        railroadsWMSConfig,
     ]
 }
 
