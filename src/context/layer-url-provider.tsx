@@ -51,7 +51,7 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
     }, [layersConfig]);
 
     const visibleLayerTitles = useMemo(() => {
-        if (urlLayers === undefined) return new Set<string>();
+        if (urlLayers == null) return new Set<string>();
         const layersArray = Array.isArray(urlLayers) ? urlLayers : [urlLayers];
         return new Set(layersArray.filter(title => allValidTitles.has(title)));
     }, [urlLayers, allValidTitles]);
