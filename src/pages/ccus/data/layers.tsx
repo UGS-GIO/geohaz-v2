@@ -213,6 +213,26 @@ const railroadsWMSConfig: WMSLayerProps = {
     ],
 };
 
+// Transmission Lines WMS Layer
+const transmissionLinesLayerName = 'ccus_transmissionlines';
+const transmissionLinesWMSTitle = 'Transmission Lines';
+const transmissionLinesWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: transmissionLinesWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${transmissionLinesLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Layer': { field: 'layer', type: 'string' },
+            },
+        },
+    ],
+}
+
 // Seamless Geological Units WMS Layer
 const seamlessGeolunitsLayerName = 'seamlessgeolunits';
 const seamlessGeolunitsWMSTitle = 'Geological Units (500k)';
@@ -679,6 +699,7 @@ const infrastructureAndLandUseConfig: LayerProps = {
         SITLAConfig,
         roadsWMSConfig,
         railroadsWMSConfig,
+        transmissionLinesWMSConfig,
     ]
 }
 
