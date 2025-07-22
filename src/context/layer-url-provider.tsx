@@ -10,23 +10,6 @@ interface LayerUrlContextType {
 
 const LayerUrlContext = createContext<LayerUrlContextType | undefined>(undefined);
 
-// Helper functions (can be moved to a utils file)
-const getAllValidTitles = (layers: LayerProps[]): Set<string> => {
-    const titles = new Set<string>();
-    const traverse = (layerArray: LayerProps[]) => {
-        for (const layer of layerArray) {
-            if (layer.title) {
-                titles.add(layer.title);
-            }
-            if (layer.type === 'group' && 'layers' in layer && layer.layers) {
-                traverse(layer.layers);
-            }
-        }
-    };
-    traverse(layers);
-    return titles;
-};
-
 const getDefaultVisible = (layers: LayerProps[]): string[] => {
     let visible: string[] = [];
     layers.forEach(layer => {
@@ -45,41 +28,23 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
     const layersConfig = useGetLayerConfig();
     const hasInitialized = useRef(false);
 
-    const allValidTitles = useMemo(() => {
-        if (!layersConfig) return new Set<string>();
-        return getAllValidTitles(layersConfig);
-    }, [layersConfig]);
-
     const visibleLayerTitles = useMemo(() => {
         if (urlLayers == null) return new Set<string>();
         const layersArray = Array.isArray(urlLayers) ? urlLayers : [urlLayers];
-        return new Set(layersArray.filter(title => allValidTitles.has(title)));
-    }, [urlLayers, allValidTitles]);
+        return new Set(layersArray);
+    }, [urlLayers]);
 
     useEffect(() => {
-        // 1. Exit if the config isn't ready or if we have already run this setup.
-        if (!layersConfig || hasInitialized.current) {
-            return;
-        }
-
+        if (!layersConfig || hasInitialized.current) return;
         const layersParamExists = new URL(window.location.href).searchParams.has('layers');
-
         if (!layersParamExists) {
             const defaults = getDefaultVisible(layersConfig);
             if (defaults.length > 0) {
-                navigate({
-                    to: '.',
-                    search: (prev) => ({ ...prev, layers: defaults }),
-                    replace: true
-                });
+                navigate({ to: '.', search: (prev) => ({ ...prev, layers: defaults }), replace: true });
             }
         }
-
-        // 2. Mark initialization as complete. This is the crucial step.
         hasInitialized.current = true;
-
     }, [layersConfig, navigate]);
-
 
     const updateLayerVisibility = useCallback((titles: string | string[], shouldBeVisible: boolean) => {
         const titlesToUpdate = Array.isArray(titles) ? titles : [titles];
@@ -96,10 +61,7 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
         if (newLayers.length === 0) {
             navigate({
                 to: '.',
-                search: (prev) => {
-                    const { layers, ...rest } = prev;
-                    return rest;
-                },
+                search: (prev) => { const { layers, ...rest } = prev; return rest; },
                 replace: true,
             });
         } else {

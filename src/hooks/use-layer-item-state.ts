@@ -1,15 +1,10 @@
 import { useLayerUrl } from '@/context/layer-url-provider';
 import { LayerProps } from '@/lib/types/mapping-types';
 
-// Helper function to get all child titles of a group
 const getChildLayerTitles = (layer: LayerProps): string[] => {
     if ('layers' in layer && layer.type === 'group') {
-        return (layer.layers || []).flatMap(child =>
-            getChildLayerTitles(child)
-        );
+        return (layer.layers || []).flatMap(child => getChildLayerTitles(child));
     }
-
-    // This is the base case for non-group layers.
     return layer.title ? [layer.title] : [];
 };
 
@@ -17,34 +12,32 @@ export const useLayerItemState = (layerConfig: LayerProps) => {
     const { visibleLayerTitles, updateLayerVisibility } = useLayerUrl();
 
     if (layerConfig.type !== 'group') {
-        // logic for a single layer
-        const isVisible = visibleLayerTitles.has(layerConfig.title || '');
-
-        const toggleVisibility = () => {
-            if (layerConfig.title) {
-                updateLayerVisibility(layerConfig.title, !isVisible);
-            }
+        const isSelected = visibleLayerTitles.has(layerConfig.title || '');
+        // This handler for single layers expects a boolean
+        const handleToggleSelection = (select: boolean) => {
+            if (layerConfig.title) updateLayerVisibility(layerConfig.title, select);
         };
-
-        return { isVisible, toggleVisibility, groupState: null };
+        return {
+            isSelected,
+            handleToggleSelection,
+            groupIsSelected: false,
+            handleSelectAllToggle: () => { }, // Provide a no-op for type consistency
+        };
     } else {
-
         const childTitles = getChildLayerTitles(layerConfig);
         const visibleChildrenCount = childTitles.filter(title => visibleLayerTitles.has(title)).length;
+        const groupIsSelected = visibleChildrenCount > 0;
 
-        let groupState: 'all' | 'some' | 'none' = 'none';
-        if (visibleChildrenCount === childTitles.length && childTitles.length > 0) {
-            groupState = 'all';
-        } else if (visibleChildrenCount > 0) {
-            groupState = 'some';
-        }
-
-        const toggleGroupVisibility = () => {
-            // If some or none are selected, turn all on. Otherwise, turn all off.
-            const shouldBeVisible = groupState !== 'all';
-            updateLayerVisibility(childTitles, shouldBeVisible);
+        // This handler for "Select All" takes no arguments
+        const handleSelectAllToggle = () => {
+            updateLayerVisibility(childTitles, !groupIsSelected);
         };
 
-        return { isVisible: groupState !== 'none', toggleVisibility: toggleGroupVisibility, groupState };
+        return {
+            isSelected: false,
+            handleToggleSelection: () => { }, // Provide a no-op
+            groupIsSelected,
+            handleSelectAllToggle,
+        };
     }
 };
