@@ -1,4 +1,3 @@
-// context/auth-provider.tsx
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User } from 'firebase/auth';
 import { onAuthStateChange, handleRedirectResult } from '@/lib/auth';
@@ -6,12 +5,10 @@ import { onAuthStateChange, handleRedirectResult } from '@/lib/auth';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  initialized: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-});
+const AuthContext = createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -20,64 +17,64 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    console.log('🔥 AuthProvider: Starting - URL:', window.location.href);
-    console.log('🔥 AuthProvider: URL search params:', window.location.search);
-    console.log('🔥 AuthProvider: URL hash:', window.location.hash);
-
     let mounted = true;
 
-    // Check for redirect result immediately
-    console.log('🔥 AuthProvider: Calling handleRedirectResult...');
+    // Handle redirect result first
     handleRedirectResult()
       .then((result) => {
-        console.log('🔥 AuthProvider: handleRedirectResult completed');
-        console.log('🔥 AuthProvider: Result:', result);
-        
-        if (mounted && result) {
-          console.log('🔥 AuthProvider: Found user in redirect result!');
-          console.log('🔥 AuthProvider: User email:', result.user.email);
-          console.log('🔥 AuthProvider: User UID:', result.user.uid);
-          setUser(result.user);
-        } else {
-          console.log('🔥 AuthProvider: No redirect result found');
+        if (mounted) {
+          if (result) {
+            console.log('Redirect result:', result.user.email);
+            setUser(result.user);
+          }
+          setInitialized(true);
         }
       })
       .catch((error) => {
-        console.error('🔥 AuthProvider: handleRedirectResult ERROR:', error);
-      })
-      .finally(() => {
-        console.log('🔥 AuthProvider: Setting loading to false');
+        console.error('Error handling redirect result:', error);
         if (mounted) {
-          setLoading(false);
+          setInitialized(true);
         }
       });
 
     // Set up auth state listener
     const unsubscribe = onAuthStateChange((user) => {
       if (mounted) {
-        console.log('🔥 AuthProvider: onAuthStateChange triggered');
-        console.log('🔥 AuthProvider: User from listener:', user?.email || 'no user');
+        console.log('Auth state changed:', user?.email || 'no user');
         setUser(user);
+        if (initialized) {
+          setLoading(false);
+        }
       }
     });
 
     return () => {
-      console.log('🔥 AuthProvider: Cleanup');
       mounted = false;
       unsubscribe();
     };
   }, []);
 
+  // Only stop loading once we've handled redirect result and have initial auth state
+  useEffect(() => {
+    if (initialized) {
+      setLoading(false);
+    }
+  }, [initialized]);
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, initialized }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth(): AuthContextType {
+export function useAuth() {
   const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 }
