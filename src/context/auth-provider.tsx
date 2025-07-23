@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User } from 'firebase/auth';
 import { onAuthStateChange, handleRedirectResult } from '@/lib/auth';
 
-
 interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -21,37 +20,49 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     // Handle redirect result first
     handleRedirectResult()
       .then((result) => {
-        if (result) {
-          setUser(result.user);
+        if (mounted) {
+          if (result) {
+            console.log('Redirect result:', result.user.email);
+            setUser(result.user);
+          }
+          setInitialized(true);
         }
       })
       .catch((error) => {
         console.error('Error handling redirect result:', error);
-      })
-      .finally(() => {
-        setInitialized(true);
+        if (mounted) {
+          setInitialized(true);
+        }
       });
 
     // Set up auth state listener
     const unsubscribe = onAuthStateChange((user) => {
-      setUser(user);
-      if (initialized) {
-        setLoading(false);
+      if (mounted) {
+        console.log('Auth state changed:', user?.email || 'no user');
+        setUser(user);
+        if (initialized) {
+          setLoading(false);
+        }
       }
     });
 
-    return () => unsubscribe();
-  }, [initialized]);
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, []);
 
   // Only stop loading once we've handled redirect result and have initial auth state
   useEffect(() => {
-    if (initialized && user !== undefined) {
+    if (initialized) {
       setLoading(false);
     }
-  }, [initialized, user]);
+  }, [initialized]);
 
   return (
     <AuthContext.Provider value={{ user, loading, initialized }}>
