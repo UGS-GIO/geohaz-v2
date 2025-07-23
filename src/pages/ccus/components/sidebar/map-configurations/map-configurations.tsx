@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -22,8 +22,10 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
+import { MapContext } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/mapping-utils';
+import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
 
 export const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
@@ -105,17 +107,30 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
 
 function MapConfigurations() {
     const { setIsDecimalDegrees } = useMapCoordinates();
+    const { map } = useContext(MapContext);
     const navigate = useNavigate({ from: '/ccus' });
     const search = useSearch({ from: '/ccus/' });
 
     const [formationDropdownOpen, setFormationDropdownOpen] = useState(false);
 
-    const { data: formationMappings = [], isLoading: isLoadingFormations, error: formationError } = useQuery({
+    const {
+        data: formationMappings = [],
+        isLoading: isLoadingFormations,
+        error: formationError
+    } = useQuery({
         queryKey: ['formationMappings'],
         queryFn: fetchFormationData,
-        staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+        staleTime: 1000 * 60 * 60, // Cache for 60 minutes
         refetchOnWindowFocus: false,
     });
+
+    // This simplified effect's only job is to apply the final filter state from the URL to the map.
+    useEffect(() => {
+        if (!map) return;
+        const filtersFromUrl = search.filters ?? {};
+        const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
+        findAndApplyWMSFilter(map, wellWithTopsWMSTitle, wellFilter);
+    }, [search.filters, map]);
 
     const handleCoordFormatChange = (value: string) => {
         const isDD = value === "Decimal Degrees";

@@ -1,29 +1,29 @@
-import { createContext, useContext, useCallback, ReactNode, useMemo, useEffect } from 'react';
-import { useSearch, useNavigate } from '@tanstack/react-router';
+import { createContext, useContext, useCallback, ReactNode, useMemo, useEffect, useRef } from 'react';
+import { useSearch, useNavigate, useLocation } from '@tanstack/react-router';
 import { LayerProps } from '@/lib/types/mapping-types';
 import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 
 interface LayerUrlContextType {
-    visibleLayerTitles: Set<string>;
-    updateLayerVisibility: (titles: string | string[], shouldBeVisible: boolean) => void;
+    selectedLayerTitles: Set<string>;
+    hiddenGroupTitles: Set<string>;
+    updateLayerSelection: (titles: string | string[], shouldBeSelected: boolean) => void;
+    toggleGroupVisibility: (title: string) => void;
 }
 
 const LayerUrlContext = createContext<LayerUrlContextType | undefined>(undefined);
 
-// Helper functions (can be moved to a utils file)
-const getAllValidTitles = (layers: LayerProps[]): Set<string> => {
+const getAllValidTitles = (layers: LayerProps[], groupsOnly = false): Set<string> => {
     const titles = new Set<string>();
-    const traverse = (layerArray: LayerProps[]) => {
-        for (const layer of layerArray) {
-            if (layer.title) {
-                titles.add(layer.title);
+    layers.forEach(layer => {
+        if (layer.type === 'group' && layer.title) {
+            titles.add(layer.title);
+            if ('layers' in layer && layer.layers) {
+                getAllValidTitles(layer.layers, groupsOnly).forEach(t => titles.add(t));
             }
-            if (layer.type === 'group' && 'layers' in layer && layer.layers) {
-                traverse(layer.layers);
-            }
+        } else if (!groupsOnly && layer.title) {
+            titles.add(layer.title);
         }
-    };
-    traverse(layers);
+    });
     return titles;
 };
 
@@ -31,7 +31,7 @@ const getDefaultVisible = (layers: LayerProps[]): string[] => {
     let visible: string[] = [];
     layers.forEach(layer => {
         if (layer.type === 'group' && 'layers' in layer && layer.layers) {
-            visible = [...visible, ...getDefaultVisible(layer.layers)];
+            visible.push(...getDefaultVisible(layer.layers));
         } else if (layer.visible && layer.title) {
             visible.push(layer.title);
         }
@@ -39,102 +39,116 @@ const getDefaultVisible = (layers: LayerProps[]): string[] => {
     return visible;
 };
 
+const getDefaultHiddenGroups = (layers: LayerProps[]): string[] => {
+    let hidden: string[] = [];
+    layers.forEach(layer => {
+        if (layer.type === 'group' && layer.title) {
+            if (layer.visible === false) {
+                hidden.push(layer.title);
+            }
+            if ('layers' in layer && layer.layers) {
+                hidden.push(...getDefaultHiddenGroups(layer.layers));
+            }
+        }
+    });
+    return hidden;
+};
+
 export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
     const navigate = useNavigate();
-    const { layers: urlLayers } = useSearch({ from: '__root__' });
+    const { visibility: urlVisibility } = useSearch({ from: '__root__' });
     const layersConfig = useGetLayerConfig();
+    const hasInitialized = useRef(false);
+    const location = useLocation();
+    const pathnameRef = useRef(location.pathname);
 
-    const allValidTitles = useMemo(() => {
-        if (!layersConfig) return new Set<string>();
-        return getAllValidTitles(layersConfig);
-    }, [layersConfig]);
+    // If the pathname has changed, the user switched apps, so we must re-initialize.
+    if (location.pathname !== pathnameRef.current) {
+        hasInitialized.current = false;
+        pathnameRef.current = location.pathname;
+    }
 
-    const visibleLayerTitles = useMemo(() => {
-        if (!urlLayers) return new Set<string>();
-        const layersArray = Array.isArray(urlLayers) ? urlLayers : [urlLayers];
-        return new Set(layersArray.filter(title => allValidTitles.has(title)));
-    }, [urlLayers, allValidTitles]);
+    const selectedLayerTitles = useMemo(() => new Set(urlVisibility?.selected || []), [urlVisibility]);
+    const hiddenGroupTitles = useMemo(() => new Set(urlVisibility?.hidden || []), [urlVisibility]);
 
     useEffect(() => {
-        if (!layersConfig) return;
+        if (!layersConfig || hasInitialized.current) return;
 
-        const layersParamExists = new URL(window.location.href).searchParams.has('layers');
+        const allValidLayerTitles = getAllValidTitles(layersConfig);
+        const allValidGroupTitles = getAllValidTitles(layersConfig, true);
+        const defaultSelected = getDefaultVisible(layersConfig);
+        const defaultHidden = getDefaultHiddenGroups(layersConfig);
 
-        // Case 1: The `layers` parameter is not in the URL at all.
-        if (!layersParamExists) {
-            const defaults = getDefaultVisible(layersConfig);
-            if (defaults.length > 0) {
-                navigate({
-                    to: '.',
-                    search: (prev) => ({ ...prev, layers: defaults }), replace: true
-                });
+        let finalVisibility: { selected?: string[], hidden?: string[] } = {};
+        let needsUpdate = false;
+
+        if (!urlVisibility) {
+            if (defaultSelected.length > 0) finalVisibility.selected = defaultSelected;
+            if (defaultHidden.length > 0) finalVisibility.hidden = defaultHidden;
+            needsUpdate = true;
+        }
+        else {
+            const currentSelected = urlVisibility.selected || [];
+            const currentHidden = urlVisibility.hidden || [];
+
+            let validSelected = currentSelected.filter(title => allValidLayerTitles.has(title));
+            const validHidden = currentHidden.filter(title => allValidGroupTitles.has(title));
+
+            if (currentSelected.length > 0 && validSelected.length === 0) {
+                validSelected = defaultSelected;
             }
-            return;
+
+            if (validSelected.length !== currentSelected.length || validHidden.length !== currentHidden.length) {
+                needsUpdate = true;
+            }
+
+            if (validSelected.length > 0) finalVisibility.selected = validSelected;
+            if (validHidden.length > 0) finalVisibility.hidden = validHidden;
         }
 
-        // Case 2: The `layers` parameter IS present. We validate its contents.
-        const urlLayersArray = Array.isArray(urlLayers) ? urlLayers : (urlLayers ? [urlLayers].filter(Boolean) : []);
-        const validatedTitles = urlLayersArray.filter(title => allValidTitles.has(title));
-
-        // If, after validation, the list is empty (because the param was empty OR all titles were invalid),
-        // we populate the defaults.
-        if (validatedTitles.length === 0) {
-            const defaults = getDefaultVisible(layersConfig);
-            // Only update if there are defaults, to prevent an infinite loop on `?layers=`
-            if (defaults.length > 0) {
-                navigate({
-                    to: '.',
-                    search: (prev) => ({ ...prev, layers: defaults }), replace: true
-                });
-            }
-        }
-        // Otherwise, if the list isn't empty, but we removed some invalid titles, we clean the URL.
-        else if (validatedTitles.length < urlLayersArray.length) {
+        if (needsUpdate) {
+            const finalVisibilityString = Object.keys(finalVisibility).length > 0 ? JSON.stringify(finalVisibility) : undefined;
             navigate({
                 to: '.',
-                search: (prev) => ({ ...prev, layers: validatedTitles }), replace: true
+                search: (prev) => ({ ...prev, visibility: finalVisibilityString }),
+                replace: true
             });
         }
-        // If the URL was already clean and valid, we do nothing.
-    }, [layersConfig, urlLayers, allValidTitles, navigate]);
 
+        hasInitialized.current = true;
+    }, [layersConfig, navigate, urlVisibility]);
 
-
-    const updateLayerVisibility = useCallback((titles: string | string[], shouldBeVisible: boolean) => {
+    const updateLayerSelection = useCallback((titles: string | string[], shouldBeSelected: boolean) => {
+        const newSelectedSet = new Set(selectedLayerTitles);
         const titlesToUpdate = Array.isArray(titles) ? titles : [titles];
-        const newVisibleSet = new Set(visibleLayerTitles);
-
-        if (shouldBeVisible) {
-            titlesToUpdate.forEach(title => newVisibleSet.add(title));
+        if (shouldBeSelected) {
+            titlesToUpdate.forEach(title => newSelectedSet.add(title));
         } else {
-            titlesToUpdate.forEach(title => newVisibleSet.delete(title));
+            titlesToUpdate.forEach(title => newSelectedSet.delete(title));
         }
 
-        const newLayers = Array.from(newVisibleSet);
+        const { selected, ...restOfVisibility } = urlVisibility || {};
+        const newVisibility = { ...restOfVisibility, ...(newSelectedSet.size > 0 && { selected: Array.from(newSelectedSet) }) };
+        const newVisibilityString = Object.keys(newVisibility).length > 0 ? JSON.stringify(newVisibility) : undefined;
+        navigate({ to: '.', search: (prev) => ({ ...prev, visibility: newVisibilityString }), replace: true });
+    }, [navigate, selectedLayerTitles, urlVisibility]);
 
-        // If the final list of layers is empty, remove the 'layers' key from the URL.
-        if (newLayers.length === 0) {
-            navigate({
-                to: '.',
-                search: (prev) => {
-                    const { layers, ...rest } = prev; // Create a new object without the 'layers' key
-                    return rest;
-                },
-                replace: true,
-            });
+    const toggleGroupVisibility = useCallback((title: string) => {
+        const newHiddenSet = new Set(hiddenGroupTitles);
+        if (newHiddenSet.has(title)) {
+            newHiddenSet.delete(title);
         } else {
-            // Otherwise, update the URL with the new list.
-            navigate({
-                to: '.',
-                search: (prev) => ({ ...prev, layers: newLayers }),
-                replace: true,
-            });
+            newHiddenSet.add(title);
         }
 
-    }, [navigate, visibleLayerTitles]);
+        const { hidden, ...restOfVisibility } = urlVisibility || {};
+        const newVisibility = { ...restOfVisibility, ...(newHiddenSet.size > 0 && { hidden: Array.from(newHiddenSet) }) };
+        const newVisibilityString = Object.keys(newVisibility).length > 0 ? JSON.stringify(newVisibility) : undefined;
+        navigate({ to: '.', search: (prev) => ({ ...prev, visibility: newVisibilityString }), replace: true });
+    }, [navigate, hiddenGroupTitles, urlVisibility]);
 
     return (
-        <LayerUrlContext.Provider value={{ visibleLayerTitles, updateLayerVisibility }}>
+        <LayerUrlContext.Provider value={{ selectedLayerTitles, hiddenGroupTitles, updateLayerSelection, toggleGroupVisibility }}>
             {children}
         </LayerUrlContext.Provider>
     );
@@ -142,8 +156,6 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
 
 export const useLayerUrl = () => {
     const context = useContext(LayerUrlContext);
-    if (context === undefined) {
-        throw new Error('useLayerUrl must be used within a LayerUrlProvider');
-    }
+    if (!context) throw new Error('useLayerUrl must be used within a LayerUrlProvider');
     return context;
 };
