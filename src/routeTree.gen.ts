@@ -61,7 +61,7 @@ const HazardsReviewIndexLazyRoute = HazardsReviewIndexLazyImport.update({
   path: '/hazards-review/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() =>
-  import('./routes/hazards-review/index.lazy').then((d) => d.Route),
+  import('./routes/hazards-review').then((d) => d.Route),
 )
 
 const CcusIndexRoute = CcusIndexImport.update({
