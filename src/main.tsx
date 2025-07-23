@@ -17,8 +17,7 @@ import { routeTree } from './routeTree.gen'
 // Create a new router instance
 const router = createRouter({ routeTree })
 
-// Initialize Firebase Analytics (auth is now handled in lib/auth.ts)
-// Note: Only initialize analytics if you need it, otherwise you can remove this
+// Initialize Firebase Analytics
 let analytics;
 try {
   analytics = getAnalytics();

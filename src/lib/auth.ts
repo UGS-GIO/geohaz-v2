@@ -1,15 +1,14 @@
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
-  signInWithRedirect, 
-  getRedirectResult, 
+  signInWithPopup, 
   signOut as firebaseSignOut,
   onAuthStateChanged,
   OAuthProvider,
   User
 } from 'firebase/auth';
 
-// Firebase configuration - moved from main.tsx
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAk9zQ6zDuLFAxhJCXCklNOiBVQQFo1CD8",
   authDomain: "ut-dnr-ugs-maps-prod.firebaseapp.com",
@@ -17,7 +16,7 @@ const firebaseConfig = {
   storageBucket: "ut-dnr-ugs-maps-prod.firebasestorage.app",
   messagingSenderId: "328621131372",
   appId: "1:328621131372:web:be0e38a400bb831f79fa49",
-  measurementId: "G-RXN0523RE5" // Updated to match server
+  measurementId: "G-RXN0523RE5"
 };
 
 // Initialize Firebase app
@@ -34,15 +33,11 @@ const oidcProvider = new OAuthProvider('oidc.entraid-oidc');
 // oidcProvider.addScope('profile');
 
 export const signInWithOIDC = () => {
-  return signInWithRedirect(auth, oidcProvider);
+  return signInWithPopup(auth, oidcProvider);
 };
 
 export const signOut = () => {
   return firebaseSignOut(auth);
-};
-
-export const handleRedirectResult = () => {
-  return getRedirectResult(auth);
 };
 
 // Auth state observer
