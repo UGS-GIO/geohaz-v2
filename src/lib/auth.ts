@@ -17,7 +17,7 @@ const firebaseConfig = {
   storageBucket: "ut-dnr-ugs-maps-prod.firebasestorage.app",
   messagingSenderId: "328621131372",
   appId: "1:328621131372:web:be0e38a400bb831f79fa49",
-  measurementId: "G-4HPYLDS1SS"
+  measurementId: "G-RXN0523RE5"
 };
 
 // Initialize Firebase app
