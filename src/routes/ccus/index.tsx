@@ -44,7 +44,6 @@ export const Route = createFileRoute('/ccus/')({
             core,
             formation,
             filters: Object.keys(newFilters).length > 0 ? newFilters : undefined,
-            layers: Array.from(newLayersSet),
         };
     },
 });
