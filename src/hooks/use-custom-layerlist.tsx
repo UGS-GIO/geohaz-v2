@@ -19,18 +19,27 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     const {
         isSelected,
         handleToggleSelection,
-        groupIsSelected,
+        isGroupVisible,
+        handleToggleGroupVisibility,
+        groupCheckboxState,
         handleSelectAllToggle,
     } = useLayerItemState(layerConfig);
 
     const { view } = useContext(MapContext);
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions } = useFetchLayerDescriptions();
+    // 1. Manage the accordion's open/closed state directly.
     const [accordionValue, setAccordionValue] = useState<string>(
-        // On initial load, open the accordion if the group or layer is active.
-        (isSelected || groupIsSelected) ? "item-1" : ""
+        (isSelected || groupCheckboxState !== 'none') ? "item-1" : ""
     );
     const isMobile = useIsMobile();
+
+    // 2. This useEffect syncs the accordion state if the external URL state changes.
+    useEffect(() => {
+        const shouldBeOpen = isSelected || groupCheckboxState !== 'none';
+        setAccordionValue(shouldBeOpen ? "item-1" : "");
+    }, [isSelected, groupCheckboxState]);
+
 
     const liveLayer = useMemo(() => {
         if (!view?.map || !layerConfig.title) return null;
@@ -68,6 +77,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
 
         return (
             <div className="mr-2 border border-secondary rounded my-1">
+                {/* 3. The Accordion is now a controlled component. */}
                 <Accordion
                     type="single"
                     collapsible
@@ -76,9 +86,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                 >
                     <AccordionItem value="item-1">
                         <AccordionHeader>
-                            {/* <Switch checked={groupIsSelected} onCheckedChange={handleSelectAllToggle} className="mx-2" /> */}
-                            {/* create a switch that toggles the visibility of the sublayers in place but doesn't actually check or uncheck and boxes */}
-
+                            <Switch checked={isGroupVisible} onCheckedChange={handleToggleGroupVisibility} className="mx-2" />
                             <AccordionTrigger>
                                 <h3 className="font-medium text-left text-md">{layerConfig.title}</h3>
                             </AccordionTrigger>
@@ -86,7 +94,8 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                         <AccordionContent>
                             <div className="flex items-center space-x-2 ml-2">
                                 <Checkbox
-                                    checked={groupIsSelected}
+                                    checked={groupCheckboxState === 'all'}
+                                    data-state={groupCheckboxState === 'some' ? 'indeterminate' : 'checked'}
                                     onCheckedChange={handleSelectAllToggle}
                                 />
                                 <label className="text-sm font-medium italic">Select All</label>
@@ -129,13 +138,12 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                         ) : (
                             <Checkbox
                                 checked={isSelected}
-                                onCheckedChange={(checkedState) => {
-                                    // checkedState can be boolean or 'indeterminate' so we handle both cases
-                                    // to play nice with the handleToggleSelection function
-                                    if (typeof checkedState === 'boolean') {
-                                        handleToggleSelection(checkedState);
-                                    } else if (checkedState === 'indeterminate') {
-                                        handleToggleSelection(true);
+                                onCheckedChange={(checked) => {
+                                    // Only call the handler if the new state is a clear true/false
+                                    if (typeof checked === 'boolean') {
+                                        handleToggleSelection(checked);
+                                    } else {
+                                        handleToggleSelection(checked === 'indeterminate' ? false : true);
                                     }
                                 }}
                                 className="mx-2"
@@ -146,13 +154,13 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                     </AccordionHeader>
                     <AccordionContent>
                         <LayerControls
-                            layerOpacity={typedLayer?.opacity ?? 1}
+                            layerOpacity={liveLayer?.opacity ?? 1}
                             handleOpacityChange={handleOpacityChange}
                             title={layerConfig.title || ''}
                             description={layerDescriptions ? layerDescriptions[layerConfig.title || ''] : ''}
                             handleZoomToLayer={handleZoomToLayer}
-                            layerId={typedLayer?.id || ''}
-                            url={typedLayer?.url || ''}
+                            layerId={liveLayer?.id || ''}
+                            url={typedLayer && 'url' in typedLayer ? typedLayer.url || '' : ''}
                             openLegend={true}
                         />
                     </AccordionContent>
@@ -168,7 +176,7 @@ export const useCustomLayerList = () => {
 
     const layerList = useMemo(() => {
         if (!layersConfig) return [];
-        return [...layersConfig].reverse().map(layer => (
+        return [...layersConfig].map(layer => (
             <LayerAccordionItem key={layer.title} layerConfig={layer} isTopLevel={true} />
         ));
     }, [layersConfig]);
