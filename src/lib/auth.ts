@@ -30,8 +30,8 @@ export const auth = getAuth(app);
 const oidcProvider = new OAuthProvider('oidc.entraid-oidc');
 
 // Optional: Configure additional scopes if needed
-oidcProvider.addScope('email');
-oidcProvider.addScope('profile');
+// oidcProvider.addScope('email');
+// oidcProvider.addScope('profile');
 
 export const signInWithOIDC = () => {
   return signInWithRedirect(auth, oidcProvider);
