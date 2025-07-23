@@ -161,7 +161,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                             handleZoomToLayer={handleZoomToLayer}
                             layerId={liveLayer?.id || ''}
                             url={typedLayer && 'url' in typedLayer ? typedLayer.url || '' : ''}
-                            openLegend={true}
+                            openLegend={accordionValue === "item-1" && isSelected}
                         />
                     </AccordionContent>
                 </AccordionItem>
