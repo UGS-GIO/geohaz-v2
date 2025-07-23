@@ -26,7 +26,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 // Configure OIDC provider
-const oidcProvider = new OAuthProvider('oidc.entrac');
+const oidcProvider = new OAuthProvider('oidc.entra');
 
 // Optional: Configure additional scopes if needed
 // oidcProvider.addScope('email');
