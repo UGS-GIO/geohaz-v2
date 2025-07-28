@@ -11,8 +11,7 @@ export const Route = createFileRoute('/hazards-review/')({
   beforeLoad: async ({ location }) => {
     // Wait for auth to initialize
     await new Promise<void>((resolve) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const unsubscribe = auth.onAuthStateChanged((user) => { // This user is scoped to the callback
+      const unsubscribe = auth.onAuthStateChanged(() => { // Remove the parameter completely
         unsubscribe()
         resolve()
       })
@@ -21,7 +20,7 @@ export const Route = createFileRoute('/hazards-review/')({
     // Check if user is authenticated
     if (!auth.currentUser) {
       throw redirect({
-        to: '/login', // Remove trailing slash
+        to: '/login',
         search: {
           redirectTo: location.href,
         },
