@@ -13,6 +13,8 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as LoginIndexImport } from './routes/login/index'
+import { Route as HazardsReviewIndexImport } from './routes/hazards-review/index'
 import { Route as CcusIndexImport } from './routes/ccus/index'
 
 // Create Virtual Routes
@@ -20,7 +22,6 @@ import { Route as CcusIndexImport } from './routes/ccus/index'
 const WetlandsIndexLazyImport = createFileRoute('/wetlands/')()
 const MineralsIndexLazyImport = createFileRoute('/minerals/')()
 const HazardsIndexLazyImport = createFileRoute('/hazards/')()
-const HazardsReviewIndexLazyImport = createFileRoute('/hazards-review/')()
 const HazardsReportAoiLazyImport = createFileRoute('/hazards/report/$aoi')()
 const HazardsReviewReportNewreportLazyImport = createFileRoute(
   '/hazards-review/report/newreport',
@@ -56,13 +57,17 @@ const HazardsIndexLazyRoute = HazardsIndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/hazards/index.lazy').then((d) => d.Route))
 
-const HazardsReviewIndexLazyRoute = HazardsReviewIndexLazyImport.update({
+const LoginIndexRoute = LoginIndexImport.update({
+  id: '/login/',
+  path: '/login/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const HazardsReviewIndexRoute = HazardsReviewIndexImport.update({
   id: '/hazards-review/',
   path: '/hazards-review/',
   getParentRoute: () => rootRoute,
-} as any).lazy(() =>
-  import('./routes/hazards-review').then((d) => d.Route),
-)
+} as any)
 
 const CcusIndexRoute = CcusIndexImport.update({
   id: '/ccus/',
@@ -123,7 +128,14 @@ declare module '@tanstack/react-router' {
       id: '/hazards-review/'
       path: '/hazards-review'
       fullPath: '/hazards-review'
-      preLoaderRoute: typeof HazardsReviewIndexLazyImport
+      preLoaderRoute: typeof HazardsReviewIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/login/': {
+      id: '/login/'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginIndexImport
       parentRoute: typeof rootRoute
     }
     '/hazards/': {
@@ -182,7 +194,8 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/ccus': typeof CcusIndexRoute
-  '/hazards-review': typeof HazardsReviewIndexLazyRoute
+  '/hazards-review': typeof HazardsReviewIndexRoute
+  '/login': typeof LoginIndexRoute
   '/hazards': typeof HazardsIndexLazyRoute
   '/minerals': typeof MineralsIndexLazyRoute
   '/wetlands': typeof WetlandsIndexLazyRoute
@@ -194,7 +207,8 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/ccus': typeof CcusIndexRoute
-  '/hazards-review': typeof HazardsReviewIndexLazyRoute
+  '/hazards-review': typeof HazardsReviewIndexRoute
+  '/login': typeof LoginIndexRoute
   '/hazards': typeof HazardsIndexLazyRoute
   '/minerals': typeof MineralsIndexLazyRoute
   '/wetlands': typeof WetlandsIndexLazyRoute
@@ -207,7 +221,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/ccus/': typeof CcusIndexRoute
-  '/hazards-review/': typeof HazardsReviewIndexLazyRoute
+  '/hazards-review/': typeof HazardsReviewIndexRoute
+  '/login/': typeof LoginIndexRoute
   '/hazards/': typeof HazardsIndexLazyRoute
   '/minerals/': typeof MineralsIndexLazyRoute
   '/wetlands/': typeof WetlandsIndexLazyRoute
@@ -222,6 +237,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/ccus'
     | '/hazards-review'
+    | '/login'
     | '/hazards'
     | '/minerals'
     | '/wetlands'
@@ -233,6 +249,7 @@ export interface FileRouteTypes {
   to:
     | '/ccus'
     | '/hazards-review'
+    | '/login'
     | '/hazards'
     | '/minerals'
     | '/wetlands'
@@ -244,6 +261,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/ccus/'
     | '/hazards-review/'
+    | '/login/'
     | '/hazards/'
     | '/minerals/'
     | '/wetlands/'
@@ -256,7 +274,8 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   CcusIndexRoute: typeof CcusIndexRoute
-  HazardsReviewIndexLazyRoute: typeof HazardsReviewIndexLazyRoute
+  HazardsReviewIndexRoute: typeof HazardsReviewIndexRoute
+  LoginIndexRoute: typeof LoginIndexRoute
   HazardsIndexLazyRoute: typeof HazardsIndexLazyRoute
   MineralsIndexLazyRoute: typeof MineralsIndexLazyRoute
   WetlandsIndexLazyRoute: typeof WetlandsIndexLazyRoute
@@ -268,7 +287,8 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   CcusIndexRoute: CcusIndexRoute,
-  HazardsReviewIndexLazyRoute: HazardsReviewIndexLazyRoute,
+  HazardsReviewIndexRoute: HazardsReviewIndexRoute,
+  LoginIndexRoute: LoginIndexRoute,
   HazardsIndexLazyRoute: HazardsIndexLazyRoute,
   MineralsIndexLazyRoute: MineralsIndexLazyRoute,
   WetlandsIndexLazyRoute: WetlandsIndexLazyRoute,
@@ -290,6 +310,7 @@ export const routeTree = rootRoute
       "children": [
         "/ccus/",
         "/hazards-review/",
+        "/login/",
         "/hazards/",
         "/minerals/",
         "/wetlands/",
@@ -303,7 +324,10 @@ export const routeTree = rootRoute
       "filePath": "ccus/index.tsx"
     },
     "/hazards-review/": {
-      "filePath": "hazards-review/index.lazy.tsx"
+      "filePath": "hazards-review/index.tsx"
+    },
+    "/login/": {
+      "filePath": "login/index.tsx"
     },
     "/hazards/": {
       "filePath": "hazards/index.lazy.tsx"
