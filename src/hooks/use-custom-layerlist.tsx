@@ -1,4 +1,4 @@
-import { useMemo, useContext, useState, useEffect } from 'react';
+import { useMemo, useContext, useState } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
@@ -28,18 +28,8 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     const { view } = useContext(MapContext);
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions } = useFetchLayerDescriptions();
-    // 1. Manage the accordion's open/closed state directly.
-    const [accordionValue, setAccordionValue] = useState<string>(
-        (isSelected || groupCheckboxState !== 'none') ? "item-1" : ""
-    );
+    const [userAccordionOpen, setUserAccordionOpen] = useState<boolean>(false);
     const isMobile = useIsMobile();
-
-    // 2. This useEffect syncs the accordion state if the external URL state changes.
-    useEffect(() => {
-        const shouldBeOpen = isSelected || groupCheckboxState !== 'none';
-        setAccordionValue(shouldBeOpen ? "item-1" : "");
-    }, [isSelected, groupCheckboxState]);
-
 
     const liveLayer = useMemo(() => {
         if (!view?.map || !layerConfig.title) return null;
@@ -61,6 +51,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
             if (extent) {
                 view?.goTo(new Extent({ ...extent, spatialReference: { wkid: 4326 } }));
                 handleToggleSelection(true);
+                setUserAccordionOpen(true);
                 if (isMobile) {
                     setIsCollapsed(true);
                     setNavOpened(false);
@@ -71,18 +62,29 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
         }
     };
 
+    // Determine if the accordion should be open based on initial load state OR user interaction.
+    const shouldAccordionBeOpen = useMemo(() => {
+        if (layerConfig.type === 'group') {
+            // Group accordion opens if visible, all children checked, OR user explicitly opened it.
+            // 'some' state no longer triggers open on load.
+            return isGroupVisible || groupCheckboxState === 'all' || userAccordionOpen;
+        } else {
+            return isSelected || userAccordionOpen;
+        }
+    }, [isSelected, isGroupVisible, groupCheckboxState, userAccordionOpen, layerConfig.type]);
+
+
     // --- Group Layer Rendering ---
     if (layerConfig.type === 'group' && 'layers' in layerConfig) {
         const childLayers = [...(layerConfig.layers || [])];
 
         return (
             <div className="mr-2 border border-secondary rounded my-1">
-                {/* 3. The Accordion is now a controlled component. */}
                 <Accordion
                     type="single"
                     collapsible
-                    value={accordionValue}
-                    onValueChange={setAccordionValue}
+                    value={shouldAccordionBeOpen ? "item-1" : ""}
+                    onValueChange={(val) => setUserAccordionOpen(val === "item-1")}
                 >
                     <AccordionItem value="item-1">
                         <AccordionHeader>
@@ -95,8 +97,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                             <div className="flex items-center space-x-2 ml-2">
                                 <Checkbox
                                     checked={groupCheckboxState === 'all'}
-                                    data-state={groupCheckboxState === 'some' ? 'indeterminate' : 'checked'}
-                                    onCheckedChange={handleSelectAllToggle}
+                                    onCheckedChange={() => handleSelectAllToggle()}
                                 />
                                 <label className="text-sm font-medium italic">Select All</label>
                             </div>
@@ -128,23 +129,23 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
             <Accordion
                 type="single"
                 collapsible
-                value={accordionValue}
-                onValueChange={setAccordionValue}
+                value={shouldAccordionBeOpen ? "item-1" : ""}
+                onValueChange={(val) => setUserAccordionOpen(val === "item-1")}
             >
                 <AccordionItem value="item-1">
                     <AccordionHeader>
                         {isTopLevel ? (
-                            <Switch checked={isSelected} onCheckedChange={(checked) => handleToggleSelection(checked)} className="mx-2" />
+                            <Switch checked={isSelected} onCheckedChange={(checked) => {
+                                handleToggleSelection(checked);
+                                setUserAccordionOpen(checked);
+                            }} className="mx-2" />
                         ) : (
                             <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={(checked) => {
-                                    // Only call the handler if the new state is a clear true/false
-                                    if (typeof checked === 'boolean') {
-                                        handleToggleSelection(checked);
-                                    } else {
-                                        handleToggleSelection(checked === 'indeterminate' ? false : true);
-                                    }
+                                    if (typeof checked !== 'boolean') return;
+                                    handleToggleSelection(checked);
+                                    setUserAccordionOpen(checked);
                                 }}
                                 className="mx-2"
                             />)}
@@ -161,7 +162,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                             handleZoomToLayer={handleZoomToLayer}
                             layerId={liveLayer?.id || ''}
                             url={typedLayer && 'url' in typedLayer ? typedLayer.url || '' : ''}
-                            openLegend={accordionValue === "item-1" && isSelected}
+                            openLegend={shouldAccordionBeOpen}
                         />
                     </AccordionContent>
                 </AccordionItem>
