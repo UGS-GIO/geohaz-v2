@@ -1,4 +1,4 @@
-import React, { useMemo, useContext, useState, useEffect } from 'react';
+import { useMemo, useContext, useState, useEffect } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
