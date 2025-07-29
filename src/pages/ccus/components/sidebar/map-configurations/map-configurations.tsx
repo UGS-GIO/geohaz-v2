@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useContext, useMemo } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -54,7 +54,6 @@ export const findAndApplyWMSFilter = (
 };
 
 type YesNoAll = "yes" | "no" | "all";
-
 const wellsHasCoreFilterConfig = {
     label: "Cores/Cuttings Available?",
     attribute: "hascore",
@@ -124,13 +123,15 @@ function MapConfigurations() {
         refetchOnWindowFocus: false,
     });
 
-    // This simplified effect's only job is to apply the final filter state from the URL to the map.
-    useEffect(() => {
-        if (!map) return;
-        const filtersFromUrl = search.filters ?? {};
-        const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
+    // The filter is calculated on every render.
+    const wellFilter = useMemo(() => {
+        return search.filters?.[wellWithTopsWMSTitle] || null;
+    }, [search.filters]);
+
+    // The side effect is called directly if the map is available.
+    if (map) {
         findAndApplyWMSFilter(map, wellWithTopsWMSTitle, wellFilter);
-    }, [search.filters, map]);
+    }
 
     const handleCoordFormatChange = (value: string) => {
         const isDD = value === "Decimal Degrees";

@@ -18,9 +18,7 @@ const rootSearchSchema = z.object({
     lon: z.coerce.number().optional(),
     filters: z.record(z.string()).optional(),
     coordinate_format: z.enum(['dd', 'dms']).optional(),
-
-    // a single visibility object that can contain selected and hidden layers
-    visibility: z.preprocess((val) => {
+    layers: z.preprocess((val) => {
         if (typeof val === 'string') {
             try { return JSON.parse(val); } catch (e) { return undefined; }
         }
@@ -29,7 +27,6 @@ const rootSearchSchema = z.object({
         selected: z.array(z.string()).optional(),
         hidden: z.array(z.string()).optional(),
     }).optional())
-
 }).strip();
 
 export type RootSearch = z.infer<typeof rootSearchSchema>;

@@ -37,7 +37,6 @@ export const useLayerItemState = (layerConfig: LayerProps) => {
         };
 
         const isGroupVisible = !hiddenGroupTitles.has(layerConfig.title || '');
-        console.log(`Group "${layerConfig.title}" visibility: ${isGroupVisible}, selected children: ${selectedChildrenCount}/${childTitles.length}, 'hiddenGroupTitles': ${Array.from(hiddenGroupTitles).join(', ')}`);
 
         const handleToggleGroupVisibility = () => {
             if (layerConfig.title) toggleGroupVisibility(layerConfig.title);

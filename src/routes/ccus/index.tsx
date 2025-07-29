@@ -1,28 +1,29 @@
-// src/routes/ccus/index.tsx
-
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
+import Map from '@/pages/ccus';
 
 const ccusSearchSchema = z.object({
     core: z.enum(['yes', 'no']).optional(),
     formation: z.string().optional(),
     filters: z.record(z.string()).optional(),
-});
+}).strip();
 
 export const Route = createFileRoute('/ccus/')({
-    validateSearch: (search: Record<string, unknown>): z.infer<typeof ccusSearchSchema> & { layers?: string[] } => {
-        // Parse the simple UI params from the incoming URL.
-        const { core, formation } = ccusSearchSchema.pick({ core: true, formation: true }).parse(search);
+    component: () => <Map />,
+    validateSearch: (search: Record<string, unknown>) => {
+        // Zod first strips unknown params, then we parse and process the result.
+        const { core, formation, filters } = ccusSearchSchema.parse(search);
 
-        // Also parse any existing global params we might interact with.
-        const currentLayers = z.array(z.string()).optional().parse(search.layers);
-        const currentFilters = ccusSearchSchema.shape.filters.parse(search.filters);
+        const layers = z.object({
+            selected: z.array(z.string()).optional(),
+            hidden: z.array(z.string()).optional(),
+        }).optional().parse(search.layers);
 
-        const newFilters = { ...currentFilters };
-        const newLayersSet = new Set(currentLayers);
+        const newSelectedSet = new Set(layers?.selected);
+        const newFilters = { ...filters };
 
-        // Build the filter string from the simple UI params.
+        // Build the filter string from the UI params.
         const wellFilterParts: string[] = [];
         if (core === "yes") wellFilterParts.push(`hascore = 'True'`);
         if (core === "no") wellFilterParts.push(`hascore = 'False'`);
@@ -30,20 +31,20 @@ export const Route = createFileRoute('/ccus/')({
 
         const combinedWellFilter = wellFilterParts.length > 0 ? wellFilterParts.join(' AND ') : null;
 
-        // Sync both the filter object AND the layers array.
         if (combinedWellFilter) {
             newFilters[wellWithTopsWMSTitle] = combinedWellFilter;
-            // If the filter is active, ensure the layer is visible.
-            newLayersSet.add(wellWithTopsWMSTitle);
         } else {
             delete newFilters[wellWithTopsWMSTitle];
         }
 
-        // Return the complete, synchronized search object.
         return {
             core,
             formation,
             filters: Object.keys(newFilters).length > 0 ? newFilters : undefined,
+            layers: {
+                ...layers,
+                selected: Array.from(newSelectedSet),
+            }
         };
     },
 });
