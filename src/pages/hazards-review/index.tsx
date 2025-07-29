@@ -9,15 +9,9 @@ import { useSidebar } from '@/hooks/use-sidebar';
 import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleCollectionSelect, handleSearchSelect, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox';
 import { PROD_POSTGREST_URL } from '@/lib/constants';
 import { qFaultsWMSTitle } from './data/layers';
-import { signOut } from '@/lib/auth'; // Add this import
-import { useAuth } from '@/context/auth-provider'; // Add this import
-import { Button } from '@/components/ui/button'; // Add this import
-import { Badge } from '@/components/ui/badge'; // Add this import
-import { LogOut } from 'lucide-react'; // Add this import
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
-  const { user } = useAuth(); // Add this line
 
   const searchConfig: SearchSourceConfig[] = [
     defaultMasqueradeConfig,
@@ -37,34 +31,8 @@ export default function Map() {
     },
   ];
 
-  // Add this function
-  const handleLogout = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
   return (
     <div className="relative h-full overflow-hidden bg-background">
-      {/* Add auth indicator */}
-      <div className="absolute top-4 right-4 z-50">
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="bg-background/95 backdrop-blur-sm">
-            {user?.email}
-          </Badge>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleLogout}
-            className="bg-background/95 backdrop-blur-sm"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
       <Sidebar />
       <main
         id="content"
@@ -91,7 +59,7 @@ export default function Map() {
             </div>
           </Layout.Header>
 
-          <Layout.Body className="min-h-0"> {/* Add min-h-0 for the map fix */}
+          <Layout.Body className="min-h-0">
             <MapContainer />
           </Layout.Body>
 
