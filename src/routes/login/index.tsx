@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { z } from 'zod'
 import { useState } from 'react'
-import { signInWithOIDC } from '@/lib/auth'
 import { useAuth } from '@/context/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,14 +31,10 @@ function LoginPage() {
     setAuthError(null)
     
     try {
-      console.log('Starting OIDC popup login...')
-      const result = await signInWithOIDC()
-      console.log('Login successful:', result.user.email)
       
       // Redirect to the intended page or default
       navigate({ to: redirectTo || '/hazards-review/' })
     } catch (error: unknown) {
-      console.error('Login failed:', error)
       
       if (error && typeof error === 'object' && 'code' in error) {
         const authError = error as { code: string; message: string }
