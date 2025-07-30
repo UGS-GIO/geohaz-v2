@@ -116,7 +116,7 @@ export default function Map() {
             </div>
           </Layout.Header>
 
-          <Layout.Body className="min-h-0">
+          <Layout.Body>
             <MapContainer />
           </Layout.Body>
 
