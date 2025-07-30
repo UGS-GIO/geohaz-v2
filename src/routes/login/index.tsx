@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { z } from 'zod'
 import { useState } from 'react'
 import { useAuth } from '@/context/auth-provider'
+import { signInWithOIDC } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -31,11 +32,12 @@ function LoginPage() {
     setAuthError(null)
     
     try {
+      await signInWithOIDC()
       
       // Redirect to the intended page or default
       navigate({ to: redirectTo || '/hazards-review/' })
     } catch (error: unknown) {
-      
+      console.error('Login failed:', error)
       if (error && typeof error === 'object' && 'code' in error) {
         const authError = error as { code: string; message: string }
         if (authError.code === 'auth/popup-closed-by-user') {
