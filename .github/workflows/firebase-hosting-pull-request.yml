@@ -26,8 +26,8 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_PROD }}'
-          projectId: 'ut-dnr-ugs-maps-prod'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_UT_DNR_UGS_MAPS_DEV }}'
+          projectId: 'ut-dnr-ugs-maps-dev'
           target: main-site
           channelId: pr-${{ github.event.number }}
           expires: 6d
