@@ -188,8 +188,8 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
     // If mark is not a recognized simple marker style, use PictureMarkerSymbol
     return new PictureMarkerSymbol({
         url: url || mark, // Treat mark as the URL for custom icon or font-based symbol
-        width: parsedSize * .75,
-        height: parsedSize * .75,
+        width: parsedSize * SCALING_FACTOR,
+        height: parsedSize * SCALING_FACTOR,
     });
 }
 
