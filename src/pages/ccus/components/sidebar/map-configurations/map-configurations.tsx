@@ -18,7 +18,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Power } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
@@ -26,7 +26,6 @@ import { MapContext } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/mapping-utils';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
-import { useLayerUrl } from '@/context/layer-url-provider';
 
 export const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
