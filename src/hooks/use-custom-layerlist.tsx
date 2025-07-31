@@ -1,4 +1,4 @@
-import { useMemo, useContext, useState } from 'react';
+import { useMemo, useContext, useState, useEffect } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
@@ -36,6 +36,16 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     });
     const isMobile = useIsMobile();
 
+    // This effect declaratively opens the accordion when the layer is selected.
+    useEffect(() => {
+        if (isSelected) {
+            setUserAccordionOpen(true);
+        } else {
+            setUserAccordionOpen(false);
+        }
+    }, [isSelected]);
+
+
     const liveLayer = useMemo(() => {
         if (!view?.map || !layerConfig.title) return null;
         return findLayerByTitle(view.map, layerConfig.title);
@@ -55,7 +65,6 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
             const extent = cachedExtent || await fetchExtent().then(result => result.data);
             if (extent) {
                 handleToggleSelection(true);
-                setUserAccordionOpen(true);
                 view?.goTo(new Extent({ ...extent, spatialReference: { wkid: 4326 } }));
                 if (isMobile) {
                     setIsCollapsed(true);
@@ -93,7 +102,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                             <div className="flex items-center space-x-2 ml-2">
                                 <Checkbox
                                     checked={groupCheckboxState === 'all'}
-                                    onCheckedChange={() => handleSelectAllToggle()}
+                                    onCheckedChange={handleSelectAllToggle}
                                 />
                                 <label className="text-sm font-medium italic">Select All</label>
                             </div>
