@@ -3,11 +3,15 @@ import { useSearch, useNavigate, useLocation } from '@tanstack/react-router';
 import { LayerProps } from '@/lib/types/mapping-types';
 import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 
+type ActiveFilters = Record<string, string>;
+
 interface LayerUrlContextType {
     selectedLayerTitles: Set<string>;
     hiddenGroupTitles: Set<string>;
+    activeFilters: ActiveFilters;
     updateLayerSelection: (titles: string | string[], shouldBeSelected: boolean) => void;
     toggleGroupVisibility: (title: string) => void;
+    updateFilter: (layerTitle: string, filterValue: string | undefined) => void;
 }
 
 const LayerUrlContext = createContext<LayerUrlContextType | undefined>(undefined);
@@ -50,14 +54,8 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
     const hasInitializedForPath = useRef<string | null>(null);
     const location = useLocation();
 
-    if (hasInitializedForPath.current !== location.pathname) {
-        hasInitializedForPath.current = null; // Reset when path changes
-    }
-
-    const selectedLayerTitles = useMemo(() => new Set(urlLayers?.selected || []), [urlLayers]);
-    const hiddenGroupTitles = useMemo(() => new Set(urlLayers?.hidden || []), [urlLayers]);
-
     useEffect(() => {
+        if (!layersConfig || hasInitializedForPath.current === location.pathname) return;
         if (!layersConfig || hasInitializedForPath.current === location.pathname) {
             return;
         }
@@ -105,37 +103,97 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
 
     }, [layersConfig, navigate, urlLayers, urlFilters, location.pathname]);
 
-    const updateLayerSelection = useCallback((titles: string | string[], shouldBeSelected: boolean) => {
-        const newSelectedSet = new Set(selectedLayerTitles);
-        const titlesToUpdate = Array.isArray(titles) ? titles : [titles];
-        if (shouldBeSelected) {
-            titlesToUpdate.forEach(title => newSelectedSet.add(title));
-        } else {
-            titlesToUpdate.forEach(title => newSelectedSet.delete(title));
-        }
 
-        const { selected, ...restOfLayers } = urlLayers || {};
-        const newLayers = { ...restOfLayers, ...(newSelectedSet.size > 0 && { selected: Array.from(newSelectedSet) }) };
-        const newLayersString = Object.keys(newLayers).length > 0 ? JSON.stringify(newLayers) : undefined;
-        navigate({ to: '.', search: (prev) => ({ ...prev, layers: newLayersString }), replace: true });
-    }, [navigate, selectedLayerTitles, urlLayers]);
+    const selectedLayerTitles = useMemo(() => new Set(urlLayers?.selected || []), [urlLayers]);
+    const hiddenGroupTitles = useMemo(() => new Set(urlLayers?.hidden || []), [urlLayers]);
+    const activeFilters: ActiveFilters = useMemo(() => urlFilters || {}, [urlFilters]);
+
+    const updateLayerSelection = useCallback((titles: string | string[], shouldBeSelected: boolean) => {
+        const titlesToUpdate = Array.isArray(titles) ? titles : [titles];
+
+        navigate({
+            to: '.',
+            search: (prev) => {
+                const currentSelected = new Set(prev.layers?.selected || []);
+                const currentFilters = { ...(prev.filters || {}) };
+
+                if (shouldBeSelected) {
+                    // Rule: Turning a layer ON does not affect filters.
+                    titlesToUpdate.forEach(title => currentSelected.add(title));
+                } else {
+                    // Rule: Turning a layer OFF also clears its filter.
+                    titlesToUpdate.forEach(title => {
+                        currentSelected.delete(title);
+                        delete currentFilters[title];
+                    });
+                }
+
+                return {
+                    ...prev,
+                    layers: { ...prev.layers, selected: Array.from(currentSelected) },
+                    filters: Object.keys(currentFilters).length > 0 ? currentFilters : undefined,
+                };
+            },
+            replace: true,
+        });
+    }, [navigate]);
+
+    const updateFilter = useCallback((layerTitle: string, filterValue: string | undefined) => {
+        navigate({
+            to: '.',
+            search: (prev) => {
+                const currentFilters = { ...(prev.filters || {}) };
+                const currentSelected = new Set(prev.layers?.selected || []);
+
+                if (filterValue) {
+                    // Rule: Applying a filter also ensures the layer is ON.
+                    currentFilters[layerTitle] = filterValue;
+                    currentSelected.add(layerTitle);
+                } else {
+                    // Rule: Clearing a filter does not affect layer visibility.
+                    delete currentFilters[layerTitle];
+                }
+
+                return {
+                    ...prev,
+                    layers: { ...prev.layers, selected: Array.from(currentSelected) },
+                    filters: Object.keys(currentFilters).length > 0 ? currentFilters : undefined,
+                };
+            },
+            replace: true
+        });
+    }, [navigate]);
 
     const toggleGroupVisibility = useCallback((title: string) => {
-        const newHiddenSet = new Set(hiddenGroupTitles);
-        if (newHiddenSet.has(title)) {
-            newHiddenSet.delete(title);
-        } else {
-            newHiddenSet.add(title);
-        }
+        navigate({
+            to: '.',
+            search: (prev) => {
+                const newHiddenSet = new Set(prev.layers?.hidden || []);
+                if (newHiddenSet.has(title)) {
+                    newHiddenSet.delete(title);
+                } else {
+                    newHiddenSet.add(title);
+                }
+                return {
+                    ...prev,
+                    layers: { ...prev.layers, hidden: Array.from(newHiddenSet) }
+                };
+            },
+            replace: true
+        });
+    }, [navigate]);
 
-        const { hidden, ...restOfLayers } = urlLayers || {};
-        const newLayers = { ...restOfLayers, ...(newHiddenSet.size > 0 && { hidden: Array.from(newHiddenSet) }) };
-        const newLayersString = Object.keys(newLayers).length > 0 ? JSON.stringify(newLayers) : undefined;
-        navigate({ to: '.', search: (prev) => ({ ...prev, layers: newLayersString }), replace: true });
-    }, [navigate, hiddenGroupTitles, urlLayers]);
+    const value = {
+        selectedLayerTitles,
+        hiddenGroupTitles,
+        activeFilters,
+        updateLayerSelection,
+        toggleGroupVisibility,
+        updateFilter,
+    };
 
     return (
-        <LayerUrlContext.Provider value={{ selectedLayerTitles, hiddenGroupTitles, updateLayerSelection, toggleGroupVisibility }}>
+        <LayerUrlContext.Provider value={value}>
             {children}
         </LayerUrlContext.Provider>
     );

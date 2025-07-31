@@ -31,9 +31,8 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     const [userAccordionOpen, setUserAccordionOpen] = useState<boolean>(() => {
         if (layerConfig.type === 'group') {
             return isGroupVisible || groupCheckboxState === 'all';
-        } else {
-            return isSelected;
         }
+        return isSelected;
     });
     const isMobile = useIsMobile();
 
@@ -94,13 +93,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                             <div className="flex items-center space-x-2 ml-2">
                                 <Checkbox
                                     checked={groupCheckboxState === 'all'}
-                                    onCheckedChange={(checked) => {
-                                        handleSelectAllToggle();
-                                        if (checked === true) { // If turning the group ON
-                                            setUserAccordionOpen(true);
-                                        }
-                                        // If turning group OFF, do nothing to accordion state
-                                    }}
+                                    onCheckedChange={() => handleSelectAllToggle()}
                                 />
                                 <label className="text-sm font-medium italic">Select All</label>
                             </div>
@@ -138,28 +131,22 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                 <AccordionItem value="item-1">
                     <AccordionHeader>
                         {isTopLevel ? (
-                            <Switch checked={isSelected} onCheckedChange={(checked) => {
-                                handleToggleSelection(checked);
-                                if (checked === true) { // If turning the layer ON
-                                    setUserAccordionOpen(true);
-                                }
-                                // If turning layer OFF, do nothing to accordion state
-                            }} className="mx-2" />
+                            <Switch
+                                checked={isSelected}
+                                onCheckedChange={handleToggleSelection}
+                                className="mx-2"
+                            />
                         ) : (
                             <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={(checked) => {
-                                    if (typeof checked !== 'boolean') return; // Ensure checked is boolean versus 'indeterminate' even though we remove the indeterminate state before this step
-                                    handleToggleSelection(checked);
-                                    if (checked === true) { // If turning the layer ON
-                                        setUserAccordionOpen(true);
-                                    }
-                                    // If turning layer OFF, do nothing to accordion state
+                                    if (typeof checked === 'boolean') handleToggleSelection(checked);
                                 }}
                                 className="mx-2"
-                            />)}
+                            />
+                        )}
                         <AccordionTrigger>
-                            <h3 className={`text-md font-medium text-left`}>{layerConfig.title}</h3>
+                            <h3 className="text-md font-medium text-left">{layerConfig.title}</h3>
                         </AccordionTrigger>
                     </AccordionHeader>
                     <AccordionContent>

@@ -9,21 +9,39 @@ const getChildLayerTitles = (layer: LayerProps): string[] => {
 };
 
 export const useLayerItemState = (layerConfig: LayerProps) => {
-    const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection, toggleGroupVisibility } = useLayerUrl();
+    const {
+        selectedLayerTitles,
+        hiddenGroupTitles,
+        updateLayerSelection,
+        toggleGroupVisibility
+    } = useLayerUrl();
+
+    const title = layerConfig.title || '';
 
     // SINGLE LAYER LOGIC
     if (layerConfig.type !== 'group') {
-        const isSelected = selectedLayerTitles.has(layerConfig.title || '');
-        const handleToggleSelection = (select: boolean) => {
-            if (layerConfig.title) updateLayerSelection(layerConfig.title, select);
-        };
-        return { isSelected, handleToggleSelection, isGroupVisible: true, handleToggleGroupVisibility: () => { }, groupCheckboxState: null, handleSelectAllToggle: () => { } };
-    }
+        const isSelected = selectedLayerTitles.has(title);
 
+        const handleToggleSelection = (select: boolean) => {
+            if (title) {
+                updateLayerSelection(title, select);
+            }
+        };
+
+        return {
+            isSelected,
+            handleToggleSelection,
+            isGroupVisible: true,
+            handleToggleGroupVisibility: () => { },
+            groupCheckboxState: null,
+            handleSelectAllToggle: () => { },
+        };
+    }
     // GROUP LAYER LOGIC
     else {
         const childTitles = getChildLayerTitles(layerConfig);
         const selectedChildrenCount = childTitles.filter(title => selectedLayerTitles.has(title)).length;
+
         let groupCheckboxState: 'all' | 'some' | 'none' = 'none';
         if (selectedChildrenCount === childTitles.length && childTitles.length > 0) {
             groupCheckboxState = 'all';
@@ -36,10 +54,10 @@ export const useLayerItemState = (layerConfig: LayerProps) => {
             updateLayerSelection(childTitles, shouldSelectAll);
         };
 
-        const isGroupVisible = !hiddenGroupTitles.has(layerConfig.title || '');
+        const isGroupVisible = !hiddenGroupTitles.has(title);
 
         const handleToggleGroupVisibility = () => {
-            if (layerConfig.title) toggleGroupVisibility(layerConfig.title);
+            if (title) toggleGroupVisibility(title);
         };
 
         return {

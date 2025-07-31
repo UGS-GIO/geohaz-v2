@@ -1,4 +1,4 @@
-import { useState, useContext, useMemo } from 'react';
+import { useState, useContext, useMemo, useEffect } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -18,7 +18,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Power } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
@@ -26,16 +26,14 @@ import { MapContext } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/mapping-utils';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
+import { useLayerUrl } from '@/context/layer-url-provider';
 
 export const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
     layerTitle: string,
     cqlFilter: string | null
 ) => {
-    if (!mapInstance) {
-        console.warn("[MapConfigurations] Map instance is not available. Cannot apply filter.");
-        return;
-    }
+    if (!mapInstance) return;
     const layer = findLayerByTitle(mapInstance, layerTitle);
 
     if (layer?.type === 'wms') {
@@ -56,10 +54,7 @@ export const findAndApplyWMSFilter = (
 type YesNoAll = "yes" | "no" | "all";
 const wellsHasCoreFilterConfig = {
     label: "Cores/Cuttings Available?",
-    attribute: "hascore",
-    options: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "all", label: "All" }] as { value: YesNoAll; label: string }[],
-    trueValue: 'True',
-    falseValue: 'False'
+    options: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "all", label: "All" }] as const,
 };
 
 const formationNameMappingConfig = {
@@ -83,26 +78,22 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
     const response = await fetch(url, {
         headers: {
             "Accept-Profile": acceptProfile,
-            "Accept": "application/json",
-            "Cache-Control": "no-cache",
-        },
+            "Accept": "application/json"
+        }
     });
-    if (!response.ok) {
-        throw new Error(`HTTP error fetching formation mappings! status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP error fetching formation mappings! status: ${response.status}`);
     const data: Array<Record<string, any>> = await response.json();
-    const uniqueMappings: FormationMapping[] = [];
-    const seenAliases = new Set<string>();
+    const uniqueMappings = new Map<string, string>();
     data.forEach(item => {
         const alias = item[displayField];
         const columnName = item[columnNameField];
-        if (alias && columnName && !seenAliases.has(alias)) {
-            uniqueMappings.push({ value: columnName, label: alias });
-            seenAliases.add(alias);
+        if (alias && columnName && !uniqueMappings.has(alias)) {
+            uniqueMappings.set(alias, columnName);
         }
     });
-    return uniqueMappings.sort((a, b) => a.label.localeCompare(b.label));
+    return Array.from(uniqueMappings, ([label, value]) => ({ label, value })).sort((a, b) => a.label.localeCompare(b.label));
 };
+
 
 function MapConfigurations() {
     const { setIsDecimalDegrees } = useMapCoordinates();
@@ -110,80 +101,72 @@ function MapConfigurations() {
     const navigate = useNavigate({ from: '/ccus' });
     const search = useSearch({ from: '/ccus/' });
 
-    const [formationDropdownOpen, setFormationDropdownOpen] = useState(false);
-
-    const {
-        data: formationMappings = [],
-        isLoading: isLoadingFormations,
-        error: formationError
-    } = useQuery({
-        queryKey: ['formationMappings'],
-        queryFn: fetchFormationData,
-        staleTime: 1000 * 60 * 60, // Cache for 60 minutes
-        refetchOnWindowFocus: false,
-    });
-
-    // The filter is calculated on every render.
-    const wellFilter = useMemo(() => {
-        return search.filters?.[wellWithTopsWMSTitle] || null;
-    }, [search.filters]);
-
-    // The side effect is called directly if the map is available.
-    if (map) {
+    const wellFilter = useMemo(() => search.filters?.[wellWithTopsWMSTitle] || null, [search.filters]);
+    useEffect(() => {
         findAndApplyWMSFilter(map, wellWithTopsWMSTitle, wellFilter);
-    }
+    }, [map, wellFilter]);
 
-    const handleCoordFormatChange = (value: string) => {
-        const isDD = value === "Decimal Degrees";
-        if (setIsDecimalDegrees) setIsDecimalDegrees(isDD);
+    const handleCoordFormatChange = (value: 'dd' | 'dms') => {
+        if (setIsDecimalDegrees) setIsDecimalDegrees(value === 'dd');
         navigate({
-            search: (prev) => ({ ...prev, coordinate_format: isDD ? 'dd' : 'dms' }),
+            search: (prev) => ({ ...prev, coordinate_format: value }),
             replace: true,
         });
     };
 
-    const handleHasCoreChange = (value: string) => {
-        const newCoreValue = value as YesNoAll;
+    const handleHasCoreChange = (value: YesNoAll) => {
         navigate({
-            search: (prev) => ({ ...prev, core: newCoreValue === "all" ? undefined : newCoreValue }),
+            search: (prev) => ({ ...prev, core: value === "all" ? undefined : value }),
             replace: true,
         });
     };
 
-    const handleFormationChange = (newFormationValue: string) => {
+    const handleFormationChange = (value: string) => {
         navigate({
-            search: (prev) => ({ ...prev, formation: newFormationValue === "" ? undefined : newFormationValue }),
+            search: (prev) => ({ ...prev, formation: value === "" ? undefined : value }),
             replace: true,
         });
-        setFormationDropdownOpen(false);
     };
-
-    const coordFormatRadioValue = search.coordinate_format === "dms" ? "Degrees, Minutes, Seconds" : "Decimal Degrees";
-    const coreFilterValue = search.core ?? "all";
-    const selectedFormationValue = search.formation ?? "";
 
     return (
         <>
             <BackToMenuButton />
             <div className='space-y-4 p-4 max-h-full overflow-y-auto'>
-                <div className="mb-4"><h3 className="text-lg font-medium mb-2">Map Configurations</h3></div>
+                <div className="mb-4">
+                    <h3 className="text-lg font-medium">Map Configurations</h3>
+                </div>
+
                 <Card>
-                    <CardHeader className="py-3 px-4"><CardTitle className="text-base">Location Coordinate Format</CardTitle></CardHeader>
+                    <CardHeader className="py-3 px-4">
+                        <CardTitle className="text-base">Location Coordinate Format</CardTitle>
+                    </CardHeader>
                     <CardContent className="p-4">
-                        <RadioGroup value={coordFormatRadioValue} onValueChange={handleCoordFormatChange} className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <RadioGroup
+                            value={search.coordinate_format ?? 'dd'}
+                            onValueChange={handleCoordFormatChange}
+                            className="grid grid-cols-2 gap-2"
+                        >
                             <div className="flex">
-                                <RadioGroupItem value="Decimal Degrees" id="decimal-degrees" className="peer sr-only" />
+                                <RadioGroupItem
+                                    value="dd"
+                                    id="dd-radio"
+                                    className="peer sr-only"
+                                />
                                 <Label
-                                    htmlFor="decimal-degrees"
+                                    htmlFor="dd-radio"
                                     className="flex flex-1 items-center justify-center rounded-md border-2 border-transparent bg-popover p-3 text-center cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
                                 >
                                     Decimal Degrees
                                 </Label>
                             </div>
                             <div className="flex">
-                                <RadioGroupItem value="Degrees, Minutes, Seconds" id="dms" className="peer sr-only" />
+                                <RadioGroupItem
+                                    value="dms"
+                                    id="dms-radio"
+                                    className="peer sr-only"
+                                />
                                 <Label
-                                    htmlFor="dms"
+                                    htmlFor="dms-radio"
                                     className="flex flex-1 items-center justify-center rounded-md border-2 border-transparent bg-popover p-3 text-center cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
                                 >
                                     Degrees, Minutes, Seconds
@@ -194,76 +177,116 @@ function MapConfigurations() {
                 </Card>
 
                 <Card>
-                    <CardHeader className="py-3 px-4"><CardTitle className="text-base">Filter Wells Database (Demo)</CardTitle></CardHeader>
+                    <CardHeader className="py-3 px-4">
+                        <CardTitle className="text-base">Filter Wells Database (Demo)</CardTitle>
+                    </CardHeader>
                     <CardContent className="p-4 space-y-4">
-                        <div>
-                            <Label htmlFor="has-core-filter-group" className="text-sm font-medium text-muted-foreground mb-2 block">{wellsHasCoreFilterConfig.label}</Label>
-                            <RadioGroup id="has-core-filter-group" value={coreFilterValue} onValueChange={handleHasCoreChange} className="grid grid-cols-3 gap-2">
-                                {wellsHasCoreFilterConfig.options.map(option => (
-                                    <div className="flex" key={`hascore-${option.value}`}>
-                                        <RadioGroupItem value={option.value} id={`hascore-filter-${option.value}`} className="peer sr-only" />
-                                        <Label htmlFor={`hascore-filter-${option.value}`} className="flex flex-1 items-center justify-center rounded-md border-2 border-transparent bg-popover p-2 text-xs text-center cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground">{option.label}</Label>
-                                    </div>
-                                ))}
-                            </RadioGroup>
-                        </div>
-                        <div>
-                            <Label htmlFor="formation-present-combobox" className="text-sm font-medium text-muted-foreground mb-2 block">{formationNameMappingConfig.label}</Label>
-                            <Popover open={formationDropdownOpen} onOpenChange={setFormationDropdownOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        id="formation-present-combobox"
-                                        variant="outline"
-                                        role="combobox"
-                                        aria-expanded={formationDropdownOpen}
-                                        className="w-full justify-between text-xs h-9"
-                                    >
-                                        {selectedFormationValue
-                                            ? formationMappings.find((f) => f.value === selectedFormationValue)?.label
-                                            : "Select formation..."
-                                        }
-                                        <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                    <Command>
-                                        <CommandInput placeholder="Search formation..." className="h-8 text-xs" />
-                                        <CommandList>
-                                            <CommandEmpty>{isLoadingFormations ? "Loading..." : (formationError ? "Error loading data" : "No formations found.")}</CommandEmpty>
-                                            <CommandGroup>
-                                                <CommandItem
-                                                    key="all-formations"
-                                                    value=""
-                                                    onSelect={() => handleFormationChange("")}
-                                                    className="text-xs"
-                                                >
-                                                    <Check className={cn("mr-2 h-3 w-3", selectedFormationValue === "" ? "opacity-100" : "opacity-0")} />
-                                                    All Formations
-                                                </CommandItem>
-                                                {formationMappings.map((mapping) => (
-                                                    <CommandItem
-                                                        key={mapping.value}
-                                                        value={mapping.value}
-                                                        onSelect={(currentValue) => {
-                                                            handleFormationChange(currentValue === selectedFormationValue ? "" : currentValue);
-                                                        }}
-                                                        className="text-xs"
-                                                    >
-                                                        <Check className={cn("mr-2 h-3 w-3", selectedFormationValue === mapping.value ? "opacity-100" : "opacity-0")} />
-                                                        {mapping.label}
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                        </div>
+                        <WellCoreFilter
+                            value={search.core ?? 'all'}
+                            onChange={handleHasCoreChange}
+                        />
+                        <WellFormationFilter
+                            value={search.formation ?? ''}
+                            onChange={handleFormationChange}
+                        />
                     </CardContent>
                 </Card>
             </div>
         </>
     );
 }
+
+const WellCoreFilter = ({ value, onChange }: { value: YesNoAll, onChange: (value: YesNoAll) => void }) => (
+    <div>
+        <Label className="text-sm font-medium text-muted-foreground mb-2 block">
+            {wellsHasCoreFilterConfig.label}
+        </Label>
+        <RadioGroup
+            value={value}
+            onValueChange={onChange}
+            className="grid grid-cols-3 gap-2"
+        >
+            {wellsHasCoreFilterConfig.options.map(option => (
+                <div key={option.value}>
+                    <RadioGroupItem
+                        value={option.value}
+                        id={`hascore-filter-${option.value}`}
+                        className="peer sr-only"
+                    />
+                    <Label
+                        htmlFor={`hascore-filter-${option.value}`}
+                        className="flex flex-1 items-center justify-center rounded-md border-2 border-transparent bg-popover p-2 text-xs text-center cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
+                    >
+                        {option.label}
+                    </Label>
+                </div>
+            ))}
+        </RadioGroup>
+    </div>
+);
+
+const WellFormationFilter = ({ value, onChange }: { value: string, onChange: (value: string) => void }) => {
+    const [open, setOpen] = useState(false);
+    const { data: mappings = [], isLoading, error } = useQuery({
+        queryKey: ['formationMappings'],
+        queryFn: fetchFormationData,
+        staleTime: 1000 * 60 * 60,
+    });
+
+    return (
+        <div>
+            <Label className="text-sm font-medium text-muted-foreground mb-2 block">
+                {formationNameMappingConfig.label}
+            </Label>
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-full justify-between text-xs h-9"
+                    >
+                        {value ? mappings.find(m => m.value === value)?.label : "Select formation..."}
+                        <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                    <Command>
+                        <CommandInput
+                            placeholder="Search formation..."
+                            className="h-8 text-xs"
+                        />
+                        <CommandList>
+                            <CommandEmpty>
+                                {isLoading ? "Loading..." : error ? "Error loading data" : "No formations found."}
+                            </CommandEmpty>
+                            <CommandGroup>
+                                <CommandItem
+                                    value=""
+                                    onSelect={() => { onChange(""); setOpen(false); }}
+                                    className="text-xs"
+                                >
+                                    <Check className={cn("mr-2 h-3 w-3", value === "" ? "opacity-100" : "opacity-0")} />
+                                    All Formations
+                                </CommandItem>
+                                {mappings.map(mapping => (
+                                    <CommandItem
+                                        key={mapping.value}
+                                        value={mapping.label}
+                                        onSelect={() => { onChange(mapping.value); setOpen(false); }}
+                                        className="text-xs"
+                                    >
+                                        <Check className={cn("mr-2 h-3 w-3", value === mapping.value ? "opacity-100" : "opacity-0")} />
+                                        {mapping.label}
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+        </div>
+    );
+};
 
 export default MapConfigurations;

@@ -12,8 +12,7 @@ const ccusSearchSchema = z.object({
 export const Route = createFileRoute('/ccus/')({
     component: () => <Map />,
     validateSearch: (search: Record<string, unknown>) => {
-        // Zod first strips unknown params, then we parse and process the result.
-        const { core, formation, filters } = ccusSearchSchema.parse(search);
+        let { core, formation, filters } = ccusSearchSchema.parse(search);
 
         const layers = z.object({
             selected: z.array(z.string()).optional(),
@@ -23,7 +22,13 @@ export const Route = createFileRoute('/ccus/')({
         const newSelectedSet = new Set(layers?.selected);
         const newFilters = { ...filters };
 
-        // Build the filter string from the UI params.
+        // Rule 1: If the Wells Database layer is not selected, its filters must be cleared.
+        if (!newSelectedSet.has(wellWithTopsWMSTitle)) {
+            core = undefined;
+            formation = undefined;
+        }
+
+        // Build the filter string from the (now validated) UI params.
         const wellFilterParts: string[] = [];
         if (core === "yes") wellFilterParts.push(`hascore = 'True'`);
         if (core === "no") wellFilterParts.push(`hascore = 'False'`);
@@ -33,10 +38,13 @@ export const Route = createFileRoute('/ccus/')({
 
         if (combinedWellFilter) {
             newFilters[wellWithTopsWMSTitle] = combinedWellFilter;
+            // Rule 2: If a filter is active, ensure the layer is selected.
+            newSelectedSet.add(wellWithTopsWMSTitle);
         } else {
             delete newFilters[wellWithTopsWMSTitle];
         }
 
+        // Return the final, synchronized search object.
         return {
             core,
             formation,
