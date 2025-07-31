@@ -1,140 +1,199 @@
-import { createContext, useContext, useCallback, ReactNode, useMemo, useEffect } from 'react';
-import { useSearch, useNavigate } from '@tanstack/react-router';
+import { createContext, useContext, useCallback, ReactNode, useMemo, useEffect, useRef } from 'react';
+import { useSearch, useNavigate, useLocation } from '@tanstack/react-router';
 import { LayerProps } from '@/lib/types/mapping-types';
 import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 
+type ActiveFilters = Record<string, string>;
+
 interface LayerUrlContextType {
-    visibleLayerTitles: Set<string>;
-    updateLayerVisibility: (titles: string | string[], shouldBeVisible: boolean) => void;
+    selectedLayerTitles: Set<string>;
+    hiddenGroupTitles: Set<string>;
+    activeFilters: ActiveFilters;
+    updateLayerSelection: (titles: string | string[], shouldBeSelected: boolean) => void;
+    toggleGroupVisibility: (title: string) => void;
+    updateFilter: (layerTitle: string, filterValue: string | undefined) => void;
 }
 
 const LayerUrlContext = createContext<LayerUrlContextType | undefined>(undefined);
 
-// Helper functions (can be moved to a utils file)
-const getAllValidTitles = (layers: LayerProps[]): Set<string> => {
+const getAllValidTitles = (layers: LayerProps[], groupsOnly = false): Set<string> => {
     const titles = new Set<string>();
-    const traverse = (layerArray: LayerProps[]) => {
-        for (const layer of layerArray) {
-            if (layer.title) {
-                titles.add(layer.title);
+    layers.forEach(layer => {
+        if (layer.type === 'group' && layer.title) {
+            titles.add(layer.title);
+            if ('layers' in layer && layer.layers) {
+                getAllValidTitles(layer.layers, groupsOnly).forEach(t => titles.add(t));
             }
-            if (layer.type === 'group' && 'layers' in layer && layer.layers) {
-                traverse(layer.layers);
-            }
+        } else if (!groupsOnly && layer.title) {
+            titles.add(layer.title);
         }
-    };
-    traverse(layers);
+    });
     return titles;
 };
 
-const getDefaultVisible = (layers: LayerProps[]): string[] => {
-    let visible: string[] = [];
+const getDefaultVisible = (layers: LayerProps[]): { selected: string[], hidden: string[] } => {
+    let selected: string[] = [];
+    let hidden: string[] = [];
     layers.forEach(layer => {
         if (layer.type === 'group' && 'layers' in layer && layer.layers) {
-            visible = [...visible, ...getDefaultVisible(layer.layers)];
+            if (layer.visible === false && layer.title) hidden.push(layer.title);
+            const children = getDefaultVisible(layer.layers);
+            selected.push(...children.selected);
+            hidden.push(...children.hidden);
         } else if (layer.visible && layer.title) {
-            visible.push(layer.title);
+            selected.push(layer.title);
         }
     });
-    return visible;
+    return { selected, hidden };
 };
 
 export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
     const navigate = useNavigate();
-    const { layers: urlLayers } = useSearch({ from: '__root__' });
+    const { layers: urlLayers, filters: urlFilters } = useSearch({ from: '__root__' });
     const layersConfig = useGetLayerConfig();
-
-    const allValidTitles = useMemo(() => {
-        if (!layersConfig) return new Set<string>();
-        return getAllValidTitles(layersConfig);
-    }, [layersConfig]);
-
-    const visibleLayerTitles = useMemo(() => {
-        if (!urlLayers) return new Set<string>();
-        const layersArray = Array.isArray(urlLayers) ? urlLayers : [urlLayers];
-        return new Set(layersArray.filter(title => allValidTitles.has(title)));
-    }, [urlLayers, allValidTitles]);
+    const hasInitializedForPath = useRef<string | null>(null);
+    const location = useLocation();
 
     useEffect(() => {
-        if (!layersConfig) return;
-
-        const layersParamExists = new URL(window.location.href).searchParams.has('layers');
-
-        // Case 1: The `layers` parameter is not in the URL at all.
-        if (!layersParamExists) {
-            const defaults = getDefaultVisible(layersConfig);
-            if (defaults.length > 0) {
-                navigate({
-                    to: '.',
-                    search: (prev) => ({ ...prev, layers: defaults }), replace: true
-                });
-            }
+        if (!layersConfig || hasInitializedForPath.current === location.pathname) return;
+        if (!layersConfig || hasInitializedForPath.current === location.pathname) {
             return;
         }
 
-        // Case 2: The `layers` parameter IS present. We validate its contents.
-        const urlLayersArray = Array.isArray(urlLayers) ? urlLayers : (urlLayers ? [urlLayers].filter(Boolean) : []);
-        const validatedTitles = urlLayersArray.filter(title => allValidTitles.has(title));
+        const allValidLayerTitles = getAllValidTitles(layersConfig);
+        const defaults = getDefaultVisible(layersConfig);
 
-        // If, after validation, the list is empty (because the param was empty OR all titles were invalid),
-        // we populate the defaults.
-        if (validatedTitles.length === 0) {
-            const defaults = getDefaultVisible(layersConfig);
-            // Only update if there are defaults, to prevent an infinite loop on `?layers=`
-            if (defaults.length > 0) {
-                navigate({
-                    to: '.',
-                    search: (prev) => ({ ...prev, layers: defaults }), replace: true
-                });
+        let finalLayers = urlLayers;
+        let finalFilters = urlFilters;
+        let needsUpdate = false;
+
+        if (urlFilters) {
+            const validFilterKeys = Object.keys(urlFilters).filter(key => allValidLayerTitles.has(key));
+            if (validFilterKeys.length < Object.keys(urlFilters).length) {
+                finalFilters = undefined;
+                needsUpdate = true;
             }
         }
-        // Otherwise, if the list isn't empty, but we removed some invalid titles, we clean the URL.
-        else if (validatedTitles.length < urlLayersArray.length) {
+
+        if (!urlLayers || urlLayers.selected?.length === 0) {
+            finalLayers = defaults;
+            needsUpdate = true;
+        } else {
+            const currentSelected = urlLayers.selected || [];
+            const validSelected = currentSelected.filter(title => allValidLayerTitles.has(title));
+            if (currentSelected.length > 0 && validSelected.length === 0) {
+                finalLayers = defaults;
+                needsUpdate = true;
+            } else if (validSelected.length !== currentSelected.length) {
+                finalLayers = { ...urlLayers, selected: validSelected };
+                needsUpdate = true;
+            }
+        }
+
+        if (needsUpdate) {
+            const finalLayersString = Object.keys(finalLayers || {}).length > 0 ? JSON.stringify(finalLayers) : undefined;
             navigate({
                 to: '.',
-                search: (prev) => ({ ...prev, layers: validatedTitles }), replace: true
+                search: (prev) => ({ ...prev, layers: finalLayersString, filters: finalFilters }),
+                replace: true
             });
         }
-        // If the URL was already clean and valid, we do nothing.
-    }, [layersConfig, urlLayers, allValidTitles, navigate]);
+
+        hasInitializedForPath.current = location.pathname;
+
+    }, [layersConfig, navigate, urlLayers, urlFilters, location.pathname]);
 
 
+    const selectedLayerTitles = useMemo(() => new Set(urlLayers?.selected || []), [urlLayers]);
+    const hiddenGroupTitles = useMemo(() => new Set(urlLayers?.hidden || []), [urlLayers]);
+    const activeFilters: ActiveFilters = useMemo(() => urlFilters || {}, [urlFilters]);
 
-    const updateLayerVisibility = useCallback((titles: string | string[], shouldBeVisible: boolean) => {
+    const updateLayerSelection = useCallback((titles: string | string[], shouldBeSelected: boolean) => {
         const titlesToUpdate = Array.isArray(titles) ? titles : [titles];
-        const newVisibleSet = new Set(visibleLayerTitles);
 
-        if (shouldBeVisible) {
-            titlesToUpdate.forEach(title => newVisibleSet.add(title));
-        } else {
-            titlesToUpdate.forEach(title => newVisibleSet.delete(title));
-        }
+        navigate({
+            to: '.',
+            search: (prev) => {
+                const currentSelected = new Set(prev.layers?.selected || []);
+                const currentFilters = { ...(prev.filters || {}) };
 
-        const newLayers = Array.from(newVisibleSet);
+                if (shouldBeSelected) {
+                    // Rule: Turning a layer ON does not affect filters.
+                    titlesToUpdate.forEach(title => currentSelected.add(title));
+                } else {
+                    // Rule: Turning a layer OFF also clears its filter.
+                    titlesToUpdate.forEach(title => {
+                        currentSelected.delete(title);
+                        delete currentFilters[title];
+                    });
+                }
 
-        // If the final list of layers is empty, remove the 'layers' key from the URL.
-        if (newLayers.length === 0) {
-            navigate({
-                to: '.',
-                search: (prev) => {
-                    const { layers, ...rest } = prev; // Create a new object without the 'layers' key
-                    return rest;
-                },
-                replace: true,
-            });
-        } else {
-            // Otherwise, update the URL with the new list.
-            navigate({
-                to: '.',
-                search: (prev) => ({ ...prev, layers: newLayers }),
-                replace: true,
-            });
-        }
+                return {
+                    ...prev,
+                    layers: { ...prev.layers, selected: Array.from(currentSelected) },
+                    filters: Object.keys(currentFilters).length > 0 ? currentFilters : undefined,
+                };
+            },
+            replace: true,
+        });
+    }, [navigate]);
 
-    }, [navigate, visibleLayerTitles]);
+    const updateFilter = useCallback((layerTitle: string, filterValue: string | undefined) => {
+        navigate({
+            to: '.',
+            search: (prev) => {
+                const currentFilters = { ...(prev.filters || {}) };
+                const currentSelected = new Set(prev.layers?.selected || []);
+
+                if (filterValue) {
+                    // Rule: Applying a filter also ensures the layer is ON.
+                    currentFilters[layerTitle] = filterValue;
+                    currentSelected.add(layerTitle);
+                } else {
+                    // Rule: Clearing a filter does not affect layer visibility.
+                    delete currentFilters[layerTitle];
+                }
+
+                return {
+                    ...prev,
+                    layers: { ...prev.layers, selected: Array.from(currentSelected) },
+                    filters: Object.keys(currentFilters).length > 0 ? currentFilters : undefined,
+                };
+            },
+            replace: true
+        });
+    }, [navigate]);
+
+    const toggleGroupVisibility = useCallback((title: string) => {
+        navigate({
+            to: '.',
+            search: (prev) => {
+                const newHiddenSet = new Set(prev.layers?.hidden || []);
+                if (newHiddenSet.has(title)) {
+                    newHiddenSet.delete(title);
+                } else {
+                    newHiddenSet.add(title);
+                }
+                return {
+                    ...prev,
+                    layers: { ...prev.layers, hidden: Array.from(newHiddenSet) }
+                };
+            },
+            replace: true
+        });
+    }, [navigate]);
+
+    const value = {
+        selectedLayerTitles,
+        hiddenGroupTitles,
+        activeFilters,
+        updateLayerSelection,
+        toggleGroupVisibility,
+        updateFilter,
+    };
 
     return (
-        <LayerUrlContext.Provider value={{ visibleLayerTitles, updateLayerVisibility }}>
+        <LayerUrlContext.Provider value={value}>
             {children}
         </LayerUrlContext.Provider>
     );
@@ -142,8 +201,6 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
 
 export const useLayerUrl = () => {
     const context = useContext(LayerUrlContext);
-    if (context === undefined) {
-        throw new Error('useLayerUrl must be used within a LayerUrlProvider');
-    }
+    if (!context) throw new Error('useLayerUrl must be used within a LayerUrlProvider');
     return context;
 };
