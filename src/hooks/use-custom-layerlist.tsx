@@ -28,15 +28,10 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     const { view } = useContext(MapContext);
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions } = useFetchLayerDescriptions();
-    const [userAccordionOpen, setUserAccordionOpen] = useState<boolean>(() => {
-        if (layerConfig.type === 'group') {
-            return isGroupVisible || groupCheckboxState === 'all';
-        }
-        return isSelected;
-    });
+    const [userAccordionOpen, setUserAccordionOpen] = useState(false);
     const isMobile = useIsMobile();
 
-    // This effect declaratively opens the accordion when the layer is selected.
+    // This effect declaratively opens/closes the accordion when the layer turned on/off
     useEffect(() => {
         if (isSelected) {
             setUserAccordionOpen(true);
