@@ -46,6 +46,8 @@ interface PointGraphic {
     "stroke-linejoin": LineJoin;
     "stroke-opacity": string;
     "stroke-width": string;
+    "external-graphic-url"?: string;
+    "external-graphic-type"?: string;
 }
 
 export type LineCap = "butt" | "round" | "square";
