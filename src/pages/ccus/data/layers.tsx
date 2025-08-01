@@ -648,6 +648,26 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
     ],
 };
 
+const ccsExclusionAreasLayerName = 'ccus_noccuszone';
+const ccsExclusionAreasWMSTitle = 'CCS Exclusion Areas';
+const ccsExclusionAreasWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: ccsExclusionAreasWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${ccsExclusionAreasLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Notes': { field: 'notes', type: 'string' },
+
+            }
+        }
+    ],
+};
+
 
 const geothermalPowerplantsLayerName = 'ccus_geothermalpowerplants';
 const geothermalPowerplantsWMSTitle = 'Geothermal Powerplants';
@@ -684,7 +704,8 @@ const ccusResourcesConfig: LayerProps = {
         oilGasFieldsWMSConfig,
         co2SourcesWMSConfig,
         wildernessStudyAreasWMSConfig,
-        sitlaReportsWMSConfig
+        sitlaReportsWMSConfig,
+        ccsExclusionAreasWMSConfig
     ]
 }
 
