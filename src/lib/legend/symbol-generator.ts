@@ -5,6 +5,8 @@ import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol.js";
 import Symbol from "@arcgis/core/symbols/Symbol.js";
 import { FillSymbolizer, LineCap, LineJoin, StrokeSymbolizer, Symbolizer } from "@/lib/types/geoserver-types";
 
+const SCALING_FACTOR = .75;
+
 export function createLineSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
     const lineSymbolizer = symbolizers.find(symbolizer => 'Line' in symbolizer)?.Line as StrokeSymbolizer;
 
