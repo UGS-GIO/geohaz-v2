@@ -478,13 +478,22 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 'Cored Intervals': { field: 'cored_formation', type: 'string' },
                 'Formation': { field: 'formation', type: 'string' },
                 'Formation at TD': { field: 'form_td', type: 'string' },
-                'Cored Formation Table': {
+                'Cored Formations': {
                     field: 'custom',
                     type: 'custom',
                     transform: (props) => {
-                        const formation = props?.['formation'];
-                        const coredFormation = props?.['cored_formation'];
-                        return `${formation} ${coredFormation}, todo, make table from this data`;
+                        const formation = props?.['formation'] || '';
+                        const coredFormation = props?.['cored_formation'] || '';
+
+                        if (formation && coredFormation) {
+                            return `${formation}, ${coredFormation}`;
+                        } else if (formation) {
+                            return `${formation}`;
+                        } else if (coredFormation) {
+                            return `${coredFormation}`;
+                        } else {
+                            return '';
+                        }
                     }
                 },
                 '': {
