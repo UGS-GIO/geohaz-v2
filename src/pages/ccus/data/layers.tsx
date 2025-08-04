@@ -484,8 +484,16 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                     transform: (props) => {
                         const formation = props?.['formation'] || '';
                         const coredFormation = props?.['cored_formation'] || '';
-                        return `${formation}, Cored Interval: ${coredFormation}`;
-                        // example: ENTRADA, Cored Interval: 1-100 ft, 200-300 ft
+
+                        if (formation && coredFormation) {
+                            return `${formation}, Cored Interval: ${coredFormation}`;
+                        } else if (formation) {
+                            return `${formation}`;
+                        } else if (coredFormation) {
+                            return `Cored Interval: ${coredFormation}`;
+                        } else {
+                            return '';
+                        }
                     }
                 },
                 '': {
