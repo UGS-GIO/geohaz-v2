@@ -30,11 +30,13 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     const { data: layerDescriptions } = useFetchLayerDescriptions();
     const isMobile = useIsMobile();
     const [isUserExpanded, setIsUserExpanded] = useState(false);
+
+    // This effect runs only once on component mount to set the initial state.
+    // Group layers will expand on load if any child is visible.
+    // Single layers will NOT expand on load, even if they are selected.
     useEffect(() => {
         if (layerConfig.type === 'group') {
             setIsUserExpanded(isGroupVisible);
-        } else {
-            setIsUserExpanded(isSelected);
         }
     }, []);
 

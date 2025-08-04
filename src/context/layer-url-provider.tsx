@@ -56,9 +56,6 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (!layersConfig || hasInitializedForPath.current === location.pathname) return;
-        if (!layersConfig || hasInitializedForPath.current === location.pathname) {
-            return;
-        }
 
         const allValidLayerTitles = getAllValidTitles(layersConfig);
         const defaults = getDefaultVisible(layersConfig);
@@ -76,25 +73,21 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
         }
 
         if (!urlLayers || urlLayers.selected?.length === 0) {
-            finalLayers = defaults;
+            finalLayers = { ...urlLayers, ...defaults };
             needsUpdate = true;
         } else {
             const currentSelected = urlLayers.selected || [];
             const validSelected = currentSelected.filter(title => allValidLayerTitles.has(title));
-            if (currentSelected.length > 0 && validSelected.length === 0) {
-                finalLayers = defaults;
-                needsUpdate = true;
-            } else if (validSelected.length !== currentSelected.length) {
+            if (validSelected.length !== currentSelected.length) {
                 finalLayers = { ...urlLayers, selected: validSelected };
                 needsUpdate = true;
             }
         }
 
         if (needsUpdate) {
-            const finalLayersString = Object.keys(finalLayers || {}).length > 0 ? JSON.stringify(finalLayers) : undefined;
             navigate({
                 to: '.',
-                search: (prev) => ({ ...prev, layers: finalLayersString, filters: finalFilters }),
+                search: (prev) => ({ ...prev, layers: finalLayers, filters: finalFilters }),
                 replace: true
             });
         }
@@ -103,11 +96,42 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
 
     }, [layersConfig, navigate, urlLayers, urlFilters, location.pathname]);
 
+    // 1. NEW: Create a map to find a layer's parent group title.
+    const childToParentMap = useMemo(() => {
+        const map = new Map<string, string>();
+        if (!layersConfig) return map;
+
+        const traverse = (layers: LayerProps[], parent: LayerProps) => {
+            for (const layer of layers) {
+                // Ensure the parent is a group and has a title before setting the map
+                if (parent.type === 'group' && parent.title && layer.title) {
+                    map.set(layer.title, parent.title);
+                }
+
+                // Use a type guard to confirm 'layer' is a group before recursing
+                if (layer.type === 'group' && 'layers' in layer && layer.layers) {
+                    traverse(layer.layers, layer);
+                }
+            }
+        };
+
+        // Start the traversal for each top-level item
+        for (const layer of layersConfig) {
+            // Use a type guard on the top-level items as well
+            if (layer.type === 'group' && 'layers' in layer && layer.layers) {
+                traverse(layer.layers, layer);
+            }
+        }
+
+        return map;
+    }, [layersConfig]);
+
 
     const selectedLayerTitles = useMemo(() => new Set(urlLayers?.selected || []), [urlLayers]);
     const hiddenGroupTitles = useMemo(() => new Set(urlLayers?.hidden || []), [urlLayers]);
     const activeFilters: ActiveFilters = useMemo(() => urlFilters || {}, [urlFilters]);
 
+    // 2. ENHANCED: This function now turns on the parent group when a child is selected.
     const updateLayerSelection = useCallback((titles: string | string[], shouldBeSelected: boolean) => {
         const titlesToUpdate = Array.isArray(titles) ? titles : [titles];
 
@@ -115,13 +139,19 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
             to: '.',
             search: (prev) => {
                 const currentSelected = new Set(prev.layers?.selected || []);
+                const currentHidden = new Set(prev.layers?.hidden || []);
                 const currentFilters = { ...(prev.filters || {}) };
 
                 if (shouldBeSelected) {
-                    // Rule: Turning a layer ON does not affect filters.
-                    titlesToUpdate.forEach(title => currentSelected.add(title));
+                    titlesToUpdate.forEach(title => {
+                        currentSelected.add(title);
+                        // **FIX**: If selecting a child, ensure its parent group is not hidden.
+                        const parentTitle = childToParentMap.get(title);
+                        if (parentTitle) {
+                            currentHidden.delete(parentTitle);
+                        }
+                    });
                 } else {
-                    // Rule: Turning a layer OFF also clears its filter.
                     titlesToUpdate.forEach(title => {
                         currentSelected.delete(title);
                         delete currentFilters[title];
@@ -130,13 +160,17 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
 
                 return {
                     ...prev,
-                    layers: { ...prev.layers, selected: Array.from(currentSelected) },
+                    layers: {
+                        ...prev.layers,
+                        selected: Array.from(currentSelected),
+                        hidden: Array.from(currentHidden),
+                    },
                     filters: Object.keys(currentFilters).length > 0 ? currentFilters : undefined,
                 };
             },
             replace: true,
         });
-    }, [navigate]);
+    }, [navigate, childToParentMap]);
 
     const updateFilter = useCallback((layerTitle: string, filterValue: string | undefined) => {
         navigate({
@@ -146,11 +180,9 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
                 const currentSelected = new Set(prev.layers?.selected || []);
 
                 if (filterValue) {
-                    // Rule: Applying a filter also ensures the layer is ON.
                     currentFilters[layerTitle] = filterValue;
                     currentSelected.add(layerTitle);
                 } else {
-                    // Rule: Clearing a filter does not affect layer visibility.
                     delete currentFilters[layerTitle];
                 }
 
