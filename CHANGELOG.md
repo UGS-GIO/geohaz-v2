@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/UGS-GIO/geohaz-v2/compare/v1.11.0...v1.11.1) (2025-08-04)
+
+
+### data-reviewer
+
+* **🐛 Bug Fixes**(`data-reviewer`): change is_current_cql to allow for review items ([#253](https://github.com/UGS-GIO/geohaz-v2/issues/253))
+
 ## [1.11.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.10.0...v1.11.0) (2025-07-09)
 
 
