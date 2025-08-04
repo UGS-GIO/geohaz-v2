@@ -28,17 +28,15 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     const { view } = useContext(MapContext);
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions } = useFetchLayerDescriptions();
-    const [userAccordionOpen, setUserAccordionOpen] = useState(false);
     const isMobile = useIsMobile();
-
-    // This effect declaratively opens/closes the accordion when the layer turned on/off
+    const [isUserExpanded, setIsUserExpanded] = useState(false);
     useEffect(() => {
-        if (isSelected) {
-            setUserAccordionOpen(true);
+        if (layerConfig.type === 'group') {
+            setIsUserExpanded(isGroupVisible);
         } else {
-            setUserAccordionOpen(false);
+            setIsUserExpanded(isSelected);
         }
-    }, [isSelected]);
+    }, []);
 
 
     const liveLayer = useMemo(() => {
@@ -71,7 +69,8 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
         }
     };
 
-    const currentAccordionValue = userAccordionOpen ? "item-1" : "";
+    // The accordion's value is always tied to the user's explicit action.
+    const accordionValue = isUserExpanded ? "item-1" : "";
 
 
     // --- Group Layer Rendering ---
@@ -83,8 +82,8 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                 <Accordion
                     type="single"
                     collapsible
-                    value={currentAccordionValue}
-                    onValueChange={(val) => setUserAccordionOpen(val === "item-1")}
+                    value={accordionValue}
+                    onValueChange={(val) => setIsUserExpanded(val === "item-1")}
                 >
                     <AccordionItem value="item-1">
                         <AccordionHeader>
@@ -129,8 +128,8 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
             <Accordion
                 type="single"
                 collapsible
-                value={currentAccordionValue}
-                onValueChange={(val) => setUserAccordionOpen(val === "item-1")}
+                value={accordionValue}
+                onValueChange={(val) => setIsUserExpanded(val === "item-1")}
             >
                 <AccordionItem value="item-1">
                     <AccordionHeader>
@@ -162,7 +161,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                             handleZoomToLayer={handleZoomToLayer}
                             layerId={liveLayer?.id || ''}
                             url={typedLayer && 'url' in typedLayer ? typedLayer.url || '' : ''}
-                            openLegend={userAccordionOpen}
+                            openLegend={accordionValue === "item-1"}
                         />
                     </AccordionContent>
                 </AccordionItem>
