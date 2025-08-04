@@ -172,7 +172,7 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
     };
 
     // Check if mark is a valid SimpleMarkerSymbol style
-    const style = markToStyleMap[mark?.toLowerCase()] as SimpleMarkerStyle;
+    const style = mark ? markToStyleMap[mark.toLowerCase()] as SimpleMarkerStyle : undefined;
 
     if (style) {
         return new SimpleMarkerSymbol({
