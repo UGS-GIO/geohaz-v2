@@ -486,11 +486,11 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                         const coredFormation = props?.['cored_formation'] || '';
 
                         if (formation && coredFormation) {
-                            return `${formation}, Cored Interval: ${coredFormation}`;
+                            return `${formation}, ${coredFormation}`;
                         } else if (formation) {
                             return `${formation}`;
                         } else if (coredFormation) {
-                            return `Cored Interval: ${coredFormation}`;
+                            return `${coredFormation}`;
                         } else {
                             return '';
                         }
