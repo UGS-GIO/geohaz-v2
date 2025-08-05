@@ -14,18 +14,29 @@ import { useLayerUrl } from '@/context/layer-url-provider';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
 import { findAndApplyWMSFilter } from '@/pages/ccus/components/sidebar/map-configurations/map-configurations';
 
-const preprocessLayerVisibility = (layers: LayerProps[], visibleLayerTitles: Set<string>): LayerProps[] => {
-    return layers.map(layer => {
-        // Handle group layers
-        if (layer.type === 'group' && 'layers' in layer) {
-            const newChildLayers = preprocessLayerVisibility(layer.layers || [], visibleLayerTitles);
-            const isGroupVisible = newChildLayers.some(child => child.visible);
-            return { ...layer, visible: isGroupVisible, layers: newChildLayers };
-        }
-        // Handle single layers
-        return { ...layer, visible: visibleLayerTitles.has(layer.title || '') };
-    });
-}
+const preprocessLayerVisibility = (
+    layers: LayerProps[],
+    selectedLayerTitles: Set<string>,
+    hiddenGroupTitles: Set<string>
+): LayerProps[] => {
+    const process = (layerArray: LayerProps[], parentIsHidden: boolean): LayerProps[] => {
+        return layerArray.map(layer => {
+
+            const isHiddenByGroup = parentIsHidden || hiddenGroupTitles.has(layer.title || '');
+
+            if (layer.type === 'group' && 'layers' in layer) {
+                const newChildLayers = process(layer.layers || [], isHiddenByGroup);
+                const isGroupEffectivelyVisible = newChildLayers.some(child => child.visible);
+                return { ...layer, visible: isGroupEffectivelyVisible, layers: newChildLayers };
+            }
+
+            // A layer is only visible if it's selected AND its group hierarchy is not hidden.
+            const isVisible = selectedLayerTitles.has(layer.title || '') && !isHiddenByGroup;
+            return { ...layer, visible: isVisible };
+        });
+    };
+    return process(layers, false);
+};
 
 interface UseMapContainerProps {
     wmsUrl: string;
@@ -44,7 +55,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
     const search = useSearch({ from: '__root__' });
-    const { visibleLayerTitles, updateLayerVisibility } = useLayerUrl();
+    const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection } = useLayerUrl();
 
     const featureInfoQuery = useFeatureInfoQuery({
         view,
@@ -91,13 +102,13 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
         findAndApplyWMSFilter(view.map, wellWithTopsWMSTitle, wellFilter);
         if (wellFilter) {
-            updateLayerVisibility(wellWithTopsWMSTitle, true);
+            updateLayerSelection(wellWithTopsWMSTitle, true);
         }
-    }, [view, search.filters, updateLayerVisibility]);
+    }, [view, search.filters, updateLayerSelection]);
 
     useEffect(() => {
         if (mapRef.current && loadMap && zoom && center && layersConfig) {
-            const finalLayersConfig = preprocessLayerVisibility(layersConfig, visibleLayerTitles);
+            const finalLayersConfig = preprocessLayerVisibility(layersConfig, selectedLayerTitles, hiddenGroupTitles);
             loadMap({
                 container: mapRef.current,
                 zoom,
@@ -105,7 +116,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
                 layers: finalLayersConfig,
             });
         }
-    }, [loadMap, zoom, center, layersConfig, visibleLayerTitles]);
+    }, [loadMap, zoom, center, layersConfig, selectedLayerTitles, hiddenGroupTitles]);
 
     return {
         mapRef,
