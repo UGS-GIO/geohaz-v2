@@ -173,6 +173,66 @@ const riversWMSConfig: WMSLayerProps = {
     ],
 };
 
+// Roads WMS Layer
+const roadsLayerName = 'ccus_majorroads';
+const roadsWMSTitle = 'Major Roads';
+const roadsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: roadsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${roadsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Name': { field: 'fullname', type: 'string', transform: (value) => toTitleCase(value || '') },
+            },
+        },
+    ],
+};
+
+// Railroads WMS Layer
+const railroadsLayerName = 'ccus_railroads';
+const railroadsWMSTitle = 'Railroads';
+const railroadsWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: railroadsWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${railroadsLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Name': { field: 'railroad', type: 'string', transform: (value) => toTitleCase(value || '') },
+            },
+        },
+    ],
+};
+
+// Transmission Lines WMS Layer
+const transmissionLinesLayerName = 'ccus_transmissionlines';
+const transmissionLinesWMSTitle = 'Transmission Lines';
+const transmissionLinesWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: transmissionLinesWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${transmissionLinesLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Layer': { field: 'layer', type: 'string' },
+            },
+        },
+    ],
+}
+
 // Seamless Geological Units WMS Layer
 const seamlessGeolunitsLayerName = 'seamlessgeolunits';
 const seamlessGeolunitsWMSTitle = 'Geological Units (500k)';
@@ -288,6 +348,7 @@ const SITLAConfig: LayerProps = {
     type: 'map-image',
     url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer',
     opacity: 0.5,
+    title: 'Landownership',
     options: {
         title: 'Landownership',
         elevationInfo: [{ mode: 'on-the-ground' }],
@@ -417,13 +478,22 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 'Cored Intervals': { field: 'cored_formation', type: 'string' },
                 'Formation': { field: 'formation', type: 'string' },
                 'Formation at TD': { field: 'form_td', type: 'string' },
-                'Cored Formation Table': {
+                'Cored Formations': {
                     field: 'custom',
                     type: 'custom',
                     transform: (props) => {
-                        const formation = props?.['formation'];
-                        const coredFormation = props?.['cored_formation'];
-                        return `${formation} ${coredFormation}, todo, make table from this data`;
+                        const formation = props?.['formation'] || '';
+                        const coredFormation = props?.['cored_formation'] || '';
+
+                        if (formation && coredFormation) {
+                            return `${formation}, ${coredFormation}`;
+                        } else if (formation) {
+                            return `${formation}`;
+                        } else if (coredFormation) {
+                            return `${coredFormation}`;
+                        } else {
+                            return '';
+                        }
                     }
                 },
                 '': {
@@ -587,6 +657,26 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
     ],
 };
 
+const ccsExclusionAreasLayerName = 'ccus_noccuszone';
+const ccsExclusionAreasWMSTitle = 'CCS Exclusion Areas';
+const ccsExclusionAreasWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: ccsExclusionAreasWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${ENERGY_MINERALS_WORKSPACE}:${ccsExclusionAreasLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Notes': { field: 'notes', type: 'string' },
+
+            }
+        }
+    ],
+};
+
 
 const geothermalPowerplantsLayerName = 'ccus_geothermalpowerplants';
 const geothermalPowerplantsWMSTitle = 'Geothermal Powerplants';
@@ -623,7 +713,8 @@ const ccusResourcesConfig: LayerProps = {
         oilGasFieldsWMSConfig,
         co2SourcesWMSConfig,
         wildernessStudyAreasWMSConfig,
-        sitlaReportsWMSConfig
+        sitlaReportsWMSConfig,
+        ccsExclusionAreasWMSConfig
     ]
 }
 
@@ -635,7 +726,10 @@ const infrastructureAndLandUseConfig: LayerProps = {
         geothermalPowerplantsWMSConfig,
         pipelinesWMSConfig,
         riversWMSConfig,
-        SITLAConfig
+        SITLAConfig,
+        roadsWMSConfig,
+        railroadsWMSConfig,
+        transmissionLinesWMSConfig,
     ]
 }
 

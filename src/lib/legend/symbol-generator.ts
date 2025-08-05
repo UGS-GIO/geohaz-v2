@@ -5,6 +5,8 @@ import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol.js";
 import Symbol from "@arcgis/core/symbols/Symbol.js";
 import { FillSymbolizer, LineCap, LineJoin, StrokeSymbolizer, Symbolizer } from "@/lib/types/geoserver-types";
 
+const SCALING_FACTOR = .75;
+
 export function createLineSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
     const lineSymbolizer = symbolizers.find(symbolizer => 'Line' in symbolizer)?.Line as StrokeSymbolizer;
 
@@ -123,15 +125,17 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
         }
     });
 }
+
 function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
     // Find the first symbolizer that has a 'Point' property
     const pointSymbolizer = symbolizers.find(symbolizer => 'Point' in symbolizer)?.Point;
 
+    // Ensure a valid Point symbolizer exists
     if (!pointSymbolizer) {
         throw new Error("No valid Point symbolizer found in the provided symbolizers.");
     }
 
-    // Destructure properties from the Point symbolizer
+    // Destructure only the required properties from the Point symbolizer
     const { size, opacity, rotation, url, graphics } = pointSymbolizer;
 
     // Ensure there is at least one graphic in the 'graphics' array
@@ -141,16 +145,18 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
         throw new Error("No valid graphic found in the Point symbolizer.");
     }
 
-    // Parse the size, opacity, and rotation with a default value in case of invalid or expression values
+    // Destructure only the required properties from the graphic
+    const { fill, stroke, mark } = graphic;
+    const fillOpacity = graphic["fill-opacity"];
+    const strokeWidth = graphic["stroke-width"];
+
+    // Parse the size, opacity, and rotation with default values
     const parsedSize = parseSize(size);
     const parsedOpacity = parseFloat(opacity) || 1.0; // Default opacity to 1 if it's invalid
     const parsedRotation = parseFloat(rotation) || 0.0; // Default rotation to 0 if it's invalid
 
     // Add opacity to the fill color if necessary
-    const fillColorWithOpacity = addOpacityToHex(graphic.fill, parsedOpacity * parseFloat(graphic["fill-opacity"] || "1"));
-
-    // Get 'mark' from the graphic (mark is always supplied)
-    const mark = graphic.mark;
+    const fillColorWithOpacity = addOpacityToHex(fill, parsedOpacity * parseFloat(fillOpacity || "1"));
 
     // Define the allowed simple marker styles with proper typing
     type SimpleMarkerStyle = "circle" | "square" | "diamond" | "cross" | "x" | "triangle";
@@ -166,7 +172,7 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
     };
 
     // Check if mark is a valid SimpleMarkerSymbol style
-    const style = markToStyleMap[mark.toLowerCase()] as SimpleMarkerStyle;
+    const style = mark ? markToStyleMap[mark.toLowerCase()] as SimpleMarkerStyle : undefined;
 
     if (style) {
         return new SimpleMarkerSymbol({
@@ -175,17 +181,17 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
             size: parsedSize,
             angle: parsedRotation,
             outline: {
-                color: graphic.stroke, // Use stroke color from graphic
-                width: parseFloat(graphic["stroke-width"] || "1"), // Use stroke width from graphic
+                color: stroke, // Use stroke color from graphic
+                width: parseFloat(strokeWidth || "1"), // Use stroke width from graphic
             }
         });
     }
 
     // If mark is not a recognized simple marker style, use PictureMarkerSymbol
     return new PictureMarkerSymbol({
-        url: url || mark,  // Treat mark as the URL for custom icon or font-based symbol
-        width: parsedSize,
-        height: parsedSize,
+        url: url || mark, // Treat mark as the URL for custom icon or font-based symbol
+        width: parsedSize * SCALING_FACTOR,
+        height: parsedSize * SCALING_FACTOR,
     });
 }
 
