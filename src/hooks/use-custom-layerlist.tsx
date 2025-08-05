@@ -1,4 +1,4 @@
-import { useMemo, useContext, useState, useEffect, useRef } from 'react';
+import { useMemo, useContext, useState } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
@@ -39,31 +39,6 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
         return false;
     });
 
-    // --- 2. The Interaction Handler ---
-    const isMounted = useRef(false);
-    const hasInitialRenderCompleted = useRef(false);
-
-    // This effect links the checkbox to the accordion for all interactions AFTER the initial load.
-    useEffect(() => {
-        // Skip the first render to let initial state apply
-        if (!isMounted.current) {
-            isMounted.current = true;
-            return;
-        }
-
-        // Mark that we've completed the initial render cycle
-        if (!hasInitialRenderCompleted.current) {
-            hasInitialRenderCompleted.current = true;
-            return;
-        }
-
-        // After load, the accordion's expanded state mirrors the checkbox's state.
-        if (layerConfig.type !== 'group') {
-            setIsUserExpanded(isSelected);
-        }
-    }, [isSelected, layerConfig.type]);
-
-
     const liveLayer = useMemo(() => {
         if (!view?.map || !layerConfig.title) return null;
         return findLayerByTitle(view.map, layerConfig.title);
@@ -77,12 +52,19 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
         }
     };
 
+    // This handler now explicitly sets the accordion state.
+    const handleLocalToggle = (checked: boolean) => {
+        handleToggleSelection(checked);
+        setIsUserExpanded(checked);
+    };
+
     const handleZoomToLayer = async () => {
         if (!liveLayer || isExtentLoading) return;
         try {
             const extent = cachedExtent || await fetchExtent().then(result => result.data);
             if (extent) {
                 handleToggleSelection(true);
+                setIsUserExpanded(true);
                 view?.goTo(new Extent({ ...extent, spatialReference: { wkid: 4326 } }));
                 if (isMobile) {
                     setIsCollapsed(true);
@@ -169,7 +151,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                         {isTopLevel ? (
                             <Switch
                                 checked={isSelected}
-                                onCheckedChange={handleToggleSelection}
+                                onCheckedChange={handleLocalToggle}
                                 className="mx-2"
                             />
                         ) : (
@@ -177,7 +159,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                                 checked={isSelected}
                                 onCheckedChange={(checked) => {
                                     if (typeof checked === 'boolean') {
-                                        handleToggleSelection(checked);
+                                        handleLocalToggle(checked);
                                     }
                                 }}
                                 className="mx-2"
