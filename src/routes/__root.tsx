@@ -1,8 +1,7 @@
-import { LayerUrlProvider } from '@/context/layer-url-provider';
-import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
-import { zodValidator } from '@tanstack/zod-adapter'
+import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { z } from 'zod';
+import { LayerUrlProvider } from '@/context/layer-url-provider';
 
 const RootComponent = () => {
     return (
@@ -14,17 +13,25 @@ const RootComponent = () => {
 };
 
 const rootSearchSchema = z.object({
-    zoom: z.coerce.number().optional().catch(undefined),
-    lat: z.coerce.number().optional().catch(undefined),
-    lon: z.coerce.number().optional().catch(undefined),
-    coordinate_format: z.enum(['dd', 'dms']).optional().catch(undefined),
-    layers: z.array(z.string()).optional(),
+    zoom: z.coerce.number().optional(),
+    lat: z.coerce.number().optional(),
+    lon: z.coerce.number().optional(),
     filters: z.record(z.string()).optional(),
-}).catchall(z.unknown());
+    coordinate_format: z.enum(['dd', 'dms']).optional(),
+    layers: z.preprocess((val) => {
+        if (typeof val === 'string') {
+            try { return JSON.parse(val); } catch (e) { return undefined; }
+        }
+        return val;
+    }, z.object({
+        selected: z.array(z.string()).optional(),
+        hidden: z.array(z.string()).optional(),
+    }).optional())
+}).strip();
 
 export type RootSearch = z.infer<typeof rootSearchSchema>;
 
 export const Route = createRootRoute({
     component: RootComponent,
-    validateSearch: zodValidator(rootSearchSchema),
+    validateSearch: rootSearchSchema,
 });
