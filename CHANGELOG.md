@@ -1,3 +1,14 @@
+## [1.12.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.11.1...v1.12.0) (2025-08-05)
+
+
+### ccus
+
+* **✨ Features**(`ccus`): add ccs exclusion areas layer ([#257](https://github.com/UGS-GIO/geohaz-v2/issues/257))* **✨ Features**(`ccus`): add new layers ccus_majorroads, ccus_railroads, and ccus_transmissionlines ([#251](https://github.com/UGS-GIO/geohaz-v2/issues/251))* **♻️ Refactors**(`ccus`): finalize the cored_formation field in cores/cuttings ([#256](https://github.com/UGS-GIO/geohaz-v2/issues/256))* **♻️ Refactors**(`ccus`): sync filters with visible layers
+
+### common
+
+* **✨ Features**(`common`): add auth ([#254](https://github.com/UGS-GIO/geohaz-v2/issues/254))* **🐛 Bug Fixes**(`common`): allow layers to clear filters from url when turning off, rewrite logic for how url manages visibility ([#250](https://github.com/UGS-GIO/geohaz-v2/issues/250))* **✨ Features**(`common`): implement picturesymbols when we get an image in the legend ([#255](https://github.com/UGS-GIO/geohaz-v2/issues/255))
+
 ## [1.11.1](https://github.com/UGS-GIO/geohaz-v2/compare/v1.11.0...v1.11.1) (2025-08-04)
 
 
