@@ -1,4 +1,4 @@
-import { useMemo, useContext, useState, useEffect } from 'react';
+import { useMemo, useContext, useState, useEffect, useRef } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
@@ -29,16 +29,39 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions } = useFetchLayerDescriptions();
     const isMobile = useIsMobile();
-    const [isUserExpanded, setIsUserExpanded] = useState(false);
-
-    // This effect runs only once on component mount to set the initial state.
-    // Group layers will expand on load if any child is visible.
-    // Single layers will NOT expand on load, even if they are selected.
-    useEffect(() => {
+    const [isUserExpanded, setIsUserExpanded] = useState(() => {
         if (layerConfig.type === 'group') {
-            setIsUserExpanded(isGroupVisible);
+            // If it is, expand it ONLY if any of its children are selected.
+            return groupCheckboxState === 'all' || groupCheckboxState === 'some';
         }
-    }, []);
+
+        // If it's not a group, it's a single layer. ALWAYS start collapsed.
+        return false;
+    });
+
+    // --- 2. The Interaction Handler ---
+    const isMounted = useRef(false);
+    const hasInitialRenderCompleted = useRef(false);
+
+    // This effect links the checkbox to the accordion for all interactions AFTER the initial load.
+    useEffect(() => {
+        // Skip the first render to let initial state apply
+        if (!isMounted.current) {
+            isMounted.current = true;
+            return;
+        }
+
+        // Mark that we've completed the initial render cycle
+        if (!hasInitialRenderCompleted.current) {
+            hasInitialRenderCompleted.current = true;
+            return;
+        }
+
+        // After load, the accordion's expanded state mirrors the checkbox's state.
+        if (layerConfig.type !== 'group') {
+            setIsUserExpanded(isSelected);
+        }
+    }, [isSelected, layerConfig.type]);
 
 
     const liveLayer = useMemo(() => {
@@ -71,7 +94,6 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
         }
     };
 
-    // The accordion's value is always tied to the user's explicit action.
     const accordionValue = isUserExpanded ? "item-1" : "";
 
 
@@ -89,9 +111,15 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                 >
                     <AccordionItem value="item-1">
                         <AccordionHeader>
-                            <Switch checked={isGroupVisible} onCheckedChange={handleToggleGroupVisibility} className="mx-2" />
+                            <Switch
+                                checked={isGroupVisible}
+                                onCheckedChange={handleToggleGroupVisibility}
+                                className="mx-2"
+                            />
                             <AccordionTrigger>
-                                <h3 className="font-medium text-left text-md">{layerConfig.title}</h3>
+                                <h3 className="font-medium text-left text-md">
+                                    {layerConfig.title}
+                                </h3>
                             </AccordionTrigger>
                         </AccordionHeader>
                         <AccordionContent>
@@ -104,7 +132,10 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                             </div>
                             {childLayers.map((child) => (
                                 <div className="ml-4" key={child.title}>
-                                    <LayerAccordionItem layerConfig={child} isTopLevel={false} />
+                                    <LayerAccordionItem
+                                        layerConfig={child}
+                                        isTopLevel={false}
+                                    />
                                 </div>
                             ))}
                         </AccordionContent>
@@ -131,7 +162,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                 type="single"
                 collapsible
                 value={accordionValue}
-                onValueChange={(val) => setIsUserExpanded(val === "item-1")}
+                onValueChange={(val) => setIsUserExpanded(val === 'item-1')}
             >
                 <AccordionItem value="item-1">
                     <AccordionHeader>
@@ -145,13 +176,17 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                             <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={(checked) => {
-                                    if (typeof checked === 'boolean') handleToggleSelection(checked);
+                                    if (typeof checked === 'boolean') {
+                                        handleToggleSelection(checked);
+                                    }
                                 }}
                                 className="mx-2"
                             />
                         )}
                         <AccordionTrigger>
-                            <h3 className="text-md font-medium text-left">{layerConfig.title}</h3>
+                            <h3 className="text-md font-medium text-left">
+                                {layerConfig.title}
+                            </h3>
                         </AccordionTrigger>
                     </AccordionHeader>
                     <AccordionContent>
@@ -163,7 +198,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
                             handleZoomToLayer={handleZoomToLayer}
                             layerId={liveLayer?.id || ''}
                             url={typedLayer && 'url' in typedLayer ? typedLayer.url || '' : ''}
-                            openLegend={accordionValue === "item-1"}
+                            openLegend={isUserExpanded}
                         />
                     </AccordionContent>
                 </AccordionItem>
@@ -179,7 +214,11 @@ export const useCustomLayerList = () => {
     const layerList = useMemo(() => {
         if (!layersConfig) return [];
         return [...layersConfig].map(layer => (
-            <LayerAccordionItem key={layer.title} layerConfig={layer} isTopLevel={true} />
+            <LayerAccordionItem
+                key={layer.title}
+                layerConfig={layer}
+                isTopLevel={true}
+            />
         ));
     }, [layersConfig]);
 
