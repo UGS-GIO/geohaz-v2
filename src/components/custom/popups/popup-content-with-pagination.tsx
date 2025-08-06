@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
 import { ColorCodingRecordFunction, FieldConfig, LinkFields, ProcessedRasterSource, RelatedTable } from "@/lib/types/mapping-types"
-import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
 import { highlightFeature, zoomToFeature } from '@/lib/mapping-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
@@ -225,11 +224,6 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
 
         return () => observer.disconnect()
     }, [sectionIds, onSectionChange])
-
-    // Define coordinate systems
-    proj4.defs("EPSG:26912", "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs");
-    proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
-
     const handleZoomToFeature = async (feature: ExtendedFeature) => {
         if (!view) return
         view.graphics.removeAll() // Clear existing highlights before adding new one

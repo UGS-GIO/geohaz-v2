@@ -147,7 +147,7 @@ export const highlightSearchResult = async (
         console.warn(`highlightSearchResult: Source CRS is undefined on geometry. Assuming WGS84 (${effectiveSourceCRS}). Highlighting might be inaccurate if assumption is wrong.`);
     }
 
-    const wgs84Geometry = convertGeometryToWGS84<Geometry>(
+    const wgs84Geometry = convertGeometryToWGS84(
         originalGeometry,
         effectiveSourceCRS
     );
@@ -167,13 +167,13 @@ export const highlightSearchResult = async (
         return null;
     }
 
-    const defaulSearchtHighlightOptions: Required<HighlightOptions> = {
+    const defaultSearchHighlightOptions: Required<HighlightOptions> = {
         fillColor: [255, 255, 0, 0.5], // Slightly transparent yellow fill
         outlineColor: [255, 255, 0, 1],  // Solid yellow outline
         outlineWidth: 2,
         pointSize: 8
     };
-    const highlightOptions: Required<HighlightOptions> = { ...defaulSearchtHighlightOptions, ...options };
+    const highlightOptions: Required<HighlightOptions> = { ...defaultSearchHighlightOptions, ...options };
     const graphics = createEsriGraphics(esriGeom, highlightOptions);
 
     if (!graphics || graphics.length === 0) {
@@ -217,15 +217,15 @@ export function createPinGraphic(lat: number, long: number, view: __esri.SceneVi
     view.graphics.add(pointGraphic);
 }
 
-export function convertGeometryToWGS84<G extends Geometry | null | undefined>(
-    geometry: G,
+export function convertGeometryToWGS84<G extends Geometry>(
+    geometry: G | null | undefined,
     sourceCRS = "EPSG:4326"
-): Exclude<G, null | undefined> {
+): G | null {
     if (!geometry) {
-        throw new Error("Input geometry cannot be null or undefined.");
+        console.warn("convertGeometryToWGS84: Input geometry is null or undefined.");
+        return null;
     }
 
-    const nonNullGeometry = geometry as Exclude<G, null | undefined>;
     const targetCRS = "EPSG:4326"; // Target is always WGS84 to comply with geojson spec https://datatracker.ietf.org/doc/html/rfc7946#section-4
 
     // no conversion needed
@@ -233,25 +233,21 @@ export function convertGeometryToWGS84<G extends Geometry | null | undefined>(
         console.log("Source CRS is already WGS84, returning clone.");
         try {
             // Return a clone to ensure function purity
-            return clone(nonNullGeometry);
+            return clone(geometry) as G;
         } catch (cloneError: any) {
             console.error("Error cloning geometry:", cloneError);
-            // Re-throw as a more specific error if desired
-            throw new Error(`Failed to clone geometry: ${cloneError?.message || cloneError}`);
+            return null;
         }
     }
 
     // conversion needed
-    let clonedGeometry: Exclude<G, null | undefined>;
+    let clonedGeometry: G;
     try {
-        proj4.defs(sourceCRS);
-        proj4.defs(targetCRS);
-
         // clone the geometry to avoid modifying the original
-        clonedGeometry = clone(nonNullGeometry);
+        clonedGeometry = clone(geometry);
     } catch (setupError: any) {
         console.error(`Error during geometry conversion setup for ${sourceCRS}:`, setupError);
-        throw new Error(`Setup failed for conversion from ${sourceCRS}: ${setupError?.message || setupError}`);
+        return null;
     }
 
     let conversionErrorFound: Error | null = null;
@@ -285,7 +281,8 @@ export function convertGeometryToWGS84<G extends Geometry | null | undefined>(
     });
 
     if (conversionErrorFound) {
-        throw conversionErrorFound;
+        console.error("Conversion failed:", conversionErrorFound);
+        return null;
     }
     return clonedGeometry;
 }

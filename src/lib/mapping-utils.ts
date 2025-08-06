@@ -604,10 +604,6 @@ export async function fetchWfsGeometry({ namespace, feature }: { namespace: stri
     return response.json()
 }
 
-// Define coordinate systems
-proj4.defs("EPSG:26912", "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs");
-proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
-
 export const convertCoordinate = (point: number[], sourceEPSG: string = "EPSG:26912", targetEPSG: string = "EPSG:4326"): number[] => {
     try {
         const converted = proj4(
