@@ -274,7 +274,7 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
                         const unitName = props?.['unit_name'];
                         const unitSymbol = props?.['unit_symbol'];
                         const value = `${unitName} (${unitSymbol})`;
-                        return toSentenceCase(value);
+                        return value;
                     }
                 },
                 'Unit Description': { field: 'unit_description', type: 'string' },
