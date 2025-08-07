@@ -1,6 +1,6 @@
 import { LayerListContext } from "@/context/layerlist-provider";
 import { MapContext } from "@/context/map-provider";
-import { findLayerById } from "@/lib/mapping-utils";
+import { findLayerById } from "@/lib/legend/utils";
 import { useContext, useState, useEffect, useCallback, useRef } from "react";
 
 const useLayerVisibilityManager = (layer: __esri.Layer) => {
@@ -25,6 +25,7 @@ const useLayerVisibilityManager = (layer: __esri.Layer) => {
         })
     });
 
+    // Ensure currentLayer is set from the layer prop if not already set
     useEffect(() => {
         if (activeLayers && layerId) {
             const foundLayer = findLayerById(activeLayers, layerId);

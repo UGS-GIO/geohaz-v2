@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // add the thousands separator to numbers.  ie 2,342,000
-export function addCommas(x: string) {
+export function addThousandsSeparator(x: number | string): string {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 

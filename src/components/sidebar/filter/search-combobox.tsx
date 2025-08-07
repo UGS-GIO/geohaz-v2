@@ -10,12 +10,13 @@ import { featureCollection, point as turfPoint } from '@turf/helpers';
 import { useDebounce } from 'use-debounce';
 import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
 import { MapContext } from '@/context/map-provider';
-import { convertBbox, findLayerByTitle } from '@/lib/mapping-utils';
+import { convertBbox } from '@/lib/map/conversion-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
-import { highlightSearchResult, removeGraphics } from '@/lib/util/highlight-utils';
+import { highlightSearchResult, removeGraphics } from '@/lib/map/highlight-utils';
 import * as turf from '@turf/turf';
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from "@/hooks/use-toast";
+import { findLayerByTitle } from '@/lib/map/utils';
 
 export const defaultMasqueradeConfig: SearchSourceConfig = {
     type: 'masquerade',

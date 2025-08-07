@@ -6,9 +6,10 @@ import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lu
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
 import { ColorCodingRecordFunction, FieldConfig, LinkFields, ProcessedRasterSource, RelatedTable } from "@/lib/types/mapping-types"
 import { MapContext } from "@/context/map-provider"
-import { highlightFeature, zoomToFeature } from '@/lib/mapping-utils';
+import { highlightFeature } from '@/lib/map/highlight-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { zoomToFeature } from "@/lib/map/utils"
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50]
 export interface ExtendedFeature extends Feature<Geometry, GeoJsonProperties> {

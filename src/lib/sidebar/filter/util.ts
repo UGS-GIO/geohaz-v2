@@ -1,5 +1,5 @@
 import { ExtendedGeometry } from "@/components/sidebar/filter/search-combobox";
-import { convertBbox } from "@/lib/mapping-utils";
+import { convertBbox } from "@/lib/map/conversion-utils";
 import Extent from "@arcgis/core/geometry/Extent";
 import { Feature, GeoJsonProperties } from "geojson";
 import * as turf from "@turf/turf";
