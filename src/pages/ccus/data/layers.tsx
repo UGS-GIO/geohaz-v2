@@ -1,7 +1,7 @@
 import { Link } from "@/components/custom/link";
 import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
-import { addCommas, toTitleCase } from "@/lib/utils";
+import { addCommas, toSentenceCase, toTitleCase } from "@/lib/utils";
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -23,16 +23,35 @@ const basinNamesWMSConfig: WMSLayerProps = {
                 'Report Link': { field: 'reportlink', type: 'string' },
                 'Rank': {
                     field: 'rank',
-                    type: 'number'
+                    type: 'string',
+                    transform: (value: string | null): string | null => {
+                        if (value === null) {
+                            return "Coming Soon";
+                        }
+
+                        const rank = parseInt(value, 10);
+                        if (rank === 0 || isNaN(rank)) {
+                            return "Coming Soon"; // Transform rank 0 or invalid to "Coming Soon"
+                        }
+
+                        return rank.toString(); // Return rank as a string
+                    }
                 }
             },
             colorCodingMap: {
                 'rank': (value: string | number) => {
+                    // Handle "Coming Soon" case
+                    if (value === "Coming Soon") {
+                        return "#808080"; // Gray for "Coming Soon"
+                    }
+
                     const rank = typeof value === 'number' ? value : parseInt(value, 10);
+
+                    console.log(`Parsed rank: ${rank}`);
                     if (rank === 1) return "#FF0000"; // Red
                     if (rank === 2) return "#FFFF00"; // Yellow
                     if (rank === 3) return "#00FF00"; // Green
-                    return "#808080"; // Gray
+                    return "#808080"; // Gray for other cases
                 }
             }
         },
@@ -185,7 +204,7 @@ const roadsWMSConfig: WMSLayerProps = {
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${roadsLayerName}`,
             popupEnabled: false,
-            queryable: true,
+            queryable: false,
             popupFields: {
                 'Name': { field: 'fullname', type: 'string', transform: (value) => toTitleCase(value || '') },
             },
@@ -225,9 +244,9 @@ const transmissionLinesWMSConfig: WMSLayerProps = {
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${transmissionLinesLayerName}`,
             popupEnabled: false,
-            queryable: true,
+            queryable: false,
             popupFields: {
-                'Layer': { field: 'layer', type: 'string' },
+                'Voltage': { field: 'layer', type: 'string' },
             },
         },
     ],
@@ -254,7 +273,8 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
                     transform: (props) => {
                         const unitName = props?.['unit_name'];
                         const unitSymbol = props?.['unit_symbol'];
-                        return `${unitName} (${unitSymbol})`;
+                        const value = `${unitName} (${unitSymbol})`;
+                        return toSentenceCase(value);
                     }
                 },
                 'Unit Description': { field: 'unit_description', type: 'string' },
@@ -380,7 +400,8 @@ const faultsWMSConfig: WMSLayerProps = {
                         const subtype = props?.['subtype'];
                         const type = props?.['type'];
                         const modifier = props?.['modifier'];
-                        return `${subtype} ${type}, ${modifier}`;
+                        const value = `${subtype} ${type}, ${modifier}`
+                        return toSentenceCase(value);
                     }
                 },
                 'Scale': {
@@ -435,8 +456,33 @@ const qFaultsWMSConfig: WMSLayerProps = {
                 'Slip Rate': { field: 'sliprate', type: 'string' },
                 'Structure Class': { field: 'faultclass', type: 'string' },
                 'Structure Age': { field: 'faultage', type: 'string' },
-                'Detailed Report': { field: 'usgs_link', type: 'string' },
-            }
+                '': {
+                    field: 'usgs_link',
+                    type: 'custom',
+                    transform: (value) => {
+                        if (!value) {
+                            return 'No USGS link available';
+                        }
+                        return value['usgs_link'] || 'No USGS link available';
+                    }
+                },
+            },
+            linkFields: {
+                'usgs_link': {
+                    transform: (usgsLink) => {
+                        if (!usgsLink || usgsLink === 'No USGS link available') {
+                            return [{
+                                label: 'No USGS link available',
+                                href: ''
+                            }];
+                        }
+                        return [{
+                            label: 'Detailed Report',
+                            href: `${usgsLink}`
+                        }];
+                    }
+                }
+            },
         },
     ],
 };
@@ -457,9 +503,16 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 'API': { field: 'apishort', type: 'string' },
                 'UWI': { field: 'uwi', type: 'string' },
                 'Well Name': { field: 'well_name', type: 'string' },
-                'Sample Types': { field: 'all_types', type: 'string' },
+                'Sample Types': {
+                    field: 'all_types', type: 'string', transform: (value) => {
+                        if (value) {
+                            return toTitleCase(value.replace(/,/g, ', '));
+                        }
+                        return 'No Data';
+                    }
+                },
                 'Purpose': { field: 'purpose_description', type: 'string' },
-                'Operator': { field: 'operator', type: 'string' },
+                'Operator': { field: 'operator', type: 'string', transform: (value) => toTitleCase(value || '') },
                 'Depth': {
                     field: 'depth_display',
                     type: 'custom',
@@ -477,7 +530,7 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                 },
                 'Cored Intervals': { field: 'cored_formation', type: 'string' },
                 'Formation': { field: 'formation', type: 'string' },
-                'Formation at TD': { field: 'form_td', type: 'string' },
+                'Formation at TD': { field: 'form_td', type: 'string', transform: (value) => toTitleCase(value || '') },
                 'Cored Formations': {
                     field: 'custom',
                     type: 'custom',
@@ -592,6 +645,7 @@ const wildernessStudyAreasWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: wildernessStudyAreasWMSTitle,
     visible: false,
+    opacity: 0.5,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${wildernessStudyAreasLayerName}`,
@@ -614,6 +668,7 @@ const sitlaReportsWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: sitlaReportsWMSTitle,
     visible: false,
+    opacity: 0.5,
     sublayers: [
         {
             name: `${ENERGY_MINERALS_WORKSPACE}:${sitlaReportsLayerName}`,
