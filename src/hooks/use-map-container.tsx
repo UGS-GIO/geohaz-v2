@@ -5,7 +5,7 @@ import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
 import { LayerOrderConfig, useGetLayerConfig } from "@/hooks/use-get-layer-config";
-import { highlightFeature } from '@/lib/mapping-utils';
+import { highlightFeature } from '@/lib/map/highlight-utils';
 import Point from '@arcgis/core/geometry/Point';
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";

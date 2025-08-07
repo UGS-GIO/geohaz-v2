@@ -1,6 +1,6 @@
 import { Switch } from "@/components/ui/switch";
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
-import { addCommas } from "@/lib/utils";
+import { addThousandsSeparator } from "@/lib/utils";
 
 const MapCoordinates = () => {
     const {
@@ -44,7 +44,7 @@ const MapCoordinates = () => {
                 <UnitSwitch />
                 <div className="h-4 w-px bg-border" aria-hidden="true" />
                 <span className="text-sm text-muted-foreground">
-                    Scale: 1:{addCommas(scale?.toFixed(0).toString() || '')}
+                    Scale: 1:{addThousandsSeparator(scale?.toFixed(0).toString() || '')}
                 </span>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import { PROD_GEOSERVER_URL, ENERGY_MINERALS_WORKSPACE } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
-import { addCommas } from "@/lib/utils";
+import { addThousandsSeparator } from "@/lib/utils";
 
 // --- Industrial Minerals WMS Layer Configurations ---
 const aluniteLayerName = 'metalmineralapp_im_alunite';
@@ -403,7 +403,7 @@ const miningDistrictsConfig: WMSLayerProps = {
                 'Short Tons': {
                     field: 'short_tons', type: 'string', transform: (value) => {
                         if (value === '0' || !value) return null;
-                        return addCommas(value);
+                        return addThousandsSeparator(value);
                     },
                 },
                 'Total Dollar Value': {

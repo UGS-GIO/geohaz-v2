@@ -3,7 +3,7 @@ import Collection from "@arcgis/core/core/Collection.js";
 import { MapContext } from "@/context/map-provider";
 import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
 import { useGetLayerConfig } from "./use-get-layer-config";
-import { createPinGraphic, removeGraphics } from "@/lib/util/highlight-utils";
+import { createPinGraphic, removeGraphics } from "@/lib/map/highlight-utils";
 
 type VisibleLayer = {
     visible: boolean;

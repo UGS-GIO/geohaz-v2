@@ -8,7 +8,7 @@ import { LayerContentProps, PopupContentWithPagination } from "@/components/cust
 import useScreenSize from "@/hooks/use-screen-size";
 import { XIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { clearGraphics } from "@/lib/mapping-utils";
+import { clearGraphics } from "@/lib/map/highlight-utils";
 import { MapContext } from "@/context/map-provider";
 
 interface CombinedSidebarDrawerProps {

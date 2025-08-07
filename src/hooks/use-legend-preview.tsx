@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { RendererFactory } from '@/lib/legend/renderer-factory';
-import { getRenderer } from '@/lib/mapping-utils';
+import { getRenderer } from '@/lib/legend/utils';
 import { MapContext } from '@/context/map-provider';
 import { useContext } from 'react';
 import { MapImageLayerRenderer, RegularLayerRenderer } from '@/lib/types/mapping-types';
