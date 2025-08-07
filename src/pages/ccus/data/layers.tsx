@@ -348,9 +348,9 @@ const SITLAConfig: LayerProps = {
     type: 'map-image',
     url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer',
     opacity: 0.5,
-    title: 'Landownership',
+    title: 'Land Ownership',
     options: {
-        title: 'Landownership',
+        title: 'Land Ownership',
         elevationInfo: [{ mode: 'on-the-ground' }],
         visible: false,
         sublayers: [{
@@ -709,10 +709,7 @@ const ccusResourcesConfig: LayerProps = {
     layers: [
         sco2WMSConfig,
         basinNamesWMSConfig,
-        wellWithTopsWMSConfig,
-        oilGasFieldsWMSConfig,
         co2SourcesWMSConfig,
-        wildernessStudyAreasWMSConfig,
         sitlaReportsWMSConfig,
         ccsExclusionAreasWMSConfig
     ]
@@ -726,10 +723,11 @@ const infrastructureAndLandUseConfig: LayerProps = {
         geothermalPowerplantsWMSConfig,
         pipelinesWMSConfig,
         riversWMSConfig,
-        SITLAConfig,
         roadsWMSConfig,
         railroadsWMSConfig,
         transmissionLinesWMSConfig,
+        wildernessStudyAreasWMSConfig,
+        SITLAConfig,
     ]
 }
 
@@ -740,8 +738,17 @@ const geologicalInformationConfig: LayerProps = {
     layers: [
         qFaultsWMSConfig,
         faultsWMSConfig,
-        seamlessGeolunitsWMSConfig,
-        coresAndCuttingsWMSConfig
+        seamlessGeolunitsWMSConfig
+    ]
+}
+const subsurfaceDataConfig: LayerProps = {
+    type: 'group',
+    title: 'Subsurface Data',
+    visible: false,
+    layers: [
+        wellWithTopsWMSConfig,
+        coresAndCuttingsWMSConfig,
+        oilGasFieldsWMSConfig
     ]
 }
 
@@ -749,8 +756,9 @@ const geologicalInformationConfig: LayerProps = {
 
 const layersConfig: LayerProps[] = [
     ccusResourcesConfig,
+    subsurfaceDataConfig,
+    geologicalInformationConfig,
     infrastructureAndLandUseConfig,
-    geologicalInformationConfig
 ];
 
 export default layersConfig;
