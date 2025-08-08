@@ -84,7 +84,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
             const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
 
             if (hasFeatures && firstFeature && view) {
-                highlightFeature(firstFeature, view);
+                highlightFeature(firstFeature, view, popupContent[0].sourceCRS);
             }
             if (!hasFeatures && drawerState === 'open') {
                 drawerTriggerRef.current?.click();

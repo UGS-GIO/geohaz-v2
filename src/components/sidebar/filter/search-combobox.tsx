@@ -12,11 +12,12 @@ import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
 import { MapContext } from '@/context/map-provider';
 import { convertBbox } from '@/lib/map/conversion-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
-import { highlightSearchResult, removeGraphics } from '@/lib/map/highlight-utils';
+import { highlightFeature, removeGraphics } from '@/lib/map/highlight-utils';
 import * as turf from '@turf/turf';
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from "@/hooks/use-toast";
 import { findLayerByTitle } from '@/lib/map/utils';
+import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 
 export const defaultMasqueradeConfig: SearchSourceConfig = {
     type: 'masquerade',
@@ -646,6 +647,8 @@ const handleSearchSelect = (
     const sourceConfigWrapper = searchConfig[sourceIndex];
     const sourceConfig = sourceConfigWrapper;
 
+    console.log('searchResult:', searchResult)
+
     if (!geom || !view || !sourceConfig) {
         console.warn("No geometry, view, or valid source config for single feature select.", { geom, view, sourceConfig, sourceIndex });
         return;
@@ -656,16 +659,21 @@ const handleSearchSelect = (
         let sourceCRS: string | undefined | null = null;
 
         if (sourceConfig.type === 'postgREST') {
+            console.log('inside postgREST source select handler');
+
 
             // use CRS from config if provided
             sourceCRS = sourceConfig.crs;
             if (!sourceCRS) {
                 // fallback: check for embedded CRS in the geometry
                 sourceCRS = (geom as ExtendedGeometry).crs?.properties?.name;
+
+                console.log("Checking for embedded CRS in geometry:", sourceCRS);
+
                 if (sourceCRS) {
                     // console.log("Using embedded CRS from PostgREST feature:", sourceCRS);
                 } else {
-                    sourceCRS = "EPSG:26912";
+                    sourceCRS = "EPSG:3857";
                     console.warn(`No CRS configured or embedded for PostgREST source ${sourceIndex}. Assuming ${sourceCRS}. This could be incorreect!`);
                 }
             }
@@ -690,7 +698,15 @@ const handleSearchSelect = (
             (geom as ExtendedGeometry).crs = { type: "name", properties: { name: sourceCRS } };
         }
 
-        highlightSearchResult(searchResult as Feature<ExtendedGeometry, GeoJsonProperties>, view, false);
+        // highlightSearchResult(searchResult as Feature<ExtendedGeometry, GeoJsonProperties>, view, false);
+
+        console.log('sourceCRS:', sourceCRS);
+
+        highlightFeature(
+            searchResult,
+            view,
+            sourceCRS,
+        );
 
         const featureBbox = turf.bbox(geom);
         if (!featureBbox || !featureBbox.every(isFinite)) {
@@ -722,7 +738,7 @@ const handleSearchSelect = (
 
 // PostgREST Enter key
 const handleCollectionSelect = (
-    collection: FeatureCollection<Geometry, GeoJsonProperties> | null,
+    collection: FeatureCollection<Geometry & { crs?: { properties?: { name?: string } } }, GeoJsonProperties> | null,
     _sourceUrl: string | null,
     _sourceIndex: number,
     view: __esri.MapView | __esri.SceneView | undefined,
@@ -734,10 +750,8 @@ const handleCollectionSelect = (
     removeGraphics(view);
 
     try {
-        // Calculate overall bbox for the collection using Turf
         const collectionBbox = turf.bbox(collection);
         let [xmin, ymin, xmax, ymax] = collectionBbox;
-        [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax]);
 
         if (!collectionBbox.every(isFinite)) {
             console.error("Invalid bounding box calculated for collection");
@@ -746,9 +760,12 @@ const handleCollectionSelect = (
 
         zoomToExtent(xmin, ymin, xmax, ymax, view);
 
-        // Highlight all features in the collection
         collection.features.forEach(feature => {
-            highlightSearchResult(feature, view, false);
+            highlightFeature(
+                feature,
+                view,
+                feature?.geometry?.crs?.properties?.name || 'EPSG:4326',
+            );
         });
 
     } catch (error) {

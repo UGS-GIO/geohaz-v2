@@ -19,7 +19,7 @@ export default function Map() {
       type: 'postgREST',
       url: `${PROD_POSTGREST_URL}/${wellWithTopsLayerName}`,
       sourceName: 'API #',
-      crs: 'EPSG:26912',
+      crs: 'EPSG:3857',
       displayField: 'api',
       layerName: wellWithTopsWMSTitle,
       params: {

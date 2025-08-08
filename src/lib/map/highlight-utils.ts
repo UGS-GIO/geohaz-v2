@@ -1,295 +1,295 @@
-import { Feature, Geometry, GeoJsonProperties, Position } from 'geojson';
-import Graphic from '@arcgis/core/Graphic';
-import Point from '@arcgis/core/geometry/Point';
-import Polyline from '@arcgis/core/geometry/Polyline';
-import Polygon from '@arcgis/core/geometry/Polygon';
-import SpatialReference from '@arcgis/core/geometry/SpatialReference';
-import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
-import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
-import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
-import { convertCoordinates, extractCoordinates } from '@/lib/map/conversion-utils';
-import { ExtendedGeometry } from '@/components/sidebar/filter/search-combobox';
-import PictureMarkerSymbol from '@arcgis/core/symbols/PictureMarkerSymbol';
-import { MAP_PIN_ICON } from '@/assets/icons';
-import { clone, coordEach } from '@turf/turf';
-import proj4 from 'proj4';
-import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
+// import { Feature, Geometry, GeoJsonProperties, Position } from 'geojson';
+// import Graphic from '@arcgis/core/Graphic';
+// import Point from '@arcgis/core/geometry/Point';
+// import Polyline from '@arcgis/core/geometry/Polyline';
+// import Polygon from '@arcgis/core/geometry/Polygon';
+// import SpatialReference from '@arcgis/core/geometry/SpatialReference';
+// import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
+// import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
+// import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
+// import { convertCoordinates, extractCoordinates } from '@/lib/map/conversion-utils';
+// import { ExtendedGeometry } from '@/components/sidebar/filter/search-combobox';
+// import PictureMarkerSymbol from '@arcgis/core/symbols/PictureMarkerSymbol';
+// import { MAP_PIN_ICON } from '@/assets/icons';
+// import { clone, coordEach } from '@turf/turf';
+// import proj4 from 'proj4';
+// import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 
-interface HighlightOptions {
-    fillColor?: __esri.Color | number[];
-    outlineColor?: __esri.Color | number[];
-    outlineWidth?: number;
-    pointSize?: number;
-}
+// interface HighlightOptions {
+//     fillColor?: __esri.Color | number[];
+//     outlineColor?: __esri.Color | number[];
+//     outlineWidth?: number;
+//     pointSize?: number;
+// }
 
-// create Esri geometry from GeoJSON geometry + SR
-const createEsriGeometry = (
-    geoJsonGeometry: Geometry,
-    spatialReference: SpatialReference
-): __esri.Geometry | null => {
-    if (!geoJsonGeometry) return null;
+// // create Esri geometry from GeoJSON geometry + SR
+// const createEsriGeometry = (
+//     geoJsonGeometry: Geometry,
+//     spatialReference: SpatialReference
+// ): __esri.Geometry | null => {
+//     if (!geoJsonGeometry) return null;
 
-    try {
-        switch (geoJsonGeometry.type) {
-            case 'Point':
-                return new Point({
-                    x: geoJsonGeometry.coordinates[0],
-                    y: geoJsonGeometry.coordinates[1],
-                    spatialReference: spatialReference,
-                });
-            case 'LineString':
-                return new Polyline({
-                    paths: [geoJsonGeometry.coordinates],
-                    spatialReference: spatialReference,
-                });
-            case 'Polygon':
-                return new Polygon({
-                    rings: geoJsonGeometry.coordinates,
-                    spatialReference: spatialReference,
-                });
-            case 'MultiLineString':
-                return new Polyline({
-                    paths: geoJsonGeometry.coordinates,
-                    spatialReference: spatialReference,
-                });
-            default:
-                console.warn(`createEsriGeometry: Unsupported GeoJSON geometry type for Esri conversion: ${geoJsonGeometry.type}`);
-                return null;
-        }
-    } catch (error) {
-        console.error("createEsriGeometry: Error converting GeoJSON to Esri geometry:", error);
-        return null;
-    }
-};
+//     try {
+//         switch (geoJsonGeometry.type) {
+//             case 'Point':
+//                 return new Point({
+//                     x: geoJsonGeometry.coordinates[0],
+//                     y: geoJsonGeometry.coordinates[1],
+//                     spatialReference: spatialReference,
+//                 });
+//             case 'LineString':
+//                 return new Polyline({
+//                     paths: [geoJsonGeometry.coordinates],
+//                     spatialReference: spatialReference,
+//                 });
+//             case 'Polygon':
+//                 return new Polygon({
+//                     rings: geoJsonGeometry.coordinates,
+//                     spatialReference: spatialReference,
+//                 });
+//             case 'MultiLineString':
+//                 return new Polyline({
+//                     paths: geoJsonGeometry.coordinates,
+//                     spatialReference: spatialReference,
+//                 });
+//             default:
+//                 console.warn(`createEsriGeometry: Unsupported GeoJSON geometry type for Esri conversion: ${geoJsonGeometry.type}`);
+//                 return null;
+//         }
+//     } catch (error) {
+//         console.error("createEsriGeometry: Error converting GeoJSON to Esri geometry:", error);
+//         return null;
+//     }
+// };
 
-// create esri graphics from esri geometry
-const createEsriGraphics = (
-    esriGeometry: __esri.Geometry,
-    options: Required<HighlightOptions>
-): Graphic[] => { // Return array
-    if (!esriGeometry) {
-        return [];
-    }
+// // create esri graphics from esri geometry
+// const createEsriGraphics = (
+//     esriGeometry: __esri.Geometry,
+//     options: Required<HighlightOptions>
+// ): Graphic[] => { // Return array
+//     if (!esriGeometry) {
+//         return [];
+//     }
 
-    try {
-        switch (esriGeometry.type) {
-            case 'point':
-            case 'multipoint': {
-                // point and multipoint are handled the same way
-                const pointSymbol = new SimpleMarkerSymbol({
-                    color: options.fillColor,
-                    size: options.pointSize,
-                    outline: {
-                        color: options.outlineColor,
-                        width: options.outlineWidth > 0 ? 1 : 0,
-                    }
-                });
-                return [new Graphic({ geometry: esriGeometry, symbol: pointSymbol })];
-            }
+//     try {
+//         switch (esriGeometry.type) {
+//             case 'point':
+//             case 'multipoint': {
+//                 // point and multipoint are handled the same way
+//                 const pointSymbol = new SimpleMarkerSymbol({
+//                     color: options.fillColor,
+//                     size: options.pointSize,
+//                     outline: {
+//                         color: options.outlineColor,
+//                         width: options.outlineWidth > 0 ? 1 : 0,
+//                     }
+//                 });
+//                 return [new Graphic({ geometry: esriGeometry, symbol: pointSymbol })];
+//             }
 
-            case 'polyline': {
-                const lineSymbol = new SimpleLineSymbol({
-                    color: options.outlineColor,
-                    width: options.outlineWidth
-                });
-                return [new Graphic({ geometry: esriGeometry, symbol: lineSymbol })];
-            }
+//             case 'polyline': {
+//                 const lineSymbol = new SimpleLineSymbol({
+//                     color: options.outlineColor,
+//                     width: options.outlineWidth
+//                 });
+//                 return [new Graphic({ geometry: esriGeometry, symbol: lineSymbol })];
+//             }
 
-            case 'polygon': {
-                const fillSymbol = new SimpleFillSymbol({
-                    color: options.fillColor,
-                    outline: {
-                        color: options.outlineColor,
-                        width: options.outlineWidth
-                    }
-                });
-                return [new Graphic({ geometry: esriGeometry, symbol: fillSymbol })];
-            }
+//             case 'polygon': {
+//                 const fillSymbol = new SimpleFillSymbol({
+//                     color: options.fillColor,
+//                     outline: {
+//                         color: options.outlineColor,
+//                         width: options.outlineWidth
+//                     }
+//                 });
+//                 return [new Graphic({ geometry: esriGeometry, symbol: fillSymbol })];
+//             }
 
-            // TODO: Add other Esri geometry types if needed (e.g., 'extent', 'mesh')
+//             // TODO: Add other Esri geometry types if needed (e.g., 'extent', 'mesh')
 
-            default:
-                console.warn(`createEsriGraphics: Unsupported Esri geometry type for default symbol generation: ${esriGeometry.type}`);
-                return [];
-        }
-    } catch (error) {
-        console.error("createEsriGraphics: Error creating Esri symbol or graphic:", error);
-        return [];
-    }
-};
+//             default:
+//                 console.warn(`createEsriGraphics: Unsupported Esri geometry type for default symbol generation: ${esriGeometry.type}`);
+//                 return [];
+//         }
+//     } catch (error) {
+//         console.error("createEsriGraphics: Error creating Esri symbol or graphic:", error);
+//         return [];
+//     }
+// };
 
-/**
- * Highlights a search result feature on the map and returns its WGS84 coordinates.
- *
- * @param searchResult The GeoJSON Feature search result. Geometry CRS expected in `geometry.crs`.
- * @param view The Esri MapView or SceneView instance.
- * @param clearGraphics If true, removes existing graphics from the view's graphics layer. Default: true.
- * @param options Optional styling for the highlight graphic.
- * @returns A Promise resolving to the WGS84 coordinates (Position | Position[] | ...)
- * or null if the input geometry is invalid or conversion/highlighting fails.
- */
-export const highlightSearchResult = async (
-    searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null | undefined,
-    view: __esri.MapView | __esri.SceneView,
-    clearGraphics: boolean = true,
-    options?: HighlightOptions
-): Promise<Position | Position[] | Position[][] | Position[][][] | null> => {
+// /**
+//  * Highlights a search result feature on the map and returns its WGS84 coordinates.
+//  *
+//  * @param searchResult The GeoJSON Feature search result. Geometry CRS expected in `geometry.crs`.
+//  * @param view The Esri MapView or SceneView instance.
+//  * @param clearGraphics If true, removes existing graphics from the view's graphics layer. Default: true.
+//  * @param options Optional styling for the highlight graphic.
+//  * @returns A Promise resolving to the WGS84 coordinates (Position | Position[] | ...)
+//  * or null if the input geometry is invalid or conversion/highlighting fails.
+//  */
+// export const highlightSearchResult = async (
+//     searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null | undefined,
+//     view: __esri.MapView | __esri.SceneView,
+//     clearGraphics: boolean = true,
+//     options?: HighlightOptions
+// ): Promise<Position | Position[] | Position[][] | Position[][][] | null> => {
 
-    if (!searchResult?.geometry) {
-        console.warn('highlightSearchResult: Invalid searchResult or missing geometry. Cannot highlight.');
-        return null;
-    }
+//     if (!searchResult?.geometry) {
+//         console.warn('highlightSearchResult: Invalid searchResult or missing geometry. Cannot highlight.');
+//         return null;
+//     }
 
-    const originalGeometry: ExtendedGeometry = searchResult.geometry;
-    const sourceCRS = originalGeometry.crs?.properties?.name;
-    const effectiveSourceCRS = sourceCRS || "EPSG:4326"; // Assume WGS84 if undefined https://datatracker.ietf.org/doc/html/rfc7946#section-4
+//     const originalGeometry: ExtendedGeometry = searchResult.geometry;
+//     const sourceCRS = originalGeometry.crs?.properties?.name;
+//     const effectiveSourceCRS = sourceCRS || "EPSG:4326"; // Assume WGS84 if undefined https://datatracker.ietf.org/doc/html/rfc7946#section-4
 
-    if (!sourceCRS) {
-        console.warn(`highlightSearchResult: Source CRS is undefined on geometry. Assuming WGS84 (${effectiveSourceCRS}). Highlighting might be inaccurate if assumption is wrong.`);
-    }
+//     if (!sourceCRS) {
+//         console.warn(`highlightSearchResult: Source CRS is undefined on geometry. Assuming WGS84 (${effectiveSourceCRS}). Highlighting might be inaccurate if assumption is wrong.`);
+//     }
 
-    const wgs84Geometry = convertGeometryToWGS84(
-        originalGeometry,
-        effectiveSourceCRS
-    );
+//     const wgs84Geometry = convertGeometryToWGS84(
+//         originalGeometry,
+//         effectiveSourceCRS
+//     );
 
-    if (!wgs84Geometry) {
-        console.error(`highlightSearchResult: Failed to convert geometry from ${effectiveSourceCRS} to WGS84. Cannot highlight accurately.`);
-        clearGraphics && removeGraphics(view);
-        return null;
-    }
+//     if (!wgs84Geometry) {
+//         console.error(`highlightSearchResult: Failed to convert geometry from ${effectiveSourceCRS} to WGS84. Cannot highlight accurately.`);
+//         clearGraphics && removeGraphics(view);
+//         return null;
+//     }
 
-    const wgs84SpatialReference = new SpatialReference({ wkid: 4326 });
-    const esriGeom = createEsriGeometry(wgs84Geometry, wgs84SpatialReference);
+//     const wgs84SpatialReference = new SpatialReference({ wkid: 4326 });
+//     const esriGeom = createEsriGeometry(wgs84Geometry, wgs84SpatialReference);
 
-    if (!esriGeom) {
-        console.error("highlightSearchResult: Failed to create Esri geometry from converted WGS84 GeoJSON.");
-        clearGraphics && removeGraphics(view);
-        return null;
-    }
+//     if (!esriGeom) {
+//         console.error("highlightSearchResult: Failed to create Esri geometry from converted WGS84 GeoJSON.");
+//         clearGraphics && removeGraphics(view);
+//         return null;
+//     }
 
-    const defaultSearchHighlightOptions: Required<HighlightOptions> = {
-        fillColor: [255, 255, 0, 0.5], // Slightly transparent yellow fill
-        outlineColor: [255, 255, 0, 1],  // Solid yellow outline
-        outlineWidth: 2,
-        pointSize: 8
-    };
-    const highlightOptions: Required<HighlightOptions> = { ...defaultSearchHighlightOptions, ...options };
-    const graphics = createEsriGraphics(esriGeom, highlightOptions);
+//     const defaultSearchHighlightOptions: Required<HighlightOptions> = {
+//         fillColor: [255, 255, 0, 0.5], // Slightly transparent yellow fill
+//         outlineColor: [255, 255, 0, 1],  // Solid yellow outline
+//         outlineWidth: 2,
+//         pointSize: 8
+//     };
+//     const highlightOptions: Required<HighlightOptions> = { ...defaultSearchHighlightOptions, ...options };
+//     const graphics = createEsriGraphics(esriGeom, highlightOptions);
 
-    if (!graphics || graphics.length === 0) {
-        console.warn("highlightSearchResult: No graphics were generated for highlighting (geometry type unsupported?).");
-        clearGraphics && removeGraphics(view);
-        return extractCoordinates(wgs84Geometry);
-    }
+//     if (!graphics || graphics.length === 0) {
+//         console.warn("highlightSearchResult: No graphics were generated for highlighting (geometry type unsupported?).");
+//         clearGraphics && removeGraphics(view);
+//         return extractCoordinates(wgs84Geometry);
+//     }
 
-    if (clearGraphics) {
-        removeGraphics(view);
-    }
-    view.graphics.addMany(graphics);
+//     if (clearGraphics) {
+//         removeGraphics(view);
+//     }
+//     view.graphics.addMany(graphics);
 
-    const wgs84Coordinates = extractCoordinates(wgs84Geometry);
+//     const wgs84Coordinates = extractCoordinates(wgs84Geometry);
 
-    return wgs84Coordinates;
-};
+//     return wgs84Coordinates;
+// };
 
-export function removeGraphics(view: __esri.SceneView | __esri.MapView) {
-    view.graphics.removeAll();
-}
+// export function removeGraphics(view: __esri.SceneView | __esri.MapView) {
+//     view.graphics.removeAll();
+// }
 
-// Create a graphic to display a point on the map
-export function createPinGraphic(lat: number, long: number, view: __esri.SceneView | __esri.MapView) {
-    // Create a symbol for drawing the point
-    const markerSymbol = new PictureMarkerSymbol({
-        url: `${MAP_PIN_ICON}`,
-        width: "20px",
-        height: "20px",
-        yoffset: 10
-    });
-    // Create a graphic and add the geometry and symbol to it
-    const pointGraphic = new Graphic({
-        geometry: new Point({
-            longitude: long,
-            latitude: lat
-        }),
-        symbol: markerSymbol
-    });
+// // Create a graphic to display a point on the map
+// export function createPinGraphic(lat: number, long: number, view: __esri.SceneView | __esri.MapView) {
+//     // Create a symbol for drawing the point
+//     const markerSymbol = new PictureMarkerSymbol({
+//         url: `${MAP_PIN_ICON}`,
+//         width: "20px",
+//         height: "20px",
+//         yoffset: 10
+//     });
+//     // Create a graphic and add the geometry and symbol to it
+//     const pointGraphic = new Graphic({
+//         geometry: new Point({
+//             longitude: long,
+//             latitude: lat
+//         }),
+//         symbol: markerSymbol
+//     });
 
-    view.graphics.add(pointGraphic);
-}
+//     view.graphics.add(pointGraphic);
+// }
 
-export function convertGeometryToWGS84<G extends Geometry>(
-    geometry: G | null | undefined,
-    sourceCRS = "EPSG:4326"
-): G | null {
-    if (!geometry) {
-        console.warn("convertGeometryToWGS84: Input geometry is null or undefined.");
-        return null;
-    }
+// export function convertGeometryToWGS84<G extends Geometry>(
+//     geometry: G | null | undefined,
+//     sourceCRS = "EPSG:4326"
+// ): G | null {
+//     if (!geometry) {
+//         console.warn("convertGeometryToWGS84: Input geometry is null or undefined.");
+//         return null;
+//     }
 
-    const targetCRS = "EPSG:4326"; // Target is always WGS84 to comply with geojson spec https://datatracker.ietf.org/doc/html/rfc7946#section-4
+//     const targetCRS = "EPSG:4326"; // Target is always WGS84 to comply with geojson spec https://datatracker.ietf.org/doc/html/rfc7946#section-4
 
-    // no conversion needed
-    if (sourceCRS === targetCRS || sourceCRS.toUpperCase() === 'WGS84' || sourceCRS === '4326') {
-        console.log("Source CRS is already WGS84, returning clone.");
-        try {
-            // Return a clone to ensure function purity
-            return clone(geometry) as G;
-        } catch (cloneError: any) {
-            console.error("Error cloning geometry:", cloneError);
-            return null;
-        }
-    }
+//     // no conversion needed
+//     if (sourceCRS === targetCRS || sourceCRS.toUpperCase() === 'WGS84' || sourceCRS === '4326') {
+//         console.log("Source CRS is already WGS84, returning clone.");
+//         try {
+//             // Return a clone to ensure function purity
+//             return clone(geometry) as G;
+//         } catch (cloneError: any) {
+//             console.error("Error cloning geometry:", cloneError);
+//             return null;
+//         }
+//     }
 
-    // conversion needed
-    let clonedGeometry: G;
-    try {
-        // clone the geometry to avoid modifying the original
-        clonedGeometry = clone(geometry);
-    } catch (setupError: any) {
-        console.error(`Error during geometry conversion setup for ${sourceCRS}:`, setupError);
-        return null;
-    }
+//     // conversion needed
+//     let clonedGeometry: G;
+//     try {
+//         // clone the geometry to avoid modifying the original
+//         clonedGeometry = clone(geometry);
+//     } catch (setupError: any) {
+//         console.error(`Error during geometry conversion setup for ${sourceCRS}:`, setupError);
+//         return null;
+//     }
 
-    let conversionErrorFound: Error | null = null;
+//     let conversionErrorFound: Error | null = null;
 
-    // Iterate over each coordinate pair [x, y]
-    coordEach(clonedGeometry, (currentCoord, coordIndex) => {
-        if (conversionErrorFound) return;
+//     // Iterate over each coordinate pair [x, y]
+//     coordEach(clonedGeometry, (currentCoord, coordIndex) => {
+//         if (conversionErrorFound) return;
 
-        if (
-            Array.isArray(currentCoord) &&
-            currentCoord.length >= 2 &&
-            typeof currentCoord[0] === 'number' &&
-            typeof currentCoord[1] === 'number'
-        ) {
-            const originalCoord: Position = [currentCoord[0], currentCoord[1]];
-            try {
-                const convertedCoord = proj4(sourceCRS, targetCRS, originalCoord);
-                currentCoord[0] = convertedCoord[0];
-                currentCoord[1] = convertedCoord[1];
+//         if (
+//             Array.isArray(currentCoord) &&
+//             currentCoord.length >= 2 &&
+//             typeof currentCoord[0] === 'number' &&
+//             typeof currentCoord[1] === 'number'
+//         ) {
+//             const originalCoord: Position = [currentCoord[0], currentCoord[1]];
+//             try {
+//                 const convertedCoord = proj4(sourceCRS, targetCRS, originalCoord);
+//                 currentCoord[0] = convertedCoord[0];
+//                 currentCoord[1] = convertedCoord[1];
 
-            } catch (projError: any) {
-                const errorMsg = `Coordinate conversion failed for ${JSON.stringify(originalCoord)} from ${sourceCRS}: ${projError?.message || projError}`;
-                console.error(errorMsg);
-                conversionErrorFound = new Error(errorMsg);
-            }
-        } else {
-            const errorMsg = `Invalid coordinate structure encountered at index ${coordIndex}: ${JSON.stringify(currentCoord)}`;
-            console.error(errorMsg);
-            conversionErrorFound = new Error(errorMsg);
-        }
-    });
+//             } catch (projError: any) {
+//                 const errorMsg = `Coordinate conversion failed for ${JSON.stringify(originalCoord)} from ${sourceCRS}: ${projError?.message || projError}`;
+//                 console.error(errorMsg);
+//                 conversionErrorFound = new Error(errorMsg);
+//             }
+//         } else {
+//             const errorMsg = `Invalid coordinate structure encountered at index ${coordIndex}: ${JSON.stringify(currentCoord)}`;
+//             console.error(errorMsg);
+//             conversionErrorFound = new Error(errorMsg);
+//         }
+//     });
 
-    if (conversionErrorFound) {
-        console.error("Conversion failed:", conversionErrorFound);
-        return null;
-    }
-    return clonedGeometry;
-}
+//     if (conversionErrorFound) {
+//         console.error("Conversion failed:", conversionErrorFound);
+//         return null;
+//     }
+//     return clonedGeometry;
+// }
 
 
-export async function fetchWfsGeometry({ namespace, feature }: { namespace: string; feature: ExtendedFeature }) {
+export async function fetchWfsGeometry({ namespace, feature, sourceCRS }: { namespace: string; feature: Feature<Geometry, GeoJsonProperties>; sourceCRS: string }) {
     const featureId = feature.id!.toString()
     const layerName = featureId.split('.')[0];
     const ogcFid = feature.properties?.ogc_fid;
@@ -301,7 +301,7 @@ export async function fetchWfsGeometry({ namespace, feature }: { namespace: stri
         VERSION: '2.0.0',
         TYPENAMES: `${namespace}:${layerName}`, // Extract typename from featureId
         OUTPUTFORMAT: 'application/json',
-        SRSNAME: 'EPSG:26912',
+        SRSNAME: sourceCRS,
     })
     // in order to differentiate between normal layer and a view based layer
     // we need to check if the feature has ogc_fid property
@@ -321,139 +321,142 @@ export async function fetchWfsGeometry({ namespace, feature }: { namespace: stri
     return response.json()
 }
 
-// export interface HighlightOptions {
-//     fillColor?: [number, number, number, number];
-//     outlineColor?: [number, number, number, number];
-//     outlineWidth?: number;
-//     pointSize?: number;
+// // export interface HighlightOptions {
+// //     fillColor?: [number, number, number, number];
+// //     outlineColor?: [number, number, number, number];
+// //     outlineWidth?: number;
+// //     pointSize?: number;
+// // }
+// const defaultSearchResultHighlightOptions: HighlightOptions = {
+//     fillColor: [255, 255, 0, 1],
+//     outlineColor: [255, 255, 0, 1],
+//     outlineWidth: 4,
+//     pointSize: 5
 // }
-const defaultSearchResultHighlightOptions: HighlightOptions = {
-    fillColor: [255, 255, 0, 1],
-    outlineColor: [255, 255, 0, 1],
-    outlineWidth: 4,
-    pointSize: 5
-}
 
-export const createHighlightGraphic = (
-    feature: Feature<Geometry, GeoJsonProperties>,
-    options: HighlightOptions = {}
-): Graphic[] => {
-    const mergedOptions = { ...defaultSearchResultHighlightOptions, ...options };
-    const coordinates = extractCoordinates(feature.geometry);
-    const convertedCoordinates = convertCoordinates(coordinates);
-    const graphics: Graphic[] = [];
+// export const createHighlightGraphic = (
+//     feature: Feature<Geometry, GeoJsonProperties>,
+//     sourceCrs: string,
+//     options: HighlightOptions = {}
+// ): Graphic[] => {
+//     const mergedOptions = { ...defaultSearchResultHighlightOptions, ...options };
+//     const coordinates = extractCoordinates(feature.geometry);
+//     const convertedCoordinates = convertCoordinates(coordinates, sourceCrs);
 
-    switch (feature.geometry.type) {
-        case 'Point':
-            const pointSymbol = new SimpleMarkerSymbol({
-                color: mergedOptions.fillColor,
-                size: mergedOptions.pointSize,
-                outline: {
-                    color: mergedOptions.outlineColor,
-                    width: mergedOptions.outlineWidth
-                }
-            });
+//     const graphics: Graphic[] = [];
 
-            graphics.push(new Graphic({
-                geometry: new Point({
-                    x: convertedCoordinates[0][0],
-                    y: convertedCoordinates[0][1],
-                    spatialReference: { wkid: 4326 }
-                }),
-                symbol: pointSymbol
-            }));
-            break;
+//     switch (feature.geometry.type) {
+//         case 'Point':
+//             const pointSymbol = new SimpleMarkerSymbol({
+//                 color: mergedOptions.fillColor,
+//                 size: mergedOptions.pointSize,
+//                 outline: {
+//                     color: mergedOptions.outlineColor,
+//                     width: mergedOptions.outlineWidth
+//                 }
+//             });
 
-        case 'LineString':
-        case 'MultiLineString':
-            coordinates.forEach(lineSegment => {
-                const convertedSegment = convertCoordinates([lineSegment]);
+//             graphics.push(new Graphic({
+//                 geometry: new Point({
+//                     x: convertedCoordinates[0][0],
+//                     y: convertedCoordinates[0][1],
+//                     spatialReference: { wkid: 4326 }
+//                 }),
+//                 symbol: pointSymbol
+//             }));
+//             break;
 
-                const polylineSymbol = new SimpleLineSymbol({
-                    color: mergedOptions.outlineColor,
-                    width: mergedOptions.outlineWidth
-                });
+//         case 'LineString':
+//         case 'MultiLineString':
+//             coordinates.forEach(lineSegment => {
+//                 const convertedSegment = convertCoordinates([lineSegment], sourceCrs);
 
-                graphics.push(new Graphic({
-                    geometry: new Polyline({
-                        paths: [convertedSegment],
-                        spatialReference: { wkid: 4326 }
-                    }),
-                    symbol: polylineSymbol
-                }));
-            });
-            break;
+//                 const polylineSymbol = new SimpleLineSymbol({
+//                     color: mergedOptions.outlineColor,
+//                     width: mergedOptions.outlineWidth
+//                 });
 
-        case 'Polygon':
-        case 'MultiPolygon':
-            coordinates.forEach(polygonRing => {
-                const convertedRing = convertCoordinates([polygonRing]);
-                const polygonSymbol = new SimpleFillSymbol({
-                    color: mergedOptions.fillColor,
-                    outline: {
-                        color: mergedOptions.outlineColor,
-                        width: mergedOptions.outlineWidth
-                    }
-                });
+//                 graphics.push(new Graphic({
+//                     geometry: new Polyline({
+//                         paths: [convertedSegment],
+//                         spatialReference: { wkid: 4326 }
+//                     }),
+//                     symbol: polylineSymbol
+//                 }));
+//             });
+//             break;
 
-                graphics.push(new Graphic({
-                    geometry: new Polygon({
-                        rings: [convertedRing],
-                        spatialReference: { wkid: 4326 }
-                    }),
-                    symbol: polygonSymbol
-                }));
-            });
-            break;
-    }
+//         case 'Polygon':
+//         case 'MultiPolygon':
+//             coordinates.forEach(polygonRing => {
+//                 const convertedRing = convertCoordinates([polygonRing], sourceCrs);
+//                 const polygonSymbol = new SimpleFillSymbol({
+//                     color: mergedOptions.fillColor,
+//                     outline: {
+//                         color: mergedOptions.outlineColor,
+//                         width: mergedOptions.outlineWidth
+//                     }
+//                 });
 
-    return graphics;
-};
+//                 graphics.push(new Graphic({
+//                     geometry: new Polygon({
+//                         rings: [convertedRing],
+//                         spatialReference: { wkid: 4326 }
+//                     }),
+//                     symbol: polygonSymbol
+//                 }));
+//             });
+//             break;
+//     }
+
+//     return graphics;
+// };
 
 
-export const highlightFeature = async (
-    feature: ExtendedFeature,
-    view: __esri.MapView | __esri.SceneView,
-    options?: HighlightOptions
-) => {
-    // If the feature requires WFS geometry fetching
-    let targetFeature: Feature<Geometry, GeoJsonProperties>;
-    if ('namespace' in feature) {
-        const wfsGeometry = await fetchWfsGeometry({
-            namespace: feature.namespace,
-            feature: feature
-        });
-        targetFeature = wfsGeometry.features[0];
-    } else {
-        targetFeature = feature;
-    }
+// export const highlightFeature = async (
+//     feature: ExtendedFeature,
+//     view: __esri.MapView | __esri.SceneView,
+//     sourceCRS: string,
+//     options?: HighlightOptions
+// ) => {
+//     // If the feature requires WFS geometry fetching
+//     let targetFeature: Feature<Geometry, GeoJsonProperties>;
+//     if ('namespace' in feature) {
+//         const wfsGeometry = await fetchWfsGeometry({
+//             namespace: feature.namespace,
+//             feature: feature
+//         });
+//         targetFeature = wfsGeometry.features[0];
+//     } else {
+//         targetFeature = feature;
+//     }
 
-    console.log('highlightFeature', feature);
-    console.log('targetFeature', targetFeature);
+//     console.log('highlightFeature', feature);
+//     console.log('targetFeature', targetFeature);
 
 
-    // Clear previous highlights
-    view.graphics.removeAll();
+//     // Clear previous highlights
+//     view.graphics.removeAll();
 
-    // Create and add new highlight graphics with default or provided options
-    // click highlight defaults to yellow
-    const defaultHighlightOptions: HighlightOptions = {
-        fillColor: [0, 0, 0, 0],
-        outlineColor: [255, 255, 0, 1],
-        outlineWidth: 4,
-        pointSize: 12
-    }
+//     // Create and add new highlight graphics with default or provided options
+//     // click highlight defaults to yellow
+//     const defaultHighlightOptions: HighlightOptions = {
+//         fillColor: [0, 0, 0, 0],
+//         outlineColor: [255, 255, 0, 1],
+//         outlineWidth: 4,
+//         pointSize: 12
+//     }
 
-    const highlightOptions = { ...defaultHighlightOptions, ...options };
-    const graphics = createHighlightGraphic(targetFeature, highlightOptions);
-    graphics.forEach(graphic => view.graphics.add(graphic));
+//     const highlightOptions = { ...defaultHighlightOptions, ...options };
+//     const graphics = createHighlightGraphic(targetFeature, sourceCRS, highlightOptions);
+//     graphics.forEach(graphic => view.graphics.add(graphic));
 
-    // Return the converted coordinates if needed
-    const coordinates = extractCoordinates(targetFeature.geometry);
-    console.log('Extracted coordinates:', coordinates);
+//     // Return the converted coordinates if needed
+//     const coordinates = extractCoordinates(targetFeature.geometry);
+//     console.log('Extracted coordinates:', coordinates);
 
-    return convertCoordinates(coordinates);
-}
+//     return convertCoordinates(coordinates, sourceCRS);
+// }
 
 export const clearGraphics = (view: __esri.MapView | __esri.SceneView) => {
     if (view && view.graphics) {
@@ -461,4 +464,153 @@ export const clearGraphics = (view: __esri.MapView | __esri.SceneView) => {
     } else {
         console.warn("clearGraphics: View or graphics layer is not available.");
     }
+}
+
+
+import { Feature, Geometry, GeoJsonProperties } from 'geojson';
+import Graphic from '@arcgis/core/Graphic';
+import Point from '@arcgis/core/geometry/Point';
+import Polyline from '@arcgis/core/geometry/Polyline';
+import Polygon from '@arcgis/core/geometry/Polygon';
+import SpatialReference from '@arcgis/core/geometry/SpatialReference';
+import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
+import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
+import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
+import PictureMarkerSymbol from '@arcgis/core/symbols/PictureMarkerSymbol';
+import { MAP_PIN_ICON } from '@/assets/icons';
+import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
+import { convertGeometryToWGS84 } from './conversion-utils'; // Use the robust converter
+
+// Define the options for styling
+export interface HighlightOptions {
+    fillColor?: __esri.Color | number[];
+    outlineColor?: __esri.Color | number[];
+    outlineWidth?: number;
+    pointSize?: number;
+}
+
+// --- HELPER 1: Create Esri Geometry from GeoJSON ---
+// This takes a WGS84 GeoJSON geometry and converts it to an Esri geometry object.
+const createEsriGeometry = (geoJsonGeometry: Geometry): __esri.Geometry | null => {
+    if (!geoJsonGeometry) return null;
+    const spatialReference = new SpatialReference({ wkid: 4326 });
+
+    try {
+        switch (geoJsonGeometry.type) {
+            case 'Point':
+                return new Point({ x: geoJsonGeometry.coordinates[0], y: geoJsonGeometry.coordinates[1], spatialReference });
+            case 'LineString':
+                return new Polyline({ paths: [geoJsonGeometry.coordinates], spatialReference });
+            case 'Polygon':
+                return new Polygon({ rings: geoJsonGeometry.coordinates, spatialReference });
+            case 'MultiLineString':
+                return new Polyline({ paths: geoJsonGeometry.coordinates, spatialReference });
+            case 'MultiPolygon':
+                return new Polygon({ rings: geoJsonGeometry.coordinates.flat(), spatialReference });
+            default:
+                return null;
+        }
+    } catch (error) {
+        console.error("Error creating Esri geometry:", error);
+        return null;
+    }
+};
+
+// --- HELPER 2: Create Styled Graphics from Esri Geometry ---
+// This takes an Esri geometry and applies the correct symbol to create a graphic.
+const createEsriGraphic = (esriGeometry: __esri.Geometry, options: Required<HighlightOptions>): Graphic | null => {
+    let symbol: __esri.Symbol;
+    switch (esriGeometry.type) {
+        case 'point':
+            symbol = new SimpleMarkerSymbol({
+                color: options.fillColor,
+                size: options.pointSize,
+                outline: { color: options.outlineColor, width: options.outlineWidth }
+            });
+            break;
+        case 'polyline':
+            symbol = new SimpleLineSymbol({ color: options.outlineColor, width: options.outlineWidth });
+            break;
+        case 'polygon':
+            symbol = new SimpleFillSymbol({
+                color: options.fillColor,
+                outline: { color: options.outlineColor, width: options.outlineWidth }
+            });
+            break;
+        default:
+            return null;
+    }
+    return new Graphic({ geometry: esriGeometry, symbol });
+};
+
+
+// --- THE MAIN PUBLIC FUNCTION ---
+// This is now the single, reliable function for highlighting any feature.
+export const highlightFeature = async (
+    // feature: ExtendedFeature,
+    feature: Feature<Geometry, GeoJsonProperties>,
+    view: __esri.MapView | __esri.SceneView,
+    sourceCRS: string,
+    options?: HighlightOptions
+): Promise<Graphic | null> => {
+    // 1. Get the full feature geometry if necessary
+    let targetFeature: Feature<Geometry, GeoJsonProperties> = feature;
+
+    // if (feature.namespace) {
+    //     try {
+    //         const wfsResponse = await fetchWfsGeometry({ namespace: feature.namespace, feature: feature, sourceCRS: sourceCRS });
+    //         console.log('WFS response:', wfsResponse);
+
+    //         if (!wfsResponse.features?.length) return null;
+    //         targetFeature = wfsResponse.features[0];
+    //     } catch (error) {
+    //         console.error("Failed to fetch WFS geometry for highlighting:", error);
+    //         return null;
+    //     }
+    // }
+
+    // 2. Convert the geometry to WGS84 using our robust utility
+    const wgs84Geometry = convertGeometryToWGS84(targetFeature.geometry, sourceCRS);
+    if (!wgs84Geometry) return null;
+
+    // 3. Create an Esri geometry object
+    const esriGeom = createEsriGeometry(wgs84Geometry);
+    if (!esriGeom) return null;
+
+    // 4. Create the styled Esri graphic
+    const defaultOptions: Required<HighlightOptions> = {
+        fillColor: [0, 0, 0, 0],
+        outlineColor: [255, 255, 0, 1],
+        outlineWidth: 4,
+        pointSize: 12
+    };
+    const finalOptions = { ...defaultOptions, ...options };
+    const graphic = createEsriGraphic(esriGeom, finalOptions);
+    if (!graphic) return null;
+
+    // 5. Clear old graphics and add the new one to the map
+    view.graphics.removeAll();
+    view.graphics.add(graphic);
+
+    return graphic;
+};
+
+// --- Other Utility Functions ---
+
+export function removeGraphics(view: __esri.SceneView | __esri.MapView) {
+    view.graphics.removeAll();
+}
+
+export function createPinGraphic(lat: number, long: number, view: __esri.SceneView | __esri.MapView) {
+    const markerSymbol = new PictureMarkerSymbol({
+        url: `${MAP_PIN_ICON}`,
+        width: "20px",
+        height: "20px",
+        yoffset: 10
+    });
+    const pointGraphic = new Graphic({
+        geometry: new Point({ longitude: long, latitude: lat }),
+        symbol: markerSymbol
+    });
+    view.graphics.add(pointGraphic);
 }

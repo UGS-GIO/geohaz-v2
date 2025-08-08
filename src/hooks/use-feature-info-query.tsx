@@ -4,8 +4,6 @@ import Point from '@arcgis/core/geometry/Point';
 import { Feature } from 'geojson';
 import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
 import { LayerContentProps } from '@/components/custom/popups/popup-content-with-pagination';
-
-
 import { createBbox } from "@/lib/map/utils";
 
 interface WMSQueryProps {
@@ -32,8 +30,7 @@ export async function fetchWMSFeatureInfo({
     buffer = 10,
     featureCount = 50,
     cql_filter = null
-}: WMSQueryProps) {
-
+}: WMSQueryProps): Promise<any> {
     if (layers.length === 0) {
         console.warn('No layers specified to query.');
         return null;
@@ -118,8 +115,7 @@ export async function fetchWMSFeatureInfo({
 }
 
 // Reorder layers based on the specified order config. this is useful for reordering layers in the popup
-const reorderLayers = (layerInfo: any[], layerOrderConfigs: LayerOrderConfig[]) => {
-
+const reorderLayers = (layerInfo: LayerContentProps[], layerOrderConfigs: LayerOrderConfig[]): LayerContentProps[] => {
     // First, create an object to map layer names to their desired positions
     const layerPositions: Record<string, number> = {};
 
@@ -128,7 +124,7 @@ const reorderLayers = (layerInfo: any[], layerOrderConfigs: LayerOrderConfig[]) 
         if (config.position === 'start') {
             layerPositions[config.layerName] = -Infinity; // Move to the front
         } else if (config.position === 'end') {
-            layerPositions[config.layerName] = Infinity;  // Move to the back
+            layerPositions[config.layerName] = Infinity; // Move to the back
         }
     });
 
@@ -148,6 +144,24 @@ const reorderLayers = (layerInfo: any[], layerOrderConfigs: LayerOrderConfig[]) 
     });
 };
 
+/**
+ * Safely parses the CRS from a GeoJSON object from GeoServer.
+ * Defaults to WGS 84 ('EPSG:4326') if the crs member is missing, per the GeoJSON spec.
+ */
+const getSourceCRSFromGeoJSON = (geoJson: any): string => {
+
+    const crsName = geoJson?.crs?.properties?.name;
+    console.log('CRS Name:', crsName);
+    if (typeof crsName === 'string') {
+        const epsgMatch = crsName.match(/EPSG::(\d+)/);
+        if (epsgMatch && epsgMatch[1]) {
+            return `EPSG:${epsgMatch[1]}`;
+        }
+    }
+    // If no CRS is specified, default to WGS 84
+    return 'EPSG:4326';
+};
+
 interface UseFeatureInfoQueryProps {
     view: __esri.MapView | __esri.SceneView | undefined;
     wmsUrl: string;
@@ -158,8 +172,8 @@ interface UseFeatureInfoQueryProps {
 export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrderConfigs }: UseFeatureInfoQueryProps) {
     const [mapPoint, setMapPoint] = useState<Point | null>(null);
 
-    const queryFn = async () => {
-        if (!view || !mapPoint) return null;
+    const queryFn = async (): Promise<LayerContentProps[]> => {
+        if (!view || !mapPoint) return [];
 
         const queryableLayers = Object.entries(visibleLayersMap)
             .filter(([_, layerInfo]) => layerInfo.visible && layerInfo.queryable)
@@ -176,29 +190,31 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
 
         if (!featureInfo || !featureInfo.features) return [];
 
+        // Extract the source CRS for all features in this response.
+        const sourceCRS = getSourceCRSFromGeoJSON(featureInfo);
+
         const layerInfoPromises = Object.entries(visibleLayersMap)
             .filter(([_, value]) => value.visible)
             .map(async ([key, value]) => {
-
-                const baseLayerInfo: any = {
+                const baseLayerInfo = {
                     visible: value.visible,
                     layerTitle: value.layerTitle,
                     groupLayerTitle: value.groupLayerTitle,
+                    sourceCRS: sourceCRS,
                     features: featureInfo.features.filter((feature: Feature) =>
                         feature.id?.toString().includes(key.split(':')[0]) ||
                         feature.id?.toString().split('.')[0].includes(key.split(':')[1])
                     ),
-                    ...(value.popupFields && { popupFields: value.popupFields }),
-                    ...(value.linkFields && { linkFields: value.linkFields }),
-                    ...(value.colorCodingMap && { colorCodingMap: value.colorCodingMap }),
-                    ...(value.relatedTables && value.relatedTables.length > 0 && {
-                        relatedTables: value.relatedTables.map(table => ({
-                            ...table,
-                            matchingField: table.matchingField || "",
-                            fieldLabel: table.fieldLabel || ""
-                        }))
-                    }),
-                    ...(value.schema && { schema: value.schema }),
+                    popupFields: value.popupFields,
+                    linkFields: value.linkFields,
+                    colorCodingMap: value.colorCodingMap,
+                    relatedTables: value.relatedTables?.map(table => ({
+                        ...table,
+                        matchingField: table.matchingField || "",
+                        fieldLabel: table.fieldLabel || ""
+                    })),
+                    schema: value.schema,
+                    rasterSource: value.rasterSource
                 };
 
                 if (value.rasterSource) {
@@ -208,14 +224,10 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
                         layers: [value.rasterSource.layerName],
                         url: value.rasterSource.url,
                     });
-
-                    baseLayerInfo.rasterSource = {
-                        ...value.rasterSource,
-                        data: rasterFeatureInfo
-                    };
+                    baseLayerInfo.rasterSource = { ...value.rasterSource, data: rasterFeatureInfo };
                 }
 
-                return baseLayerInfo;
+                return baseLayerInfo as LayerContentProps;
             });
 
         const resolvedLayerInfo = await Promise.all(layerInfoPromises);

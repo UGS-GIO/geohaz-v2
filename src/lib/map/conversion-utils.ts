@@ -1,3 +1,4 @@
+import { clone, coordEach } from "@turf/turf";
 import { Geometry } from "geojson";
 import proj4 from "proj4";
 
@@ -20,16 +21,13 @@ export function convertDDToDMS(dd: number, isLongitude: boolean = false) {
 }
 
 
-export const convertCoordinate = (point: number[], sourceEPSG: string = "EPSG:26912", targetEPSG: string = "EPSG:4326"): number[] => {
+export const convertCoordinate = (point: number[], sourceEPSG: string, targetEPSG: string = "EPSG:4326"): number[] => {
     try {
         const converted = proj4(
             sourceEPSG,
             targetEPSG,
             point
         );
-
-        console.log('Converted coordinates:', converted);
-
 
         return converted;
     } catch (error) {
@@ -38,7 +36,8 @@ export const convertCoordinate = (point: number[], sourceEPSG: string = "EPSG:26
     }
 };
 
-export const convertBbox = (bbox: number[], sourceEPSG: string = "EPSG:26912", targetEPSG: string = "EPSG:4326"): number[] => {
+export const convertBbox = (bbox: number[], sourceEPSG: string, targetEPSG: string = "EPSG:4326"): number[] => {
+
     try {
         // Convert each corner of the bbox
         const minXConverted = convertCoordinate([bbox[0], bbox[1]], sourceEPSG, targetEPSG);
@@ -57,16 +56,20 @@ export const convertBbox = (bbox: number[], sourceEPSG: string = "EPSG:26912", t
     }
 };
 
-export const convertCoordinates = (coordinates: number[][][]): number[][] => {
+export const convertCoordinates = (coordinates: number[][][], sourceCRS: string): number[][] => {
     return coordinates.flatMap(linestring =>
         linestring.map(point => {
             try {
                 // Explicitly convert with more verbose proj4 definition
-                const converted = proj4(
-                    "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
-                    "+proj=longlat +datum=WGS84 +no_defs",
-                    point
-                );
+                // const converted = proj4(
+                //     "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
+                //     "+proj=longlat +datum=WGS84 +no_defs",
+                //     point
+                // );
+                const converted = proj4(sourceCRS, "EPSG:4326", point);
+
+                console.log('Converted coordinates:', converted, 'from:', sourceCRS, 'to: EPSG:4326', 'for point:', point);
+
 
                 return converted;
             } catch (error) {
@@ -94,3 +97,48 @@ export const extractCoordinates = (geometry: Geometry): number[][][] => {
             return [];
     }
 };
+
+
+/**
+ * Converts a GeoJSON geometry object from a source CRS to WGS84 (EPSG:4326).
+ * This is the single source of truth for all coordinate conversions.
+ */
+export function convertGeometryToWGS84<G extends Geometry>(
+    geometry: G | null | undefined,
+    sourceCRS: string
+): G | null {
+    if (!geometry) {
+        console.warn("convertGeometryToWGS84: Input geometry is null or undefined.");
+        return null;
+    }
+
+    const targetCRS = "EPSG:4326";
+
+    // No conversion needed, return a clone to ensure function purity.
+    if (sourceCRS === targetCRS || sourceCRS.toUpperCase() === 'WGS84' || sourceCRS.includes('4326')) {
+        return clone(geometry) as G;
+    }
+
+    try {
+        const converter = proj4(sourceCRS, targetCRS);
+        const clonedGeometry = clone(geometry) as G;
+
+        coordEach(clonedGeometry, (currentCoord) => {
+            const [x, y] = currentCoord;
+            if (typeof x === 'number' && typeof y === 'number') {
+                const convertedCoord = converter.forward([x, y]);
+                currentCoord[0] = convertedCoord[0];
+                currentCoord[1] = convertedCoord[1];
+            } else {
+                throw new Error(`Invalid coordinate structure: ${JSON.stringify(currentCoord)}`);
+            }
+        });
+
+        return clonedGeometry;
+
+    } catch (error: any) {
+        console.error(`Error during geometry conversion from ${sourceCRS} to ${targetCRS}:`, error.message || error);
+        return null;
+    }
+}
+

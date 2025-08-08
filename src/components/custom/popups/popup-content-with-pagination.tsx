@@ -6,7 +6,7 @@ import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lu
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
 import { ColorCodingRecordFunction, FieldConfig, LinkFields, ProcessedRasterSource, RelatedTable } from "@/lib/types/mapping-types"
 import { MapContext } from "@/context/map-provider"
-import { highlightFeature } from '@/lib/map/highlight-utils';
+import { fetchWfsGeometry, highlightFeature } from '@/lib/map/highlight-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { zoomToFeature } from "@/lib/map/utils"
@@ -20,6 +20,7 @@ export interface LayerContentProps {
     groupLayerTitle: string
     layerTitle: string
     features: ExtendedFeature[]
+    sourceCRS: string; // (e.g., "EPSG:26912")
     popupFields?: Record<string, FieldConfig>
     relatedTables?: RelatedTable[]
     linkFields?: LinkFields
@@ -93,7 +94,7 @@ const LayerCard = ({
 }: {
     layer: LayerContentProps,
     buttons: React.ReactNode[] | null,
-    handleZoomToFeature: (feature: ExtendedFeature) => Promise<void>
+    handleZoomToFeature: (feature: ExtendedFeature, sourceCRS: string) => Promise<void>
 }) => {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [currentPage, setCurrentPage] = useState(1)
@@ -108,6 +109,7 @@ const LayerCard = ({
     // Paginate features for this layer
     const paginatedFeatures = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage
+
         return layer.features.slice(startIndex, startIndex + itemsPerPage)
     }, [layer.features, currentPage, itemsPerPage])
 
@@ -123,13 +125,14 @@ const LayerCard = ({
         if (itemsPerPage === 1 && newPaginatedFeatures.length > 0) {
             if (!view) return
             view.graphics.removeAll() // Clear existing highlights before adding new one
-            highlightFeature(newPaginatedFeatures[0], view)
+
+            highlightFeature(newPaginatedFeatures[0], view, layer.sourceCRS)
         }
     }
 
     const PopupButtons = ({ feature }: { feature: ExtendedFeature }) => (
         <div className="flex justify-start gap-2">
-            <Button variant="ghost" onClick={() => handleZoomToFeature(feature)} className="flex gap-x-2">
+            <Button variant="ghost" onClick={() => handleZoomToFeature(feature, layer.sourceCRS)} className="flex gap-x-2">
                 <Shrink className="h-5 w-5" />
                 <span className="hidden md:flex">Zoom to Feature</span>
                 <span className="md:hidden">Zoom</span>
@@ -225,11 +228,30 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
 
         return () => observer.disconnect()
     }, [sectionIds, onSectionChange])
-    const handleZoomToFeature = async (feature: ExtendedFeature) => {
+    const handleZoomToFeature = async (feature: ExtendedFeature, sourceCRS: string) => {
+        console.log(
+            'this is the feature to zoom to',
+            feature
+        );
+
         if (!view) return
         view.graphics.removeAll() // Clear existing highlights before adding new one
-        highlightFeature(feature, view)
-        zoomToFeature(feature, view)
+        // let targetFeature = feature;
+
+        // if (feature.namespace) {
+        //     try {
+        //         const wfsResponse = await fetchWfsGeometry({ namespace: feature.namespace, feature: feature, sourceCRS: sourceCRS });
+        //         console.log('WFS response:', wfsResponse);
+
+        //         if (!wfsResponse.features?.length) return null;
+        //         targetFeature = wfsResponse.features[0];
+        //     } catch (error) {
+        //         console.error("Failed to fetch WFS geometry for highlighting:", error);
+        //         return null;
+        //     }
+        // }
+        highlightFeature(feature, view, sourceCRS)
+        zoomToFeature(feature, view, sourceCRS)
     }
 
     // If no layers, return null

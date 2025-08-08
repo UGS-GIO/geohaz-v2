@@ -22,7 +22,7 @@ export default function Map() {
       layerName: qFaultsWMSTitle,
       searchTerm: "search_term",
       sourceName: 'Faults',
-      crs: 'EPSG:26912', // EPSG:26912
+      crs: 'EPSG:3857',
       displayField: "concatnames", // Field in PostgREST result features
       headers: {
         'Accept-Profile': 'hazards',

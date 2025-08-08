@@ -203,10 +203,11 @@ export function createBbox({ mapPoint, resolution = 1, buffer = 10 }: CreateBbox
 
 export const zoomToFeature = (
     feature: ExtendedFeature,
-    view: __esri.MapView | __esri.SceneView
+    view: __esri.MapView | __esri.SceneView,
+    sourceCRS: string
 ) => {
     if (feature.bbox) {
-        const bbox = convertBbox(feature.bbox);
+        const bbox = convertBbox(feature.bbox, sourceCRS);
 
         view?.goTo({
             target: new Extent({
