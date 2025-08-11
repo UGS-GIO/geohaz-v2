@@ -252,7 +252,7 @@ export const highlightFeature = async (
     if (!graphics || graphics.length === 0) return null;
 
     // 4. Clear old graphics and add the new ones to the map
-    view.graphics.removeAll();
+    clearGraphics(view)
     view.graphics.addMany(graphics);
 
     // Return the first graphic for consistency, or null if none were created

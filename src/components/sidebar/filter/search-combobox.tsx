@@ -585,7 +585,7 @@ const handleSuggestionSelect = async (
         return;
     }
 
-    view.graphics.removeAll();
+    clearGraphics(view);
 
     // findAddressCandidates
     try {
@@ -646,32 +646,22 @@ const handleSearchSelect = (
     const sourceConfigWrapper = searchConfig[sourceIndex];
     const sourceConfig = sourceConfigWrapper;
 
-    console.log('searchResult:', searchResult)
-
     if (!geom || !view || !sourceConfig) {
         console.warn("No geometry, view, or valid source config for single feature select.", { geom, view, sourceConfig, sourceIndex });
         return;
     }
-    view.graphics.removeAll();
-
+    clearGraphics(view)
     try {
         let sourceCRS: string | undefined | null = null;
 
         if (sourceConfig.type === 'postgREST') {
-            console.log('PostgREST source config:', sourceConfig);
-
             // use CRS from config if provided
             sourceCRS = sourceConfig.crs;
             if (!sourceCRS) {
 
                 // fallback: check for embedded CRS in the geometry
                 sourceCRS = (geom as ExtendedGeometry).crs?.properties?.name;
-                console.log('needing CRS for PostgREST source:', geom);
-
-                console.log("Checking for embedded CRS in geometry:", sourceCRS);
-
                 if (sourceCRS) {
-                    // console.log("Using embedded CRS from PostgREST feature:", sourceCRS);
                 } else {
                     sourceCRS = "EPSG:3857";
                     console.warn(`No CRS configured or embedded for PostgREST source ${sourceIndex}. Assuming ${sourceCRS}. This could be incorreect!`);
@@ -698,15 +688,7 @@ const handleSearchSelect = (
             (geom as ExtendedGeometry).crs = { type: "name", properties: { name: sourceCRS } };
         }
 
-        // highlightSearchResult(searchResult as Feature<ExtendedGeometry, GeoJsonProperties>, view, false);
-
-        console.log('sourceCRS:', sourceCRS);
-
-        highlightFeature(
-            searchResult,
-            view,
-            sourceCRS,
-        );
+        highlightFeature(searchResult, view, sourceCRS);
 
         const featureBbox = turf.bbox(geom);
         if (!featureBbox || !featureBbox.every(isFinite)) {
