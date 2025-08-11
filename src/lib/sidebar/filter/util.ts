@@ -1,8 +1,6 @@
 import { ExtendedGeometry } from "@/components/sidebar/filter/search-combobox";
-import { convertBbox } from "@/lib/map/conversion-utils";
 import Extent from "@arcgis/core/geometry/Extent";
 import { Feature, GeoJsonProperties } from "geojson";
-import * as turf from "@turf/turf";
 
 export interface SearchResult {
     name: string,
@@ -26,15 +24,4 @@ export const zoomToExtent = (xmin: number, ymin: number, xmax: number, ymax: num
             console.error("Error zooming to extent:", error);
         }
     });
-}
-
-
-export const getBoundingBox = (geom: ExtendedGeometry) => {
-    let xmin, ymin, xmax, ymax;
-    [xmin, ymin, xmax, ymax] = turf.bbox(geom);
-
-    // if the geometry is not in EPSG:4326, convert it to EPSG:4326
-    if (geom.crs && geom.crs.properties.name !== "EPSG:4326") [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax]);
-
-    return [xmin, ymin, xmax, ymax];
 }
