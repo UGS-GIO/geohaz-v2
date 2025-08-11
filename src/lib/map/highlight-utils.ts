@@ -14,7 +14,7 @@ import proj4 from 'proj4';
 import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 
 
-// --- HELPER 1: Reproject GeoJSON Geometry to WGS84 ---
+// --- Reproject GeoJSON Geometry to WGS84 ---
 export function convertGeometryToWGS84<G extends Geometry>(
     geometry: G | null | undefined,
     sourceCRS: string
@@ -72,7 +72,7 @@ export function convertGeometryToWGS84<G extends Geometry>(
     return clonedGeometry;
 }
 
-// --- HELPER 2: Create Esri Geometry from GeoJSON + SR ---
+// --- Create Esri Geometry from GeoJSON + SR ---
 const createEsriGeometry = (
     geoJsonGeometry: Geometry,
     spatialReference: SpatialReference
@@ -188,7 +188,7 @@ export async function fetchWfsGeometry({ namespace, feature, sourceCRS }: { name
     return response.json()
 }
 
-// --- NEW ORCHESTRATOR FUNCTION ---
+// --- ORCHESTRATOR FUNCTION ---
 // This function determines if a fetch is needed before highlighting.
 export const handleFeatureHighlight = async (
     feature: ExtendedFeature,
@@ -217,7 +217,7 @@ export const handleFeatureHighlight = async (
 }
 
 
-// --- SIMPLIFIED HIGHLIGHT FUNCTION ---
+// --- HIGHLIGHT FUNCTION ---
 // Its only responsibility is to take a complete feature and highlight it.
 export const highlightFeature = async (
     feature: Feature<Geometry, GeoJsonProperties>,
@@ -259,7 +259,7 @@ export const highlightFeature = async (
     return graphics[0];
 };
 
-// --- Other Utility Functions (already provided) ---
+// --- Other Utility Functions ---
 export const clearGraphics = (view: __esri.MapView | __esri.SceneView) => {
     if (view && view.graphics) {
         view.graphics.removeAll();
