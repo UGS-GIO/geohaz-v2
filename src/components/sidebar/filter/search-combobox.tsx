@@ -17,7 +17,6 @@ import * as turf from '@turf/turf';
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from "@/hooks/use-toast";
 import { findLayerByTitle } from '@/lib/map/utils';
-import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 
 export const defaultMasqueradeConfig: SearchSourceConfig = {
     type: 'masquerade',
