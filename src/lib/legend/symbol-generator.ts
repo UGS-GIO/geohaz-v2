@@ -7,13 +7,149 @@ import { FillSymbolizer, LineCap, LineJoin, StrokeSymbolizer, Symbolizer } from 
 
 const SCALING_FACTOR = .75;
 
-export function createLineSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
-    const lineSymbolizer = symbolizers.find(symbolizer => 'Line' in symbolizer)?.Line as StrokeSymbolizer;
+// New interface for composite symbol result
+interface CompositeSymbolResult {
+    symbol?: __esri.Symbol;
+    html?: HTMLElement;
+    isComposite: boolean;
+    symbolizers: Symbolizer[];
+}
 
-    if (!lineSymbolizer) {
+// Enhanced function to create composite line symbols
+export function createCompositeLineSymbol(symbolizers: Symbolizer[]): CompositeSymbolResult {
+    const lineSymbolizers = symbolizers.filter(symbolizer => 'Line' in symbolizer);
+
+    if (lineSymbolizers.length === 0) {
         throw new Error("No valid Line symbolizer found in the provided symbolizers.");
     }
 
+    // If only one LineSymbolizer, use standard approach
+    if (lineSymbolizers.length === 1) {
+        return {
+            symbol: createSingleLineSymbol(lineSymbolizers[0].Line as StrokeSymbolizer),
+            isComposite: false,
+            symbolizers: lineSymbolizers
+        };
+    }
+
+    // For multiple LineSymbolizers, create composite HTML representation
+    const compositeHtml = createCompositeLineHTML(lineSymbolizers);
+    
+    return {
+        html: compositeHtml,
+        isComposite: true,
+        symbolizers: lineSymbolizers
+    };
+}
+
+// Create HTML element showing all LineSymbolizers stacked
+function createCompositeLineHTML(lineSymbolizers: Symbolizer[]): HTMLElement {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "32");
+    svg.setAttribute("height", "20");
+    svg.setAttribute("viewBox", "0 0 32 20");
+    svg.style.display = "block";
+    svg.style.width = "32px";
+    svg.style.height = "20px";
+    svg.style.maxWidth = "32px";
+    svg.style.maxHeight = "20px";
+    svg.style.minWidth = "32px";
+    svg.style.minHeight = "20px";
+
+    // Process symbolizers in order (first = bottom layer, last = top layer)
+    lineSymbolizers.forEach((symbolizer, index) => {
+        const lineData = symbolizer.Line as StrokeSymbolizer;
+        const line = createSVGLineElement(lineData, index);
+        svg.appendChild(line);
+    });
+
+    return svg;
+}
+
+// Create individual SVG line element
+function createSVGLineElement(lineSymbolizer: StrokeSymbolizer, zIndex: number): SVGLineElement {
+    const {
+        stroke = "#000000",
+        "stroke-width": strokeWidth = "1",
+        "stroke-linecap": strokeLinecap = "round",
+        "stroke-linejoin": strokeLinejoin = "round",
+        "stroke-dasharray": strokeDasharray,
+        "stroke-opacity": strokeOpacity = "1",
+    } = lineSymbolizer;
+
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    
+    // Position line in center of SVG (adjusted for 32px width)
+    line.setAttribute("x1", "2");
+    line.setAttribute("y1", "10");
+    line.setAttribute("x2", "30");
+    line.setAttribute("y2", "10");
+    
+    // Apply styling
+    line.setAttribute("stroke", stroke);
+    line.setAttribute("stroke-width", strokeWidth);
+    line.setAttribute("stroke-linecap", strokeLinecap);
+    line.setAttribute("stroke-linejoin", strokeLinejoin);
+    line.setAttribute("stroke-opacity", strokeOpacity);
+    
+    // Handle dash patterns
+    if (strokeDasharray && strokeDasharray.length > 0) {
+        line.setAttribute("stroke-dasharray", strokeDasharray.join(" "));
+    }
+    
+    return line;
+}
+
+// Enhanced main creation function
+export function createEsriSymbol(symbolizers: Symbolizer[]): __esri.Symbol | CompositeSymbolResult {
+    if (symbolizers.every(symbolizer => symbolizer.Line)) {
+        const result = createCompositeLineSymbol(symbolizers);
+        
+        // Return the full CompositeSymbolResult instead of just html or symbol
+        // This preserves the isComposite flag and other metadata
+        return result;
+    } else if (symbolizers.every(symbolizer => symbolizer.Polygon)) {
+        return createPolygonSymbol(symbolizers);
+    } else if (symbolizers.every(symbolizer => symbolizer.Point)) {
+        return createPointSymbol(symbolizers);
+    } else {
+        console.error("Unsupported symbol type:", symbolizers);
+        return new Symbol();
+    }
+}
+
+// Alternative approach: Create a single symbol that approximates the composite
+export function createApproximateCompositeSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
+    const lineSymbolizers = symbolizers.filter(symbolizer => 'Line' in symbolizer);
+
+    if (lineSymbolizers.length <= 1) {
+        return createSingleLineSymbol(lineSymbolizers[0]?.Line as StrokeSymbolizer);
+    }
+
+    // Strategy: Use the widest line as base, with color from the top line
+    const widestSymbolizer = lineSymbolizers.reduce((prev, current) => {
+        const prevWidth = parseFloat((prev.Line as StrokeSymbolizer)["stroke-width"] || "1");
+        const currentWidth = parseFloat((current.Line as StrokeSymbolizer)["stroke-width"] || "1");
+        return currentWidth > prevWidth ? current : prev;
+    });
+
+    const topSymbolizer = lineSymbolizers[lineSymbolizers.length - 1];
+    const baseSymbol = createSingleLineSymbol(widestSymbolizer.Line as StrokeSymbolizer);
+    const topLine = topSymbolizer.Line as StrokeSymbolizer;
+
+    // Modify the symbol to show characteristics of both
+    return new SimpleLineSymbol({
+        color: topLine.stroke || baseSymbol.color,
+        width: parseFloat((widestSymbolizer.Line as StrokeSymbolizer)["stroke-width"] || "1"),
+        cap: topLine["stroke-linecap"] || baseSymbol.cap,
+        join: topLine["stroke-linejoin"] || baseSymbol.join,
+        style: baseSymbol.style,
+        miterLimit: 2,
+    });
+}
+
+// Helper function to create a single line symbol (unchanged from original)
+function createSingleLineSymbol(lineSymbolizer: StrokeSymbolizer): SimpleLineSymbol {
     const {
         stroke,
         "stroke-width": strokeWidth,
@@ -32,7 +168,6 @@ export function createLineSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
 
     type LineSymbolStyle = "solid" | "dash" | "dash-dot" | "dot" | "long-dash" | "long-dash-dot" | "long-dash-dot-dot" | "none" | "short-dash" | "short-dash-dot" | "short-dash-dot-dot" | "short-dot";
 
-
     // Explicitly typing the dashMap to be a Record with string keys and string values
     const dashMap: Record<string, LineSymbolStyle> = {
         '8.0,2.0': 'short-dash',
@@ -46,12 +181,11 @@ export function createLineSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
     function mapDashArrayToStyle(dasharray: string[]): LineSymbolStyle {
         // Create a key by joining the dasharray values (which now include decimals)
         const dashKey = dasharray.join(',');
-
         // Return the corresponding style from the object, or default to 'solid' if not found
         return dashMap[dashKey] || 'solid';
     }
 
-    // Map the dash array to one of the GeoServer styles
+     // Map the dash array to one of the GeoServer styles
     const style = strokeDasharray ? mapDashArrayToStyle(strokeDasharray) : 'solid';
 
     return new SimpleLineSymbol({
@@ -63,6 +197,7 @@ export function createLineSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
         miterLimit: 2,
     });
 }
+
 
 type SymbolizerWithPolygon = Symbolizer & { Polygon: FillSymbolizer | StrokeSymbolizer };
 
@@ -137,7 +272,6 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
 
     // Destructure only the required properties from the Point symbolizer
     const { size, opacity, rotation, url, graphics } = pointSymbolizer;
-
     // Ensure there is at least one graphic in the 'graphics' array
     const graphic = graphics && graphics.length > 0 ? graphics[0] : null;
 
@@ -197,14 +331,12 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
 
 // Utility function for parsing size, including expressions
 function parseSize(size: string | number): number {
-    // Handle number values directly
+     // Handle number values directly
     if (typeof size === 'number') {
         return size;
     }
-
     // For strings, attempt to parse as a number
     const parsed = parseFloat(size);
-
     // If parsing succeeds, return the parsed value; otherwise return default
     return !isNaN(parsed) ? parsed : 16;
 }
@@ -215,7 +347,6 @@ function addOpacityToHex(hex: string, opacity: number): string {
     if (!hex) {
         return "#000000FF"; // Default to black with full opacity
     }
-
     // Ensure opacity is between 0 and 1
     const validOpacity = Math.max(0, Math.min(1, opacity));
     const alpha = Math.round(validOpacity * 255).toString(16).padStart(2, '0').toUpperCase();
@@ -224,20 +355,6 @@ function addOpacityToHex(hex: string, opacity: number): string {
     if (hex.length === 9) {
         return `${hex.substring(0, 7)}${alpha}`;
     }
-
     // Otherwise, append the alpha channel
     return `${hex}${alpha}`;
-}
-
-export function createEsriSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
-    if (symbolizers.every(symbolizer => symbolizer.Line)) {
-        return createLineSymbol(symbolizers);
-    } else if (symbolizers.every(symbolizer => symbolizer.Polygon)) {
-        return createPolygonSymbol(symbolizers);
-    } else if (symbolizers.every(symbolizer => symbolizer.Point)) {
-        return createPointSymbol(symbolizers);
-    } else {
-        console.error("Unsupported symbol type:", symbolizers);
-        return new Symbol();
-    }
 }
