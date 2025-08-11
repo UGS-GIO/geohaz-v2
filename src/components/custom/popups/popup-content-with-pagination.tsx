@@ -6,7 +6,7 @@ import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lu
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
 import { ColorCodingRecordFunction, FieldConfig, LinkFields, ProcessedRasterSource, RelatedTable } from "@/lib/types/mapping-types"
 import { MapContext } from "@/context/map-provider"
-import { fetchWfsGeometry, highlightFeature } from '@/lib/map/highlight-utils';
+import { highlightFeature } from '@/lib/map/highlight-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { zoomToFeature } from "@/lib/map/utils"
@@ -229,11 +229,6 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
         return () => observer.disconnect()
     }, [sectionIds, onSectionChange])
     const handleZoomToFeature = async (feature: ExtendedFeature, sourceCRS: string) => {
-        console.log(
-            'this is the feature to zoom to',
-            feature
-        );
-
         if (!view) return
         view.graphics.removeAll() // Clear existing highlights before adding new one
         // let targetFeature = feature;

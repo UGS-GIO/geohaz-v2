@@ -3,7 +3,7 @@ import Collection from "@arcgis/core/core/Collection.js";
 import { MapContext } from "@/context/map-provider";
 import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
 import { useGetLayerConfig } from "./use-get-layer-config";
-import { createPinGraphic, removeGraphics } from "@/lib/map/highlight-utils";
+import { createPinGraphic, clearGraphics } from "@/lib/map/highlight-utils";
 
 type VisibleLayer = {
     visible: boolean;
@@ -219,7 +219,7 @@ export const useMapInteractions = () => {
 
                 // Update your state or context with the new coordinates
                 setCoordinates({ x: longitude.toString(), y: latitude.toString() }); // Assuming x = longitude and y = latitude
-                removeGraphics(view);
+                clearGraphics(view);
                 createPinGraphic(latitude, longitude, view);
             }
         }

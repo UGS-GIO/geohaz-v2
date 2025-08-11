@@ -5,7 +5,7 @@ import { ClipboardCopy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { convertDDToDMS } from '@/lib/map/conversion-utils';
 import { MapContext } from '@/context/map-provider';
-import { removeGraphics } from '@/lib/map/highlight-utils';
+import { clearGraphics } from '@/lib/map/highlight-utils';
 
 interface Props {
     hiddenTriggerRef: RefObject<HTMLDivElement>,
@@ -33,7 +33,7 @@ const MapContextMenu = ({ hiddenTriggerRef, coordinates }: Props) => {
     // Remove graphics from the map
     const handleRemoveGraphics = useCallback(() => {
         if (view) {
-            removeGraphics(view);
+            clearGraphics(view);
         }
     }, [view]);
 

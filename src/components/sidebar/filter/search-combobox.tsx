@@ -12,7 +12,7 @@ import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
 import { MapContext } from '@/context/map-provider';
 import { convertBbox } from '@/lib/map/conversion-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
-import { highlightFeature, removeGraphics } from '@/lib/map/highlight-utils';
+import { highlightFeature, clearGraphics } from '@/lib/map/highlight-utils';
 import * as turf from '@turf/turf';
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from "@/hooks/use-toast";
@@ -659,14 +659,15 @@ const handleSearchSelect = (
         let sourceCRS: string | undefined | null = null;
 
         if (sourceConfig.type === 'postgREST') {
-            console.log('inside postgREST source select handler');
-
+            console.log('PostgREST source config:', sourceConfig);
 
             // use CRS from config if provided
             sourceCRS = sourceConfig.crs;
             if (!sourceCRS) {
+
                 // fallback: check for embedded CRS in the geometry
                 sourceCRS = (geom as ExtendedGeometry).crs?.properties?.name;
+                console.log('needing CRS for PostgREST source:', geom);
 
                 console.log("Checking for embedded CRS in geometry:", sourceCRS);
 
@@ -747,7 +748,7 @@ const handleCollectionSelect = (
         console.warn("No features/view for collection select.");
         return;
     }
-    removeGraphics(view);
+    clearGraphics(view);
 
     try {
         const collectionBbox = turf.bbox(collection);
