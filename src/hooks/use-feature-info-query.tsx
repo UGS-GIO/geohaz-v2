@@ -149,9 +149,7 @@ const reorderLayers = (layerInfo: LayerContentProps[], layerOrderConfigs: LayerO
  * Defaults to WGS 84 ('EPSG:4326') if the crs member is missing, per the GeoJSON spec.
  */
 const getSourceCRSFromGeoJSON = (geoJson: any): string => {
-
     const crsName = geoJson?.crs?.properties?.name;
-    console.log('CRS Name:', crsName);
     if (typeof crsName === 'string') {
         const epsgMatch = crsName.match(/EPSG::(\d+)/);
         if (epsgMatch && epsgMatch[1]) {
