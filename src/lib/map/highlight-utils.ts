@@ -9,7 +9,6 @@ import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import PictureMarkerSymbol from '@arcgis/core/symbols/PictureMarkerSymbol';
 import { MAP_PIN_ICON } from '@/assets/icons';
-import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 import { convertGeometryToWGS84 } from '@/lib/map/conversion-utils';
 
 
@@ -125,62 +124,6 @@ const createEsriGraphics = (
         return [];
     }
 };
-
-// --- WFS FETCH FUNCTION ---
-export async function fetchWfsGeometry({ namespace, feature, sourceCRS }: { namespace: string; feature: Feature<Geometry, GeoJsonProperties>; sourceCRS: string }) {
-    const featureId = feature.id!.toString()
-    const layerName = featureId.split('.')[0];
-    const ogcFid = feature.properties?.ogc_fid;
-    const baseUrl = 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/wfs'
-    const params = new URLSearchParams({
-        SERVICE: 'WFS',
-        REQUEST: 'GetFeature',
-        VERSION: '2.0.0',
-        TYPENAMES: `${namespace}:${layerName}`,
-        OUTPUTFORMAT: 'application/json',
-        SRSNAME: sourceCRS,
-    })
-    if (feature.properties?.ogc_fid) {
-        params.append('CQL_FILTER', `ogc_fid=${ogcFid}`);
-    } else {
-        params.append('FEATUREID', featureId);
-    }
-    const url = `${baseUrl}?${params.toString()}`
-    const response = await fetch(url)
-    if (!response.ok) {
-        throw new Error(`Failed to fetch WFS feature: ${response.status}`)
-    }
-    return response.json()
-}
-
-// --- ORCHESTRATOR FUNCTION ---
-// This function determines if a fetch is needed before highlighting.
-export const handleFeatureHighlight = async (
-    feature: ExtendedFeature,
-    view: __esri.MapView | __esri.SceneView,
-    sourceCRS: string,
-    options?: HighlightOptions
-): Promise<Graphic | null> => {
-    // 1. Get the full feature geometry, fetching from WFS if necessary
-    let targetFeature: Feature<Geometry, GeoJsonProperties> = feature;
-    if ('namespace' in feature && feature.namespace) {
-        try {
-            const wfsResponse = await fetchWfsGeometry({ namespace: feature.namespace, feature: feature, sourceCRS: sourceCRS });
-            if (!wfsResponse.features?.length) {
-                console.warn("WFS fetch returned no features.");
-                return null;
-            }
-            targetFeature = wfsResponse.features[0];
-        } catch (error) {
-            console.error("Failed to fetch WFS geometry for highlighting:", error);
-            return null;
-        }
-    }
-
-    // 2. Now call the simplified highlightFeature function
-    return highlightFeature(targetFeature, view, sourceCRS, options);
-}
-
 
 // --- HIGHLIGHT FUNCTION ---
 // Its only responsibility is to take a complete feature and highlight it.
