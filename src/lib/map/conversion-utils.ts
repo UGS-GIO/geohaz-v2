@@ -1,5 +1,5 @@
 import { clone, coordEach } from "@turf/turf";
-import { Geometry } from "geojson";
+import { Geometry, Position } from "geojson";
 import proj4 from "proj4";
 
 export function convertDDToDMS(dd: number, isLongitude: boolean = false) {
@@ -103,6 +103,7 @@ export const extractCoordinates = (geometry: Geometry): number[][][] => {
  * Converts a GeoJSON geometry object from a source CRS to WGS84 (EPSG:4326).
  * This is the single source of truth for all coordinate conversions.
  */
+// --- Reproject GeoJSON Geometry to WGS84 ---
 export function convertGeometryToWGS84<G extends Geometry>(
     geometry: G | null | undefined,
     sourceCRS: string
@@ -114,31 +115,49 @@ export function convertGeometryToWGS84<G extends Geometry>(
 
     const targetCRS = "EPSG:4326";
 
-    // No conversion needed, return a clone to ensure function purity.
-    if (sourceCRS === targetCRS || sourceCRS.toUpperCase() === 'WGS84' || sourceCRS.includes('4326')) {
-        return clone(geometry) as G;
+    if (sourceCRS.toUpperCase() === targetCRS || sourceCRS.toUpperCase() === 'WGS84' || sourceCRS.toUpperCase() === '4326') {
+        try {
+            return clone(geometry) as G;
+        } catch (cloneError: any) {
+            console.error("Error cloning geometry:", cloneError);
+            return null;
+        }
     }
 
+    let clonedGeometry: G;
     try {
-        const converter = proj4(sourceCRS, targetCRS);
-        const clonedGeometry = clone(geometry) as G;
-
-        coordEach(clonedGeometry, (currentCoord) => {
-            const [x, y] = currentCoord;
-            if (typeof x === 'number' && typeof y === 'number') {
-                const convertedCoord = converter.forward([x, y]);
-                currentCoord[0] = convertedCoord[0];
-                currentCoord[1] = convertedCoord[1];
-            } else {
-                throw new Error(`Invalid coordinate structure: ${JSON.stringify(currentCoord)}`);
-            }
-        });
-
-        return clonedGeometry;
-
-    } catch (error: any) {
-        console.error(`Error during geometry conversion from ${sourceCRS} to ${targetCRS}:`, error.message || error);
+        clonedGeometry = clone(geometry);
+    } catch (setupError: any) {
+        console.error(`Error during geometry conversion setup for ${sourceCRS}:`, setupError);
         return null;
     }
+
+    let conversionErrorFound: Error | null = null;
+    coordEach(clonedGeometry, (currentCoord, coordIndex) => {
+        if (conversionErrorFound) return;
+        if (Array.isArray(currentCoord) && currentCoord.length >= 2) {
+            const originalCoord: Position = [currentCoord[0], currentCoord[1]];
+            try {
+                const convertedCoord = proj4(sourceCRS, targetCRS, originalCoord);
+                currentCoord[0] = convertedCoord[0];
+                currentCoord[1] = convertedCoord[1];
+
+            } catch (projError: any) {
+                const errorMsg = `Coordinate conversion failed for ${JSON.stringify(originalCoord)} from ${sourceCRS}: ${projError?.message || projError}`;
+                console.error(errorMsg);
+                conversionErrorFound = new Error(errorMsg);
+            }
+        } else {
+            const errorMsg = `Invalid coordinate structure encountered at index ${coordIndex}: ${JSON.stringify(currentCoord)}`;
+            console.error(errorMsg);
+            conversionErrorFound = new Error(errorMsg);
+        }
+    });
+
+    if (conversionErrorFound) {
+        console.error("Conversion failed:", conversionErrorFound);
+        return null;
+    }
+    return clonedGeometry;
 }
 

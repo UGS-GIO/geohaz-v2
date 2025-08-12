@@ -1,4 +1,4 @@
-import { Feature, Geometry, GeoJsonProperties, Position } from 'geojson';
+import { Feature, Geometry, GeoJsonProperties } from 'geojson';
 import Graphic from '@arcgis/core/Graphic';
 import Point from '@arcgis/core/geometry/Point';
 import Polyline from '@arcgis/core/geometry/Polyline';
@@ -9,68 +9,11 @@ import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import PictureMarkerSymbol from '@arcgis/core/symbols/PictureMarkerSymbol';
 import { MAP_PIN_ICON } from '@/assets/icons';
-import { clone, coordEach } from '@turf/turf';
-import proj4 from 'proj4';
 import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
+import { convertGeometryToWGS84 } from '@/lib/map/conversion-utils';
 
 
-// --- Reproject GeoJSON Geometry to WGS84 ---
-export function convertGeometryToWGS84<G extends Geometry>(
-    geometry: G | null | undefined,
-    sourceCRS: string
-): G | null {
-    if (!geometry) {
-        console.warn("convertGeometryToWGS84: Input geometry is null or undefined.");
-        return null;
-    }
 
-    const targetCRS = "EPSG:4326";
-
-    if (sourceCRS.toUpperCase() === targetCRS || sourceCRS.toUpperCase() === 'WGS84' || sourceCRS.toUpperCase() === '4326') {
-        try {
-            return clone(geometry) as G;
-        } catch (cloneError: any) {
-            console.error("Error cloning geometry:", cloneError);
-            return null;
-        }
-    }
-
-    let clonedGeometry: G;
-    try {
-        clonedGeometry = clone(geometry);
-    } catch (setupError: any) {
-        console.error(`Error during geometry conversion setup for ${sourceCRS}:`, setupError);
-        return null;
-    }
-
-    let conversionErrorFound: Error | null = null;
-    coordEach(clonedGeometry, (currentCoord, coordIndex) => {
-        if (conversionErrorFound) return;
-        if (Array.isArray(currentCoord) && currentCoord.length >= 2) {
-            const originalCoord: Position = [currentCoord[0], currentCoord[1]];
-            try {
-                const convertedCoord = proj4(sourceCRS, targetCRS, originalCoord);
-                currentCoord[0] = convertedCoord[0];
-                currentCoord[1] = convertedCoord[1];
-
-            } catch (projError: any) {
-                const errorMsg = `Coordinate conversion failed for ${JSON.stringify(originalCoord)} from ${sourceCRS}: ${projError?.message || projError}`;
-                console.error(errorMsg);
-                conversionErrorFound = new Error(errorMsg);
-            }
-        } else {
-            const errorMsg = `Invalid coordinate structure encountered at index ${coordIndex}: ${JSON.stringify(currentCoord)}`;
-            console.error(errorMsg);
-            conversionErrorFound = new Error(errorMsg);
-        }
-    });
-
-    if (conversionErrorFound) {
-        console.error("Conversion failed:", conversionErrorFound);
-        return null;
-    }
-    return clonedGeometry;
-}
 
 // --- Create Esri Geometry from GeoJSON + SR ---
 const createEsriGeometry = (
@@ -136,20 +79,42 @@ const createEsriGraphics = (
                 const pointSymbol = new SimpleMarkerSymbol({
                     color: options.fillColor,
                     size: options.pointSize,
-                    outline: { color: options.outlineColor, width: options.outlineWidth > 0 ? 1 : 0 }
+                    outline: { color: options.outlineColor, width: options.outlineWidth > 0 ? 2 : 0 }
                 });
-                return [new Graphic({ geometry: esriGeometry, symbol: pointSymbol })];
+                const outlineSymbol = new SimpleMarkerSymbol({
+                    color: options.fillColor,
+                    size: options.pointSize + 2,
+                    outline: { color: [0, 0, 0, .5], width: options.outlineWidth / 2 }
+                });
+                return [
+                    new Graphic({ geometry: esriGeometry, symbol: pointSymbol }),
+                    new Graphic({ geometry: esriGeometry, symbol: outlineSymbol })
+                ];
             }
             case 'polyline': {
                 const lineSymbol = new SimpleLineSymbol({ color: options.outlineColor, width: options.outlineWidth });
-                return [new Graphic({ geometry: esriGeometry, symbol: lineSymbol })];
+                const outlineSymbol = new SimpleLineSymbol({
+                    color: [0, 0, 0, .5],
+                    width: options.outlineWidth + 2
+                });
+                return [
+                    new Graphic({ geometry: esriGeometry, symbol: outlineSymbol }),
+                    new Graphic({ geometry: esriGeometry, symbol: lineSymbol })
+                ];
             }
             case 'polygon': {
                 const fillSymbol = new SimpleFillSymbol({
                     color: options.fillColor,
                     outline: { color: options.outlineColor, width: options.outlineWidth }
                 });
-                return [new Graphic({ geometry: esriGeometry, symbol: fillSymbol })];
+                const outlineSymbol = new SimpleFillSymbol({
+                    color: [0, 0, 0, 0],
+                    outline: { color: [0, 0, 0, 1], width: options.outlineWidth + 2 }
+                });
+                return [
+                    new Graphic({ geometry: esriGeometry, symbol: outlineSymbol }),
+                    new Graphic({ geometry: esriGeometry, symbol: fillSymbol })
+                ];
             }
             default:
                 console.warn(`createEsriGraphics: Unsupported Esri geometry type for default symbol generation: ${esriGeometry.type}`);
@@ -251,8 +216,7 @@ export const highlightFeature = async (
     const graphics = createEsriGraphics(esriGeom, finalOptions);
     if (!graphics || graphics.length === 0) return null;
 
-    // 4. Clear old graphics and add the new ones to the map
-    clearGraphics(view)
+    // 4. Add the graphics to the view
     view.graphics.addMany(graphics);
 
     // Return the first graphic for consistency, or null if none were created
