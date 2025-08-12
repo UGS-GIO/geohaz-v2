@@ -18,11 +18,11 @@ export default function Map() {
     {
       type: 'postgREST',
       url: PROD_POSTGREST_URL,
-      functionName: "search_fault_data",
+      functionName: "search_fault_data_beta",
       layerName: qFaultsWMSTitle,
       searchTerm: "search_term",
       sourceName: 'Faults',
-      crs: 'EPSG:26912', // EPSG:26912
+      crs: 'EPSG:4326',
       displayField: "concatnames", // Field in PostgREST result features
       headers: {
         'Accept-Profile': 'hazards',

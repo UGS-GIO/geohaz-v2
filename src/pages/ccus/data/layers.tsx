@@ -1,7 +1,7 @@
 import { Link } from "@/components/custom/link";
 import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
-import { addCommas, toSentenceCase, toTitleCase } from "@/lib/utils";
+import { addThousandsSeparator, toTitleCase, toSentenceCase } from "@/lib/utils";
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -523,8 +523,8 @@ const coresAndCuttingsWMSConfig: WMSLayerProps = {
                         if (top == null || bottom == null) {
                             return 'Depth N/A';
                         }
-                        const topFt = addCommas(top);
-                        const bottomFt = addCommas(bottom);
+                        const topFt = addThousandsSeparator(top);
+                        const bottomFt = addThousandsSeparator(bottom);
                         return `${topFt} - ${bottomFt} ft`;
                     }
                 },
@@ -612,7 +612,7 @@ const co2SourcesWMSConfig: WMSLayerProps = {
                         if (value === null) {
                             return 'No Data';
                         }
-                        return `${addCommas(value)} mtCO₂e`;
+                        return `${addThousandsSeparator(value)} mtCO₂e`;
                     }
                 },
                 'Reporting Year': { field: 'reporting_year', type: 'string' },

@@ -3,6 +3,7 @@ import type SceneView from "@arcgis/core/views/SceneView";
 import type MapView from "@arcgis/core/views/MapView";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
 import { LayerProps } from "@/lib/types/mapping-types";
+import { init } from "@/lib/map/utils";
 
 type MapContextProps = {
     view?: SceneView | MapView,
@@ -30,19 +31,6 @@ type MapContextProps = {
     isSketching?: boolean
     setIsSketching?: (isSketching: boolean) => void
 }
-
-// type FeatureAttributes = {
-//     title: string;
-//     content: string;
-// };
-
-// type Feature = {
-//     attributes: FeatureAttributes;
-// };
-
-// type LayerDescriptionResponse = {
-//     features: Feature[];
-// };
 
 export const MapContext = createContext<MapContextProps>({
     coordinates: { x: "000.000", y: "000.000" },
@@ -128,7 +116,6 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
         // If the view does NOT exist, run the initial creation logic.
         else {
-            const { init } = await import("@/lib/mapping-utils");
             const { view: initView, map } = init(container, isMobile, { zoom, center }, layers, 'map');
             setView(initView);
             setMap(map);

@@ -10,12 +10,14 @@ import { featureCollection, point as turfPoint } from '@turf/helpers';
 import { useDebounce } from 'use-debounce';
 import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
 import { MapContext } from '@/context/map-provider';
-import { convertBbox, findLayerByTitle } from '@/lib/mapping-utils';
+import { convertBbox } from '@/lib/map/conversion-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
-import { highlightSearchResult, removeGraphics } from '@/lib/util/highlight-utils';
+import { highlightFeature, clearGraphics } from '@/lib/map/highlight-utils';
 import * as turf from '@turf/turf';
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from "@/hooks/use-toast";
+import { findLayerByTitle } from '@/lib/map/utils';
+import { ExtendedFeature } from '@/components/custom/popups/popup-content-with-pagination';
 
 export const defaultMasqueradeConfig: SearchSourceConfig = {
     type: 'masquerade',
@@ -82,7 +84,7 @@ interface SearchComboboxProps {
     // Called when a PostgREST feature OR a finalized Masquerade candidate is selected
     onFeatureSelect?: (searchResult: Feature<Geometry, GeoJsonProperties> | null, _sourceUrl: string, sourceIndex: number, searchConfig: SearchSourceConfig[], view: __esri.MapView | __esri.SceneView | undefined) => void
     // Called when Enter is pressed on PostgREST results
-    onCollectionSelect?: (collection: FeatureCollection<Geometry, GeoJsonProperties> | null, _sourceUrl: string | null, _sourceIndex: number, view: __esri.MapView | __esri.SceneView | undefined) => void;
+    onCollectionSelect?: (collection: FeatureCollection<Geometry, GeoJsonProperties> | null, _sourceUrl: string | null, _sourceIndex: number, searchConfig: SearchSourceConfig[], view: __esri.MapView | __esri.SceneView | undefined) => void;
     // Called when a Masquerade suggestion is clicked
     onSuggestionSelect?: (suggestion: Suggestion, sourceConfig: MasqueradeConfig, sourceIndex: number, view: __esri.MapView | __esri.SceneView | undefined, searchConfig: SearchSourceConfig[]) => void;
     className?: string;
@@ -336,13 +338,13 @@ function SearchCombobox({
             // prevent default selection/submission and run the collection search.
             if (!selectedItem || isSourceFilterSelected) {
                 event.preventDefault(); // Prevent cmdk from acting on Enter
-                executeCollectionSearch(search);
+                executeCollectionSearch(search, config);
             }
         }
     };
 
 
-    const executeCollectionSearch = (currentSearchTerm: string) => {
+    const executeCollectionSearch = (currentSearchTerm: string, searchConfig: SearchSourceConfig[]) => {
         let allVisibleFeatures: Feature<Geometry, GeoJsonProperties>[] = [];
         let firstValidSourceUrl: string | null = null;
         let firstValidSourceIndex: number = -1;
@@ -372,7 +374,7 @@ function SearchCombobox({
         }
 
         // Call the actual select handler provided by the parent component
-        onCollectionSelect?.(combinedCollection, firstValidSourceUrl, firstValidSourceIndex, view);
+        onCollectionSelect?.(combinedCollection, firstValidSourceUrl, firstValidSourceIndex, searchConfig, view);
 
         if (combinedCollection !== null) {
             setOpen(false);
@@ -455,7 +457,7 @@ function SearchCombobox({
                                         <CommandItem
                                             key="hidden-enter-trigger"
                                             value="##hidden-enter-trigger"
-                                            onSelect={() => executeCollectionSearch(search)}
+                                            onSelect={() => executeCollectionSearch(search, config)}
                                             className="hidden"
                                             aria-hidden="true"
                                         />
@@ -584,7 +586,7 @@ const handleSuggestionSelect = async (
         return;
     }
 
-    view.graphics.removeAll();
+    clearGraphics(view);
 
     // findAddressCandidates
     try {
@@ -649,22 +651,20 @@ const handleSearchSelect = (
         console.warn("No geometry, view, or valid source config for single feature select.", { geom, view, sourceConfig, sourceIndex });
         return;
     }
-    view.graphics.removeAll();
-
+    clearGraphics(view)
     try {
         let sourceCRS: string | undefined | null = null;
 
         if (sourceConfig.type === 'postgREST') {
-
             // use CRS from config if provided
             sourceCRS = sourceConfig.crs;
             if (!sourceCRS) {
+
                 // fallback: check for embedded CRS in the geometry
                 sourceCRS = (geom as ExtendedGeometry).crs?.properties?.name;
                 if (sourceCRS) {
-                    // console.log("Using embedded CRS from PostgREST feature:", sourceCRS);
                 } else {
-                    sourceCRS = "EPSG:26912";
+                    sourceCRS = "EPSG:3857";
                     console.warn(`No CRS configured or embedded for PostgREST source ${sourceIndex}. Assuming ${sourceCRS}. This could be incorreect!`);
                 }
             }
@@ -689,7 +689,7 @@ const handleSearchSelect = (
             (geom as ExtendedGeometry).crs = { type: "name", properties: { name: sourceCRS } };
         }
 
-        highlightSearchResult(searchResult as Feature<ExtendedGeometry, GeoJsonProperties>, view, false);
+        highlightFeature(searchResult, view, sourceCRS);
 
         const featureBbox = turf.bbox(geom);
         if (!featureBbox || !featureBbox.every(isFinite)) {
@@ -719,35 +719,76 @@ const handleSearchSelect = (
     }
 };
 
+interface GeoServerFeatureCollection extends FeatureCollection<Geometry, GeoJsonProperties> {
+    crs?: {
+        type: string;
+        properties: {
+            name: string;
+        };
+    };
+}
+
 // PostgREST Enter key
 const handleCollectionSelect = (
-    collection: FeatureCollection<Geometry, GeoJsonProperties> | null,
+    collection: GeoServerFeatureCollection | null,
     _sourceUrl: string | null,
-    _sourceIndex: number,
+    sourceIndex: number, // Corrected param name
+    searchConfig: SearchSourceConfig[], // Corrected param name
     view: __esri.MapView | __esri.SceneView | undefined,
 ) => {
     if (!collection?.features?.length || !view) {
         console.warn("No features/view for collection select.");
         return;
     }
-    removeGraphics(view);
+    clearGraphics(view);
+
+    console.log('COLLECTION SELECTED:', collection, 'Source Index:', sourceIndex);
+
+
+    // --- 1. Robust CRS Determination ---
+    let sourceCRS: string;
+    const currentConfig = searchConfig[sourceIndex];
+
+    // First, prioritize the CRS from the search configuration.
+    if (currentConfig?.type === 'postgREST' && currentConfig.crs) {
+        sourceCRS = currentConfig.crs;
+    }
+    // Next, try to get it from the top-level CRS member of the FeatureCollection.
+    else if (collection.crs?.properties?.name) {
+        const crsName = collection.crs.properties.name;
+        const epsgMatch = crsName.match(/EPSG::(\d+)/);
+        sourceCRS = epsgMatch?.[1] ? `EPSG:${epsgMatch[1]}` : crsName;
+    }
+    // Finally, fallback to WGS84 (the GeoJSON standard) and warn the developer.
+    else {
+        sourceCRS = "EPSG:4326";
+        console.warn(`Could not determine source CRS for collection search at index ${sourceIndex}. Assuming ${sourceCRS}. This may be incorrect.`);
+    }
 
     try {
-        // Calculate overall bbox for the collection using Turf
         const collectionBbox = turf.bbox(collection);
-        let [xmin, ymin, xmax, ymax] = collectionBbox;
-        [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax]);
-
         if (!collectionBbox.every(isFinite)) {
             console.error("Invalid bounding box calculated for collection");
             return;
         }
 
+        // --- 2. Consistent Conversion & Zoom ---
+        const targetCRS = "EPSG:4326";
+        // Use the single, reliable sourceCRS for the conversion.
+        const [xmin, ymin, xmax, ymax] = convertBbox(collectionBbox, sourceCRS, targetCRS);
         zoomToExtent(xmin, ymin, xmax, ymax, view);
 
-        // Highlight all features in the collection
+        // --- 3. Consistent Highlighting ---
+        // Highlight each feature using the same reliable sourceCRS.
         collection.features.forEach(feature => {
-            highlightSearchResult(feature, view, false);
+            // The highlightFeature function may expect an ExtendedFeature type.
+            // We can cast it or create a temporary object that conforms.
+            const extendedFeature: ExtendedFeature = { ...feature, namespace: '' };
+            highlightFeature(
+                extendedFeature,
+                view,
+                sourceCRS, // Use the single source of truth
+            );
         });
 
     } catch (error) {

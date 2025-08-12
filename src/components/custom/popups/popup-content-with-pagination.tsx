@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
 import { ColorCodingRecordFunction, FieldConfig, LinkFields, ProcessedRasterSource, RelatedTable } from "@/lib/types/mapping-types"
-import proj4 from 'proj4';
 import { MapContext } from "@/context/map-provider"
-import { highlightFeature, zoomToFeature } from '@/lib/mapping-utils';
+import { clearGraphics, highlightFeature } from '@/lib/map/highlight-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { zoomToFeature } from "@/lib/map/utils"
 
 const ITEMS_PER_PAGE_OPTIONS = [1, 5, 10, 25, 50]
 export interface ExtendedFeature extends Feature<Geometry, GeoJsonProperties> {
@@ -20,6 +20,7 @@ export interface LayerContentProps {
     groupLayerTitle: string
     layerTitle: string
     features: ExtendedFeature[]
+    sourceCRS: string; // (e.g., "EPSG:26912")
     popupFields?: Record<string, FieldConfig>
     relatedTables?: RelatedTable[]
     linkFields?: LinkFields
@@ -93,7 +94,7 @@ const LayerCard = ({
 }: {
     layer: LayerContentProps,
     buttons: React.ReactNode[] | null,
-    handleZoomToFeature: (feature: ExtendedFeature) => Promise<void>
+    handleZoomToFeature: (feature: ExtendedFeature, sourceCRS: string) => Promise<void>
 }) => {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [currentPage, setCurrentPage] = useState(1)
@@ -108,6 +109,7 @@ const LayerCard = ({
     // Paginate features for this layer
     const paginatedFeatures = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage
+
         return layer.features.slice(startIndex, startIndex + itemsPerPage)
     }, [layer.features, currentPage, itemsPerPage])
 
@@ -122,14 +124,15 @@ const LayerCard = ({
         // Only highlight to the first feature if items per page is 1
         if (itemsPerPage === 1 && newPaginatedFeatures.length > 0) {
             if (!view) return
-            view.graphics.removeAll() // Clear existing highlights before adding new one
-            highlightFeature(newPaginatedFeatures[0], view)
+            clearGraphics(view)
+
+            highlightFeature(newPaginatedFeatures[0], view, layer.sourceCRS)
         }
     }
 
     const PopupButtons = ({ feature }: { feature: ExtendedFeature }) => (
         <div className="flex justify-start gap-2">
-            <Button variant="ghost" onClick={() => handleZoomToFeature(feature)} className="flex gap-x-2">
+            <Button variant="ghost" onClick={() => handleZoomToFeature(feature, layer.sourceCRS)} className="flex gap-x-2">
                 <Shrink className="h-5 w-5" />
                 <span className="hidden md:flex">Zoom to Feature</span>
                 <span className="md:hidden">Zoom</span>
@@ -225,16 +228,11 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
 
         return () => observer.disconnect()
     }, [sectionIds, onSectionChange])
-
-    // Define coordinate systems
-    proj4.defs("EPSG:26912", "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs");
-    proj4.defs("EPSG:4326", "+proj=longlat +datum=WGS84 +no_defs");
-
-    const handleZoomToFeature = async (feature: ExtendedFeature) => {
+    const handleZoomToFeature = async (feature: ExtendedFeature, sourceCRS: string) => {
         if (!view) return
-        view.graphics.removeAll() // Clear existing highlights before adding new one
-        highlightFeature(feature, view)
-        zoomToFeature(feature, view)
+        clearGraphics(view)
+        highlightFeature(feature, view, sourceCRS)
+        zoomToFeature(feature, view, sourceCRS)
     }
 
     // If no layers, return null

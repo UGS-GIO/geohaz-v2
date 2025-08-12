@@ -36,7 +36,7 @@ export default function Map() {
       layerName: qFaultsWMSTitle,
       searchTerm: "search_term",
       sourceName: 'Faults',
-      crs: 'EPSG:26912',
+      crs: 'EPSG:3857',
       displayField: "concatnames",
       headers: {
         'Accept-Profile': 'hazards',
@@ -93,9 +93,8 @@ export default function Map() {
       <Sidebar />
       <main
         id="content"
-        className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${
-          isCollapsed ? 'md:ml-14' : 'md:ml-[32rem]'
-        } h-full`}
+        className={`overflow-x-hidden pt-16 transition-[margin] md:overflow-y-hidden md:pt-0 ${isCollapsed ? 'md:ml-14' : 'md:ml-[32rem]'
+          } h-full`}
       >
         <Layout>
           <Layout.Header className='flex items-center justify-between px-4 md:px-6'>
