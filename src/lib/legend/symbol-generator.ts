@@ -15,7 +15,7 @@ interface CompositeSymbolResult {
     symbolizers: Symbolizer[];
 }
 
-// Enhanced function to create composite line symbols
+// Enhanced function to create composite line symbols - now always returns SVG
 export function createCompositeLineSymbol(symbolizers: Symbolizer[]): CompositeSymbolResult {
     const lineSymbolizers = symbolizers.filter(symbolizer => 'Line' in symbolizer);
 
@@ -23,21 +23,12 @@ export function createCompositeLineSymbol(symbolizers: Symbolizer[]): CompositeS
         throw new Error("No valid Line symbolizer found in the provided symbolizers.");
     }
 
-    // If only one LineSymbolizer, use standard approach
-    if (lineSymbolizers.length === 1) {
-        return {
-            symbol: createSingleLineSymbol(lineSymbolizers[0].Line as StrokeSymbolizer),
-            isComposite: false,
-            symbolizers: lineSymbolizers
-        };
-    }
-
-    // For multiple LineSymbolizers, create composite HTML representation
+    // Always create SVG representation for consistency, even for single LineSymbolizers
     const compositeHtml = createCompositeLineHTML(lineSymbolizers);
     
     return {
         html: compositeHtml,
-        isComposite: true,
+        isComposite: lineSymbolizers.length > 1, // Still track if it's truly composite
         symbolizers: lineSymbolizers
     };
 }

@@ -137,7 +137,7 @@ export type MapImageLayerRenderer = {
 
 export type RegularLayerRenderer = {
     type: 'regular-layer-renderer';
-    renderer: __esri.Symbol;
+    renderer: __esri.Symbol | CompositeSymbolResult | HTMLElement;
     id: string;
     label: string;
     url: string;
@@ -213,13 +213,4 @@ interface CompositeSymbolResult {
     html?: HTMLElement;
     isComposite: boolean;
     symbolizers: any[];
-}
-
-// Update your existing RegularLayerRenderer type to include CompositeSymbolResult
-export interface RegularLayerRenderer {
-    type: 'regular-layer-renderer';
-    renderer: __esri.Symbol | CompositeSymbolResult | HTMLElement; // Added CompositeSymbolResult here
-    id: string;
-    label: string;
-    url: string;
 }
