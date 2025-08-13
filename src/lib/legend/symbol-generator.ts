@@ -58,7 +58,7 @@ function createCompositeLineHTML(lineSymbolizers: Symbolizer[]): SVGSVGElement {
 }
 
 // Create individual SVG line element
-function createSVGLineElement(lineSymbolizer: StrokeSymbolizer, zIndex: number): SVGLineElement {
+function createSVGLineElement(lineSymbolizer: StrokeSymbolizer): SVGLineElement {
     const {
         stroke = "#000000",
         "stroke-width": strokeWidth = "1",
