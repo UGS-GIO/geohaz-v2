@@ -8,9 +8,9 @@ import { FillSymbolizer, LineCap, LineJoin, StrokeSymbolizer, Symbolizer } from 
 const SCALING_FACTOR = .75;
 
 // New interface for composite symbol result
-interface CompositeSymbolResult {
+export interface CompositeSymbolResult {
     symbol?: __esri.Symbol;
-    html?: HTMLElement;
+    html?: HTMLElement | SVGSVGElement;
     isComposite: boolean;
     symbolizers: Symbolizer[];
 }
@@ -34,7 +34,7 @@ export function createCompositeLineSymbol(symbolizers: Symbolizer[]): CompositeS
 }
 
 // Create HTML element showing all LineSymbolizers stacked
-function createCompositeLineHTML(lineSymbolizers: Symbolizer[]): HTMLElement {
+function createCompositeLineHTML(lineSymbolizers: Symbolizer[]): SVGSVGElement {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", "32");
     svg.setAttribute("height", "20");

@@ -1,14 +1,7 @@
 import * as symbolUtils from "@arcgis/core/symbols/support/symbolUtils.js";
 import { MapImageLayerRenderer, RegularLayerRenderer } from '@/lib/types/mapping-types';
 import { SymbolUnion } from "@arcgis/core/unionTypes.js";
-
-// Interface to match the CompositeSymbolResult from symbol-generator.ts
-interface CompositeSymbolResult {
-    symbol?: __esri.Symbol;
-    html?: HTMLElement;
-    isComposite: boolean;
-    symbolizers: any[];
-}
+import { CompositeSymbolResult } from '@/lib/legend/symbol-generator';
 
 export const RendererFactory = {
     createPreview: async (rendererData: MapImageLayerRenderer | RegularLayerRenderer) => {
@@ -27,7 +20,7 @@ export const RendererFactory = {
         // Check if renderer is a CompositeSymbolResult
         if (renderer && typeof renderer === 'object' && 'isComposite' in renderer) {
             console.log(renderer)
-            const compositeRenderer = renderer;
+            const compositeRenderer = renderer as CompositeSymbolResult;
             
             // Handle any case where we have HTML (both composite and single LineSymbolizers)
             if (compositeRenderer.html) {
