@@ -37,7 +37,7 @@ interface BaseConfig {
 interface PostgRESTConfig extends BaseConfig {
     type: 'postgREST';
     layerName?: string; // corresponds to the map layer name
-    crs?: string; // Optional: Coordinate Reference System (e.g., 'EPSG:26912')
+    crs?: string; // Optional: if provided, it will be used to convert coordinates to WGS84
     params?: PostgRESTParams;
     functionName?: string;
     searchTerm?: string;
@@ -637,59 +637,62 @@ const handleSuggestionSelect = async (
 
 // PostgREST results or finalized Candidate)
 const handleSearchSelect = (
-    searchResult: Feature<Geometry, GeoJsonProperties> | null,
+    searchResult: Feature<ExtendedGeometry, GeoJsonProperties> | null,
     _sourceUrl: string,
     sourceIndex: number,
     searchConfig: SearchSourceConfig[],
     view: __esri.MapView | __esri.SceneView | undefined,
 ) => {
     const geom = searchResult?.geometry;
-    const sourceConfigWrapper = searchConfig[sourceIndex];
-    const sourceConfig = sourceConfigWrapper;
+    const sourceConfig = searchConfig[sourceIndex];
 
     if (!geom || !view || !sourceConfig) {
         console.warn("No geometry, view, or valid source config for single feature select.", { geom, view, sourceConfig, sourceIndex });
         return;
     }
-    clearGraphics(view)
+    clearGraphics(view);
+
     try {
-        let sourceCRS: string | undefined | null = null;
+        let sourceCRS: string;
 
-        if (sourceConfig.type === 'postgREST') {
-            // use CRS from config if provided
+        // --- 1. CRS Determination ---
+        const outputCrs = searchResult?.properties?.['output_crs']; // This is a common property that will be returned from a PostgREST custom function
+
+        // Handle Masquerade type as a specific case first
+        if (sourceConfig.type === 'masquerade') {
+            console.log(`Masquerade source detected at index ${sourceIndex}. Using outSR: ${sourceConfig.outSR ?? 4326}`);
+
+            sourceCRS = `EPSG:${sourceConfig.outSR ?? 4326}`;
+        }
+        // For all other types (like PostgREST)
+        // Priority 1: Check for `output_crs` on the feature's properties.
+        else if (outputCrs && (typeof outputCrs === 'number' || typeof outputCrs === 'string')) {
+            sourceCRS = `EPSG:${outputCrs}`;
+        }
+        // Priority 2: Check for a non-standard, embedded CRS on the geometry.
+        else if ((geom as ExtendedGeometry)?.crs?.properties?.name) {
+            const crsName = (geom as ExtendedGeometry).crs?.properties.name || '';
+            const epsgMatch = crsName?.match(/EPSG::(\d+)/);
+            sourceCRS = epsgMatch?.[1] ? `EPSG:${epsgMatch[1]}` : crsName;
+        }
+        // Priority 3: Check the explicit search configuration.
+        else if (sourceConfig.type === 'postgREST' && sourceConfig.crs) {
+            console.log(`Using explicit CRS from search config: ${sourceConfig.crs}`);
             sourceCRS = sourceConfig.crs;
-            if (!sourceCRS) {
-
-                // fallback: check for embedded CRS in the geometry
-                sourceCRS = (geom as ExtendedGeometry).crs?.properties?.name;
-                if (sourceCRS) {
-                } else {
-                    sourceCRS = "EPSG:3857";
-                    console.warn(`No CRS configured or embedded for PostgREST source ${sourceIndex}. Assuming ${sourceCRS}. This could be incorreect!`);
-                }
-            }
-        } else if (sourceConfig.type === 'masquerade') {
-            sourceCRS = `EPSG:${sourceConfig.outSR ?? 4326}`; // Default to WGS84 if not specified
-        } else {
-            console.error(`Unknown source config type at index ${sourceIndex}`);
-            return;
+        }
+        // Priority 4: Final fallback to WGS84.
+        else {
+            sourceCRS = "EPSG:4326";
+            console.warn(`Could not determine source CRS for feature at index ${sourceIndex}. Assuming ${sourceCRS}. This may be incorrect.`);
         }
 
-        // if sourceCRS is still null or undefined, log an error and return
-        if (!sourceCRS) {
-            console.error(`Could not determine source CRS for index ${sourceIndex}. Aborting selection.`);
-            return;
-        }
+        // --- 2. Consistent Highlighting & Zooming ---
 
-        if (!(geom as ExtendedGeometry).crs && sourceCRS) {
-            (geom as ExtendedGeometry).crs = { type: "name", properties: { name: sourceCRS } };
-        } else if ((geom as ExtendedGeometry).crs && sourceCRS && (geom as ExtendedGeometry).crs?.properties?.name !== sourceCRS) {
-            // Optional: Overwrite embedded CRS if config CRS is different (config takes priority)
-            console.warn(`Overwriting embedded CRS (${(geom as ExtendedGeometry).crs?.properties?.name}) with configured CRS (${sourceCRS})`);
-            (geom as ExtendedGeometry).crs = { type: "name", properties: { name: sourceCRS } };
-        }
-
-        highlightFeature(searchResult, view, sourceCRS);
+        const featureToHighlight: ExtendedFeature = {
+            ...searchResult,
+            namespace: (searchResult as ExtendedFeature).namespace || ''
+        };
+        highlightFeature(featureToHighlight, view, sourceCRS);
 
         const featureBbox = turf.bbox(geom);
         if (!featureBbox || !featureBbox.every(isFinite)) {
@@ -697,29 +700,17 @@ const handleSearchSelect = (
             return;
         }
 
-
-        let [xmin, ymin, xmax, ymax] = featureBbox;
         const targetCRS = "EPSG:4326";
-        if (sourceCRS.toUpperCase() !== targetCRS && sourceCRS.toUpperCase() !== 'WGS84') {
-            try {
-                [xmin, ymin, xmax, ymax] = convertBbox([xmin, ymin, xmax, ymax], sourceCRS, targetCRS);
-            } catch (bboxError) {
-                console.error("Error converting bounding box:", bboxError);
-                return;
-            }
-        }
-
+        const [xmin, ymin, xmax, ymax] = convertBbox(featureBbox, sourceCRS, targetCRS);
         const shouldAddScaleValue = geom.type === "Point" ? 13000 : undefined;
-
-        // Zoom to the extent of the feature
-        zoomToExtent(xmin, ymin, xmax, ymax, view, shouldAddScaleValue); // Use the WGS84 bbox
+        zoomToExtent(xmin, ymin, xmax, ymax, view, shouldAddScaleValue);
 
     } catch (error) {
         console.error("Error processing single feature selection:", error);
     }
 };
 
-interface GeoServerFeatureCollection extends FeatureCollection<Geometry, GeoJsonProperties> {
+interface GeoServerFeatureCollection extends FeatureCollection<ExtendedGeometry, GeoJsonProperties> {
     crs?: {
         type: string;
         properties: {
@@ -728,12 +719,12 @@ interface GeoServerFeatureCollection extends FeatureCollection<Geometry, GeoJson
     };
 }
 
-// PostgREST Enter key
+// Handler for FeatureCollection Selection
 const handleCollectionSelect = (
     collection: GeoServerFeatureCollection | null,
     _sourceUrl: string | null,
-    sourceIndex: number, // Corrected param name
-    searchConfig: SearchSourceConfig[], // Corrected param name
+    sourceIndex: number,
+    searchConfig: SearchSourceConfig[],
     view: __esri.MapView | __esri.SceneView | undefined,
 ) => {
     if (!collection?.features?.length || !view) {
@@ -742,24 +733,27 @@ const handleCollectionSelect = (
     }
     clearGraphics(view);
 
-    console.log('COLLECTION SELECTED:', collection, 'Source Index:', sourceIndex);
-
-
-    // --- 1. Robust CRS Determination ---
+    // --- Definitive CRS Determination Logic ---
     let sourceCRS: string;
     const currentConfig = searchConfig[sourceIndex];
+    const firstFeature = collection.features[0];
 
-    // First, prioritize the CRS from the search configuration.
-    if (currentConfig?.type === 'postgREST' && currentConfig.crs) {
-        sourceCRS = currentConfig.crs;
+    // Priority 1: Check for `output_crs` in the feature's properties.
+    const outputCrs = firstFeature?.properties?.['output_crs'];
+    if (outputCrs && (typeof outputCrs === 'number' || typeof outputCrs === 'string')) {
+        sourceCRS = `EPSG:${outputCrs}`;
     }
-    // Next, try to get it from the top-level CRS member of the FeatureCollection.
-    else if (collection.crs?.properties?.name) {
-        const crsName = collection.crs.properties.name;
+    // Priority 2: Check for an embedded CRS on the first feature's geometry.
+    else if (firstFeature?.geometry?.crs?.properties?.name) {
+        const crsName = firstFeature.geometry.crs.properties.name;
         const epsgMatch = crsName.match(/EPSG::(\d+)/);
         sourceCRS = epsgMatch?.[1] ? `EPSG:${epsgMatch[1]}` : crsName;
     }
-    // Finally, fallback to WGS84 (the GeoJSON standard) and warn the developer.
+    // Priority 3: Check the explicit search configuration.
+    else if (currentConfig?.type === 'postgREST' && currentConfig.crs) {
+        sourceCRS = currentConfig.crs;
+    }
+    // Priority 4: Final fallback to WGS84 (the GeoJSON standard).
     else {
         sourceCRS = "EPSG:4326";
         console.warn(`Could not determine source CRS for collection search at index ${sourceIndex}. Assuming ${sourceCRS}. This may be incorrect.`);
@@ -772,17 +766,11 @@ const handleCollectionSelect = (
             return;
         }
 
-        // --- 2. Consistent Conversion & Zoom ---
         const targetCRS = "EPSG:4326";
-        // Use the single, reliable sourceCRS for the conversion.
         const [xmin, ymin, xmax, ymax] = convertBbox(collectionBbox, sourceCRS, targetCRS);
         zoomToExtent(xmin, ymin, xmax, ymax, view);
 
-        // --- 3. Consistent Highlighting ---
-        // Highlight each feature using the same reliable sourceCRS.
         collection.features.forEach(feature => {
-            // The highlightFeature function may expect an ExtendedFeature type.
-            // We can cast it or create a temporary object that conforms.
             const extendedFeature: ExtendedFeature = { ...feature, namespace: '' };
             highlightFeature(
                 extendedFeature,

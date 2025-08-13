@@ -18,7 +18,7 @@ export default function Map() {
     {
       type: 'postgREST',
       url: PROD_POSTGREST_URL,
-      functionName: "search_fault_data_beta",
+      functionName: "search_fault_data",
       layerName: qFaultsWMSTitle,
       searchTerm: "search_term",
       sourceName: 'Faults',
