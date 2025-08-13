@@ -24,7 +24,7 @@ import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
 import { MapContext } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
-import { findLayerByTitle } from '@/lib/mapping-utils';
+import { findLayerByTitle } from '@/lib/map/utils';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
 
 export const findAndApplyWMSFilter = (
