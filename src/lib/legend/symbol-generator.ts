@@ -25,7 +25,7 @@ export function createCompositeLineSymbol(symbolizers: Symbolizer[]): CompositeS
 
     // Always create SVG representation for consistency, even for single LineSymbolizers
     const compositeHtml = createCompositeLineHTML(lineSymbolizers);
-    
+
     return {
         html: compositeHtml,
         isComposite: lineSymbolizers.length > 1, // Still track if it's truly composite
@@ -48,9 +48,9 @@ function createCompositeLineHTML(lineSymbolizers: Symbolizer[]): SVGSVGElement {
     svg.style.minHeight = "20px";
 
     // Process symbolizers in order (first = bottom layer, last = top layer)
-    lineSymbolizers.forEach((symbolizer, index) => {
+    lineSymbolizers.forEach((symbolizer) => {
         const lineData = symbolizer.Line as StrokeSymbolizer;
-        const line = createSVGLineElement(lineData, index);
+        const line = createSVGLineElement(lineData);
         svg.appendChild(line);
     });
 
@@ -69,25 +69,25 @@ function createSVGLineElement(lineSymbolizer: StrokeSymbolizer): SVGLineElement 
     } = lineSymbolizer;
 
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    
+
     // Position line in center of SVG (adjusted for 32px width)
     line.setAttribute("x1", "2");
     line.setAttribute("y1", "10");
     line.setAttribute("x2", "30");
     line.setAttribute("y2", "10");
-    
+
     // Apply styling
     line.setAttribute("stroke", stroke);
     line.setAttribute("stroke-width", strokeWidth);
     line.setAttribute("stroke-linecap", strokeLinecap);
     line.setAttribute("stroke-linejoin", strokeLinejoin);
     line.setAttribute("stroke-opacity", strokeOpacity);
-    
+
     // Handle dash patterns
     if (strokeDasharray && strokeDasharray.length > 0) {
         line.setAttribute("stroke-dasharray", strokeDasharray.join(" "));
     }
-    
+
     return line;
 }
 
@@ -95,7 +95,7 @@ function createSVGLineElement(lineSymbolizer: StrokeSymbolizer): SVGLineElement 
 export function createEsriSymbol(symbolizers: Symbolizer[]): __esri.Symbol | CompositeSymbolResult {
     if (symbolizers.every(symbolizer => symbolizer.Line)) {
         const result = createCompositeLineSymbol(symbolizers);
-        
+
         // Return the full CompositeSymbolResult instead of just html or symbol
         // This preserves the isComposite flag and other metadata
         return result;
@@ -176,7 +176,7 @@ function createSingleLineSymbol(lineSymbolizer: StrokeSymbolizer): SimpleLineSym
         return dashMap[dashKey] || 'solid';
     }
 
-     // Map the dash array to one of the GeoServer styles
+    // Map the dash array to one of the GeoServer styles
     const style = strokeDasharray ? mapDashArrayToStyle(strokeDasharray) : 'solid';
 
     return new SimpleLineSymbol({
@@ -322,7 +322,7 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
 
 // Utility function for parsing size, including expressions
 function parseSize(size: string | number): number {
-     // Handle number values directly
+    // Handle number values directly
     if (typeof size === 'number') {
         return size;
     }
