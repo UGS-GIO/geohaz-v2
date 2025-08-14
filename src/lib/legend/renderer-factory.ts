@@ -1,6 +1,7 @@
 import * as symbolUtils from "@arcgis/core/symbols/support/symbolUtils.js";
 import { MapImageLayerRenderer, RegularLayerRenderer } from '@/lib/types/mapping-types';
 import { SymbolUnion } from "@arcgis/core/unionTypes.js";
+import { CompositeSymbolResult } from '@/lib/legend/symbol-generator';
 
 export const RendererFactory = {
     createPreview: async (rendererData: MapImageLayerRenderer | RegularLayerRenderer) => {
@@ -14,14 +15,59 @@ export const RendererFactory = {
     },
 
     createFeatureLayerPreview: async (rendererData: RegularLayerRenderer) => {
+        const renderer = rendererData.renderer;
 
-        const renderer = rendererData.renderer as SymbolUnion;
+        // Check if renderer is a CompositeSymbolResult
+        if (renderer && typeof renderer === 'object' && 'isComposite' in renderer) {
+            const compositeRenderer = renderer as CompositeSymbolResult;
 
-        const html = await symbolUtils.renderPreviewHTML(renderer);
+            // Handle any case where we have HTML (both composite and single LineSymbolizers)
+            if (compositeRenderer.html) {
+                // Clone the element to avoid DOM manipulation issues
+                const clonedElement = compositeRenderer.html.cloneNode(true) as HTMLElement;
+
+                // Ensure proper styling for legend display
+                clonedElement.style.width = '32px';
+                clonedElement.style.height = '20px';
+                clonedElement.style.display = 'block';
+                clonedElement.style.minWidth = '32px';
+                clonedElement.style.minHeight = '20px';
+
+                return {
+                    html: clonedElement,
+                    label: rendererData.label,
+                    title: '',
+                    isComposite: compositeRenderer.isComposite
+                };
+            } else if (compositeRenderer.symbol) {
+                // Single symbol case (fallback for other symbol types)
+                const html = await symbolUtils.renderPreviewHTML(compositeRenderer.symbol as SymbolUnion);
+                return {
+                    html,
+                    label: rendererData.label,
+                    title: '',
+                    isComposite: false
+                };
+            }
+        }
+
+        // Check if renderer is a direct HTMLElement (legacy support)
+        if (renderer instanceof HTMLElement) {
+            return {
+                html: renderer,
+                label: rendererData.label,
+                title: '',
+                isComposite: true
+            };
+        }
+
+        // Standard ArcGIS symbol handling
+        const html = await symbolUtils.renderPreviewHTML(renderer as SymbolUnion);
         return {
             html,
             label: rendererData.label,
-            title: ''
+            title: '',
+            isComposite: false
         };
     },
 
@@ -35,7 +81,8 @@ export const RendererFactory = {
         return {
             html,
             label: rendererData.label,
-            title
+            title,
+            isComposite: false
         };
     }
 };
