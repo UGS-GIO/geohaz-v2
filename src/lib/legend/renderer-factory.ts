@@ -19,21 +19,20 @@ export const RendererFactory = {
 
         // Check if renderer is a CompositeSymbolResult
         if (renderer && typeof renderer === 'object' && 'isComposite' in renderer) {
-            console.log(renderer)
             const compositeRenderer = renderer as CompositeSymbolResult;
-            
+
             // Handle any case where we have HTML (both composite and single LineSymbolizers)
             if (compositeRenderer.html) {
                 // Clone the element to avoid DOM manipulation issues
                 const clonedElement = compositeRenderer.html.cloneNode(true) as HTMLElement;
-                
+
                 // Ensure proper styling for legend display
                 clonedElement.style.width = '32px';
                 clonedElement.style.height = '20px';
                 clonedElement.style.display = 'block';
                 clonedElement.style.minWidth = '32px';
                 clonedElement.style.minHeight = '20px';
-                
+
                 return {
                     html: clonedElement,
                     label: rendererData.label,

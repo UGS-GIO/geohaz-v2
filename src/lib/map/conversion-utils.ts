@@ -60,17 +60,7 @@ export const convertCoordinates = (coordinates: number[][][], sourceCRS: string)
     return coordinates.flatMap(linestring =>
         linestring.map(point => {
             try {
-                // Explicitly convert with more verbose proj4 definition
-                // const converted = proj4(
-                //     "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs",
-                //     "+proj=longlat +datum=WGS84 +no_defs",
-                //     point
-                // );
                 const converted = proj4(sourceCRS, "EPSG:4326", point);
-
-                console.log('Converted coordinates:', converted, 'from:', sourceCRS, 'to: EPSG:4326', 'for point:', point);
-
-
                 return converted;
             } catch (error) {
                 console.error('Conversion error:', error);
