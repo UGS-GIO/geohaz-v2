@@ -1,7 +1,7 @@
 import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer.js";
 import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer.js";
 import WMSSublayer from "@arcgis/core/layers/support/WMSSublayer.js";
-import { createEsriSymbol } from '@/lib/legend/symbol-generator';
+import { createSVGSymbol } from '@/lib/legend/symbol-generator';
 import { Legend } from '@/lib/types/geoserver-types';
 import { MapImageLayerType } from '@/lib/types/mapping-types'
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
@@ -136,7 +136,7 @@ const getWMSLayerRenderer = async (layer: __esri.WMSLayer) => {
         const previews = rules.map((rule) => ({
             type: 'regular-layer-renderer',
             label: rule.title,
-            renderer: createEsriSymbol(rule.symbolizers),
+            renderer: createSVGSymbol(rule.symbolizers),
             id: layer.id.toString(),
             url: layer.url,
         }));

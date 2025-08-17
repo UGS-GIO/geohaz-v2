@@ -1,15 +1,7 @@
-import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol";
-import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol.js";
-import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol.js";
-import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol.js";
-import Symbol from "@arcgis/core/symbols/Symbol.js";
 import { FillSymbolizer, LineCap, LineJoin, StrokeSymbolizer, Symbolizer } from "@/lib/types/geoserver-types";
 
-const SCALING_FACTOR = .75;
-
-// New interface for composite symbol result
 export interface CompositeSymbolResult {
-    symbol?: __esri.Symbol;
+    symbol?: SVGSVGElement; // Changed from __esri.Symbol to SVGSVGElement
     html?: HTMLElement | SVGSVGElement;
     isComposite: boolean;
     symbolizers: Symbolizer[];
@@ -28,12 +20,12 @@ export function createCompositeLineSymbol(symbolizers: Symbolizer[]): CompositeS
 
     return {
         html: compositeHtml,
-        isComposite: lineSymbolizers.length > 1, // Still track if it's truly composite
+        symbol: compositeHtml, // Same as html since it's SVG
+        isComposite: lineSymbolizers.length > 1,
         symbolizers: lineSymbolizers
     };
 }
 
-// Create HTML element showing all LineSymbolizers stacked
 function createCompositeLineHTML(lineSymbolizers: Symbolizer[]): SVGSVGElement {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", "32");
@@ -76,9 +68,13 @@ function createSVGLineElement(lineSymbolizer: StrokeSymbolizer): SVGLineElement 
     line.setAttribute("x2", "30");
     line.setAttribute("y2", "10");
 
+    // Make lines a bit thicker for better visibility
+    const originalWidth = parseFloat(strokeWidth);
+    const enhancedWidth = Math.max(2, originalWidth + 1);
+
     // Apply styling
     line.setAttribute("stroke", stroke);
-    line.setAttribute("stroke-width", strokeWidth);
+    line.setAttribute("stroke-width", enhancedWidth.toString());
     line.setAttribute("stroke-linecap", strokeLinecap);
     line.setAttribute("stroke-linejoin", strokeLinejoin);
     line.setAttribute("stroke-opacity", strokeOpacity);
@@ -91,13 +87,11 @@ function createSVGLineElement(lineSymbolizer: StrokeSymbolizer): SVGLineElement 
     return line;
 }
 
-// Enhanced main creation function
-export function createEsriSymbol(symbolizers: Symbolizer[]): __esri.Symbol | CompositeSymbolResult {
+// Main function to orchestrate which symbol to create
+export function createSVGSymbol(symbolizers: Symbolizer[]): SVGSVGElement | CompositeSymbolResult {
     if (symbolizers.every(symbolizer => symbolizer.Line)) {
         const result = createCompositeLineSymbol(symbolizers);
-
         // Return the full CompositeSymbolResult instead of just html or symbol
-        // This preserves the isComposite flag and other metadata
         return result;
     } else if (symbolizers.every(symbolizer => symbolizer.Polygon)) {
         return createPolygonSymbol(symbolizers);
@@ -105,16 +99,17 @@ export function createEsriSymbol(symbolizers: Symbolizer[]): __esri.Symbol | Com
         return createPointSymbol(symbolizers);
     } else {
         console.error("Unsupported symbol type:", symbolizers);
-        return new Symbol();
+        // Return empty SVG
+        return document.createElementNS("http://www.w3.org/2000/svg", "svg");
     }
 }
 
-// Alternative approach: Create a single symbol that approximates the composite
-export function createApproximateCompositeSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
+// Create a single SVG that approximates the composite
+export function createApproximateCompositeSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
     const lineSymbolizers = symbolizers.filter(symbolizer => 'Line' in symbolizer);
 
     if (lineSymbolizers.length <= 1) {
-        return createSingleLineSymbol(lineSymbolizers[0]?.Line as StrokeSymbolizer);
+        return createSingleLineSymbolSVG(lineSymbolizers[0]?.Line as StrokeSymbolizer);
     }
 
     // Strategy: Use the widest line as base, with color from the top line
@@ -125,70 +120,45 @@ export function createApproximateCompositeSymbol(symbolizers: Symbolizer[]): __e
     });
 
     const topSymbolizer = lineSymbolizers[lineSymbolizers.length - 1];
-    const baseSymbol = createSingleLineSymbol(widestSymbolizer.Line as StrokeSymbolizer);
     const topLine = topSymbolizer.Line as StrokeSymbolizer;
+    const widestLine = widestSymbolizer.Line as StrokeSymbolizer;
 
-    // Modify the symbol to show characteristics of both
-    return new SimpleLineSymbol({
-        color: topLine.stroke || baseSymbol.color,
-        width: parseFloat((widestSymbolizer.Line as StrokeSymbolizer)["stroke-width"] || "1"),
-        cap: topLine["stroke-linecap"] || baseSymbol.cap,
-        join: topLine["stroke-linejoin"] || baseSymbol.join,
-        style: baseSymbol.style,
-        miterLimit: 2,
-    });
-}
+    // Create SVG with combined properties
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "32");
+    svg.setAttribute("height", "20");
+    svg.setAttribute("viewBox", "0 0 32 20");
 
-// Helper function to create a single line symbol (unchanged from original)
-function createSingleLineSymbol(lineSymbolizer: StrokeSymbolizer): SimpleLineSymbol {
-    const {
-        stroke,
-        "stroke-width": strokeWidth,
-        "stroke-linecap": strokeLinecap,
-        "stroke-linejoin": strokeLinejoin,
-        "stroke-dasharray": strokeDasharray,
-    } = lineSymbolizer;
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", "2");
+    line.setAttribute("y1", "10");
+    line.setAttribute("x2", "30");
+    line.setAttribute("y2", "10");
+    line.setAttribute("stroke", topLine.stroke || "#000000");
+    line.setAttribute("stroke-width", widestLine["stroke-width"] || "1");
+    line.setAttribute("stroke-linecap", topLine["stroke-linecap"] || "round");
+    line.setAttribute("stroke-linejoin", topLine["stroke-linejoin"] || "round");
 
-    /**
-     * The following code addresses the issue of mapping dasharray patterns to ArcGIS SimpleLineSymbol styles.
-     * Because the SLD spec uses dasharray patterns that are not directly supported by the ArcGIS JS API,
-     * the code maps the dasharray patterns to the closest supported style in ArcGIS JS API.
-     * See the style options at: https://developers.arcgis.com/javascript/latest/api-reference/esri-symbols-SimpleLineSymbol.html?#style
-     * If new patterns are needed, they need to be added to the map below.
-     */
-
-    type LineSymbolStyle = "solid" | "dash" | "dash-dot" | "dot" | "long-dash" | "long-dash-dot" | "long-dash-dot-dot" | "none" | "short-dash" | "short-dash-dot" | "short-dash-dot-dot" | "short-dot";
-
-    // Explicitly typing the dashMap to be a Record with string keys and string values
-    const dashMap: Record<string, LineSymbolStyle> = {
-        '8.0,2.0': 'short-dash',
-        '3.0,3.0': 'short-dot',
-        '4.0,4.0': 'long-dash',
-        '1.0,1.0': 'dot',
-        // Add more patterns as needed
-    };
-
-    // Function to map dasharray to the style using the lookup object
-    function mapDashArrayToStyle(dasharray: string[]): LineSymbolStyle {
-        // Create a key by joining the dasharray values (which now include decimals)
-        const dashKey = dasharray.join(',');
-        // Return the corresponding style from the object, or default to 'solid' if not found
-        return dashMap[dashKey] || 'solid';
+    if (topLine["stroke-opacity"]) {
+        line.setAttribute("stroke-opacity", topLine["stroke-opacity"]);
     }
 
-    // Map the dash array to one of the GeoServer styles
-    const style = strokeDasharray ? mapDashArrayToStyle(strokeDasharray) : 'solid';
-
-    return new SimpleLineSymbol({
-        color: stroke,
-        width: strokeWidth,
-        cap: strokeLinecap,
-        join: strokeLinejoin,
-        style: style,  // Use the mapped style here
-        miterLimit: 2,
-    });
+    svg.appendChild(line);
+    return svg;
 }
 
+// Helper function to create a single line symbol SVG
+function createSingleLineSymbolSVG(lineSymbolizer: StrokeSymbolizer): SVGSVGElement {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "32");
+    svg.setAttribute("height", "20");
+    svg.setAttribute("viewBox", "0 0 32 20");
+
+    const line = createSVGLineElement(lineSymbolizer);
+    svg.appendChild(line);
+
+    return svg;
+}
 
 type SymbolizerWithPolygon = Symbolizer & { Polygon: FillSymbolizer | StrokeSymbolizer };
 
@@ -211,12 +181,13 @@ function handleStrokeSymbolizer(strokeSymbolizer: StrokeSymbolizer) {
     return { strokeColorWithOpacity, strokeWidth, strokeJoin, strokeCap };
 }
 
-export function createPolygonSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
-    let fillColorWithOpacity = "";
-    let strokeColorWithOpacity = "";
+export function createPolygonSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
+    let fillColorWithOpacity = "transparent";
+    let strokeColorWithOpacity = "#000000";
     let strokeWidth = 1;
     let strokeJoin: LineJoin = "round";
     let strokeCap: LineCap = "round";
+    let strokeDasharray = "";
 
     const PolygonSymbolizer = symbolizers.find(symbolizer => 'Polygon' in symbolizer)?.Polygon as StrokeSymbolizer;
 
@@ -236,23 +207,44 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
                 strokeWidth = strokeSymbolizer.strokeWidth;
                 strokeJoin = strokeSymbolizer.strokeJoin;
                 strokeCap = strokeSymbolizer.strokeCap;
+
+                // Handle dash array
+                const strokeData = symbolizer.Polygon as StrokeSymbolizer;
+                if (strokeData["stroke-dasharray"]) {
+                    strokeDasharray = strokeData["stroke-dasharray"].join(" ");
+                }
             }
         }
     });
 
-    return new SimpleFillSymbol({
-        color: fillColorWithOpacity,
-        style: "solid", // Default style
-        outline: {
-            color: strokeColorWithOpacity,
-            width: strokeWidth,
-            join: strokeJoin,
-            cap: strokeCap
-        }
-    });
+    // Create SVG polygon
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "32");
+    svg.setAttribute("height", "20");
+    svg.setAttribute("viewBox", "0 0 32 20");
+
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", "2");
+    rect.setAttribute("y", "3");
+    rect.setAttribute("width", "28");
+    rect.setAttribute("height", "14");
+    rect.setAttribute("fill", fillColorWithOpacity);
+    rect.setAttribute("stroke", strokeColorWithOpacity);
+    rect.setAttribute("stroke-width", strokeWidth.toString());
+    rect.setAttribute("stroke-linecap", strokeCap);
+    rect.setAttribute("stroke-linejoin", strokeJoin);
+
+    if (strokeDasharray) {
+        rect.setAttribute("stroke-dasharray", strokeDasharray);
+    }
+
+    svg.appendChild(rect);
+    return svg;
 }
 
-function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
+function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
+
+
     // Find the first symbolizer that has a 'Point' property
     const pointSymbolizer = symbolizers.find(symbolizer => 'Point' in symbolizer)?.Point;
 
@@ -261,8 +253,9 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
         throw new Error("No valid Point symbolizer found in the provided symbolizers.");
     }
 
-    // Destructure only the required properties from the Point symbolizer
+    // Destructure properties from the Point symbolizer
     const { size, opacity, rotation, url, graphics } = pointSymbolizer;
+
     // Ensure there is at least one graphic in the 'graphics' array
     const graphic = graphics && graphics.length > 0 ? graphics[0] : null;
 
@@ -270,54 +263,188 @@ function createPointSymbol(symbolizers: Symbolizer[]): __esri.Symbol {
         throw new Error("No valid graphic found in the Point symbolizer.");
     }
 
-    // Destructure only the required properties from the graphic
+    // Parse the size, opacity, and rotation with default values
+    const rawParsedSize = parseSize(size);
+    const parsedOpacity = parseFloat(opacity) || 1.0;
+    const parsedRotation = parseFloat(rotation) || 0.0;
+
+    // Smart sizing for legend display
+    let parsedSize: number;
+    if (rawParsedSize <= 5) {
+        // Small points (like wells) - make them bigger for visibility
+        parsedSize = Math.max(6, rawParsedSize * 1.5);
+    } else if (rawParsedSize <= 20) {
+        // Medium points - keep them reasonable
+        parsedSize = Math.min(16, rawParsedSize * 0.8);
+    } else {
+        // Large points (like your interpolated ones) - scale them down significantly
+        parsedSize = Math.min(18, 8 + (rawParsedSize - 20) * 0.3);
+    }
+
+    // Create SVG
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "32");
+    svg.setAttribute("height", "20");
+    svg.setAttribute("viewBox", "0 0 32 20");
+
+    const centerX = 16; // Center of 32px width
+    const centerY = 10; // Center of 20px height
+    const radius = parsedSize / 2; // Radius for the shape based on parsed size
+
+    // Check for external graphic first (but only if it's a proper external graphic)
+    if (graphic["external-graphic-url"] && graphic["external-graphic-type"]) {
+
+        const imageUrl = graphic["external-graphic-url"];
+        const scaledSize = parsedSize;
+
+        // Create image element
+        const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
+        image.setAttribute("href", imageUrl);
+        image.setAttribute("x", (centerX - parsedSize / 2).toString());
+        image.setAttribute("y", (centerY - parsedSize / 2).toString());
+        image.setAttribute("width", scaledSize.toString());
+        image.setAttribute("height", scaledSize.toString());
+
+        // Apply opacity if specified
+        if (parsedOpacity !== 1.0) {
+            image.setAttribute("opacity", parsedOpacity.toString());
+        }
+
+        // Apply rotation if specified
+        if (parsedRotation !== 0) {
+            image.setAttribute("transform", `rotate(${parsedRotation} ${centerX} ${centerY})`);
+        }
+
+        svg.appendChild(image);
+
+        return svg;
+    }
+
+    // SKIP URL FALLBACK - go directly to basic shape rendering for marks
+
     const { fill, stroke, mark } = graphic;
     const fillOpacity = graphic["fill-opacity"];
     const strokeWidth = graphic["stroke-width"];
 
-    // Parse the size, opacity, and rotation with default values
-    const parsedSize = parseSize(size);
-    const parsedOpacity = parseFloat(opacity) || 1.0; // Default opacity to 1 if it's invalid
-    const parsedRotation = parseFloat(rotation) || 0.0; // Default rotation to 0 if it's invalid
 
-    // Add opacity to the fill color if necessary
-    const fillColorWithOpacity = addOpacityToHex(fill, parsedOpacity * parseFloat(fillOpacity || "1"));
 
-    // Define the allowed simple marker styles with proper typing
-    type SimpleMarkerStyle = "circle" | "square" | "diamond" | "cross" | "x" | "triangle";
+    let element: SVGElement;
 
-    // Map mark values to valid SimpleMarkerSymbol styles
-    const markToStyleMap: Record<string, SimpleMarkerStyle> = {
-        "circle": "circle",
-        "square": "square",
-        "diamond": "diamond",
-        "cross": "cross",
-        "x": "x",
-        "triangle": "triangle"
-    };
+    // Create the appropriate shape based on mark
+    switch (mark?.toLowerCase()) {
+        case "circle":
+            element = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            element.setAttribute("cx", centerX.toString());
+            element.setAttribute("cy", centerY.toString());
+            element.setAttribute("r", radius.toString());
+            break;
+        case "square":
+            element = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            element.setAttribute("x", (centerX - radius).toString());
+            element.setAttribute("y", (centerY - radius).toString());
+            element.setAttribute("width", parsedSize.toString());
+            element.setAttribute("height", parsedSize.toString());
+            break;
+        case "triangle":
+            element = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const height = parsedSize * Math.sqrt(3) / 2;
+            const points = [
+                [centerX, centerY - height / 2],
+                [centerX - radius, centerY + height / 2],
+                [centerX + radius, centerY + height / 2]
+            ].map(point => point.join(',')).join(' ');
+            element.setAttribute("points", points);
+            break;
 
-    // Check if mark is a valid SimpleMarkerSymbol style
-    const style = mark ? markToStyleMap[mark.toLowerCase()] as SimpleMarkerStyle : undefined;
+        case "diamond":
+            element = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const diamondPoints = [
+                [centerX, centerY - radius],
+                [centerX + radius, centerY],
+                [centerX, centerY + radius],
+                [centerX - radius, centerY]
+            ].map(point => point.join(',')).join(' ');
+            element.setAttribute("points", diamondPoints);
 
-    if (style) {
-        return new SimpleMarkerSymbol({
-            style,
-            color: fillColorWithOpacity,
-            size: parsedSize,
-            angle: parsedRotation,
-            outline: {
-                color: stroke, // Use stroke color from graphic
-                width: parseFloat(strokeWidth || "1"), // Use stroke width from graphic
-            }
-        });
+            break;
+
+        case "cross":
+
+            element = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const crossLine1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            crossLine1.setAttribute("x1", (centerX - radius).toString());
+            crossLine1.setAttribute("y1", centerY.toString());
+            crossLine1.setAttribute("x2", (centerX + radius).toString());
+            crossLine1.setAttribute("y2", centerY.toString());
+            crossLine1.setAttribute("stroke", stroke || "#000000");
+            crossLine1.setAttribute("stroke-width", strokeWidth || "1");
+
+            const crossLine2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            crossLine2.setAttribute("x1", centerX.toString());
+            crossLine2.setAttribute("y1", (centerY - radius).toString());
+            crossLine2.setAttribute("x2", centerX.toString());
+            crossLine2.setAttribute("y2", (centerY + radius).toString());
+            crossLine2.setAttribute("stroke", stroke || "#000000");
+            crossLine2.setAttribute("stroke-width", strokeWidth || "1");
+
+            element.appendChild(crossLine1);
+            element.appendChild(crossLine2);
+            break;
+
+        case "x":
+            element = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const xLine1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            xLine1.setAttribute("x1", (centerX - radius).toString());
+            xLine1.setAttribute("y1", (centerY - radius).toString());
+            xLine1.setAttribute("x2", (centerX + radius).toString());
+            xLine1.setAttribute("y2", (centerY + radius).toString());
+            xLine1.setAttribute("stroke", stroke || "#000000");
+            xLine1.setAttribute("stroke-width", strokeWidth || "1");
+
+            const xLine2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            xLine2.setAttribute("x1", (centerX + radius).toString());
+            xLine2.setAttribute("y1", (centerY - radius).toString());
+            xLine2.setAttribute("x2", (centerX - radius).toString());
+            xLine2.setAttribute("y2", (centerY + radius).toString());
+            xLine2.setAttribute("stroke", stroke || "#000000");
+            xLine2.setAttribute("stroke-width", strokeWidth || "1");
+
+            element.appendChild(xLine1);
+            element.appendChild(xLine2);
+            break;
+
+        default:
+            // Default to circle for unknown marks
+            element = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            element.setAttribute("cx", centerX.toString());
+            element.setAttribute("cy", centerY.toString());
+            element.setAttribute("r", radius.toString());
+            break;
     }
 
-    // If mark is not a recognized simple marker style, use PictureMarkerSymbol
-    return new PictureMarkerSymbol({
-        url: url || mark, // Treat mark as the URL for custom icon or font-based symbol
-        width: parsedSize * SCALING_FACTOR,
-        height: parsedSize * SCALING_FACTOR,
-    });
+    // Apply common styling (for shapes that support fill/stroke)
+    if (mark?.toLowerCase() !== "cross" && mark?.toLowerCase() !== "x") {
+        const finalFill = fill || "#000000";
+        const finalFillOpacity = (parsedOpacity * parseFloat(fillOpacity || "1"));
+        const finalStroke = stroke || "#000000";
+        const finalStrokeWidth = strokeWidth || "1";
+
+        element.setAttribute("fill", finalFill);
+        element.setAttribute("fill-opacity", finalFillOpacity.toString());
+        element.setAttribute("stroke", finalStroke);
+        element.setAttribute("stroke-width", finalStrokeWidth);
+    }
+
+    // Apply rotation if specified
+    if (parsedRotation !== 0) {
+        element.setAttribute("transform", `rotate(${parsedRotation} ${centerX} ${centerY})`);
+
+    }
+
+    svg.appendChild(element);
+
+
+    return svg;
 }
 
 // Utility function for parsing size, including expressions
@@ -326,10 +453,64 @@ function parseSize(size: string | number): number {
     if (typeof size === 'number') {
         return size;
     }
-    // For strings, attempt to parse as a number
-    const parsed = parseFloat(size);
-    // If parsing succeeds, return the parsed value; otherwise return default
-    return !isNaN(parsed) ? parsed : 16;
+
+    // Handle string values
+    if (typeof size === 'string') {
+        // Check if it's a simple numeric string first
+        const simpleNumeric = parseFloat(size);
+        if (!isNaN(simpleNumeric)) {
+
+            return simpleNumeric;
+        }
+
+        // Handle interpolation expressions like [Interpolate(capacity_mtco2,'4.719877','10','5764.043791','60')]
+        if (size.includes('Interpolate')) {
+
+
+            // More flexible regex to handle various quote patterns and spacing
+            const match = size.match(/Interpolate\([^,]+,\s*['"]?([^'",]+)['"]?\s*,\s*['"]?([^'",]+)['"]?\s*,\s*['"]?([^'",]+)['"]?\s*,\s*['"]?([^'",]+)['"]?\s*\)/);
+
+            if (match) {
+                const [, minInput, minOutput, maxInput, maxOutput] = match;
+
+
+                const minSize = parseFloat(minOutput);
+                const maxSize = parseFloat(maxOutput);
+
+                // For legend purposes, use the maximum size to show the upper end
+                if (!isNaN(minSize) && !isNaN(maxSize)) {
+                    // average the two sizes for a more balanced legend size
+                    const legendSize = (minSize + maxSize) / 2;
+
+
+                    return legendSize;
+                }
+            } else {
+                // Fallback: extract all numbers from the expression
+                const numbers = size.match(/\d+\.?\d*/g);
+
+                if (numbers && numbers.length >= 2) {
+                    // Use the maximum of the last two numbers (size range)
+                    const lastTwo = numbers.slice(-2).map(parseFloat);
+                    const maxSize = Math.max(lastTwo[0], lastTwo[1]);
+                    return maxSize;
+                }
+            }
+        }
+
+
+
+        // Final fallback: extract any numeric values
+        const numbers = size.match(/\d+\.?\d*/g);
+        if (numbers && numbers.length > 0) {
+            const fallbackSize = parseFloat(numbers[numbers.length - 1]);
+            return fallbackSize;
+        }
+    }
+
+    // If all parsing fails, return default
+
+    return 16;
 }
 
 // Utility function for adding opacity to a hex color
