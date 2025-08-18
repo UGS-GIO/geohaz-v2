@@ -244,6 +244,7 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
 
 function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
 
+    console.log(`Creating point symbol with symbolizers:`, symbolizers);
 
     // Find the first symbolizer that has a 'Point' property
     const pointSymbolizer = symbolizers.find(symbolizer => 'Point' in symbolizer)?.Point;
@@ -254,7 +255,7 @@ function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
     }
 
     // Destructure properties from the Point symbolizer
-    const { size, opacity, rotation, url, graphics } = pointSymbolizer;
+    const { size, opacity, rotation, graphics } = pointSymbolizer;
 
     // Ensure there is at least one graphic in the 'graphics' array
     const graphic = graphics && graphics.length > 0 ? graphics[0] : null;
@@ -289,7 +290,9 @@ function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
 
     const centerX = 16; // Center of 32px width
     const centerY = 10; // Center of 20px height
-    const radius = parsedSize / 2; // Radius for the shape based on parsed size
+    const pointToPixelRatio = 4 / 3; // 1pt = 1.33px approximately
+    const pixelSize = rawParsedSize * pointToPixelRatio;
+    const radius = pixelSize / 2;
 
     // Check for external graphic first (but only if it's a proper external graphic)
     if (graphic["external-graphic-url"] && graphic["external-graphic-type"]) {
@@ -447,58 +450,25 @@ function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
     return svg;
 }
 
-// Utility function for parsing size, including expressions
+// Utility function to parse size from string or number
 function parseSize(size: string | number): number {
-    // Handle number values directly
+    // Handle number values directly but with a maximum limit
     if (typeof size === 'number') {
         return size;
     }
 
     // Handle string values
     if (typeof size === 'string') {
-        // Check if it's a simple numeric string first
+        // Check if it's a simple numeric string first (for legend-only rules)
         const simpleNumeric = parseFloat(size);
         if (!isNaN(simpleNumeric)) {
-
-            return simpleNumeric;
+            return simpleNumeric > 17 ? 17 : simpleNumeric; // Cap at 17 to avoid overflowing the parent container
         }
 
-        // Handle interpolation expressions like [Interpolate(capacity_mtco2,'4.719877','10','5764.043791','60')]
+        // Handle interpolation expressions (for category rules)
         if (size.includes('Interpolate')) {
-
-
-            // More flexible regex to handle various quote patterns and spacing
-            const match = size.match(/Interpolate\([^,]+,\s*['"]?([^'",]+)['"]?\s*,\s*['"]?([^'",]+)['"]?\s*,\s*['"]?([^'",]+)['"]?\s*,\s*['"]?([^'",]+)['"]?\s*\)/);
-
-            if (match) {
-                const [, minInput, minOutput, maxInput, maxOutput] = match;
-
-
-                const minSize = parseFloat(minOutput);
-                const maxSize = parseFloat(maxOutput);
-
-                // For legend purposes, use the maximum size to show the upper end
-                if (!isNaN(minSize) && !isNaN(maxSize)) {
-                    // average the two sizes for a more balanced legend size
-                    const legendSize = (minSize + maxSize) / 2;
-
-
-                    return legendSize;
-                }
-            } else {
-                // Fallback: extract all numbers from the expression
-                const numbers = size.match(/\d+\.?\d*/g);
-
-                if (numbers && numbers.length >= 2) {
-                    // Use the maximum of the last two numbers (size range)
-                    const lastTwo = numbers.slice(-2).map(parseFloat);
-                    const maxSize = Math.max(lastTwo[0], lastTwo[1]);
-                    return maxSize;
-                }
-            }
+            return 12; // Default to 12 for Interpolate expressions
         }
-
-
 
         // Final fallback: extract any numeric values
         const numbers = size.match(/\d+\.?\d*/g);
@@ -509,7 +479,6 @@ function parseSize(size: string | number): number {
     }
 
     // If all parsing fails, return default
-
     return 16;
 }
 
