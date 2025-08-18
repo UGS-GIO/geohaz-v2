@@ -272,13 +272,13 @@ function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
     // Smart sizing for legend display
     let parsedSize: number;
     if (rawParsedSize <= 5) {
-        // Small points (like wells) - make them bigger for visibility
+        // Small points - make them bigger for visibility
         parsedSize = Math.max(6, rawParsedSize * 1.5);
     } else if (rawParsedSize <= 20) {
         // Medium points - keep them reasonable
         parsedSize = Math.min(16, rawParsedSize * 0.8);
     } else {
-        // Large points (like your interpolated ones) - scale them down significantly
+        // Large points - scale them down significantly
         parsedSize = Math.min(18, 8 + (rawParsedSize - 20) * 0.3);
     }
 
@@ -291,6 +291,7 @@ function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
     const centerX = 16; // Center of 32px width
     const centerY = 10; // Center of 20px height
     const pointToPixelRatio = 4 / 3; // 1pt = 1.33px approximately
+    const imageRatio = 5 / 4; // 1.25 for image scaling
     const pixelSize = rawParsedSize * pointToPixelRatio;
     const radius = pixelSize / 2;
 
@@ -298,15 +299,15 @@ function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
     if (graphic["external-graphic-url"] && graphic["external-graphic-type"]) {
 
         const imageUrl = graphic["external-graphic-url"];
-        const scaledSize = parsedSize;
+        const imageSize = rawParsedSize * imageRatio; // Convert size to pixels
 
         // Create image element
         const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
         image.setAttribute("href", imageUrl);
-        image.setAttribute("x", (centerX - parsedSize / 2).toString());
-        image.setAttribute("y", (centerY - parsedSize / 2).toString());
-        image.setAttribute("width", scaledSize.toString());
-        image.setAttribute("height", scaledSize.toString());
+        image.setAttribute("x", (centerX - imageSize / 2).toString());
+        image.setAttribute("y", (centerY - imageSize / 2).toString());
+        image.setAttribute("width", imageSize.toString());
+        image.setAttribute("height", imageSize.toString());
 
         // Apply opacity if specified
         if (parsedOpacity !== 1.0) {
