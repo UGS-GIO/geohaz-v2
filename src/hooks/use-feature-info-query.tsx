@@ -155,19 +155,26 @@ const reorderLayers = (layerInfo: LayerContentProps[], layerOrderConfigs: LayerO
 export const getSourceCRSFromGeoJSON = (geoJson: GeoServerGeoJSON | any): string => {
     const crsName = geoJson?.crs?.properties?.name;
     if (typeof crsName === 'string') {
-        // Handle both formats: "EPSG:4326" and "urn:ogc:def:crs:EPSG::4326"
-        const epsgMatch = crsName.match(/EPSG::?(\d+)/);
-        if (epsgMatch && epsgMatch[1]) {
-            // Match either "urn:ogc:def:crs:EPSG::4326" or "EPSG:4326"
-            const epsgMatch = crsName.match(/^(?:urn:ogc:def:crs:)?EPSG::(\d+)$/) || crsName.match(/^EPSG:(\d+)$/);
-
-            if (epsgMatch && (epsgMatch[1] || epsgMatch[2])) {
-                return `EPSG:${epsgMatch[1] || epsgMatch[2]}`;
-            }
+        // Handle URN format: "urn:ogc:def:crs:EPSG::4326"
+        const urnMatch = crsName.match(/^urn:ogc:def:crs:EPSG::(\d+)$/);
+        if (urnMatch && urnMatch[1]) {
+            return `EPSG:${urnMatch[1]}`;
         }
 
-        // Handle direct EPSG format
-        if (crsName.startsWith('EPSG:')) {
+        // Handle direct EPSG format: "EPSG:4326"
+        const epsgMatch = crsName.match(/^EPSG:(\d+)$/);
+        if (epsgMatch && epsgMatch[1]) {
+            return `EPSG:${epsgMatch[1]}`;
+        }
+
+        // Handle legacy format with double colon: "EPSG::4326"
+        const legacyMatch = crsName.match(/^EPSG::(\d+)$/);
+        if (legacyMatch && legacyMatch[1]) {
+            return `EPSG:${legacyMatch[1]}`;
+        }
+
+        // If it already starts with EPSG: and looks valid, return as-is
+        if (crsName.startsWith('EPSG:') && /^EPSG:\d+$/.test(crsName)) {
             return crsName;
         }
     }
