@@ -5,14 +5,14 @@ import Map from '@/pages/ccus';
 
 const ccusSearchSchema = z.object({
     core: z.enum(['yes', 'no']).optional(),
-    formation: z.string().optional(),
+    formations: z.string().optional(),
     filters: z.record(z.string()).optional(),
 }).strip();
 
 export const Route = createFileRoute('/ccus/')({
     component: () => <Map />,
     validateSearch: (search: Record<string, unknown>) => {
-        let { core, formation, filters } = ccusSearchSchema.parse(search);
+        let { core, formations, filters } = ccusSearchSchema.parse(search);
 
         const layers = z.object({
             selected: z.array(z.string()).optional(),
@@ -25,14 +25,26 @@ export const Route = createFileRoute('/ccus/')({
         // Rule 1: If the Wells Database layer is not selected, its filters must be cleared.
         if (!newSelectedSet.has(wellWithTopsWMSTitle)) {
             core = undefined;
-            formation = undefined;
+            formations = undefined;
         }
+
+        // Parse formations from comma-separated string
+        const formationArray = formations ? formations.split(',').filter(Boolean) : [];
 
         // Build the filter string from the (now validated) UI params.
         const wellFilterParts: string[] = [];
         if (core === "yes") wellFilterParts.push(`hascore = 'True'`);
         if (core === "no") wellFilterParts.push(`hascore = 'False'`);
-        if (formation) wellFilterParts.push(`${formation} IS NOT NULL`);
+
+        // Build formation filter with OR logic for multiple formations
+        if (formationArray.length > 0) {
+            const formationFilter = formationArray.map(formation => `${formation} IS NOT NULL`).join(' OR ');
+            if (formationArray.length > 1) {
+                wellFilterParts.push(`(${formationFilter})`);
+            } else {
+                wellFilterParts.push(formationFilter);
+            }
+        }
 
         const combinedWellFilter = wellFilterParts.length > 0 ? wellFilterParts.join(' AND ') : null;
 
@@ -47,7 +59,7 @@ export const Route = createFileRoute('/ccus/')({
         // Return the final, synchronized search object.
         return {
             core,
-            formation,
+            formations,
             filters: Object.keys(newFilters).length > 0 ? newFilters : undefined,
             layers: {
                 ...layers,
