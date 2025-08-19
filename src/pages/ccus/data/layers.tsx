@@ -734,7 +734,7 @@ const ccsExclusionAreasWMSConfig: WMSLayerProps = {
 
 
 const geothermalPowerplantsLayerName = 'ccus_geothermalpowerplants';
-const geothermalPowerplantsWMSTitle = 'Geothermal Powerplants';
+const geothermalPowerplantsWMSTitle = 'Geothermal Power Plants';
 const geothermalPowerplantsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
