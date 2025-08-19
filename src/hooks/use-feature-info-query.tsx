@@ -6,6 +6,7 @@ import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
 import { LayerContentProps } from '@/components/custom/popups/popup-content-with-pagination';
 import { createBbox } from "@/lib/map/utils";
 import { useLayerUrl } from '@/context/layer-url-provider';
+import { GeoServerGeoJSON } from '@/lib/types/geoserver-types';
 
 interface WMSQueryProps {
     mapPoint: __esri.Point;
@@ -148,13 +149,21 @@ const reorderLayers = (layerInfo: LayerContentProps[], layerOrderConfigs: LayerO
 /**
  * Safely parses the CRS from a GeoJSON object from GeoServer.
  * Defaults to WGS 84 ('EPSG:4326') if the crs member is missing, per the GeoJSON spec.
+ * @param geoJson - The GeoServer GeoJSON object to extract the CRS from.
+ * @returns The CRS in EPSG format (e.g., 'EPSG:4326')
  */
-const getSourceCRSFromGeoJSON = (geoJson: any): string => {
+export const getSourceCRSFromGeoJSON = (geoJson: GeoServerGeoJSON | any): string => {
     const crsName = geoJson?.crs?.properties?.name;
     if (typeof crsName === 'string') {
-        const epsgMatch = crsName.match(/EPSG::(\d+)/);
+        // Handle both formats: "EPSG:4326" and "urn:ogc:def:crs:EPSG::4326"
+        const epsgMatch = crsName.match(/EPSG::?(\d+)/);
         if (epsgMatch && epsgMatch[1]) {
             return `EPSG:${epsgMatch[1]}`;
+        }
+
+        // Handle direct EPSG format
+        if (crsName.startsWith('EPSG:')) {
+            return crsName;
         }
     }
     // If no CRS is specified, default to WGS 84
