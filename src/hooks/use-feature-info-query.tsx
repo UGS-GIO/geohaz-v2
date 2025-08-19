@@ -158,7 +158,12 @@ export const getSourceCRSFromGeoJSON = (geoJson: GeoServerGeoJSON | any): string
         // Handle both formats: "EPSG:4326" and "urn:ogc:def:crs:EPSG::4326"
         const epsgMatch = crsName.match(/EPSG::?(\d+)/);
         if (epsgMatch && epsgMatch[1]) {
-            return `EPSG:${epsgMatch[1]}`;
+            // Match either "urn:ogc:def:crs:EPSG::4326" or "EPSG:4326"
+            const epsgMatch = crsName.match(/^(?:urn:ogc:def:crs:)?EPSG::(\d+)$/) || crsName.match(/^EPSG:(\d+)$/);
+
+            if (epsgMatch && (epsgMatch[1] || epsgMatch[2])) {
+                return `EPSG:${epsgMatch[1] || epsgMatch[2]}`;
+            }
         }
 
         // Handle direct EPSG format
