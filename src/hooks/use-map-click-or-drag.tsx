@@ -6,6 +6,12 @@ interface UseMapClickOrDragProps {
     onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
+/**
+ * A hook to handle click or drag interactions on a map container.
+ * It distinguishes between a click and a drag based on mouse movement.
+ * @param onClick - Callback function to be called on click events. 
+ * @returns An object containing the dragging state and event handlers for mouse interactions.
+ */
 export function useMapClickOrDrag({ onClick }: UseMapClickOrDragProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [startPos, setStartPos] = useState({ x: 0, y: 0 });

@@ -5,6 +5,7 @@ import { Feature } from 'geojson';
 import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
 import { LayerContentProps } from '@/components/custom/popups/popup-content-with-pagination';
 import { createBbox } from "@/lib/map/utils";
+import { useLayerUrl } from '@/context/layer-url-provider';
 
 interface WMSQueryProps {
     mapPoint: __esri.Point;
@@ -169,6 +170,7 @@ interface UseFeatureInfoQueryProps {
 
 export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrderConfigs }: UseFeatureInfoQueryProps) {
     const [mapPoint, setMapPoint] = useState<Point | null>(null);
+    const { activeFilters } = useLayerUrl();
 
     const queryFn = async (): Promise<LayerContentProps[]> => {
         if (!view || !mapPoint) return [];
@@ -179,22 +181,91 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
 
         if (queryableLayers.length === 0) return [];
 
+        // Create a mapping from titles to layer keys for easier lookup
+        const titleToKeyMap: Record<string, string> = {};
+        Object.entries(visibleLayersMap).forEach(([key, layerConfig]) => {
+            const layerTitle = (layerConfig.layerTitle || layerConfig.groupLayerTitle || "Unnamed Layer").trim();
+            titleToKeyMap[layerTitle] = key;
+        });
+
+        // Build CQL filters - one filter per layer, separated by semicolons
+        let combinedCqlFilter: string | null = null;
+
+        // Check if we have any filters at all
+        const hasAnyFilters = queryableLayers.some(layerKey => {
+            const layerConfig = visibleLayersMap[layerKey];
+            console.log('layerconfig', layerConfig);
+
+            const layerTitle = (layerConfig.layerTitle || layerConfig.groupLayerTitle || "Unnamed Layer").trim();
+            const staticFilter = (layerConfig as any).customLayerParameters?.cql_filter;
+            console.log('staticFilter', staticFilter);
+
+            const dynamicFilter = activeFilters && activeFilters[layerTitle];
+            return staticFilter || dynamicFilter;
+        });
+
+        if (hasAnyFilters) {
+            const filterParts: string[] = [];
+
+            // Build one filter per layer in the same order as queryableLayers
+            queryableLayers.forEach(layerKey => {
+                const layerConfig = visibleLayersMap[layerKey];
+                const layerTitle = (layerConfig.layerTitle || layerConfig.groupLayerTitle || "Unnamed Layer").trim();
+
+                console.log('Processing layer:', layerKey, 'with title:', layerTitle);
+
+                // Collect filters for this specific layer
+                const layerFilters: string[] = [];
+
+                // Add static filter from the layer's config (if it exists)
+                const staticFilter = (layerConfig as any).customLayerParameters?.cql_filter;
+                if (staticFilter) {
+                    console.log('Static CQL Filter for layer', layerTitle, ':', staticFilter);
+                    layerFilters.push(staticFilter);
+                }
+
+                // Add dynamic filter from the URL via the context hook - match by title
+                if (activeFilters && activeFilters[layerTitle]) {
+                    console.log('Found dynamic filter for layer title', layerTitle, ':', activeFilters[layerTitle]);
+                    layerFilters.push(activeFilters[layerTitle]);
+                } else {
+                    console.log('No dynamic filter found for layer title:', layerTitle);
+                }
+
+                // Combine filters for this layer with AND, or use INCLUDE if no filters
+                if (layerFilters.length > 0) {
+                    const combinedLayerFilter = layerFilters.join(' AND ');
+                    filterParts.push(combinedLayerFilter);
+                    console.log('Combined filter for layer', layerTitle, ':', combinedLayerFilter);
+                } else {
+                    filterParts.push('INCLUDE');
+                    console.log('No filters for layer', layerTitle, ', using INCLUDE');
+                }
+            });
+
+            // Join all layer filters with semicolons
+            combinedCqlFilter = filterParts.join(';');
+        } else {
+            console.log('No filters detected, using default behavior (query all visible layers)');
+        }
+
         const featureInfo = await fetchWMSFeatureInfo({
             mapPoint,
             view,
             layers: queryableLayers,
-            url: wmsUrl
+            url: wmsUrl,
+            cql_filter: combinedCqlFilter
         });
 
         if (!featureInfo || !featureInfo.features) return [];
 
-        // Extract the source CRS for all features in this response.
         const sourceCRS = getSourceCRSFromGeoJSON(featureInfo);
 
         const layerInfoPromises = Object.entries(visibleLayersMap)
             .filter(([_, value]) => value.visible)
             .map(async ([key, value]) => {
                 const baseLayerInfo = {
+                    customLayerParameters: value.customLayerParameters,
                     visible: value.visible,
                     layerTitle: value.layerTitle,
                     groupLayerTitle: value.groupLayerTitle,
@@ -237,7 +308,7 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
     };
 
     const { data, isFetching, isSuccess, refetch } = useQuery({
-        queryKey: ['wmsFeatureInfo', mapPoint?.toJSON()],
+        queryKey: ['wmsFeatureInfo', mapPoint?.toJSON(), activeFilters],
         queryFn,
         enabled: false,
         refetchOnWindowFocus: false,
