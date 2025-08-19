@@ -39,26 +39,26 @@ const acknowledgments = (
             This web application was created to visualize the carbon storage potential of the state of Utah and make the associated data available for download by industry professionals, local government agencies, lawmakers, and the public. The project included gathering data related to subsurface exploration and fixing data gaps through new stratigraphic analysis and interpretation of data with partners from the University of Utah. The project also included investigating community perspectives on CCUS in Utah in collaboration with Anthropology and Sociology faculty at the University of Utah. Funding was provided by the U.S. Department of Energy, grant #DE-FE0032367 as part of the 2799 FOA.
         </p>
         <p>
-            <strong><Link to="https://geology.utah.gov/about-us/data-management-program/">Utah Geological Survey</Link> project team:</strong> Dr. Gabriela St. Pierre, Dr. Eugene Szymanski, Michael Vanden Berg, Tara Tankersley
+            <Link to="https://geology.utah.gov/">Utah Geological Survey</Link> project team: Dr. Gabriela St. Pierre, Dr. Eugene Szymanski, Michael Vanden Berg, Tara Tankersley
         </p>
         <p>
-            <strong>University of Utah project team:</strong>
+            University of Utah project team:
         </p>
         <p className="pl-4">
-            <strong><Link to="https://egi.utah.edu/">Energy and Geoscience Institute</Link>:</strong> Prof. Nathan Moodie and Dr. Eric Edelman;
+            <Link to="https://egi.utah.edu/">Energy and Geoscience Institute</Link>: Prof. Nathan Moodie and Dr. Eric Edelman;
 
         </p>
         <p className="pl-4">
-            <strong><Link to="https://earth.utah.edu/">Geology and Geophysics</Link>:</strong> Dr. Cari Johnson, Dr. Liz Mahon, and Rohanna Bowers (M.S. student);
+            <Link to="https://earth.utah.edu/">Geology and Geophysics</Link>: Dr. Cari Johnson, Dr. Liz Mahon, and Rohanna Bowers (M.S. student);
         </p>
         <p className="pl-4">
-            <strong><Link to="https://anthro.utah.edu/">Anthropology and Sociology</Link>:</strong> Dr. Kate Magargal, Dr. Lazarus Adua, Sarah Dyer (Ph.D. candidate)
+            <Link to="https://anthro.utah.edu/">Anthropology and Sociology</Link>: Dr. Kate Magargal, Dr. Lazarus Adua, Sarah Dyer (Ph.D. candidate)
         </p>
         <p>
-            <strong>Data curation and database formatting:</strong> Gabriela St. Pierre, Nathan Payne, Tara Tankersley
+            Data curation and database formatting: Gabriela St. Pierre, Nathan Payne, Tara Tankersley
         </p>
         <p>
-            <strong>Application development:</strong> Clinton Lunn, Marshall Robinson, Mackenzie Cope
+            Application development: Clinton Lunn, Marshall Robinson, Mackenzie Cope
         </p>
     </div>
 )
@@ -66,7 +66,7 @@ const acknowledgments = (
 const dataDisclaimer = (
     <div className="space-y-2">
         <p>
-            This web application is currently released as a beta version and remains under active development. Although we strive for accuracy and reliability, the data presented may be incomplete, outdated, or incorrect, and features may change, malfunction, or be removed without notice. Users should not rely on this application as the sole source for decision-making or critical operations, and use of the application is at your own risk. We welcome your feedback and encourage you to report any issues or suggestions to gstpierre@utah.gov to help us improve the application.
+            This web application is currently released as a beta version and remains under active development. Although we strive for accuracy and reliability, the data presented may be incomplete, outdated, or incorrect, and features may change, malfunction, or be removed without notice. Users should not rely on this application as the sole source for decision-making or critical operations, and use of the application is at your own risk. We welcome your feedback and encourage you to report any issues or suggestions to <Link to="mailto:gstpierre@utah.gov">gstpierre@utah.gov</Link> to help us improve the application.
         </p>
         <p>
             The Utah Department of Natural Resources, Utah Geological Survey, makes no warranty, expressed or implied, regarding its suitability for a particular use, and does not guarantee accuracy or completeness of the data. The Utah Department of Natural Resources, Utah Geological Survey, shall not be liable under any circumstances for any direct, indirect, special, incidental, or consequential damages with respect to claims by users of this product.
