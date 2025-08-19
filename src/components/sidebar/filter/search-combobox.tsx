@@ -660,8 +660,6 @@ const handleSearchSelect = (
 
         // Handle Masquerade type as a specific case first
         if (sourceConfig.type === 'masquerade') {
-            console.log(`Masquerade source detected at index ${sourceIndex}. Using outSR: ${sourceConfig.outSR ?? 4326}`);
-
             sourceCRS = `EPSG:${sourceConfig.outSR ?? 4326}`;
         }
         // For all other types (like PostgREST)
@@ -677,7 +675,6 @@ const handleSearchSelect = (
         }
         // Priority 3: Check the explicit search configuration.
         else if (sourceConfig.type === 'postgREST' && sourceConfig.crs) {
-            console.log(`Using explicit CRS from search config: ${sourceConfig.crs}`);
             sourceCRS = sourceConfig.crs;
         }
         // Priority 4: Final fallback to WGS84.

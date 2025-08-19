@@ -5,6 +5,8 @@ import { Feature } from 'geojson';
 import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
 import { LayerContentProps } from '@/components/custom/popups/popup-content-with-pagination';
 import { createBbox } from "@/lib/map/utils";
+import { useLayerUrl } from '@/context/layer-url-provider';
+import { GeoServerGeoJSON } from '@/lib/types/geoserver-types';
 
 interface WMSQueryProps {
     mapPoint: __esri.Point;
@@ -147,18 +149,55 @@ const reorderLayers = (layerInfo: LayerContentProps[], layerOrderConfigs: LayerO
 /**
  * Safely parses the CRS from a GeoJSON object from GeoServer.
  * Defaults to WGS 84 ('EPSG:4326') if the crs member is missing, per the GeoJSON spec.
+ * @param geoJson - The GeoServer GeoJSON object to extract the CRS from.
+ * @returns The CRS in EPSG format (e.g., 'EPSG:4326')
  */
-const getSourceCRSFromGeoJSON = (geoJson: any): string => {
+export const getSourceCRSFromGeoJSON = (geoJson: GeoServerGeoJSON): string => {
     const crsName = geoJson?.crs?.properties?.name;
     if (typeof crsName === 'string') {
-        const epsgMatch = crsName.match(/EPSG::(\d+)/);
+        // Handle URN format: "urn:ogc:def:crs:EPSG::4326"
+        const urnMatch = crsName.match(/^urn:ogc:def:crs:EPSG::(\d+)$/);
+        if (urnMatch && urnMatch[1]) {
+            return `EPSG:${urnMatch[1]}`;
+        }
+
+        // Handle direct EPSG format: "EPSG:4326"
+        const epsgMatch = crsName.match(/^EPSG:(\d+)$/);
         if (epsgMatch && epsgMatch[1]) {
             return `EPSG:${epsgMatch[1]}`;
+        }
+
+        // Handle legacy format with double colon: "EPSG::4326"
+        const legacyMatch = crsName.match(/^EPSG::(\d+)$/);
+        if (legacyMatch && legacyMatch[1]) {
+            return `EPSG:${legacyMatch[1]}`;
+        }
+
+        // If it already starts with EPSG: and looks valid, return as-is
+        if (crsName.startsWith('EPSG:') && /^EPSG:\d+$/.test(crsName)) {
+            return crsName;
         }
     }
     // If no CRS is specified, default to WGS 84
     return 'EPSG:4326';
 };
+
+/**
+ * getLayerTitle
+ * Utility function to get the layer title from a LayerContentProps object.
+ */
+export function getLayerTitle(layer: LayerContentProps): string {
+    return layer.layerTitle?.trim() || layer.groupLayerTitle?.trim() || "Unnamed Layer";
+}
+
+/**
+ * getStaticCqlFilter
+ * Utility function to get the static CQL filter from a LayerContentProps object.
+ */
+export function getStaticCqlFilter(layer: LayerContentProps): string | null {
+    if (!layer) return null;
+    return layer.customLayerParameters?.cql_filter || null;
+}
 
 interface UseFeatureInfoQueryProps {
     view: __esri.MapView | __esri.SceneView | undefined;
@@ -169,6 +208,7 @@ interface UseFeatureInfoQueryProps {
 
 export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrderConfigs }: UseFeatureInfoQueryProps) {
     const [mapPoint, setMapPoint] = useState<Point | null>(null);
+    const { activeFilters } = useLayerUrl();
 
     const queryFn = async (): Promise<LayerContentProps[]> => {
         if (!view || !mapPoint) return [];
@@ -179,22 +219,81 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
 
         if (queryableLayers.length === 0) return [];
 
+        // Create a mapping from titles to layer keys for easier lookup
+        const titleToKeyMap: Record<string, string> = {};
+        Object.entries(visibleLayersMap).forEach(([key, layerConfig]) => {
+            const layerTitle = getLayerTitle(layerConfig);
+            titleToKeyMap[layerTitle] = key;
+        });
+
+        // Build CQL filters - one filter per layer, separated by semicolons
+        let combinedCqlFilter: string | null = null;
+
+        // Check if we have any filters at all
+        const hasAnyFilters = queryableLayers.some(layerKey => {
+            const layerConfig = visibleLayersMap[layerKey];
+
+            const layerTitle = getLayerTitle(layerConfig);
+            const staticFilter = getStaticCqlFilter(layerConfig);
+
+            const dynamicFilter = activeFilters && activeFilters[layerTitle];
+            return staticFilter || dynamicFilter;
+        });
+
+        if (hasAnyFilters) {
+            const filterParts: string[] = [];
+
+            // Build one filter per layer in the same order as queryableLayers
+            queryableLayers.forEach(layerKey => {
+                const layerConfig = visibleLayersMap[layerKey];
+                const layerTitle = getLayerTitle(layerConfig);
+
+                // Collect filters for this specific layer
+                const layerFilters: string[] = [];
+
+                // Add static filter from the layer's config (if it exists)
+                const staticFilter = getStaticCqlFilter(layerConfig);
+                if (staticFilter) {
+                    layerFilters.push(staticFilter);
+                }
+
+                // Add dynamic filter from the URL via the context hook - match by title
+                if (activeFilters && activeFilters[layerTitle]) {
+                    layerFilters.push(activeFilters[layerTitle]);
+                }
+
+                // Combine filters for this layer with AND, or use INCLUDE if no filters
+                if (layerFilters.length > 0) {
+                    const combinedLayerFilter = layerFilters.join(' AND ');
+                    filterParts.push(combinedLayerFilter);
+                } else {
+                    // In WMS CQL filter context, 'INCLUDE' acts as a no-op filter for layers without specific filters. 
+                    // If omitted, the WMS server may skip the layer or return an error, so it must be present for each layer.
+                    filterParts.push('INCLUDE');
+                }
+            });
+
+            // Join all layer filters with semicolons
+            combinedCqlFilter = filterParts.join(';');
+        }
+
         const featureInfo = await fetchWMSFeatureInfo({
             mapPoint,
             view,
             layers: queryableLayers,
-            url: wmsUrl
+            url: wmsUrl,
+            cql_filter: combinedCqlFilter
         });
 
         if (!featureInfo || !featureInfo.features) return [];
 
-        // Extract the source CRS for all features in this response.
         const sourceCRS = getSourceCRSFromGeoJSON(featureInfo);
 
         const layerInfoPromises = Object.entries(visibleLayersMap)
             .filter(([_, value]) => value.visible)
             .map(async ([key, value]) => {
                 const baseLayerInfo = {
+                    customLayerParameters: value.customLayerParameters,
                     visible: value.visible,
                     layerTitle: value.layerTitle,
                     groupLayerTitle: value.groupLayerTitle,
@@ -237,7 +336,7 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
     };
 
     const { data, isFetching, isSuccess, refetch } = useQuery({
-        queryKey: ['wmsFeatureInfo', mapPoint?.toJSON()],
+        queryKey: ['wmsFeatureInfo', mapPoint?.toJSON(), activeFilters],
         queryFn,
         enabled: false,
         refetchOnWindowFocus: false,
