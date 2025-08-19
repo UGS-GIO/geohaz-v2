@@ -161,6 +161,22 @@ const getSourceCRSFromGeoJSON = (geoJson: any): string => {
     return 'EPSG:4326';
 };
 
+/**
+ * getLayerTitle
+ * Utility function to get the layer title from a LayerContentProps object.
+ */
+export function getLayerTitle(layer: LayerContentProps): string {
+    return layer.layerTitle?.trim() || layer.groupLayerTitle?.trim() || "Unnamed Layer";
+}
+
+/**
+ * getStaticCqlFilter
+ * Utility function to get the static CQL filter from a LayerContentProps object.
+ */
+export function getStaticCqlFilter(layer: LayerContentProps): string | null {
+    return layer.customLayerParameters?.cql_filter || null;
+}
+
 interface UseFeatureInfoQueryProps {
     view: __esri.MapView | __esri.SceneView | undefined;
     wmsUrl: string;
@@ -184,7 +200,7 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
         // Create a mapping from titles to layer keys for easier lookup
         const titleToKeyMap: Record<string, string> = {};
         Object.entries(visibleLayersMap).forEach(([key, layerConfig]) => {
-            const layerTitle = (layerConfig.layerTitle || layerConfig.groupLayerTitle || "Unnamed Layer").trim();
+            const layerTitle = getLayerTitle(layerConfig);
             titleToKeyMap[layerTitle] = key;
         });
 
@@ -195,8 +211,8 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
         const hasAnyFilters = queryableLayers.some(layerKey => {
             const layerConfig = visibleLayersMap[layerKey];
 
-            const layerTitle = (layerConfig.layerTitle || layerConfig.groupLayerTitle || "Unnamed Layer").trim();
-            const staticFilter = layerConfig.customLayerParameters?.cql_filter;
+            const layerTitle = getLayerTitle(layerConfig);
+            const staticFilter = getStaticCqlFilter(layerConfig);
 
             const dynamicFilter = activeFilters && activeFilters[layerTitle];
             return staticFilter || dynamicFilter;
@@ -208,13 +224,13 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
             // Build one filter per layer in the same order as queryableLayers
             queryableLayers.forEach(layerKey => {
                 const layerConfig = visibleLayersMap[layerKey];
-                const layerTitle = (layerConfig.layerTitle || layerConfig.groupLayerTitle || "Unnamed Layer").trim();
+                const layerTitle = getLayerTitle(layerConfig);
 
                 // Collect filters for this specific layer
                 const layerFilters: string[] = [];
 
                 // Add static filter from the layer's config (if it exists)
-                const staticFilter = layerConfig.customLayerParameters?.cql_filter;
+                const staticFilter = getStaticCqlFilter(layerConfig);
                 if (staticFilter) {
                     layerFilters.push(staticFilter);
                 }
@@ -229,7 +245,9 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
                     const combinedLayerFilter = layerFilters.join(' AND ');
                     filterParts.push(combinedLayerFilter);
                 } else {
-                    filterParts.push('INCLUDE'); // Needed to ensure the layer is included even if no filters are specified
+                    // In WMS CQL filter context, 'INCLUDE' acts as a no-op filter for layers without specific filters. 
+                    // If omitted, the WMS server may skip the layer or return an error, so it must be present for each layer.
+                    filterParts.push('INCLUDE');
                 }
             });
 
