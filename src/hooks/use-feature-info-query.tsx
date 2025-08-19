@@ -195,6 +195,7 @@ export function getLayerTitle(layer: LayerContentProps): string {
  * Utility function to get the static CQL filter from a LayerContentProps object.
  */
 export function getStaticCqlFilter(layer: LayerContentProps): string | null {
+    if (!layer) return null;
     return layer.customLayerParameters?.cql_filter || null;
 }
 
