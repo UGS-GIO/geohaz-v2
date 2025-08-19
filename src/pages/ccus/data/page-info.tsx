@@ -39,19 +39,20 @@ const acknowledgments = (
             This web application was created to visualize the carbon storage potential of the state of Utah and make the associated data available for download by industry professionals, local government agencies, lawmakers, and the public. The project included gathering data related to subsurface exploration and fixing data gaps through new stratigraphic analysis and interpretation of data with partners from the University of Utah. The project also included investigating community perspectives on CCUS in Utah in collaboration with Anthropology and Sociology faculty at the University of Utah. Funding was provided by the U.S. Department of Energy, grant #DE-FE0032367 as part of the 2799 FOA.
         </p>
         <p>
-            <strong>Utah Geological Survey project team:</strong> Dr. Gabriela St. Pierre, Dr. Eugene Szymanski, Michael Vanden Berg, Nathan Payne, Tara Tankersley
+            <strong><Link to="https://geology.utah.gov/about-us/data-management-program/">Utah Geological Survey</Link> project team:</strong> Dr. Gabriela St. Pierre, Dr. Eugene Szymanski, Michael Vanden Berg, Tara Tankersley
         </p>
         <p>
             <strong>University of Utah project team:</strong>
         </p>
         <p className="pl-4">
-            <strong>Energy and Geoscience Institute:</strong> Prof. Nathan Moodie and Dr. Eric Edelman;
+            <strong><Link to="https://egi.utah.edu/">Energy and Geoscience Institute</Link>:</strong> Prof. Nathan Moodie and Dr. Eric Edelman;
+
         </p>
         <p className="pl-4">
-            <strong>Geology and Geophysics:</strong> Dr. Cari Johnson, Dr. Liz Mahon, and Rohanna Bowers (M.S. student);
+            <strong><Link to="https://earth.utah.edu/">Geology and Geophysics</Link>:</strong> Dr. Cari Johnson, Dr. Liz Mahon, and Rohanna Bowers (M.S. student);
         </p>
         <p className="pl-4">
-            <strong>Anthropology and Sociology:</strong> Dr. Kate Magargal, Dr. Lazarus Adua, Sarah Dyer (Ph.D. candidate)
+            <strong><Link to="https://anthro.utah.edu/">Anthropology and Sociology</Link>:</strong> Dr. Kate Magargal, Dr. Lazarus Adua, Sarah Dyer (Ph.D. candidate)
         </p>
         <p>
             <strong>Data curation and database formatting:</strong> Gabriela St. Pierre, Nathan Payne, Tara Tankersley
