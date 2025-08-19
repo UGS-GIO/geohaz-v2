@@ -25,7 +25,7 @@ export interface LayerContentProps {
     relatedTables?: RelatedTable[]
     linkFields?: LinkFields
     colorCodingMap?: ColorCodingRecordFunction
-    customLayerParameters?: object | null | undefined
+    customLayerParameters?: { cql_filter?: string, [key: string]: any }
     rasterSource?: ProcessedRasterSource
     visible: boolean
     queryable?: boolean

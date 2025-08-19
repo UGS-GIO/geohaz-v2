@@ -194,11 +194,9 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
         // Check if we have any filters at all
         const hasAnyFilters = queryableLayers.some(layerKey => {
             const layerConfig = visibleLayersMap[layerKey];
-            console.log('layerconfig', layerConfig);
 
             const layerTitle = (layerConfig.layerTitle || layerConfig.groupLayerTitle || "Unnamed Layer").trim();
-            const staticFilter = (layerConfig as any).customLayerParameters?.cql_filter;
-            console.log('staticFilter', staticFilter);
+            const staticFilter = layerConfig.customLayerParameters?.cql_filter;
 
             const dynamicFilter = activeFilters && activeFilters[layerTitle];
             return staticFilter || dynamicFilter;
@@ -212,41 +210,31 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
                 const layerConfig = visibleLayersMap[layerKey];
                 const layerTitle = (layerConfig.layerTitle || layerConfig.groupLayerTitle || "Unnamed Layer").trim();
 
-                console.log('Processing layer:', layerKey, 'with title:', layerTitle);
-
                 // Collect filters for this specific layer
                 const layerFilters: string[] = [];
 
                 // Add static filter from the layer's config (if it exists)
-                const staticFilter = (layerConfig as any).customLayerParameters?.cql_filter;
+                const staticFilter = layerConfig.customLayerParameters?.cql_filter;
                 if (staticFilter) {
-                    console.log('Static CQL Filter for layer', layerTitle, ':', staticFilter);
                     layerFilters.push(staticFilter);
                 }
 
                 // Add dynamic filter from the URL via the context hook - match by title
                 if (activeFilters && activeFilters[layerTitle]) {
-                    console.log('Found dynamic filter for layer title', layerTitle, ':', activeFilters[layerTitle]);
                     layerFilters.push(activeFilters[layerTitle]);
-                } else {
-                    console.log('No dynamic filter found for layer title:', layerTitle);
                 }
 
                 // Combine filters for this layer with AND, or use INCLUDE if no filters
                 if (layerFilters.length > 0) {
                     const combinedLayerFilter = layerFilters.join(' AND ');
                     filterParts.push(combinedLayerFilter);
-                    console.log('Combined filter for layer', layerTitle, ':', combinedLayerFilter);
                 } else {
-                    filterParts.push('INCLUDE');
-                    console.log('No filters for layer', layerTitle, ', using INCLUDE');
+                    filterParts.push('INCLUDE'); // Needed to ensure the layer is included even if no filters are specified
                 }
             });
 
             // Join all layer filters with semicolons
             combinedCqlFilter = filterParts.join(';');
-        } else {
-            console.log('No filters detected, using default behavior (query all visible layers)');
         }
 
         const featureInfo = await fetchWMSFeatureInfo({
