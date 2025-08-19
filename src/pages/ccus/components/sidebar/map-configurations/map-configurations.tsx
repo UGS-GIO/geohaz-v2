@@ -26,7 +26,6 @@ import { MapContext } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/map/utils';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
-import { LoadingSpinner } from '@/components/custom/loading-spinner';
 import { Badge } from '@/components/ui/badge';
 
 export const findAndApplyWMSFilter = (
