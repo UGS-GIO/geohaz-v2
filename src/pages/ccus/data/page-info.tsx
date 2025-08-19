@@ -102,26 +102,26 @@ const dataSources = (
 
         <div className="space-y-2">
             <p>
-                <strong>Storage Resource Estimates - Carbon Solutions</strong>
+                <strong>Storage Resource Estimates</strong> - Carbon Solutions
             </p>
             <span><Link to="https://www.carbonsolutionsllc.com/sco%e2%82%82t%e1%b4%be%e1%b4%bf%e1%b4%bc-unlocking-the-nations-subsurface-to-support-the-energy-transition/">View website</Link></span>
 
             <p>
-                <strong>GeoRegions - Utah Geological Survey</strong>
+                <strong>GeoRegions</strong> - Utah Geological Survey
             </p>
             <span>Report coming soon</span>
 
             <p>
-                <strong>SITLA Reports - Utah Geological Survey</strong>
+                <strong>SITLA Reports</strong> - Utah Geological Survey
             </p>
             <span><Link to="https://ugspub.nr.utah.gov/publications/non_lib_pubs/contract_deliverables/EMP-1.pdf">View report</Link></span>
 
             <p>
-                <strong>CCUS Study Areas - Utah Geological Survey</strong>
+                <strong>CCUS Study Areas</strong> - Utah Geological Survey
             </p>
 
             <p>
-                <strong>CCS Exclusion Areas - Utah Geological Survey</strong>
+                <strong>CCS Exclusion Areas</strong> - Utah Geological Survey
             </p>
         </div>
 
@@ -131,15 +131,15 @@ const dataSources = (
 
         <div className="space-y-2">
             <p>
-                <strong>Wells Database - Utah Geological Survey</strong>
+                <strong>Wells Database</strong> - Utah Geological Survey
             </p>
 
             <p>
-                <strong>Cores and Cuttings - Utah Geological Survey</strong>
+                <strong>Cores and Cuttings</strong> - Utah Geological Survey
             </p>
 
             <p>
-                <strong>Oil and Gas Fields - Utah Geological Survey</strong>
+                <strong>Oil and Gas Fields</strong> - Utah Geological Survey
             </p>
         </div>
 
@@ -149,17 +149,17 @@ const dataSources = (
 
         <div className="space-y-2">
             <p>
-                <strong>Hazardous (Quaternary age) Faults - Utah Geological Survey</strong>
+                <strong>Hazardous (Quaternary age) Faults</strong> - Utah Geological Survey
             </p>
             <span><Link to="https://maps.geology.utah.gov/hazards">Access data</Link></span>
 
             <p>
-                <strong>Utah Faults - Utah Geological Survey</strong>
+                <strong>Utah Faults</strong> - Utah Geological Survey
             </p>
             <span><Link to="https://geology.utah.gov/publication-details/?pub=M-179dm">Access data</Link></span>
 
             <p>
-                <strong>Geological Units (500k) - Utah Geological Survey</strong>
+                <strong>Geological Units (500k)</strong> - Utah Geological Survey
             </p>
             <span><Link to="https://geology.utah.gov/publication-details/?pub=M-179dm">Access data</Link></span>
         </div>
@@ -170,40 +170,40 @@ const dataSources = (
 
         <div className="space-y-2">
             <p>
-                <strong>Geothermal Power Plants - Utah Geological Survey</strong>
+                <strong>Geothermal Power Plants</strong> - Utah Geological Survey
             </p>
 
             <p>
-                <strong>Pipelines - Utah Geological Survey</strong>
+                <strong>Pipelines</strong> - Utah Geological Survey
             </p>
 
             <p>
-                <strong>Utah Roads - Local data stewards & UDOT & UGRC</strong>
+                <strong>Utah Roads</strong> - Local data stewards & UDOT & UGRC
             </p>
             <span><Link to="https://opendata.gis.utah.gov/datasets/utah-roads/about">Access data</Link></span>
 
             <p>
-                <strong>Utah Railroads - UGRC</strong>
+                <strong>Utah Railroads</strong> - UGRC
             </p>
             <span><Link to="https://opendata.gis.utah.gov/datasets/utah-railroads/about">Access data</Link></span>
 
             <p>
-                <strong>Transmission Lines - UGRC</strong>
+                <strong>Transmission Lines</strong> - UGRC
             </p>
             <span><Link to="https://opendata.gis.utah.gov/datasets/utah::utah-transmission-lines/about">Access data</Link></span>
 
             <p>
-                <strong>Wilderness Study Areas - U.S. Bureau of Land Management</strong>
+                <strong>Wilderness Study Areas</strong> - U.S. Bureau of Land Management
             </p>
             <span><Link to="https://gbp-blm-egis.hub.arcgis.com/maps/0ae90ebbc1f54f77b80b76a6148ab83d/about">Access data</Link></span>
 
             <p>
-                <strong>Major Rivers - UGRC</strong>
+                <strong>Major Rivers</strong> - UGRC
             </p>
             <span><Link to="https://opendata.gis.utah.gov/datasets/utah-major-rivers-polygons/about">Access data</Link></span>
 
             <p>
-                <strong>Utah Land Ownership - School and Institutional Trust Lands Administration (SITLA) & BLM & Partners</strong>
+                <strong>Utah Land Ownership</strong> - School and Institutional Trust Lands Administration (SITLA) & BLM & Partners
             </p>
             <span><Link to="https://opendata.gis.utah.gov/datasets/SITLA::land-ownership/about">Access data</Link></span>
         </div>
