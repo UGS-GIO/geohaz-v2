@@ -152,7 +152,7 @@ const reorderLayers = (layerInfo: LayerContentProps[], layerOrderConfigs: LayerO
  * @param geoJson - The GeoServer GeoJSON object to extract the CRS from.
  * @returns The CRS in EPSG format (e.g., 'EPSG:4326')
  */
-export const getSourceCRSFromGeoJSON = (geoJson: GeoServerGeoJSON | any): string => {
+export const getSourceCRSFromGeoJSON = (geoJson: GeoServerGeoJSON): string => {
     const crsName = geoJson?.crs?.properties?.name;
     if (typeof crsName === 'string') {
         // Handle URN format: "urn:ogc:def:crs:EPSG::4326"
