@@ -7,7 +7,10 @@ export const RendererFactory = {
             return RendererFactory.createFeatureLayerPreview(rendererData);
         } else if ('imageData' in rendererData) {
             return RendererFactory.createMapImageLayerPreview(rendererData);
-        } else {
+        } else if (!('renderer' in rendererData)) {
+            return RendererFactory.createNoLegendPreview(rendererData);
+        }
+        else {
             throw new Error("Unsupported renderer type");
         }
     },
@@ -118,6 +121,17 @@ export const RendererFactory = {
             html,
             label: rendererData.label,
             title,
+            isComposite: false
+        };
+    },
+
+    createNoLegendPreview: (rendererData: RegularLayerRenderer) => {
+        const label = rendererData.label || 'No Legend Available';
+
+        return {
+            label: label,
+            html: null,
+            title: '',
             isComposite: false
         };
     }
