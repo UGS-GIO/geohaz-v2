@@ -10,6 +10,12 @@ type VisibleLayer = {
     groupLayerTitle: string;
 }
 
+/** 
+    * This hook manages map interactions, including layer visibility and context menu handling.
+    * It provides functionality to get visible layers based on the current map view and layer configuration.
+    * It also handles right-click events to show a context menu and update coordinates. 
+    * @returns An object containing the context menu handler, visible layers, and a function to get visible layers.
+*/
 export const useMapInteractions = () => {
     const [visibleLayers, setVisibleLayers] = useState<Record<string, VisibleLayer>>();
     const { view } = useContext(MapContext);
@@ -24,6 +30,7 @@ export const useMapInteractions = () => {
         queryable?: boolean;
         linkFields?: LinkFields;
         colorCodingMap?: ColorCodingRecordFunction;
+        customLayerParameters?: object | null | undefined;
         rasterSource?: RasterSource;
         schema?: string;
     }>;
@@ -84,6 +91,7 @@ export const useMapInteractions = () => {
                             queryable: sublayer.queryable,
                             linkFields: sublayer.linkFields,
                             colorCodingMap: sublayer.colorCodingMap,
+                            customLayerParameters: layer.customLayerParameters,
                             rasterSource: sublayer.rasterSource,
                             schema: sublayer.schema,
                         };
@@ -104,6 +112,7 @@ export const useMapInteractions = () => {
                                     queryable: sublayer.queryable,
                                     linkFields: sublayer.linkFields,
                                     colorCodingMap: sublayer.colorCodingMap,
+                                    customLayerParameters: layer.customLayerParameters,
                                     rasterSource: sublayer.rasterSource,
                                     schema: sublayer.schema,
                                 };

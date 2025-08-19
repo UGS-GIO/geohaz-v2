@@ -1,3 +1,5 @@
+import { GeoJSON, FeatureCollection, Feature } from 'geojson';
+
 export interface LegendProps {
     layerName: string;
     title: string;
@@ -70,28 +72,37 @@ export interface FillSymbolizer {
 
 export type PolygonSymbolizer = FillSymbolizer | StrokeSymbolizer;
 
-export interface Feature {
-    type: string;
-    id: string;
-    geometry: Geometry;
-    geometry_name: string;
-    properties: Properties;
-    bbox: number[];
+/**
+ * GeoServer-specific CRS object that extends the standard GeoJSON format
+ */
+export interface GeoServerCRS {
+    type: 'name';
+    properties: {
+        name: string; // Usually in format like "EPSG:4326" or "urn:ogc:def:crs:EPSG::4326"
+    };
 }
 
-interface Geometry {
-    type: string;
-    coordinates: number[][][][];
+/**
+ * Base interface for GeoServer extensions to GeoJSON objects
+ */
+export interface GeoServerExtensions {
+    crs?: GeoServerCRS;
+    totalFeatures?: number;
+    numberMatched?: number;
+    numberReturned?: number;
+    timeStamp?: string;
 }
 
-interface Properties {
-    name: string;
-    location: string;
-    ohio_code: string;
-    tile: string;
-    path: string;
-    ext: string;
-    size: number;
-    shape_length: number;
-    shape_area: number;
+/**
+ * GeoServer's extended FeatureCollection (most common response type)
+ */
+export interface GeoServerFeatureCollection extends FeatureCollection, GeoServerExtensions {
+    features: Feature[];
 }
+
+/**
+ * Union type for any GeoServer GeoJSON response
+ */
+export type GeoServerGeoJSON =
+    | (GeoJSON & GeoServerExtensions)
+    | GeoServerFeatureCollection;
