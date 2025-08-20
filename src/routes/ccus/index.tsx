@@ -6,13 +6,15 @@ import Map from '@/pages/ccus';
 const ccusSearchSchema = z.object({
     core: z.enum(['yes', 'no']).optional(),
     formations: z.string().optional(),
+    formation_operator: z.enum(['and']).optional(), // 'and' explicitly set, undefined defaults to 'or'
+    coordinate_format: z.enum(['dd', 'dms']).optional(),
     filters: z.record(z.string()).optional(),
 }).strip();
 
 export const Route = createFileRoute('/ccus/')({
     component: () => <Map />,
     validateSearch: (search: Record<string, unknown>) => {
-        let { core, formations, filters } = ccusSearchSchema.parse(search);
+        let { core, formations, formation_operator, coordinate_format, filters } = ccusSearchSchema.parse(search);
 
         const layers = z.object({
             selected: z.array(z.string()).optional(),
@@ -26,6 +28,7 @@ export const Route = createFileRoute('/ccus/')({
         if (!newSelectedSet.has(wellWithTopsWMSTitle)) {
             core = undefined;
             formations = undefined;
+            formation_operator = undefined;
         }
 
         // Parse formations from comma-separated string
@@ -33,12 +36,15 @@ export const Route = createFileRoute('/ccus/')({
 
         // Build the filter string from the (now validated) UI params.
         const wellFilterParts: string[] = [];
-        if (core === "yes") wellFilterParts.push(`hascore = 'True'`);
-        if (core === "no") wellFilterParts.push(`hascore = 'False'`);
+        if (core === "yes") wellFilterParts.push(`has_core = 'Y'`);
+        if (core === "no") wellFilterParts.push(`has_core = 'N'`);
 
-        // Build formation filter with OR logic for multiple formations
+        // Build formation filter with configurable AND/OR logic for multiple formations
         if (formationArray.length > 0) {
-            const formationFilter = formationArray.map(formation => `${formation} IS NOT NULL`).join(' OR ');
+            const useAndOperator = formation_operator === 'and';
+            const operator = useAndOperator ? ' AND ' : ' OR ';
+            const formationFilter = formationArray.map(formation => `${formation} IS NOT NULL`).join(operator);
+
             if (formationArray.length > 1) {
                 wellFilterParts.push(`(${formationFilter})`);
             } else {
@@ -60,6 +66,8 @@ export const Route = createFileRoute('/ccus/')({
         return {
             core,
             formations,
+            formation_operator,
+            coordinate_format,
             filters: Object.keys(newFilters).length > 0 ? newFilters : undefined,
             layers: {
                 ...layers,

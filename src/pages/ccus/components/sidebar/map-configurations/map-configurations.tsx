@@ -5,6 +5,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Command,
     CommandEmpty,
@@ -52,12 +53,13 @@ export const findAndApplyWMSFilter = (
 };
 
 // Helper function to build CQL filter for multiple formations
-const buildFormationCQLFilter = (formations: string[]): string | null => {
+const buildFormationCQLFilter = (formations: string[], useAndOperator: boolean = false): string | null => {
     if (formations.length === 0) return null;
     if (formations.length === 1) {
         return `${formations[0]} IS NOT NULL`;
     }
-    return formations.map(formation => `${formation} IS NOT NULL`).join(' OR ');
+    const operator = useAndOperator ? ' AND ' : ' OR ';
+    return formations.map(formation => `${formation} IS NOT NULL`).join(operator);
 };
 
 type YesNoAll = "yes" | "no" | "all";
@@ -126,10 +128,15 @@ function MapConfigurations() {
         return Array.isArray(search.formations) ? search.formations : [];
     }, [search.formations]);
 
+    // Parse formation operator from URL params (defaults to OR/false)
+    const useAndOperator = useMemo(() => {
+        return search.formation_operator === 'and';
+    }, [search.formation_operator]);
+
     // Build CQL filter for formations
     const formationFilter = useMemo(() => {
-        return buildFormationCQLFilter(selectedFormations);
-    }, [selectedFormations]);
+        return buildFormationCQLFilter(selectedFormations, useAndOperator);
+    }, [selectedFormations, useAndOperator]);
 
     // Combine core and formation filters
     const wellFilter = useMemo(() => {
@@ -164,6 +171,16 @@ function MapConfigurations() {
             search: (prev) => ({
                 ...prev,
                 formations: formations.length === 0 ? undefined : formations.join(',')
+            }),
+            replace: true,
+        });
+    };
+
+    const handleFormationOperatorChange = (useAnd: boolean) => {
+        navigate({
+            search: (prev) => ({
+                ...prev,
+                formation_operator: useAnd ? 'and' : undefined // undefined defaults to OR
             }),
             replace: true,
         });
@@ -232,6 +249,8 @@ function MapConfigurations() {
                             mappings={formationMappings}
                             isLoading={isFormationLoading}
                             error={formationError}
+                            useAndOperator={useAndOperator}
+                            onOperatorChange={handleFormationOperatorChange}
                         />
                     </CardContent>
                 </Card>
@@ -275,9 +294,19 @@ interface WellFormationFilterProps {
     mappings: FormationMapping[];
     isLoading: boolean;
     error: any;
+    useAndOperator: boolean;
+    onOperatorChange: (useAnd: boolean) => void;
 }
 
-const WellFormationFilter = ({ value, onChange, mappings, isLoading, error }: WellFormationFilterProps) => {
+const WellFormationFilter = ({
+    value,
+    onChange,
+    mappings,
+    isLoading,
+    error,
+    useAndOperator,
+    onOperatorChange
+}: WellFormationFilterProps) => {
     const [open, setOpen] = useState(false);
 
     const handleSelect = (formationValue: string) => {
@@ -308,21 +337,43 @@ const WellFormationFilter = ({ value, onChange, mappings, isLoading, error }: We
                 {formationNameMappingConfig.label}
             </Label>
 
+            {/* OR/AND Toggle - only show when multiple formations are selected */}
+            {value.length > 1 && (
+                <div className="mb-3 flex items-center space-x-2">
+                    <Checkbox
+                        id="formation-operator-toggle"
+                        checked={useAndOperator}
+                        onCheckedChange={onOperatorChange}
+                    />
+                    <Label
+                        htmlFor="formation-operator-toggle"
+                        className="text-xs font-medium cursor-pointer"
+                    >
+                        Use AND condition (wells must have all selected formations)
+                    </Label>
+                </div>
+            )}
+
             {/* Selected formations display - now shows even while loading */}
             {value.length > 0 && (
-                <div className="mb-2 flex flex-wrap gap-1">
-                    {value.map((formationValue) => {
+                <div className="mb-2 flex flex-wrap gap-2">
+                    {value.map((formationValue, index) => {
                         // Find the label, or show the value if mappings haven't loaded yet
                         const label = mappings.find(m => m.value === formationValue)?.label || formationValue;
                         return (
-                            <div key={formationValue}>
+                            <div key={formationValue} className="flex items-center">
+                                {index > 0 && (
+                                    <span className="text-xs text-muted-foreground mr-2">
+                                        {useAndOperator ? 'AND' : 'OR'}
+                                    </span>
+                                )}
                                 <Badge
                                     variant="default"
-                                    className="cursor-default"
+                                    className="cursor-default flex items-center"
                                     onClick={() => removeFormation(formationValue)}
                                 >
                                     {label}
-                                    <X className="ml-1 h-3 w-3 cursor-pointer" onClick={() => removeFormation(formationValue)} />
+                                    <X className="ml-1 h-3 w-3 cursor-pointer flex-shrink-0" onClick={() => removeFormation(formationValue)} />
                                 </Badge>
                             </div>
                         );
