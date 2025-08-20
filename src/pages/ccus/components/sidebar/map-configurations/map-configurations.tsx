@@ -5,7 +5,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import {
     Command,
     CommandEmpty,
@@ -339,17 +339,29 @@ const WellFormationFilter = ({
 
             {/* OR/AND Toggle - only show when multiple formations are selected */}
             {value.length > 1 && (
-                <div className="mb-3 flex items-center space-x-2">
-                    <Checkbox
-                        id="formation-operator-toggle"
-                        checked={useAndOperator}
-                        onCheckedChange={onOperatorChange}
-                    />
+                <div className="mb-3 flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
+                        <span className={cn("text-xs font-medium transition-colors",
+                            !useAndOperator ? "text-primary" : "text-muted-foreground"
+                        )}>
+                            OR
+                        </span>
+                        <Switch
+                            id="formation-operator-toggle"
+                            checked={useAndOperator}
+                            onCheckedChange={onOperatorChange}
+                        />
+                        <span className={cn("text-xs font-medium transition-colors",
+                            useAndOperator ? "text-primary" : "text-muted-foreground"
+                        )}>
+                            AND
+                        </span>
+                    </div>
                     <Label
                         htmlFor="formation-operator-toggle"
-                        className="text-xs font-medium cursor-pointer"
+                        className="text-xs text-muted-foreground cursor-pointer"
                     >
-                        Use AND condition (wells must have all selected formations)
+                        {useAndOperator ? "Wells must have all selected formations" : "Wells can have any selected formation"}
                     </Label>
                 </div>
             )}
