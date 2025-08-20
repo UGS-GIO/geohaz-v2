@@ -1,5 +1,4 @@
 import { useRef, useContext, useState, useEffect } from 'react';
-import { useSearch } from '@tanstack/react-router';
 import { MapContext } from '@/context/map-provider';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
@@ -11,6 +10,7 @@ import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { LayerProps } from '@/lib/types/mapping-types';
 import { useLayerUrl } from '@/context/layer-url-provider';
+
 const preprocessLayerVisibility = (
     layers: LayerProps[],
     selectedLayerTitles: Set<string>,
@@ -51,8 +51,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const { zoom, center } = useMapPositionUrlParams(view);
     const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
-    const search = useSearch({ from: '__root__' });
-    const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection } = useLayerUrl();
+    const { selectedLayerTitles, hiddenGroupTitles } = useLayerUrl();
 
     const featureInfoQuery = useFeatureInfoQuery({
         view,
