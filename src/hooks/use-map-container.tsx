@@ -11,9 +11,6 @@ import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { LayerProps } from '@/lib/types/mapping-types';
 import { useLayerUrl } from '@/context/layer-url-provider';
-import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
-import { findAndApplyWMSFilter } from '@/pages/ccus/components/sidebar/map-configurations/map-configurations';
-
 const preprocessLayerVisibility = (
     layers: LayerProps[],
     selectedLayerTitles: Set<string>,
@@ -94,17 +91,6 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         }
     }, [featureInfoQuery.isSuccess, featureInfoQuery.data, view]);
 
-    // apply filters on initial load
-    useEffect(() => {
-        // Wait for the map and filters to be ready
-        if (!view || !view.map) return;
-        const filtersFromUrl = search.filters ?? {};
-        const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
-        findAndApplyWMSFilter(view.map, wellWithTopsWMSTitle, wellFilter);
-        if (wellFilter) {
-            updateLayerSelection(wellWithTopsWMSTitle, true);
-        }
-    }, [view, search.filters, updateLayerSelection]);
 
     useEffect(() => {
         if (mapRef.current && loadMap && zoom && center && layersConfig) {

@@ -36,8 +36,10 @@ export const Route = createFileRoute('/ccus/')({
 
         // Build the filter string from the (now validated) UI params.
         const wellFilterParts: string[] = [];
-        if (core === "yes") wellFilterParts.push(`has_core = 'Y'`);
-        if (core === "no") wellFilterParts.push(`has_core = 'N'`);
+
+        // Only add core filter if it's explicitly 'yes' or 'no'
+        if (core === "yes") wellFilterParts.push(`hascore = 'True'`);
+        if (core === "no") wellFilterParts.push(`hascore = 'False'`);
 
         // Build formation filter with configurable AND/OR logic for multiple formations
         if (formationArray.length > 0) {
@@ -64,7 +66,7 @@ export const Route = createFileRoute('/ccus/')({
 
         // Return the final, synchronized search object.
         return {
-            core,
+            core: core === undefined ? undefined : core,
             formations,
             formation_operator,
             coordinate_format,

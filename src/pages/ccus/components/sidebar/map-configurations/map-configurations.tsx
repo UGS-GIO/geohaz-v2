@@ -140,8 +140,8 @@ function MapConfigurations() {
 
     // Combine core and formation filters
     const wellFilter = useMemo(() => {
-        const coreFilter = search.core === 'yes' ? "has_core = 'True'" :
-            search.core === 'no' ? "has_core = 'False'" : null;
+        const coreFilter = search.core === 'yes' ? "hascore = 'True'" :
+            search.core === 'no' ? "hascore = 'False'" : null;
 
         const filters = [coreFilter, formationFilter].filter(Boolean);
         return filters.length > 0 ? filters.join(' AND ') : null;
