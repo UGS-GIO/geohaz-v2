@@ -32,6 +32,10 @@ const useGetLayerConfig = (layerOrderConfigs?: LayerOrderConfig[]) => {
 
     useEffect(() => {
         const loadConfig = async () => {
+
+            // Check if currentPage is empty, if so, set layerConfig to null to avoid loading any configuration
+            if (currentPage === '') return setLayerConfig(null);
+
             try {
                 const config = await import(`@/pages/${currentPage}/data/layers.tsx`);
                 let processedConfig = [...config.default];
