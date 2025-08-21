@@ -293,7 +293,7 @@ interface WellFormationFilterProps {
     onChange: (value: string[]) => void;
     mappings: FormationMapping[];
     isLoading: boolean;
-    error: any;
+    error: Error | null;
     useAndOperator: boolean;
     onOperatorChange: (useAnd: boolean) => void;
 }

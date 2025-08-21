@@ -1,4 +1,3 @@
-// @/pages/ccus/components/map-container.tsx
 import { useEffect } from 'react';
 import { MapWidgets } from '@/pages/ccus/components/map-widgets';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
@@ -38,7 +37,6 @@ export default function MapContainer({ searchParams, updateLayerSelection }: Map
 
         const filtersFromUrl = searchParams.filters ?? {};
         const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
-        console.log('Applying WMS filter:', wellFilter);
 
         findAndApplyWMSFilter(view.map, wellWithTopsWMSTitle, wellFilter);
         if (wellFilter) {
