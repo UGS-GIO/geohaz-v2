@@ -66,7 +66,7 @@ export const Route = createFileRoute('/ccus/')({
 
         // Return the final, synchronized search object.
         return {
-            core: core === undefined ? undefined : core,
+            core: core,
             formations,
             formation_operator,
             coordinate_format,
