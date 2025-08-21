@@ -52,16 +52,6 @@ export const findAndApplyWMSFilter = (
     }
 };
 
-// Helper function to build CQL filter for multiple formations
-const buildFormationCQLFilter = (formations: string[], useAndOperator: boolean = false): string | null => {
-    if (formations.length === 0) return null;
-    if (formations.length === 1) {
-        return `${formations[0]} IS NOT NULL`;
-    }
-    const operator = useAndOperator ? ' AND ' : ' OR ';
-    return formations.map(formation => `${formation} IS NOT NULL`).join(operator);
-};
-
 type YesNoAll = "yes" | "no" | "all";
 const wellsHasCoreFilterConfig = {
     label: "Cores/Cuttings Available?",
@@ -133,23 +123,10 @@ function MapConfigurations() {
         return search.formation_operator === 'and';
     }, [search.formation_operator]);
 
-    // Build CQL filter for formations
-    const formationFilter = useMemo(() => {
-        return buildFormationCQLFilter(selectedFormations, useAndOperator);
-    }, [selectedFormations, useAndOperator]);
-
-    // Combine core and formation filters
-    const wellFilter = useMemo(() => {
-        const coreFilter = search.core === 'yes' ? "hascore = 'True'" :
-            search.core === 'no' ? "hascore = 'False'" : null;
-
-        const filters = [coreFilter, formationFilter].filter(Boolean);
-        return filters.length > 0 ? filters.join(' AND ') : null;
-    }, [search.core, formationFilter]);
-
     useEffect(() => {
-        findAndApplyWMSFilter(map, wellWithTopsWMSTitle, wellFilter);
-    }, [map, wellFilter]);
+        const filterFromSearchState = search.filters?.[wellWithTopsWMSTitle] ?? null;
+        findAndApplyWMSFilter(map, wellWithTopsWMSTitle, filterFromSearchState);
+    }, [map, search.filters]);
 
     const handleCoordFormatChange = (value: 'dd' | 'dms') => {
         if (setIsDecimalDegrees) setIsDecimalDegrees(value === 'dd');
