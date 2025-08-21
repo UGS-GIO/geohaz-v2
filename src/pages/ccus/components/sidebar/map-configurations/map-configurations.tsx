@@ -236,7 +236,7 @@ function MapConfigurations() {
 
                 <Card>
                     <CardHeader className="py-3 px-4">
-                        <CardTitle className="text-base">Filter Wells Database (Demo)</CardTitle>
+                        <CardTitle className="text-base">Filter Wells Database</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 space-y-4">
                         <WellCoreFilter
@@ -310,7 +310,6 @@ const WellFormationFilter = ({
     const [open, setOpen] = useState(false);
 
     const handleSelect = (formationValue: string) => {
-        console.log('Selecting formation:', formationValue, 'Current value:', value);
         if (formationValue === "") {
             // Clear all selections
             onChange([]);
@@ -381,11 +380,11 @@ const WellFormationFilter = ({
                                 )}
                                 <Badge
                                     variant="default"
-                                    className="cursor-default flex items-center"
+                                    className="cursor-pointer flex items-center"
                                     onClick={() => removeFormation(formationValue)}
                                 >
                                     {label}
-                                    <X className="ml-1 h-3 w-3 cursor-pointer flex-shrink-0" onClick={() => removeFormation(formationValue)} />
+                                    <X className="ml-1 h-3 w-3 flex-shrink-0" />
                                 </Badge>
                             </div>
                         );

@@ -7,9 +7,10 @@ import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
 import { findAndApplyWMSFilter } from '@/pages/ccus/components/sidebar/map-configurations/map-configurations';
+import { CCUSSearch } from '@/routes/ccus';
 
 interface MapContainerProps {
-    searchParams: any; // Type this according to your search schema
+    searchParams: CCUSSearch;
     updateLayerSelection: (layerTitle: string, selected: boolean) => void;
 }
 

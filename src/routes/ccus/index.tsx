@@ -78,3 +78,5 @@ export const Route = createFileRoute('/ccus/')({
         };
     },
 });
+
+export type CCUSSearch = z.infer<typeof ccusSearchSchema>
