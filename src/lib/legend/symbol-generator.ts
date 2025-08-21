@@ -40,12 +40,31 @@ function createCompositeLineHTML(lineSymbolizers: Symbolizer[]): SVGSVGElement {
     svg.style.minHeight = "20px";
 
     // Process symbolizers in order (first = bottom layer, last = top layer)
-    lineSymbolizers.forEach((symbolizer) => {
+    lineSymbolizers.forEach((symbolizer, index) => {
+        console.log(`🔍 Processing line symbolizer ${index}:`, symbolizer);
         const lineData = symbolizer.Line as StrokeSymbolizer;
-        const line = createSVGLineElement(lineData);
-        svg.appendChild(line);
+        console.log("📋 Line data with dash array:", lineData);
+        console.log("📋 Stroke-dasharray:", lineData["stroke-dasharray"]);
+        
+        // Check if this symbolizer has GraphicStroke
+        const lineDataAny = lineData as any;
+        const graphicStroke = lineDataAny.GraphicStroke || lineDataAny['graphic-stroke'];
+        
+        if (graphicStroke) {
+            console.log("✨ This is a GraphicStroke symbolizer - only adding triangles, no base line");
+            // For GraphicStroke symbolizers, ONLY add the graphic symbols, not another line
+            const strokeElements = createGraphicStrokeElements(graphicStroke);
+            strokeElements.forEach(element => svg.appendChild(element));
+        } else {
+            console.log("📏 This is a regular line symbolizer - creating base line");
+            // For regular line symbolizers, create the base line (which may have dash patterns)
+            const line = createSVGLineElement(lineData);
+            console.log("📏 Created line element:", line.outerHTML);
+            svg.appendChild(line);
+        }
     });
 
+    console.log("🎯 Final composite line SVG:", svg.outerHTML);
     return svg;
 }
 
@@ -188,6 +207,8 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
     let strokeJoin: LineJoin = "round";
     let strokeCap: LineCap = "round";
     let strokeDasharray = "";
+    let hasGraphicFill = false;
+    let graphicFillPattern: SVGElement | null = null;
 
     const PolygonSymbolizer = symbolizers.find(symbolizer => 'Polygon' in symbolizer)?.Polygon as StrokeSymbolizer;
 
@@ -197,7 +218,14 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
 
     symbolizers.forEach(symbolizer => {
         if (isSymbolizerWithPolygon(symbolizer)) {
-            if ('fill' in symbolizer.Polygon) {
+            // Check for GraphicFill (your server's structure)
+            const polygonData = symbolizer.Polygon as any;
+            const graphicFill = polygonData.GraphicFill || polygonData['graphic-fill'];
+            
+            if (graphicFill) {
+                hasGraphicFill = true;
+                graphicFillPattern = createGraphicFillPatternElement(graphicFill);
+            } else if ('fill' in symbolizer.Polygon) {
                 fillColorWithOpacity = handleFillSymbolizer(symbolizer.Polygon);
             }
 
@@ -222,6 +250,25 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
     svg.setAttribute("width", "32");
     svg.setAttribute("height", "20");
     svg.setAttribute("viewBox", "0 0 32 20");
+
+    // Create pattern definition if we have GraphicFill
+    if (hasGraphicFill && graphicFillPattern) {
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        const pattern = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+        
+        // Create a unique ID based on the pattern properties
+        const patternId = `graphicFillPattern_${Math.random().toString(36).substr(2, 9)}`;
+        pattern.setAttribute("id", patternId);
+        pattern.setAttribute("patternUnits", "userSpaceOnUse");
+        pattern.setAttribute("width", "8");
+        pattern.setAttribute("height", "8");
+        pattern.appendChild(graphicFillPattern);
+        defs.appendChild(pattern);
+        svg.appendChild(defs);
+        fillColorWithOpacity = `url(#${patternId})`;
+        
+        console.log("🎨 Created pattern with ID:", patternId, "and fill:", fillColorWithOpacity);
+    }
 
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     rect.setAttribute("x", "2");
@@ -499,4 +546,102 @@ function addOpacityToHex(hex: string, opacity: number): string {
     }
     // Otherwise, append the alpha channel
     return `${hex}${alpha}`;
+}
+
+// Add this helper function to create the graphic fill pattern
+function createGraphicFillPatternElement(graphicFill: any): SVGElement | null {
+    console.log("🎨 Creating graphic fill pattern from:", graphicFill);
+    
+    // Handle your server's structure
+    if (graphicFill.graphics && graphicFill.graphics.length > 0) {
+        const graphic = graphicFill.graphics[0];
+        console.log("🎭 Graphic data:", graphic);
+        
+        if (graphic.mark === 'shape://slash') {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", "0");
+            line.setAttribute("y1", "8");
+            line.setAttribute("x2", "8");
+            line.setAttribute("y2", "0");
+            
+            // Get stroke color - try multiple property paths
+            const strokeColor = graphic.stroke || graphic["stroke"] || "#000000";
+            const strokeWidth = graphic["stroke-width"] || graphic.strokeWidth || "2";
+            
+            console.log("🖊️ Using stroke color:", strokeColor, "width:", strokeWidth);
+            
+            line.setAttribute("stroke", strokeColor);
+            line.setAttribute("stroke-width", strokeWidth);
+            
+            console.log("📐 Created slash line:", line.outerHTML);
+            return line;
+        }
+    }
+    
+    console.warn("⚠️ No valid slash graphic found");
+    return null;
+}
+
+// Add this helper function to create graphic stroke elements
+function createGraphicStrokeElements(graphicStroke: any): SVGElement[] {
+    console.log("🔺 Creating full-width triangles from:", graphicStroke);
+    const elements: SVGElement[] = [];
+    
+    // Handle your server's structure
+    if (graphicStroke.graphics && graphicStroke.graphics.length > 0) {
+        const graphic = graphicStroke.graphics[0];
+        const originalSize = parseFloat(graphicStroke.size || "6");
+        
+        console.log("🔺 Graphic data:", graphic);
+        console.log("📏 Original size:", originalSize);
+        
+        // For legend display, we want 4 triangles spanning the FULL line width
+        const symbolCount = 4;
+        const lineStart = 2;  // Line starts at x=2
+        const lineEnd = 30;   // Line ends at x=30
+        const lineWidth = lineEnd - lineStart; // 28px total
+        
+        // Each triangle gets equal width across the full line
+        const triangleWidth = lineWidth / symbolCount; // 28/4 = 7px per triangle
+        const triangleHeight = 6; // Make them a good height for visibility
+        
+        console.log("🧮 Symbol count:", symbolCount, "Triangle width:", triangleWidth, "height:", triangleHeight);
+        
+        for (let i = 0; i < symbolCount; i++) {
+            // Calculate the center X position for this triangle
+            const triangleLeft = lineStart + (i * triangleWidth);
+            const triangleRight = lineStart + ((i + 1) * triangleWidth);
+            const triangleCenter = (triangleLeft + triangleRight) / 2;
+            
+            const y = 10; // Line center
+            
+            console.log(`🎯 Creating triangle ${i}: left=${triangleLeft}, center=${triangleCenter}, right=${triangleRight}`);
+            
+            if (graphic.mark?.toLowerCase() === 'triangle') {
+                const triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                
+                // Position triangles so their base just touches the TOP edge of the line
+                // Line has stroke-width of 2, so it extends 1px above and below y=10
+                const lineTopEdge = y - 1; // Top edge of the 2px wide line
+                
+                // Create triangles that span the full allocated width
+                const points = [
+                    [triangleCenter, lineTopEdge - triangleHeight],  // Top point (above the line)
+                    [triangleLeft, lineTopEdge],                     // Bottom left (touching line, at segment start)
+                    [triangleRight, lineTopEdge]                     // Bottom right (touching line, at segment end)
+                ].map(point => point.join(',')).join(' ');
+                
+                triangle.setAttribute("points", points);
+                triangle.setAttribute("fill", graphic.fill || "#000000");
+                triangle.setAttribute("stroke", graphic.stroke || "#000000");
+                triangle.setAttribute("stroke-width", graphic["stroke-width"] || "0.5");
+                
+                console.log("🔺 Created full-width triangle:", triangle.outerHTML);
+                elements.push(triangle);
+            }
+        }
+    }
+    
+    console.log("🔺 Total full-width triangles created:", elements.length);
+    return elements;
 }
