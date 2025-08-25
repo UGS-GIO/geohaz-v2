@@ -1,7 +1,46 @@
 import { FillSymbolizer, LineCap, LineJoin, StrokeSymbolizer, Symbolizer } from "@/lib/types/geoserver-types";
 
+// Constants for symbol generation
+const SYMBOL_CONSTANTS = {
+    SVG_WIDTH: 32,
+    SVG_HEIGHT: 20,
+    LINE_Y_CENTER: 10,
+    LINE_START_X: 2,
+    LINE_END_X: 30,
+    MIN_LINE_WIDTH: 2,
+    LINE_WIDTH_ENHANCEMENT: 1,
+    TRIANGLE_HEIGHT: 6,
+    TRIANGLE_COUNT: 4,
+    PATTERN_TILE_SIZE: 8,
+    POINT_TO_PIXEL_RATIO: 4 / 3,
+    IMAGE_SCALING_RATIO: 5 / 4,
+    MAX_POINT_SIZE: 17,
+    DEFAULT_POINT_SIZE: 16
+} as const;
+
+// Interfaces for better type safety in graphic symbolizers
+interface GraphicStrokeData {
+    graphics?: Array<{
+        mark?: string;
+        fill?: string;
+        stroke?: string;
+        'stroke-width'?: string;
+        size?: string;
+    }>;
+    size?: string;
+}
+
+interface GraphicFillData {
+    graphics?: Array<{
+        mark?: string;
+        fill?: string;
+        stroke?: string;
+        'stroke-width'?: string;
+    }>;
+}
+
 export interface CompositeSymbolResult {
-    symbol?: SVGSVGElement; // Changed from __esri.Symbol to SVGSVGElement
+    symbol?: SVGSVGElement;
     html?: HTMLElement | SVGSVGElement;
     isComposite: boolean;
     symbolizers: Symbolizer[];
@@ -15,12 +54,11 @@ export function createCompositeLineSymbol(symbolizers: Symbolizer[]): CompositeS
         throw new Error("No valid Line symbolizer found in the provided symbolizers.");
     }
 
-    // Always create SVG representation for consistency, even for single LineSymbolizers
     const compositeHtml = createCompositeLineHTML(lineSymbolizers);
 
     return {
         html: compositeHtml,
-        symbol: compositeHtml, // Same as html since it's SVG
+        symbol: compositeHtml,
         isComposite: lineSymbolizers.length > 1,
         symbolizers: lineSymbolizers
     };
@@ -28,43 +66,40 @@ export function createCompositeLineSymbol(symbolizers: Symbolizer[]): CompositeS
 
 function createCompositeLineHTML(lineSymbolizers: Symbolizer[]): SVGSVGElement {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", "32");
-    svg.setAttribute("height", "20");
-    svg.setAttribute("viewBox", "0 0 32 20");
+    svg.setAttribute("width", SYMBOL_CONSTANTS.SVG_WIDTH.toString());
+    svg.setAttribute("height", SYMBOL_CONSTANTS.SVG_HEIGHT.toString());
+    svg.setAttribute("viewBox", `0 0 ${SYMBOL_CONSTANTS.SVG_WIDTH} ${SYMBOL_CONSTANTS.SVG_HEIGHT}`);
     svg.style.display = "block";
-    svg.style.width = "32px";
-    svg.style.height = "20px";
-    svg.style.maxWidth = "32px";
-    svg.style.maxHeight = "20px";
-    svg.style.minWidth = "32px";
-    svg.style.minHeight = "20px";
+    svg.style.width = `${SYMBOL_CONSTANTS.SVG_WIDTH}px`;
+    svg.style.height = `${SYMBOL_CONSTANTS.SVG_HEIGHT}px`;
+    svg.style.maxWidth = `${SYMBOL_CONSTANTS.SVG_WIDTH}px`;
+    svg.style.maxHeight = `${SYMBOL_CONSTANTS.SVG_HEIGHT}px`;
+    svg.style.minWidth = `${SYMBOL_CONSTANTS.SVG_WIDTH}px`;
+    svg.style.minHeight = `${SYMBOL_CONSTANTS.SVG_HEIGHT}px`;
 
     // Process symbolizers in order (first = bottom layer, last = top layer)
     lineSymbolizers.forEach((symbolizer, index) => {
-        console.log(`🔍 Processing line symbolizer ${index}:`, symbolizer);
-        const lineData = symbolizer.Line as StrokeSymbolizer;
-        console.log("📋 Line data with dash array:", lineData);
-        console.log("📋 Stroke-dasharray:", lineData["stroke-dasharray"]);
-        
-        // Check if this symbolizer has GraphicStroke
-        const lineDataAny = lineData as any;
-        const graphicStroke = lineDataAny.GraphicStroke || lineDataAny['graphic-stroke'];
-        
-        if (graphicStroke) {
-            console.log("✨ This is a GraphicStroke symbolizer - only adding triangles, no base line");
-            // For GraphicStroke symbolizers, ONLY add the graphic symbols, not another line
-            const strokeElements = createGraphicStrokeElements(graphicStroke);
-            strokeElements.forEach(element => svg.appendChild(element));
-        } else {
-            console.log("📏 This is a regular line symbolizer - creating base line");
-            // For regular line symbolizers, create the base line (which may have dash patterns)
-            const line = createSVGLineElement(lineData);
-            console.log("📏 Created line element:", line.outerHTML);
-            svg.appendChild(line);
+        try {
+            const lineData = symbolizer.Line as StrokeSymbolizer;
+            
+            // Check if this symbolizer has GraphicStroke
+            const lineDataAny = lineData as any;
+            const graphicStroke = lineDataAny.GraphicStroke || lineDataAny['graphic-stroke'];
+            
+            if (graphicStroke) {
+                // For GraphicStroke symbolizers, ONLY add the graphic symbols, not another line
+                const strokeElements = createGraphicStrokeElements(graphicStroke);
+                strokeElements.forEach(element => svg.appendChild(element));
+            } else {
+                // For regular line symbolizers, create the base line (which may have dash patterns)
+                const line = createSVGLineElement(lineData);
+                svg.appendChild(line);
+            }
+        } catch (error) {
+            console.error(`Error processing line symbolizer at index ${index}:`, error);
         }
     });
 
-    console.log("🎯 Final composite line SVG:", svg.outerHTML);
     return svg;
 }
 
@@ -81,15 +116,15 @@ function createSVGLineElement(lineSymbolizer: StrokeSymbolizer): SVGLineElement 
 
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
 
-    // Position line in center of SVG (adjusted for 32px width)
-    line.setAttribute("x1", "2");
-    line.setAttribute("y1", "10");
-    line.setAttribute("x2", "30");
-    line.setAttribute("y2", "10");
+    // Position line in center of SVG
+    line.setAttribute("x1", SYMBOL_CONSTANTS.LINE_START_X.toString());
+    line.setAttribute("y1", SYMBOL_CONSTANTS.LINE_Y_CENTER.toString());
+    line.setAttribute("x2", SYMBOL_CONSTANTS.LINE_END_X.toString());
+    line.setAttribute("y2", SYMBOL_CONSTANTS.LINE_Y_CENTER.toString());
 
     // Make lines a bit thicker for better visibility
     const originalWidth = parseFloat(strokeWidth);
-    const enhancedWidth = Math.max(2, originalWidth + 1);
+    const enhancedWidth = Math.max(SYMBOL_CONSTANTS.MIN_LINE_WIDTH, originalWidth + SYMBOL_CONSTANTS.LINE_WIDTH_ENHANCEMENT);
 
     // Apply styling
     line.setAttribute("stroke", stroke);
@@ -108,19 +143,30 @@ function createSVGLineElement(lineSymbolizer: StrokeSymbolizer): SVGLineElement 
 
 // Main function to orchestrate which symbol to create
 export function createSVGSymbol(symbolizers: Symbolizer[]): SVGSVGElement | CompositeSymbolResult {
-    if (symbolizers.every(symbolizer => symbolizer.Line)) {
-        const result = createCompositeLineSymbol(symbolizers);
-        // Return the full CompositeSymbolResult instead of just html or symbol
-        return result;
-    } else if (symbolizers.every(symbolizer => symbolizer.Polygon)) {
-        return createPolygonSymbol(symbolizers);
-    } else if (symbolizers.every(symbolizer => symbolizer.Point)) {
-        return createPointSymbol(symbolizers);
-    } else {
-        console.error("Unsupported symbol type:", symbolizers);
-        // Return empty SVG
-        return document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    try {
+        if (symbolizers.every(symbolizer => symbolizer.Line)) {
+            const result = createCompositeLineSymbol(symbolizers);
+            return result;
+        } else if (symbolizers.every(symbolizer => symbolizer.Polygon)) {
+            return createPolygonSymbol(symbolizers);
+        } else if (symbolizers.every(symbolizer => symbolizer.Point)) {
+            return createPointSymbol(symbolizers);
+        } else {
+            console.error("Unsupported symbol type:", symbolizers);
+            return createEmptySVG();
+        }
+    } catch (error) {
+        console.error("Error creating SVG symbol:", error);
+        return createEmptySVG();
     }
+}
+
+function createEmptySVG(): SVGSVGElement {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", SYMBOL_CONSTANTS.SVG_WIDTH.toString());
+    svg.setAttribute("height", SYMBOL_CONSTANTS.SVG_HEIGHT.toString());
+    svg.setAttribute("viewBox", `0 0 ${SYMBOL_CONSTANTS.SVG_WIDTH} ${SYMBOL_CONSTANTS.SVG_HEIGHT}`);
+    return svg;
 }
 
 // Create a single SVG that approximates the composite
@@ -142,17 +188,13 @@ export function createApproximateCompositeSymbol(symbolizers: Symbolizer[]): SVG
     const topLine = topSymbolizer.Line as StrokeSymbolizer;
     const widestLine = widestSymbolizer.Line as StrokeSymbolizer;
 
-    // Create SVG with combined properties
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", "32");
-    svg.setAttribute("height", "20");
-    svg.setAttribute("viewBox", "0 0 32 20");
+    const svg = createEmptySVG();
 
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", "2");
-    line.setAttribute("y1", "10");
-    line.setAttribute("x2", "30");
-    line.setAttribute("y2", "10");
+    line.setAttribute("x1", SYMBOL_CONSTANTS.LINE_START_X.toString());
+    line.setAttribute("y1", SYMBOL_CONSTANTS.LINE_Y_CENTER.toString());
+    line.setAttribute("x2", SYMBOL_CONSTANTS.LINE_END_X.toString());
+    line.setAttribute("y2", SYMBOL_CONSTANTS.LINE_Y_CENTER.toString());
     line.setAttribute("stroke", topLine.stroke || "#000000");
     line.setAttribute("stroke-width", widestLine["stroke-width"] || "1");
     line.setAttribute("stroke-linecap", topLine["stroke-linecap"] || "round");
@@ -168,14 +210,9 @@ export function createApproximateCompositeSymbol(symbolizers: Symbolizer[]): SVG
 
 // Helper function to create a single line symbol SVG
 function createSingleLineSymbolSVG(lineSymbolizer: StrokeSymbolizer): SVGSVGElement {
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", "32");
-    svg.setAttribute("height", "20");
-    svg.setAttribute("viewBox", "0 0 32 20");
-
+    const svg = createEmptySVG();
     const line = createSVGLineElement(lineSymbolizer);
     svg.appendChild(line);
-
     return svg;
 }
 
@@ -218,7 +255,7 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
 
     symbolizers.forEach(symbolizer => {
         if (isSymbolizerWithPolygon(symbolizer)) {
-            // Check for GraphicFill (your server's structure)
+            // Check for GraphicFill
             const polygonData = symbolizer.Polygon as any;
             const graphicFill = polygonData.GraphicFill || polygonData['graphic-fill'];
             
@@ -245,33 +282,26 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
         }
     });
 
-    // Create SVG polygon
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", "32");
-    svg.setAttribute("height", "20");
-    svg.setAttribute("viewBox", "0 0 32 20");
+    const svg = createEmptySVG();
 
     // Create pattern definition if we have GraphicFill
     if (hasGraphicFill && graphicFillPattern) {
         const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         const pattern = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
         
-        // Create a unique ID based on the pattern properties
-        const patternId = `graphicFillPattern_${Math.random().toString(36).substr(2, 9)}`;
+        const patternId = generateUniquePatternId();
         pattern.setAttribute("id", patternId);
         pattern.setAttribute("patternUnits", "userSpaceOnUse");
-        pattern.setAttribute("width", "8");
-        pattern.setAttribute("height", "8");
+        pattern.setAttribute("width", SYMBOL_CONSTANTS.PATTERN_TILE_SIZE.toString());
+        pattern.setAttribute("height", SYMBOL_CONSTANTS.PATTERN_TILE_SIZE.toString());
         pattern.appendChild(graphicFillPattern);
         defs.appendChild(pattern);
         svg.appendChild(defs);
         fillColorWithOpacity = `url(#${patternId})`;
-        
-        console.log("🎨 Created pattern with ID:", patternId, "and fill:", fillColorWithOpacity);
     }
 
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("x", "2");
+    rect.setAttribute("x", SYMBOL_CONSTANTS.LINE_START_X.toString());
     rect.setAttribute("y", "3");
     rect.setAttribute("width", "28");
     rect.setAttribute("height", "14");
@@ -290,65 +320,37 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
 }
 
 function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
-
-    console.log(`Creating point symbol with symbolizers:`, symbolizers);
-
-    // Find the first symbolizer that has a 'Point' property
     const pointSymbolizer = symbolizers.find(symbolizer => 'Point' in symbolizer)?.Point;
 
-    // Ensure a valid Point symbolizer exists
     if (!pointSymbolizer) {
         throw new Error("No valid Point symbolizer found in the provided symbolizers.");
     }
 
-    // Destructure properties from the Point symbolizer
     const { size, opacity, rotation, graphics } = pointSymbolizer;
-
-    // Ensure there is at least one graphic in the 'graphics' array
     const graphic = graphics && graphics.length > 0 ? graphics[0] : null;
 
     if (!graphic) {
         throw new Error("No valid graphic found in the Point symbolizer.");
     }
 
-    // Parse the size, opacity, and rotation with default values
     const rawParsedSize = parseSize(size);
     const parsedOpacity = parseFloat(opacity) || 1.0;
     const parsedRotation = parseFloat(rotation) || 0.0;
 
     // Smart sizing for legend display
-    let parsedSize: number;
-    if (rawParsedSize <= 5) {
-        // Small points - make them bigger for visibility
-        parsedSize = Math.max(6, rawParsedSize * 1.5);
-    } else if (rawParsedSize <= 20) {
-        // Medium points - keep them reasonable
-        parsedSize = Math.min(16, rawParsedSize * 0.8);
-    } else {
-        // Large points - scale them down significantly
-        parsedSize = Math.min(18, 8 + (rawParsedSize - 20) * 0.3);
-    }
+    const parsedSize = calculateLegendPointSize(rawParsedSize);
 
-    // Create SVG
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", "32");
-    svg.setAttribute("height", "20");
-    svg.setAttribute("viewBox", "0 0 32 20");
-
-    const centerX = 16; // Center of 32px width
-    const centerY = 10; // Center of 20px height
-    const pointToPixelRatio = 4 / 3; // 1pt = 1.33px approximately
-    const imageRatio = 5 / 4; // 1.25 for image scaling
-    const pixelSize = rawParsedSize * pointToPixelRatio;
+    const svg = createEmptySVG();
+    const centerX = SYMBOL_CONSTANTS.SVG_WIDTH / 2;
+    const centerY = SYMBOL_CONSTANTS.SVG_HEIGHT / 2;
+    const pixelSize = rawParsedSize * SYMBOL_CONSTANTS.POINT_TO_PIXEL_RATIO;
     const radius = pixelSize / 2;
 
-    // Check for external graphic first (but only if it's a proper external graphic)
+    // Check for external graphic first
     if (graphic["external-graphic-url"] && graphic["external-graphic-type"]) {
-
         const imageUrl = graphic["external-graphic-url"];
-        const imageSize = rawParsedSize * imageRatio; // Convert size to pixels
+        const imageSize = rawParsedSize * SYMBOL_CONSTANTS.IMAGE_SCALING_RATIO;
 
-        // Create image element
         const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
         image.setAttribute("href", imageUrl);
         image.setAttribute("x", (centerX - imageSize / 2).toString());
@@ -356,122 +358,23 @@ function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
         image.setAttribute("width", imageSize.toString());
         image.setAttribute("height", imageSize.toString());
 
-        // Apply opacity if specified
         if (parsedOpacity !== 1.0) {
             image.setAttribute("opacity", parsedOpacity.toString());
         }
 
-        // Apply rotation if specified
         if (parsedRotation !== 0) {
             image.setAttribute("transform", `rotate(${parsedRotation} ${centerX} ${centerY})`);
         }
 
         svg.appendChild(image);
-
         return svg;
     }
-
-    // SKIP URL FALLBACK - go directly to basic shape rendering for marks
 
     const { fill, stroke, mark } = graphic;
     const fillOpacity = graphic["fill-opacity"];
     const strokeWidth = graphic["stroke-width"];
 
-
-
-    let element: SVGElement;
-
-    // Create the appropriate shape based on mark
-    switch (mark?.toLowerCase()) {
-        case "circle":
-            element = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            element.setAttribute("cx", centerX.toString());
-            element.setAttribute("cy", centerY.toString());
-            element.setAttribute("r", radius.toString());
-            break;
-        case "square":
-            element = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            element.setAttribute("x", (centerX - radius).toString());
-            element.setAttribute("y", (centerY - radius).toString());
-            element.setAttribute("width", parsedSize.toString());
-            element.setAttribute("height", parsedSize.toString());
-            break;
-        case "triangle":
-            element = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-            const height = parsedSize * Math.sqrt(3) / 2;
-            const points = [
-                [centerX, centerY - height / 2],
-                [centerX - radius, centerY + height / 2],
-                [centerX + radius, centerY + height / 2]
-            ].map(point => point.join(',')).join(' ');
-            element.setAttribute("points", points);
-            break;
-
-        case "diamond":
-            element = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-            const diamondPoints = [
-                [centerX, centerY - radius],
-                [centerX + radius, centerY],
-                [centerX, centerY + radius],
-                [centerX - radius, centerY]
-            ].map(point => point.join(',')).join(' ');
-            element.setAttribute("points", diamondPoints);
-
-            break;
-
-        case "cross":
-
-            element = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            const crossLine1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            crossLine1.setAttribute("x1", (centerX - radius).toString());
-            crossLine1.setAttribute("y1", centerY.toString());
-            crossLine1.setAttribute("x2", (centerX + radius).toString());
-            crossLine1.setAttribute("y2", centerY.toString());
-            crossLine1.setAttribute("stroke", stroke || "#000000");
-            crossLine1.setAttribute("stroke-width", strokeWidth || "1");
-
-            const crossLine2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            crossLine2.setAttribute("x1", centerX.toString());
-            crossLine2.setAttribute("y1", (centerY - radius).toString());
-            crossLine2.setAttribute("x2", centerX.toString());
-            crossLine2.setAttribute("y2", (centerY + radius).toString());
-            crossLine2.setAttribute("stroke", stroke || "#000000");
-            crossLine2.setAttribute("stroke-width", strokeWidth || "1");
-
-            element.appendChild(crossLine1);
-            element.appendChild(crossLine2);
-            break;
-
-        case "x":
-            element = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            const xLine1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            xLine1.setAttribute("x1", (centerX - radius).toString());
-            xLine1.setAttribute("y1", (centerY - radius).toString());
-            xLine1.setAttribute("x2", (centerX + radius).toString());
-            xLine1.setAttribute("y2", (centerY + radius).toString());
-            xLine1.setAttribute("stroke", stroke || "#000000");
-            xLine1.setAttribute("stroke-width", strokeWidth || "1");
-
-            const xLine2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            xLine2.setAttribute("x1", (centerX + radius).toString());
-            xLine2.setAttribute("y1", (centerY - radius).toString());
-            xLine2.setAttribute("x2", (centerX - radius).toString());
-            xLine2.setAttribute("y2", (centerY + radius).toString());
-            xLine2.setAttribute("stroke", stroke || "#000000");
-            xLine2.setAttribute("stroke-width", strokeWidth || "1");
-
-            element.appendChild(xLine1);
-            element.appendChild(xLine2);
-            break;
-
-        default:
-            // Default to circle for unknown marks
-            element = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            element.setAttribute("cx", centerX.toString());
-            element.setAttribute("cy", centerY.toString());
-            element.setAttribute("r", radius.toString());
-            break;
-    }
+    const element = createMarkElement(mark, centerX, centerY, radius, parsedSize, stroke, strokeWidth);
 
     // Apply common styling (for shapes that support fill/stroke)
     if (mark?.toLowerCase() !== "cross" && mark?.toLowerCase() !== "x") {
@@ -486,162 +389,582 @@ function createPointSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
         element.setAttribute("stroke-width", finalStrokeWidth);
     }
 
-    // Apply rotation if specified
     if (parsedRotation !== 0) {
         element.setAttribute("transform", `rotate(${parsedRotation} ${centerX} ${centerY})`);
-
     }
 
     svg.appendChild(element);
-
-
     return svg;
+}
+
+function createMarkElement(
+    mark: string | undefined,
+    centerX: number,
+    centerY: number,
+    radius: number,
+    parsedSize: number,
+    stroke: string | undefined,
+    strokeWidth: string | undefined
+): SVGElement {
+    switch (mark?.toLowerCase()) {
+        case "circle":
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", centerX.toString());
+            circle.setAttribute("cy", centerY.toString());
+            circle.setAttribute("r", radius.toString());
+            return circle;
+
+        case "square":
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", (centerX - radius).toString());
+            rect.setAttribute("y", (centerY - radius).toString());
+            rect.setAttribute("width", parsedSize.toString());
+            rect.setAttribute("height", parsedSize.toString());
+            return rect;
+
+        case "triangle":
+            const triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const height = parsedSize * Math.sqrt(3) / 2;
+            const trianglePoints = [
+                [centerX, centerY - height / 2],
+                [centerX - radius, centerY + height / 2],
+                [centerX + radius, centerY + height / 2]
+            ].map(point => point.join(',')).join(' ');
+            triangle.setAttribute("points", trianglePoints);
+            return triangle;
+
+        case "diamond":
+            const diamond = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const diamondPoints = [
+                [centerX, centerY - radius],
+                [centerX + radius, centerY],
+                [centerX, centerY + radius],
+                [centerX - radius, centerY]
+            ].map(point => point.join(',')).join(' ');
+            diamond.setAttribute("points", diamondPoints);
+            return diamond;
+
+        case "cross":
+            return createCrossElement(centerX, centerY, radius, stroke, strokeWidth);
+
+        case "x":
+            return createXElement(centerX, centerY, radius, stroke, strokeWidth);
+
+        default:
+            // Default to circle for unknown marks
+            const defaultCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            defaultCircle.setAttribute("cx", centerX.toString());
+            defaultCircle.setAttribute("cy", centerY.toString());
+            defaultCircle.setAttribute("r", radius.toString());
+            return defaultCircle;
+    }
+}
+
+function createCrossElement(
+    centerX: number,
+    centerY: number,
+    radius: number,
+    stroke: string | undefined,
+    strokeWidth: string | undefined
+): SVGElement {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    
+    const crossLine1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    crossLine1.setAttribute("x1", (centerX - radius).toString());
+    crossLine1.setAttribute("y1", centerY.toString());
+    crossLine1.setAttribute("x2", (centerX + radius).toString());
+    crossLine1.setAttribute("y2", centerY.toString());
+    crossLine1.setAttribute("stroke", stroke || "#000000");
+    crossLine1.setAttribute("stroke-width", strokeWidth || "1");
+
+    const crossLine2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    crossLine2.setAttribute("x1", centerX.toString());
+    crossLine2.setAttribute("y1", (centerY - radius).toString());
+    crossLine2.setAttribute("x2", centerX.toString());
+    crossLine2.setAttribute("y2", (centerY + radius).toString());
+    crossLine2.setAttribute("stroke", stroke || "#000000");
+    crossLine2.setAttribute("stroke-width", strokeWidth || "1");
+
+    element.appendChild(crossLine1);
+    element.appendChild(crossLine2);
+    return element;
+}
+
+function createXElement(
+    centerX: number,
+    centerY: number,
+    radius: number,
+    stroke: string | undefined,
+    strokeWidth: string | undefined
+): SVGElement {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    
+    const xLine1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    xLine1.setAttribute("x1", (centerX - radius).toString());
+    xLine1.setAttribute("y1", (centerY - radius).toString());
+    xLine1.setAttribute("x2", (centerX + radius).toString());
+    xLine1.setAttribute("y2", (centerY + radius).toString());
+    xLine1.setAttribute("stroke", stroke || "#000000");
+    xLine1.setAttribute("stroke-width", strokeWidth || "1");
+
+    const xLine2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    xLine2.setAttribute("x1", (centerX + radius).toString());
+    xLine2.setAttribute("y1", (centerY - radius).toString());
+    xLine2.setAttribute("x2", (centerX - radius).toString());
+    xLine2.setAttribute("y2", (centerY + radius).toString());
+    xLine2.setAttribute("stroke", stroke || "#000000");
+    xLine2.setAttribute("stroke-width", strokeWidth || "1");
+
+    element.appendChild(xLine1);
+    element.appendChild(xLine2);
+    return element;
+}
+
+function calculateLegendPointSize(rawSize: number): number {
+    if (rawSize <= 5) {
+        return Math.max(6, rawSize * 1.5);
+    } else if (rawSize <= 20) {
+        return Math.min(16, rawSize * 0.8);
+    } else {
+        return Math.min(18, 8 + (rawSize - 20) * 0.3);
+    }
 }
 
 // Utility function to parse size from string or number
 function parseSize(size: string | number): number {
-    // Handle number values directly but with a maximum limit
     if (typeof size === 'number') {
         return size;
     }
 
-    // Handle string values
     if (typeof size === 'string') {
-        // Check if it's a simple numeric string first (for legend-only rules)
         const simpleNumeric = parseFloat(size);
         if (!isNaN(simpleNumeric)) {
-            return simpleNumeric > 17 ? 17 : simpleNumeric; // Cap at 17 to avoid overflowing the parent container
+            return simpleNumeric > SYMBOL_CONSTANTS.MAX_POINT_SIZE ? SYMBOL_CONSTANTS.MAX_POINT_SIZE : simpleNumeric;
         }
 
-        // Handle interpolation expressions (for category rules)
         if (size.includes('Interpolate')) {
-            return 12; // Default to 12 for Interpolate expressions
+            return 12;
         }
 
-        // Final fallback: extract any numeric values
         const numbers = size.match(/\d+\.?\d*/g);
         if (numbers && numbers.length > 0) {
-            const fallbackSize = parseFloat(numbers[numbers.length - 1]);
-            return fallbackSize;
+            return parseFloat(numbers[numbers.length - 1]);
         }
     }
 
-    // If all parsing fails, return default
-    return 16;
+    return SYMBOL_CONSTANTS.DEFAULT_POINT_SIZE;
 }
 
 // Utility function for adding opacity to a hex color
 function addOpacityToHex(hex: string, opacity: number): string {
-    // Handle case when hex is undefined
     if (!hex) {
-        return "#000000FF"; // Default to black with full opacity
+        return "#000000FF";
     }
-    // Ensure opacity is between 0 and 1
+    
     const validOpacity = Math.max(0, Math.min(1, opacity));
     const alpha = Math.round(validOpacity * 255).toString(16).padStart(2, '0').toUpperCase();
 
-    // If hex already has an alpha channel (8 characters), replace it
     if (hex.length === 9) {
         return `${hex.substring(0, 7)}${alpha}`;
     }
-    // Otherwise, append the alpha channel
+    
     return `${hex}${alpha}`;
 }
 
-// Add this helper function to create the graphic fill pattern
-function createGraphicFillPatternElement(graphicFill: any): SVGElement | null {
-    console.log("🎨 Creating graphic fill pattern from:", graphicFill);
-    
-    // Handle your server's structure
-    if (graphicFill.graphics && graphicFill.graphics.length > 0) {
-        const graphic = graphicFill.graphics[0];
-        console.log("🎭 Graphic data:", graphic);
-        
-        if (graphic.mark === 'shape://slash') {
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", "0");
-            line.setAttribute("y1", "8");
-            line.setAttribute("x2", "8");
-            line.setAttribute("y2", "0");
-            
-            // Get stroke color - try multiple property paths
-            const strokeColor = graphic.stroke || graphic["stroke"] || "#000000";
-            const strokeWidth = graphic["stroke-width"] || graphic.strokeWidth || "2";
-            
-            console.log("🖊️ Using stroke color:", strokeColor, "width:", strokeWidth);
-            
-            line.setAttribute("stroke", strokeColor);
-            line.setAttribute("stroke-width", strokeWidth);
-            
-            console.log("📐 Created slash line:", line.outerHTML);
-            return line;
-        }
-    }
-    
-    console.warn("⚠️ No valid slash graphic found");
-    return null;
+function generateUniquePatternId(): string {
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substr(2, 5);
+    return `graphicFillPattern_${timestamp}_${randomStr}`;
 }
 
-// Add this helper function to create graphic stroke elements
-function createGraphicStrokeElements(graphicStroke: any): SVGElement[] {
-    console.log("🔺 Creating full-width triangles from:", graphicStroke);
+// Enhanced function to create the graphic fill pattern with support for multiple mark types
+function createGraphicFillPatternElement(graphicFill: GraphicFillData): SVGElement | null {
+    try {
+        if (!graphicFill.graphics || graphicFill.graphics.length === 0) {
+            console.warn("No graphics found in GraphicFill data");
+            return null;
+        }
+
+        const graphic = graphicFill.graphics[0];
+        if (!graphic.mark) {
+            console.warn("No mark specified in graphic data");
+            return null;
+        }
+
+        const strokeColor = graphic.stroke || graphic.fill || "#000000";
+        const strokeWidth = graphic["stroke-width"] || "1";
+        const fillColor = graphic.fill || "none";
+
+        return createPatternMarkElement(graphic.mark, strokeColor, strokeWidth, fillColor);
+    } catch (error) {
+        console.error("Error creating graphic fill pattern:", error);
+        return null;
+    }
+}
+
+function createPatternMarkElement(
+    mark: string,
+    strokeColor: string,
+    strokeWidth: string,
+    fillColor: string
+): SVGElement | null {
+    const tileSize = SYMBOL_CONSTANTS.PATTERN_TILE_SIZE;
+    
+    switch (mark.toLowerCase()) {
+        case 'shape://slash':
+        case 'slash':
+            const slashLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            slashLine.setAttribute("x1", "0");
+            slashLine.setAttribute("y1", tileSize.toString());
+            slashLine.setAttribute("x2", tileSize.toString());
+            slashLine.setAttribute("y2", "0");
+            slashLine.setAttribute("stroke", strokeColor);
+            slashLine.setAttribute("stroke-width", strokeWidth);
+            return slashLine;
+
+        case 'shape://backslash':
+        case 'backslash':
+            const backslashLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            backslashLine.setAttribute("x1", "0");
+            backslashLine.setAttribute("y1", "0");
+            backslashLine.setAttribute("x2", tileSize.toString());
+            backslashLine.setAttribute("y2", tileSize.toString());
+            backslashLine.setAttribute("stroke", strokeColor);
+            backslashLine.setAttribute("stroke-width", strokeWidth);
+            return backslashLine;
+
+        case 'shape://plus':
+        case 'plus':
+            const plusGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const centerX = tileSize / 2;
+            const centerY = tileSize / 2;
+            
+            const hLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            hLine.setAttribute("x1", "0");
+            hLine.setAttribute("y1", centerY.toString());
+            hLine.setAttribute("x2", tileSize.toString());
+            hLine.setAttribute("y2", centerY.toString());
+            hLine.setAttribute("stroke", strokeColor);
+            hLine.setAttribute("stroke-width", strokeWidth);
+            
+            const vLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            vLine.setAttribute("x1", centerX.toString());
+            vLine.setAttribute("y1", "0");
+            vLine.setAttribute("x2", centerX.toString());
+            vLine.setAttribute("y2", tileSize.toString());
+            vLine.setAttribute("stroke", strokeColor);
+            vLine.setAttribute("stroke-width", strokeWidth);
+            
+            plusGroup.appendChild(hLine);
+            plusGroup.appendChild(vLine);
+            return plusGroup;
+
+        case 'shape://times':
+        case 'times':
+        case 'x':
+            const timesGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            
+            const diag1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            diag1.setAttribute("x1", "0");
+            diag1.setAttribute("y1", "0");
+            diag1.setAttribute("x2", tileSize.toString());
+            diag1.setAttribute("y2", tileSize.toString());
+            diag1.setAttribute("stroke", strokeColor);
+            diag1.setAttribute("stroke-width", strokeWidth);
+            
+            const diag2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            diag2.setAttribute("x1", "0");
+            diag2.setAttribute("y1", tileSize.toString());
+            diag2.setAttribute("x2", tileSize.toString());
+            diag2.setAttribute("y2", "0");
+            diag2.setAttribute("stroke", strokeColor);
+            diag2.setAttribute("stroke-width", strokeWidth);
+            
+            timesGroup.appendChild(diag1);
+            timesGroup.appendChild(diag2);
+            return timesGroup;
+
+        case 'shape://dot':
+        case 'dot':
+            const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            dot.setAttribute("cx", (tileSize / 2).toString());
+            dot.setAttribute("cy", (tileSize / 2).toString());
+            dot.setAttribute("r", "1");
+            dot.setAttribute("fill", fillColor !== "none" ? fillColor : strokeColor);
+            return dot;
+
+        case 'shape://circle':
+        case 'circle':
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", (tileSize / 2).toString());
+            circle.setAttribute("cy", (tileSize / 2).toString());
+            circle.setAttribute("r", "2");
+            circle.setAttribute("fill", fillColor);
+            circle.setAttribute("stroke", strokeColor);
+            circle.setAttribute("stroke-width", strokeWidth);
+            return circle;
+
+        case 'shape://square':
+        case 'square':
+            const square = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            const squareSize = 4;
+            square.setAttribute("x", ((tileSize - squareSize) / 2).toString());
+            square.setAttribute("y", ((tileSize - squareSize) / 2).toString());
+            square.setAttribute("width", squareSize.toString());
+            square.setAttribute("height", squareSize.toString());
+            square.setAttribute("fill", fillColor);
+            square.setAttribute("stroke", strokeColor);
+            square.setAttribute("stroke-width", strokeWidth);
+            return square;
+
+        case 'shape://triangle':
+        case 'triangle':
+            const triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const triCenterX = tileSize / 2;
+            const triCenterY = tileSize / 2;
+            const size = 3;
+            const trianglePoints = [
+                [triCenterX, triCenterY - size],
+                [triCenterX - size, triCenterY + size],
+                [triCenterX + size, triCenterY + size]
+            ].map(point => point.join(',')).join(' ');
+            triangle.setAttribute("points", trianglePoints);
+            triangle.setAttribute("fill", fillColor);
+            triangle.setAttribute("stroke", strokeColor);
+            triangle.setAttribute("stroke-width", strokeWidth);
+            return triangle;
+
+        case 'shape://vertline':
+        case 'vertline':
+        case 'vertical':
+            const vertLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            vertLine.setAttribute("x1", (tileSize / 2).toString());
+            vertLine.setAttribute("y1", "0");
+            vertLine.setAttribute("x2", (tileSize / 2).toString());
+            vertLine.setAttribute("y2", tileSize.toString());
+            vertLine.setAttribute("stroke", strokeColor);
+            vertLine.setAttribute("stroke-width", strokeWidth);
+            return vertLine;
+
+        case 'shape://horline':
+        case 'horline':
+        case 'horizontal':
+            const horLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            horLine.setAttribute("x1", "0");
+            horLine.setAttribute("y1", (tileSize / 2).toString());
+            horLine.setAttribute("x2", tileSize.toString());
+            horLine.setAttribute("y2", (tileSize / 2).toString());
+            horLine.setAttribute("stroke", strokeColor);
+            horLine.setAttribute("stroke-width", strokeWidth);
+            return horLine;
+
+        default:
+            console.warn(`Unsupported graphic fill mark type: ${mark}`);
+            return null;
+    }
+}
+
+// Enhanced function to create graphic stroke elements with support for multiple mark types
+function createGraphicStrokeElements(graphicStroke: GraphicStrokeData): SVGElement[] {
     const elements: SVGElement[] = [];
     
-    // Handle your server's structure
-    if (graphicStroke.graphics && graphicStroke.graphics.length > 0) {
+    try {
+        if (!graphicStroke.graphics || graphicStroke.graphics.length === 0) {
+            console.warn("No graphics found in GraphicStroke data");
+            return elements;
+        }
+
         const graphic = graphicStroke.graphics[0];
         const originalSize = parseFloat(graphicStroke.size || "6");
         
-        console.log("🔺 Graphic data:", graphic);
-        console.log("📏 Original size:", originalSize);
+        if (!graphic.mark) {
+            console.warn("No mark specified in graphic data");
+            return elements;
+        }
+
+        // For legend display, we want multiple symbols spanning the full line width
+        const symbolCount = SYMBOL_CONSTANTS.TRIANGLE_COUNT;
+        const lineStart = SYMBOL_CONSTANTS.LINE_START_X;
+        const lineEnd = SYMBOL_CONSTANTS.LINE_END_X;
+        const lineWidth = lineEnd - lineStart;
         
-        // For legend display, we want 4 triangles spanning the FULL line width
-        const symbolCount = 4;
-        const lineStart = 2;  // Line starts at x=2
-        const lineEnd = 30;   // Line ends at x=30
-        const lineWidth = lineEnd - lineStart; // 28px total
-        
-        // Each triangle gets equal width across the full line
-        const triangleWidth = lineWidth / symbolCount; // 28/4 = 7px per triangle
-        const triangleHeight = 6; // Make them a good height for visibility
-        
-        console.log("🧮 Symbol count:", symbolCount, "Triangle width:", triangleWidth, "height:", triangleHeight);
+        // Each symbol gets equal width across the full line
+        const symbolSpacing = lineWidth / symbolCount;
+        const symbolSize = Math.min(SYMBOL_CONSTANTS.TRIANGLE_HEIGHT, originalSize);
         
         for (let i = 0; i < symbolCount; i++) {
-            // Calculate the center X position for this triangle
-            const triangleLeft = lineStart + (i * triangleWidth);
-            const triangleRight = lineStart + ((i + 1) * triangleWidth);
-            const triangleCenter = (triangleLeft + triangleRight) / 2;
+            // Calculate the center X position for this symbol
+            const symbolLeft = lineStart + (i * symbolSpacing);
+            const symbolRight = lineStart + ((i + 1) * symbolSpacing);
+            const symbolCenter = (symbolLeft + symbolRight) / 2;
             
-            const y = 10; // Line center
+            const element = createStrokeSymbolElement(
+                graphic.mark,
+                symbolCenter,
+                SYMBOL_CONSTANTS.LINE_Y_CENTER,
+                symbolSize,
+                symbolSpacing,
+                graphic.fill || "#000000",
+                graphic.stroke || "#000000",
+                graphic["stroke-width"] || "0.5"
+            );
             
-            console.log(`🎯 Creating triangle ${i}: left=${triangleLeft}, center=${triangleCenter}, right=${triangleRight}`);
-            
-            if (graphic.mark?.toLowerCase() === 'triangle') {
-                const triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-                
-                // Position triangles so their base just touches the TOP edge of the line
-                // Line has stroke-width of 2, so it extends 1px above and below y=10
-                const lineTopEdge = y - 1; // Top edge of the 2px wide line
-                
-                // Create triangles that span the full allocated width
-                const points = [
-                    [triangleCenter, lineTopEdge - triangleHeight],  // Top point (above the line)
-                    [triangleLeft, lineTopEdge],                     // Bottom left (touching line, at segment start)
-                    [triangleRight, lineTopEdge]                     // Bottom right (touching line, at segment end)
-                ].map(point => point.join(',')).join(' ');
-                
-                triangle.setAttribute("points", points);
-                triangle.setAttribute("fill", graphic.fill || "#000000");
-                triangle.setAttribute("stroke", graphic.stroke || "#000000");
-                triangle.setAttribute("stroke-width", graphic["stroke-width"] || "0.5");
-                
-                console.log("🔺 Created full-width triangle:", triangle.outerHTML);
-                elements.push(triangle);
+            if (element) {
+                elements.push(element);
             }
         }
+    } catch (error) {
+        console.error("Error creating graphic stroke elements:", error);
     }
     
-    console.log("🔺 Total full-width triangles created:", elements.length);
     return elements;
+}
+
+function createStrokeSymbolElement(
+    mark: string,
+    centerX: number,
+    centerY: number,
+    size: number,
+    spacing: number,
+    fill: string,
+    stroke: string,
+    strokeWidth: string
+): SVGElement | null {
+    switch (mark.toLowerCase()) {
+        case 'triangle':
+        case 'shape://triangle':
+            const triangle = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            
+            // Position triangles so their base touches the top edge of the line
+            const lineTopEdge = centerY - 1; // Assuming 2px line width
+            const halfSpacing = spacing / 2;
+            
+            const points = [
+                [centerX, lineTopEdge - size],                    // Top point (above the line)
+                [centerX - halfSpacing, lineTopEdge],             // Bottom left
+                [centerX + halfSpacing, lineTopEdge]              // Bottom right
+            ].map(point => point.join(',')).join(' ');
+            
+            triangle.setAttribute("points", points);
+            triangle.setAttribute("fill", fill);
+            triangle.setAttribute("stroke", stroke);
+            triangle.setAttribute("stroke-width", strokeWidth);
+            return triangle;
+
+        case 'circle':
+        case 'shape://circle':
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", centerX.toString());
+            circle.setAttribute("cy", (centerY - size / 2).toString());
+            circle.setAttribute("r", (size / 3).toString());
+            circle.setAttribute("fill", fill);
+            circle.setAttribute("stroke", stroke);
+            circle.setAttribute("stroke-width", strokeWidth);
+            return circle;
+
+        case 'square':
+        case 'shape://square':
+            const square = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            const squareSize = size / 2;
+            square.setAttribute("x", (centerX - squareSize / 2).toString());
+            square.setAttribute("y", (centerY - size).toString());
+            square.setAttribute("width", squareSize.toString());
+            square.setAttribute("height", squareSize.toString());
+            square.setAttribute("fill", fill);
+            square.setAttribute("stroke", stroke);
+            square.setAttribute("stroke-width", strokeWidth);
+            return square;
+
+        case 'diamond':
+        case 'shape://diamond':
+            const diamond = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const halfSize = size / 2;
+            const diamondPoints = [
+                [centerX, centerY - size],              // Top
+                [centerX + halfSize, centerY - halfSize], // Right
+                [centerX, centerY],                      // Bottom
+                [centerX - halfSize, centerY - halfSize]  // Left
+            ].map(point => point.join(',')).join(' ');
+            diamond.setAttribute("points", diamondPoints);
+            diamond.setAttribute("fill", fill);
+            diamond.setAttribute("stroke", stroke);
+            diamond.setAttribute("stroke-width", strokeWidth);
+            return diamond;
+
+        case 'cross':
+        case 'shape://cross':
+        case 'plus':
+        case 'shape://plus':
+            const crossGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const crossSize = size / 2;
+            
+            const hLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            hLine.setAttribute("x1", (centerX - crossSize).toString());
+            hLine.setAttribute("y1", (centerY - crossSize).toString());
+            hLine.setAttribute("x2", (centerX + crossSize).toString());
+            hLine.setAttribute("y2", (centerY - crossSize).toString());
+            hLine.setAttribute("stroke", stroke);
+            hLine.setAttribute("stroke-width", strokeWidth);
+            
+            const vLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            vLine.setAttribute("x1", centerX.toString());
+            vLine.setAttribute("y1", (centerY - size).toString());
+            vLine.setAttribute("x2", centerX.toString());
+            vLine.setAttribute("y2", centerY.toString());
+            vLine.setAttribute("stroke", stroke);
+            vLine.setAttribute("stroke-width", strokeWidth);
+            
+            crossGroup.appendChild(hLine);
+            crossGroup.appendChild(vLine);
+            return crossGroup;
+
+        case 'x':
+        case 'shape://times':
+        case 'times':
+            const xGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const xSize = size / 2;
+            
+            const diag1 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            diag1.setAttribute("x1", (centerX - xSize).toString());
+            diag1.setAttribute("y1", (centerY - size).toString());
+            diag1.setAttribute("x2", (centerX + xSize).toString());
+            diag1.setAttribute("y2", centerY.toString());
+            diag1.setAttribute("stroke", stroke);
+            diag1.setAttribute("stroke-width", strokeWidth);
+            
+            const diag2 = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            diag2.setAttribute("x1", (centerX + xSize).toString());
+            diag2.setAttribute("y1", (centerY - size).toString());
+            diag2.setAttribute("x2", (centerX - xSize).toString());
+            diag2.setAttribute("y2", centerY.toString());
+            diag2.setAttribute("stroke", stroke);
+            diag2.setAttribute("stroke-width", strokeWidth);
+            
+            xGroup.appendChild(diag1);
+            xGroup.appendChild(diag2);
+            return xGroup;
+
+        case 'arrow':
+        case 'shape://arrow':
+            const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const arrowSize = size / 2;
+            const arrowPoints = [
+                [centerX, centerY - size],               // Tip
+                [centerX - arrowSize, centerY - arrowSize], // Left wing
+                [centerX - arrowSize / 2, centerY - arrowSize], // Left notch
+                [centerX - arrowSize / 2, centerY],      // Left bottom
+                [centerX + arrowSize / 2, centerY],      // Right bottom
+                [centerX + arrowSize / 2, centerY - arrowSize], // Right notch
+                [centerX + arrowSize, centerY - arrowSize]  // Right wing
+            ].map(point => point.join(',')).join(' ');
+            arrow.setAttribute("points", arrowPoints);
+            arrow.setAttribute("fill", fill);
+            arrow.setAttribute("stroke", stroke);
+            arrow.setAttribute("stroke-width", strokeWidth);
+            return arrow;
+
+        default:
+            console.warn(`Unsupported graphic stroke mark type: ${mark}`);
+            return null;
+    }
 }
