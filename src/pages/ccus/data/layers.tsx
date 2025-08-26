@@ -5,7 +5,7 @@ import { addThousandsSeparator, toTitleCase, toSentenceCase } from "@/lib/utils"
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
-const basinNamesWMSTitle = 'GeoRegions';
+const basinNamesWMSTitle = 'Geo-region Carbon Storage Ranking';
 const basinNamesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -108,7 +108,7 @@ const pipelinesWMSConfig: WMSLayerProps = {
 
 // SCO2 WMS Layer
 const sco2LayerName = 'sco2_draft_13aug24';
-const sco2WMSTitle = 'Storage Resource Estimates';
+const sco2WMSTitle = 'Statewide Storage Resource Estimates';
 const sco2WMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
