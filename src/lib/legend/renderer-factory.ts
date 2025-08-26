@@ -1,5 +1,5 @@
 import { MapImageLayerRenderer, RegularLayerRenderer } from '@/lib/types/mapping-types';
-import { CompositeSymbolResult } from '@/lib/legend/symbol-generator';
+import { CompositeSymbolResult } from '@/lib/legend/symbolizers/line';
 
 export const RendererFactory = {
     createPreview: async (rendererData: MapImageLayerRenderer | RegularLayerRenderer) => {
