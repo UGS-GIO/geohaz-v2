@@ -69,11 +69,6 @@ export function createPolygonSymbol(symbolizers: Symbolizer[]): SVGSVGElement {
 
             const graphicFill = polygonData.GraphicFill || polygonData['graphic-fill'];
             if (graphicFill) {
-                console.log("Found GraphicFill:", graphicFill);
-                console.log("Corresponding PolygonSymbolizer:", polygonData);
-            }
-
-            if (graphicFill) {
                 hasGraphicFill = true;
                 graphicFillPattern = createGraphicFillPatternElement(graphicFill);
             } else if ('fill' in symbolizer.Polygon) {
