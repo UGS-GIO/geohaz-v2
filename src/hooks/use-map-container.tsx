@@ -10,8 +10,8 @@ import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { LayerProps } from '@/lib/types/mapping-types';
 import { useLayerUrl } from '@/context/layer-url-provider';
-import { wellWithTopsWMSTitle } from '@/pages/ccs/data/layers';
-import { findAndApplyWMSFilter } from '@/pages/ccs/components/sidebar/map-configurations/map-configurations';
+import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
+import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
 import { useMap } from '@/context/map-provider';
 
 const preprocessLayerVisibility = (

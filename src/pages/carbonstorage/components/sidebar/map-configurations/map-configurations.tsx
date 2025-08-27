@@ -26,7 +26,7 @@ import { useMapCoordinates } from '@/hooks/use-map-coordinates';
 import { useMap } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/map/utils';
-import { wellWithTopsWMSTitle } from '@/pages/ccs/data/layers';
+import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
 import { Badge } from '@/components/ui/badge';
 
 export const findAndApplyWMSFilter = (
@@ -98,8 +98,8 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
 function MapConfigurations() {
     const { setIsDecimalDegrees } = useMapCoordinates();
     const { view } = useMap();
-    const navigate = useNavigate({ from: '/ccs' });
-    const search = useSearch({ from: '/ccs/' });
+    const navigate = useNavigate({ from: '/carbonstorage' });
+    const search = useSearch({ from: '/carbonstorage/' });
 
     // Move the formation data query to the parent component level
     // This ensures it loads immediately on page load

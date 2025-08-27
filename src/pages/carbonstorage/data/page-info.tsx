@@ -79,7 +79,7 @@ const mapDetails = (
         <p>
             This web application is a tool for the public, scientists, and industry professionals interested in carbon capture, utilization, and storage (CCS). It provides access to spatial data and technical resources to support site selection, storage resource assessment, and project planning. The visualization is intended to assist in evaluating geologic carbon storage potential options and make informed decisions based on current information.</p>
         <p>
-            About CCS: CCS involves collecting carbon dioxide (CO₂) from the atmosphere or industrial sources and either using it in commercial processes or storing it underground in geologic reservoir rock. Successful geologic carbon storage requires porous rock reservoirs capped by non-porous seals to trap the CO₂. Utah's unique geology offers many suitable sites for CO₂ storage, often located near major emission sources like power plants and refineries. <Link to="https://geology.utah.gov/energy-minerals/ccs/">Learn More</Link>.
+            About CCS: CCS involves collecting carbon dioxide (CO₂) from the atmosphere or industrial sources and either using it in commercial processes or storing it underground in geologic reservoir rock. Successful geologic carbon storage requires porous rock reservoirs capped by non-porous seals to trap the CO₂. Utah's unique geology offers many suitable sites for CO₂ storage, often located near major emission sources like power plants and refineries. <Link to="https://geology.utah.gov/energy-minerals/carbonstorage/">Learn More</Link>.
         </p>
     </div>
 )

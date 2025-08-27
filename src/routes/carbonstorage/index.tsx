@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
-import { wellWithTopsWMSTitle } from '@/pages/ccs/data/layers';
-import Map from '@/pages/ccs';
+import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
+import Map from '@/pages/carbonstorage';
 
 const ccsSearchSchema = z.object({
     core: z.enum(['yes', 'no']).optional(),
@@ -11,7 +11,7 @@ const ccsSearchSchema = z.object({
     filters: z.record(z.string()).optional(),
 }).strip();
 
-export const Route = createFileRoute('/ccs/')({
+export const Route = createFileRoute('/carbonstorage/')({
     component: () => <Map />,
     validateSearch: (search: Record<string, unknown>) => {
         let { core, formations, formation_operator, coordinate_format, filters } = ccsSearchSchema.parse(search);

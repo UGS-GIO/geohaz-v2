@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { MapWidgets } from '@/pages/ccs/components/map-widgets';
+import { MapWidgets } from '@/pages/carbonstorage/components/map-widgets';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
-import { wellWithTopsWMSTitle } from '@/pages/ccs/data/layers';
-import { findAndApplyWMSFilter } from '@/pages/ccs/components/sidebar/map-configurations/map-configurations';
-import { CCSSearch } from '@/routes/ccs';
+import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
+import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
+import { CCSSearch } from '@/routes/carbonstorage';
 
 interface MapContainerProps {
     searchParams: CCSSearch;
