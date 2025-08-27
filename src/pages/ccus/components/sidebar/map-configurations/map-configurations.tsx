@@ -5,6 +5,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
     Command,
     CommandEmpty,
@@ -18,7 +19,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
@@ -26,6 +27,7 @@ import { MapContext } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/map/utils';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
+import { Badge } from '@/components/ui/badge';
 
 export const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
@@ -93,17 +95,38 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
     return Array.from(uniqueMappings, ([label, value]) => ({ label, value })).sort((a, b) => a.label.localeCompare(b.label));
 };
 
-
 function MapConfigurations() {
     const { setIsDecimalDegrees } = useMapCoordinates();
     const { map } = useContext(MapContext);
     const navigate = useNavigate({ from: '/ccus' });
     const search = useSearch({ from: '/ccus/' });
 
-    const wellFilter = useMemo(() => search.filters?.[wellWithTopsWMSTitle] || null, [search.filters]);
+    // Move the formation data query to the parent component level
+    // This ensures it loads immediately on page load
+    const { data: formationMappings = [], isLoading: isFormationLoading, error: formationError } = useQuery({
+        queryKey: ['formationMappings'],
+        queryFn: fetchFormationData,
+        staleTime: 1000 * 60 * 60,
+    });
+
+    // Parse formations as array from URL params
+    const selectedFormations = useMemo(() => {
+        if (!search.formations) return [];
+        if (typeof search.formations === 'string') {
+            return search.formations.split(',').filter(Boolean);
+        }
+        return Array.isArray(search.formations) ? search.formations : [];
+    }, [search.formations]);
+
+    // Parse formation operator from URL params (defaults to OR/false)
+    const useAndOperator = useMemo(() => {
+        return search.formation_operator === 'and';
+    }, [search.formation_operator]);
+
     useEffect(() => {
-        findAndApplyWMSFilter(map, wellWithTopsWMSTitle, wellFilter);
-    }, [map, wellFilter]);
+        const filterFromSearchState = search.filters?.[wellWithTopsWMSTitle] ?? null;
+        findAndApplyWMSFilter(map, wellWithTopsWMSTitle, filterFromSearchState);
+    }, [map, search.filters]);
 
     const handleCoordFormatChange = (value: 'dd' | 'dms') => {
         if (setIsDecimalDegrees) setIsDecimalDegrees(value === 'dd');
@@ -120,9 +143,22 @@ function MapConfigurations() {
         });
     };
 
-    const handleFormationChange = (value: string) => {
+    const handleFormationChange = (formations: string[]) => {
         navigate({
-            search: (prev) => ({ ...prev, formation: value === "" ? undefined : value }),
+            search: (prev) => ({
+                ...prev,
+                formations: formations.length === 0 ? undefined : formations.join(',')
+            }),
+            replace: true,
+        });
+    };
+
+    const handleFormationOperatorChange = (useAnd: boolean) => {
+        navigate({
+            search: (prev) => ({
+                ...prev,
+                formation_operator: useAnd ? 'and' : undefined // undefined defaults to OR
+            }),
             replace: true,
         });
     };
@@ -177,7 +213,7 @@ function MapConfigurations() {
 
                 <Card>
                     <CardHeader className="py-3 px-4">
-                        <CardTitle className="text-base">Filter Wells Database (Demo)</CardTitle>
+                        <CardTitle className="text-base">Filter Wells Database</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 space-y-4">
                         <WellCoreFilter
@@ -185,8 +221,13 @@ function MapConfigurations() {
                             onChange={handleHasCoreChange}
                         />
                         <WellFormationFilter
-                            value={search.formation ?? ''}
+                            value={selectedFormations}
                             onChange={handleFormationChange}
+                            mappings={formationMappings}
+                            isLoading={isFormationLoading}
+                            error={formationError}
+                            useAndOperator={useAndOperator}
+                            onOperatorChange={handleFormationOperatorChange}
                         />
                     </CardContent>
                 </Card>
@@ -224,19 +265,110 @@ const WellCoreFilter = ({ value, onChange }: { value: YesNoAll, onChange: (value
     </div>
 );
 
-const WellFormationFilter = ({ value, onChange }: { value: string, onChange: (value: string) => void }) => {
+interface WellFormationFilterProps {
+    value: string[];
+    onChange: (value: string[]) => void;
+    mappings: FormationMapping[];
+    isLoading: boolean;
+    error: Error | null;
+    useAndOperator: boolean;
+    onOperatorChange: (useAnd: boolean) => void;
+}
+
+const WellFormationFilter = ({
+    value,
+    onChange,
+    mappings,
+    isLoading,
+    error,
+    useAndOperator,
+    onOperatorChange
+}: WellFormationFilterProps) => {
     const [open, setOpen] = useState(false);
-    const { data: mappings = [], isLoading, error } = useQuery({
-        queryKey: ['formationMappings'],
-        queryFn: fetchFormationData,
-        staleTime: 1000 * 60 * 60,
-    });
+
+    const handleSelect = (formationValue: string) => {
+        if (formationValue === "") {
+            // Clear all selections
+            onChange([]);
+        } else {
+            // Toggle selection
+            const isSelected = value.includes(formationValue);
+            if (isSelected) {
+                onChange(value.filter(v => v !== formationValue));
+            } else {
+                onChange([...value, formationValue]);
+            }
+        }
+        // Don't close the popover to allow multiple selections
+        // setOpen(false);
+    };
+
+    const removeFormation = (formationValue: string) => {
+        onChange(value.filter(v => v !== formationValue));
+    };
 
     return (
         <div>
             <Label className="text-sm font-medium text-muted-foreground mb-2 block">
                 {formationNameMappingConfig.label}
             </Label>
+
+            {/* OR/AND Toggle - only show when multiple formations are selected */}
+            {value.length > 1 && (
+                <div className="mb-3 flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
+                        <span className={cn("text-xs font-medium transition-colors",
+                            !useAndOperator ? "text-primary" : "text-muted-foreground"
+                        )}>
+                            OR
+                        </span>
+                        <Switch
+                            id="formation-operator-toggle"
+                            checked={useAndOperator}
+                            onCheckedChange={onOperatorChange}
+                        />
+                        <span className={cn("text-xs font-medium transition-colors",
+                            useAndOperator ? "text-primary" : "text-muted-foreground"
+                        )}>
+                            AND
+                        </span>
+                    </div>
+                    <Label
+                        htmlFor="formation-operator-toggle"
+                        className="text-xs text-muted-foreground cursor-pointer"
+                    >
+                        {useAndOperator ? "Wells must have all selected formations" : "Wells can have any selected formation"}
+                    </Label>
+                </div>
+            )}
+
+            {/* Selected formations display - now shows even while loading */}
+            {value.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-2">
+                    {value.map((formationValue, index) => {
+                        // Find the label, or show the value if mappings haven't loaded yet
+                        const label = mappings.find(m => m.value === formationValue)?.label || formationValue;
+                        return (
+                            <div key={formationValue} className="flex items-center">
+                                {index > 0 && (
+                                    <span className="text-xs text-muted-foreground mr-2">
+                                        {useAndOperator ? 'AND' : 'OR'}
+                                    </span>
+                                )}
+                                <Badge
+                                    variant="default"
+                                    className="cursor-pointer flex items-center"
+                                    onClick={() => removeFormation(formationValue)}
+                                >
+                                    {label}
+                                    <X className="ml-1 h-3 w-3 flex-shrink-0" />
+                                </Badge>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
@@ -245,7 +377,10 @@ const WellFormationFilter = ({ value, onChange }: { value: string, onChange: (va
                         aria-expanded={open}
                         className="w-full justify-between text-xs h-9"
                     >
-                        {value ? mappings.find(m => m.value === value)?.label : "Select formation..."}
+                        {value.length === 0
+                            ? "Select formations..."
+                            : `${value.length} formation${value.length === 1 ? '' : 's'} selected`
+                        }
                         <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
@@ -262,23 +397,26 @@ const WellFormationFilter = ({ value, onChange }: { value: string, onChange: (va
                             <CommandGroup>
                                 <CommandItem
                                     value=""
-                                    onSelect={() => { onChange(""); setOpen(false); }}
+                                    onSelect={() => handleSelect("")}
                                     className="text-xs"
                                 >
-                                    <Check className={cn("mr-2 h-3 w-3", value === "" ? "opacity-100" : "opacity-0")} />
-                                    All Formations
+                                    <Check className={cn("mr-2 h-3 w-3", value.length === 0 ? "opacity-100" : "opacity-0")} />
+                                    Clear All Selections
                                 </CommandItem>
-                                {mappings.map(mapping => (
-                                    <CommandItem
-                                        key={mapping.value}
-                                        value={mapping.label}
-                                        onSelect={() => { onChange(mapping.value); setOpen(false); }}
-                                        className="text-xs"
-                                    >
-                                        <Check className={cn("mr-2 h-3 w-3", value === mapping.value ? "opacity-100" : "opacity-0")} />
-                                        {mapping.label}
-                                    </CommandItem>
-                                ))}
+                                {mappings.map(mapping => {
+                                    const isSelected = value.includes(mapping.value);
+                                    return (
+                                        <CommandItem
+                                            key={mapping.value}
+                                            value={mapping.label}
+                                            onSelect={() => handleSelect(mapping.value)}
+                                            className="text-xs"
+                                        >
+                                            <Check className={cn("mr-2 h-3 w-3", isSelected ? "opacity-100" : "opacity-0")} />
+                                            {mapping.label}
+                                        </CommandItem>
+                                    );
+                                })}
                             </CommandGroup>
                         </CommandList>
                     </Command>
