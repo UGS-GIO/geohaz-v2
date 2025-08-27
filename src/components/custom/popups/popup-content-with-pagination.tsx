@@ -245,7 +245,6 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
         <div className="flex flex-1 flex-col gap-4 px-2 overflow-y-auto select-text h-full scrollable-container">
             {layerContent.map((layer) => (
                 <LayerCard
-                    view={view}
                     key={`${contentKey}-${layer.groupLayerTitle}-${layer.layerTitle}`}
                     layer={layer}
                     buttons={buttons}
