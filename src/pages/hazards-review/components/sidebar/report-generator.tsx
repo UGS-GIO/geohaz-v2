@@ -1,5 +1,5 @@
-import { useContext, useState, useEffect, useRef } from "react";
-import { MapContext } from '@/context/map-provider';
+import { useState, useEffect, useRef } from "react";
+import { useMap } from '@/context/map-provider';
 import SketchViewModel from "@arcgis/core/widgets/Sketch/SketchViewModel";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Layer from "@arcgis/core/layers/Layer";
@@ -21,7 +21,7 @@ type ActiveButtonOptions = 'currentMapExtent' | 'customArea' | 'reset';
 type DialogType = 'areaTooLarge' | 'confirmation' | null;
 
 function ReportGenerator() {
-    const { view, setIsSketching } = useContext(MapContext);
+    const { view, setIsSketching } = useMap();
     const [activeButton, setActiveButton] = useState<ActiveButtonOptions>();
     const tempGraphicsLayer = useRef<__esri.GraphicsLayer | undefined>(undefined);
     const sketchVM = useRef<__esri.SketchViewModel | undefined>(undefined);

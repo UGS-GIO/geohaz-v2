@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/custom/button';
-import { MapContext } from '@/context/map-provider';
+import { useMap } from '@/context/map-provider';
 import { BasemapIcon } from '@/assets/basemap-icons';
 import Basemap from "@arcgis/core/Basemap.js";
 
@@ -77,7 +77,7 @@ const BasemapDropdown = ({ links, trigger, onBasemapChange, activeBasemap }: Bas
 };
 
 function TopNav({ className, ...props }: TopNavProps) {
-  const { view } = useContext(MapContext);
+  const { view } = useMap();
   const [activeBasemap, setActiveBasemap] = useState<string | __esri.Basemap>(
     basemapList.find(b => b.isActive)!.basemapStyle
   );

@@ -1,6 +1,6 @@
-import { useCallback, useState, useContext } from "react";
+import { useCallback, useState } from "react";
 import Collection from "@arcgis/core/core/Collection.js";
-import { MapContext } from "@/context/map-provider";
+import { useMap } from "@/context/map-provider";
 import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
 import { useGetLayerConfig } from "./use-get-layer-config";
 import { createPinGraphic, clearGraphics } from "@/lib/map/highlight-utils";
@@ -18,7 +18,7 @@ type VisibleLayer = {
 */
 export const useMapInteractions = () => {
     const [visibleLayers, setVisibleLayers] = useState<Record<string, VisibleLayer>>();
-    const { view } = useContext(MapContext);
+    const { view } = useMap();
     const layersConfig = useGetLayerConfig();
 
     type LayerVisibilityMapProps = Record<string, {

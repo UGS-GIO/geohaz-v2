@@ -1,9 +1,10 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { MapContext } from '@/context/map-provider';
+import { useMap } from '@/context/map-provider';
 import { convertDDToDMS } from '@/lib/map/conversion-utils';
 import * as webMercatorUtils from '@arcgis/core/geometry/support/webMercatorUtils';
 import Point from '@arcgis/core/geometry/Point';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const COORD_PRECISION = 3;
 
@@ -25,27 +26,14 @@ const convertToDisplayFormat = (x: string, y: string, isDD: boolean, convertDDTo
 };
 
 export function useMapCoordinates() {
-    const context = useContext(MapContext);
-    if (!context) {
-        throw new Error('useMapCoordinates must be used within the scope of MapContextProvider');
-    }
-    const { view, isDecimalDegrees, setIsDecimalDegrees: setContextIsDecimalDegrees, isMobile } = context;
-
+    const { view } = useMap();
+    const isMobile = useIsMobile();
     const navigate = useNavigate();
     const search = useSearch({ from: '__root__' });
-
+    const isDecimalDegrees = search.coordinate_format !== 'dms';
     const [scale, setScale] = useState<number>(view?.scale || 0);
     const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "", y: "" });
     const lastDecimalCoordinates = useRef<{ x: string; y: string }>({ x: "", y: "" });
-
-    useEffect(() => {
-        const urlCoordFmt = search.coordinate_format;
-        if (setContextIsDecimalDegrees) {
-            if (urlCoordFmt !== undefined) {
-                setContextIsDecimalDegrees(urlCoordFmt === 'dd');
-            }
-        }
-    }, [search.coordinate_format, setContextIsDecimalDegrees]);
 
     const locationCoordinateFormat = isDecimalDegrees ? "Decimal Degrees" : "Degrees, Minutes, Seconds";
 
@@ -77,22 +65,20 @@ export function useMapCoordinates() {
 
             currentView.when(() => {
                 updateDisplayedCoordinatesAndScale(currentView.center, currentView.scale);
-
                 zoomWatcher = currentView.watch("zoom", () => {
                     updateDisplayedCoordinatesAndScale(
-                        currentView.toMap(currentView.center) || currentView.center, // Use current center for last known point
+                        currentView.toMap(currentView.center) || currentView.center,
                         currentView.scale
                     );
                 });
-
                 pointerMoveHandler = currentView.on("pointer-move", (event: __esri.ViewPointerMoveEvent) => {
                     const mapPoint = currentView.toMap({ x: event.x, y: event.y });
                     updateDisplayedCoordinatesAndScale(mapPoint, currentView.scale);
                 });
             });
             return () => {
-                if (zoomWatcher?.remove) zoomWatcher.remove();
-                if (pointerMoveHandler?.remove) pointerMoveHandler.remove();
+                zoomWatcher?.remove();
+                pointerMoveHandler?.remove();
             };
         },
         [updateDisplayedCoordinatesAndScale]
@@ -110,7 +96,7 @@ export function useMapCoordinates() {
                 });
             });
             return () => {
-                if (stationaryWatcher?.remove) stationaryWatcher.remove();
+                stationaryWatcher?.remove();
             };
         },
         [updateDisplayedCoordinatesAndScale]
@@ -129,18 +115,15 @@ export function useMapCoordinates() {
     }, [view, isMobile, handleDesktopViewChange, handleMobileViewChange]);
 
     const setCoordinateFormat = useCallback((newIsDecimalDegrees: boolean) => {
-        if (setContextIsDecimalDegrees) {
-            setContextIsDecimalDegrees(newIsDecimalDegrees);
-        }
         navigate({
             to: ".",
-            search: {
-                ...search,
+            search: (prev) => ({
+                ...prev,
                 coordinate_format: newIsDecimalDegrees ? 'dd' : 'dms',
-            },
+            }),
             replace: true,
         });
-    }, [setContextIsDecimalDegrees, navigate, search]);
+    }, [navigate]);
 
     return {
         isDecimalDegrees,
