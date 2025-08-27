@@ -1,6 +1,6 @@
 import { Link } from "@/components/custom/link";
 
-const appTitle = 'CCUS Portal';
+const appTitle = 'CCS Portal';
 
 const references = (
     <div>
@@ -36,7 +36,7 @@ const references = (
 const acknowledgments = (
     <div className="space-y-2">
         <p>
-            This web application was created to visualize the carbon storage potential of the state of Utah and make the associated data available for download by industry professionals, local government agencies, lawmakers, and the public. The project included gathering data related to subsurface exploration and fixing data gaps through new stratigraphic analysis and interpretation of data with partners from the University of Utah. The project also included investigating community perspectives on CCUS in Utah in collaboration with Anthropology and Sociology faculty at the University of Utah. Funding was provided by the U.S. Department of Energy, grant #DE-FE0032367 as part of the 2799 FOA.
+            This web application was created to visualize the carbon storage potential of the state of Utah and make the associated data available for download by industry professionals, local government agencies, lawmakers, and the public. The project included gathering data related to subsurface exploration and fixing data gaps through new stratigraphic analysis and interpretation of data with partners from the University of Utah. The project also included investigating community perspectives on CCS in Utah in collaboration with Anthropology and Sociology faculty at the University of Utah. Funding was provided by the U.S. Department of Energy, grant #DE-FE0032367 as part of the 2799 FOA.
         </p>
         <p>
             <Link to="https://geology.utah.gov/">Utah Geological Survey</Link> project team: Dr. Gabriela St. Pierre, Dr. Eugene Szymanski, Michael Vanden Berg, Tara Tankersley
@@ -77,16 +77,16 @@ const dataDisclaimer = (
 const mapDetails = (
     <div className='mx-2 space-y-2'>
         <p>
-            This web application is a tool for the public, scientists, and industry professionals interested in carbon capture, utilization, and storage (CCUS). It provides access to spatial data and technical resources to support site selection, storage resource assessment, and project planning. The visualization is intended to assist in evaluating geologic carbon storage potential options and make informed decisions based on current information.</p>
+            This web application is a tool for the public, scientists, and industry professionals interested in carbon capture, utilization, and storage (CCS). It provides access to spatial data and technical resources to support site selection, storage resource assessment, and project planning. The visualization is intended to assist in evaluating geologic carbon storage potential options and make informed decisions based on current information.</p>
         <p>
-            About CCUS: CCUS involves collecting carbon dioxide (CO₂) from the atmosphere or industrial sources and either using it in commercial processes or storing it underground in geologic reservoir rock. Successful geologic carbon storage requires porous rock reservoirs capped by non-porous seals to trap the CO₂. Utah's unique geology offers many suitable sites for CO₂ storage, often located near major emission sources like power plants and refineries. <Link to="https://geology.utah.gov/energy-minerals/ccus/">Learn More</Link>.
+            About CCS: CCS involves collecting carbon dioxide (CO₂) from the atmosphere or industrial sources and either using it in commercial processes or storing it underground in geologic reservoir rock. Successful geologic carbon storage requires porous rock reservoirs capped by non-porous seals to trap the CO₂. Utah's unique geology offers many suitable sites for CO₂ storage, often located near major emission sources like power plants and refineries. <Link to="https://geology.utah.gov/energy-minerals/ccs/">Learn More</Link>.
         </p>
     </div>
 )
 
 const mapDetailsShortened = (
     <p className='text-left text-sm mx-2 font-normal'>
-        This web application is a tool for the public, scientists, and industry professionals interested in carbon capture, utilization, and storage (CCUS)...
+        This web application is a tool for the public, scientists, and industry professionals interested in carbon capture, utilization, and storage (CCS)...
     </p>
 )
 
@@ -117,7 +117,7 @@ const dataSources = (
             <span><Link to="https://ugspub.nr.utah.gov/publications/non_lib_pubs/contract_deliverables/EMP-1.pdf">View report</Link></span>
 
             <p>
-                <strong>CCUS Study Areas</strong> - Utah Geological Survey
+                <strong>CCS Study Areas</strong> - Utah Geological Survey
             </p>
 
             <p>

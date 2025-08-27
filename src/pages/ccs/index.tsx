@@ -9,12 +9,12 @@ import Sidebar from '@/components/sidebar'
 import { useSidebar } from '@/hooks/use-sidebar'
 import { useLayerUrl } from '@/context/layer-url-provider'
 import { PROD_POSTGREST_URL } from '@/lib/constants'
-import { wellWithTopsLayerName, wellWithTopsWMSTitle } from '@/pages/ccus/data/layers'
+import { wellWithTopsLayerName, wellWithTopsWMSTitle } from '@/pages/ccs/data/layers'
 import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleCollectionSelect, handleSearchSelect, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox'
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
-  const search = useSearch({ from: '/ccus/' });
+  const search = useSearch({ from: '/ccs/' });
   const { updateLayerSelection } = useLayerUrl();
 
   const searchConfig: SearchSourceConfig[] = [

@@ -1,7 +1,7 @@
 import { House, Info as InfoIcon, Layers as LayersIcon, Settings, ExternalLink } from 'lucide-react'
 import Info from '@/components/sidebar/info'
 import Layers from '@/components/sidebar/layers'
-import MapConfigurations from '@/pages/ccus/components/sidebar/map-configurations/map-configurations'
+import MapConfigurations from '@/pages/ccs/components/sidebar/map-configurations/map-configurations'
 
 export interface NavLink {
   title: string
@@ -44,7 +44,7 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Learn More',
     label: '',
-    href: 'https://geology.utah.gov/energy-minerals/ccus/',
+    href: 'https://geology.utah.gov/energy-minerals/ccs/',
     icon: <ExternalLink className='stroke-foreground' />,
     // This link is external and does not need a component
   }

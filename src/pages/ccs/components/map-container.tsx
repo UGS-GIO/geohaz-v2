@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
-import { MapWidgets } from '@/pages/ccus/components/map-widgets';
+import { MapWidgets } from '@/pages/ccs/components/map-widgets';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
-import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
-import { findAndApplyWMSFilter } from '@/pages/ccus/components/sidebar/map-configurations/map-configurations';
-import { CCUSSearch } from '@/routes/ccus';
+import { wellWithTopsWMSTitle } from '@/pages/ccs/data/layers';
+import { findAndApplyWMSFilter } from '@/pages/ccs/components/sidebar/map-configurations/map-configurations';
+import { CCSSearch } from '@/routes/ccs';
 
 interface MapContainerProps {
-    searchParams: CCUSSearch;
+    searchParams: CCSSearch;
     updateLayerSelection: (layerTitle: string, selected: boolean) => void;
 }
 
@@ -30,7 +30,7 @@ export default function MapContainer({ searchParams, updateLayerSelection }: Map
         wmsUrl: `${PROD_GEOSERVER_URL}wms`,
     });
 
-    // CCUS-specific effect for applying filters on initial load
+    // ccs-specific effect for applying filters on initial load
     useEffect(() => {
         // Wait for the map and filters to be ready
         if (!view || !view.map) return;
@@ -59,7 +59,7 @@ export default function MapContainer({ searchParams, updateLayerSelection }: Map
                 container={popupContainer}
                 drawerTriggerRef={drawerTriggerRef}
                 popupContent={popupContent}
-                popupTitle="CCUS Information"
+                popupTitle="CCS Information"
             />
             <div ref={setPopupContainer} />
         </>

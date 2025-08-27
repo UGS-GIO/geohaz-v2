@@ -10,7 +10,7 @@ The repository uses semantic-release to automate version management and package 
 2. Create separate releases for each application:
    - Hazards app
    - Minerals app
-   - CCUS app
+   - CCS app
 
 ## Commit Message Format
 
@@ -42,7 +42,7 @@ The valid scopes for this project are:
 
 - `hazards`: Changes related to the Hazards application
 - `minerals`: Changes related to the Minerals application
-- `ccus`: Changes related to the CCUS application
+- `ccs`: Changes related to the CCS application
 - `common`: Changes that affect multiple applications
 
 ### Examples
@@ -50,7 +50,7 @@ The valid scopes for this project are:
 ```
 feat(hazards): add earthquake risk visualization
 fix(minerals): correct legend display for ore deposits
-refactor(ccus): optimize carbon storage calculation
+refactor(ccs): optimize carbon storage calculation
 feat(common): add shared map component for all applications
 ```
 
@@ -66,7 +66,7 @@ Each app has its own release configuration:
 
 - Hazards: Tagged as `hazards-v<version>`
 - Minerals: Tagged as `minerals-v<version>`
-- CCUS: Tagged as `ccus-v<version>`
+- CCS: Tagged as `ccs-v<version>`
 
 These releases only include commits relevant to their specific app. The relevance is determined by:
 1. The scope in the commit message (e.g., `feat(hazards): ...`)

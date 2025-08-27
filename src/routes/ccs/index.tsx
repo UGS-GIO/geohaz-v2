@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
-import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
-import Map from '@/pages/ccus';
+import { wellWithTopsWMSTitle } from '@/pages/ccs/data/layers';
+import Map from '@/pages/ccs';
 
-const ccusSearchSchema = z.object({
+const ccsSearchSchema = z.object({
     core: z.enum(['yes', 'no']).optional(),
     formations: z.string().optional(),
     formation_operator: z.enum(['and']).optional(), // 'and' explicitly set, undefined defaults to 'or'
@@ -11,10 +11,10 @@ const ccusSearchSchema = z.object({
     filters: z.record(z.string()).optional(),
 }).strip();
 
-export const Route = createFileRoute('/ccus/')({
+export const Route = createFileRoute('/ccs/')({
     component: () => <Map />,
     validateSearch: (search: Record<string, unknown>) => {
-        let { core, formations, formation_operator, coordinate_format, filters } = ccusSearchSchema.parse(search);
+        let { core, formations, formation_operator, coordinate_format, filters } = ccsSearchSchema.parse(search);
 
         const layers = z.object({
             selected: z.array(z.string()).optional(),
@@ -79,4 +79,4 @@ export const Route = createFileRoute('/ccus/')({
     },
 });
 
-export type CCUSSearch = z.infer<typeof ccusSearchSchema>
+export type CCSSearch = z.infer<typeof ccsSearchSchema>
