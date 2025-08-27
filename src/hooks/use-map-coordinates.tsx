@@ -1,9 +1,10 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { MapContext } from '@/context/map-provider';
+import { useMap } from '@/context/map-provider';
 import { convertDDToDMS } from '@/lib/map/conversion-utils';
 import * as webMercatorUtils from '@arcgis/core/geometry/support/webMercatorUtils';
 import Point from '@arcgis/core/geometry/Point';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const COORD_PRECISION = 3;
 
@@ -25,30 +26,24 @@ const convertToDisplayFormat = (x: string, y: string, isDD: boolean, convertDDTo
 };
 
 export function useMapCoordinates() {
-    const context = useContext(MapContext);
-    if (!context) {
-        throw new Error('useMapCoordinates must be used within the scope of MapContextProvider');
-    }
-    const { view, isDecimalDegrees, setIsDecimalDegrees: setContextIsDecimalDegrees, isMobile } = context;
-
+    // 1. Get ONLY what's needed from the context.
+    // The isDecimalDegrees state is no longer managed by the provider.
+    const { view } = useMap();
+    const isMobile = useIsMobile();
     const navigate = useNavigate();
     const search = useSearch({ from: '__root__' });
+
+    // 2. DERIVE the state directly from the URL. This is the single source of truth.
+    // We default to 'dd' if the parameter is not present.
+    const isDecimalDegrees = search.coordinate_format !== 'dms';
 
     const [scale, setScale] = useState<number>(view?.scale || 0);
     const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "", y: "" });
     const lastDecimalCoordinates = useRef<{ x: string; y: string }>({ x: "", y: "" });
 
-    useEffect(() => {
-        const urlCoordFmt = search.coordinate_format;
-        if (setContextIsDecimalDegrees) {
-            if (urlCoordFmt !== undefined) {
-                setContextIsDecimalDegrees(urlCoordFmt === 'dd');
-            }
-        }
-    }, [search.coordinate_format, setContextIsDecimalDegrees]);
-
     const locationCoordinateFormat = isDecimalDegrees ? "Decimal Degrees" : "Degrees, Minutes, Seconds";
 
+    // This effect correctly updates the display when the derived `isDecimalDegrees` value changes.
     useEffect(() => {
         const { x, y } = lastDecimalCoordinates.current;
         if (x && y) {
@@ -80,7 +75,7 @@ export function useMapCoordinates() {
 
                 zoomWatcher = currentView.watch("zoom", () => {
                     updateDisplayedCoordinatesAndScale(
-                        currentView.toMap(currentView.center) || currentView.center, // Use current center for last known point
+                        currentView.toMap(currentView.center) || currentView.center,
                         currentView.scale
                     );
                 });
@@ -91,14 +86,14 @@ export function useMapCoordinates() {
                 });
             });
             return () => {
-                if (zoomWatcher?.remove) zoomWatcher.remove();
-                if (pointerMoveHandler?.remove) pointerMoveHandler.remove();
+                zoomWatcher?.remove();
+                pointerMoveHandler?.remove();
             };
         },
         [updateDisplayedCoordinatesAndScale]
     );
 
-    const handleMobileViewChange = useCallback(
+    const handleMobileViewchange = useCallback(
         (currentView: __esri.MapView | __esri.SceneView) => {
             let stationaryWatcher: __esri.WatchHandle;
             currentView.when(() => {
@@ -110,7 +105,7 @@ export function useMapCoordinates() {
                 });
             });
             return () => {
-                if (stationaryWatcher?.remove) stationaryWatcher.remove();
+                stationaryWatcher?.remove();
             };
         },
         [updateDisplayedCoordinatesAndScale]
@@ -120,27 +115,25 @@ export function useMapCoordinates() {
         if (view) {
             let cleanupFunction: () => void;
             if (isMobile) {
-                cleanupFunction = handleMobileViewChange(view);
+                cleanupFunction = handleMobileViewchange(view);
             } else {
                 cleanupFunction = handleDesktopViewChange(view);
             }
             return cleanupFunction;
         }
-    }, [view, isMobile, handleDesktopViewChange, handleMobileViewChange]);
+    }, [view, isMobile, handleDesktopViewChange, handleMobileViewchange]);
 
+    // 3. The setter function now ONLY updates the URL.
     const setCoordinateFormat = useCallback((newIsDecimalDegrees: boolean) => {
-        if (setContextIsDecimalDegrees) {
-            setContextIsDecimalDegrees(newIsDecimalDegrees);
-        }
         navigate({
             to: ".",
-            search: {
-                ...search,
+            search: (prev) => ({
+                ...prev,
                 coordinate_format: newIsDecimalDegrees ? 'dd' : 'dms',
-            },
+            }),
             replace: true,
         });
-    }, [setContextIsDecimalDegrees, navigate, search]);
+    }, [navigate]);
 
     return {
         isDecimalDegrees,

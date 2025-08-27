@@ -1,6 +1,5 @@
-import { useRef, useContext, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useSearch } from '@tanstack/react-router';
-import { MapContext } from '@/context/map-provider';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
@@ -13,6 +12,7 @@ import { LayerProps } from '@/lib/types/mapping-types';
 import { useLayerUrl } from '@/context/layer-url-provider';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
 import { findAndApplyWMSFilter } from '@/pages/ccus/components/sidebar/map-configurations/map-configurations';
+import { useMap } from '@/context/map-provider';
 
 const preprocessLayerVisibility = (
     layers: LayerProps[],
@@ -45,7 +45,7 @@ interface UseMapContainerProps {
 
 export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContainerProps) {
     const mapRef = useRef<HTMLDivElement>(null);
-    const { loadMap, view, isSketching } = useContext(MapContext);
+    const { loadMap, view, isSketching } = useMap();
     const { coordinates, setCoordinates } = useMapCoordinates();
     const { handleOnContextMenu, getVisibleLayers } = useMapInteractions();
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null);

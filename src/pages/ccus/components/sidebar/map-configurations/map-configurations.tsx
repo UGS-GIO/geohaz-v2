@@ -1,4 +1,4 @@
-import { useState, useContext, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -22,7 +22,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
-import { MapContext } from '@/context/map-provider';
+import { MapContext, useMap } from '@/context/map-provider';
 import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/map/utils';
 import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
@@ -96,14 +96,14 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
 
 function MapConfigurations() {
     const { setIsDecimalDegrees } = useMapCoordinates();
-    const { map } = useContext(MapContext);
+    const { view } = useMap();
     const navigate = useNavigate({ from: '/ccus' });
     const search = useSearch({ from: '/ccus/' });
 
-    const wellFilter = useMemo(() => search.filters?.[wellWithTopsWMSTitle] || null, [search.filters]);
     useEffect(() => {
-        findAndApplyWMSFilter(map, wellWithTopsWMSTitle, wellFilter);
-    }, [map, wellFilter]);
+        const filterFromSearchState = search.filters?.[wellWithTopsWMSTitle] ?? null;
+        findAndApplyWMSFilter(view?.map, wellWithTopsWMSTitle, filterFromSearchState);
+    }, [view, search.filters]);
 
     const handleCoordFormatChange = (value: 'dd' | 'dms') => {
         if (setIsDecimalDegrees) setIsDecimalDegrees(value === 'dd');

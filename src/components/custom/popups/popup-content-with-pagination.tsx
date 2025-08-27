@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
 import { ColorCodingRecordFunction, FieldConfig, LinkFields, ProcessedRasterSource, RelatedTable } from "@/lib/types/mapping-types"
-import { MapContext } from "@/context/map-provider"
+import { useMap } from "@/context/map-provider"
 import { clearGraphics, highlightFeature } from '@/lib/map/highlight-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -89,17 +89,18 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
 }
 
 const LayerCard = ({
+    view,
     layer,
     buttons,
     handleZoomToFeature
 }: {
+    view: __esri.MapView | __esri.SceneView | undefined,
     layer: LayerContentProps,
     buttons: React.ReactNode[] | null,
     handleZoomToFeature: (feature: ExtendedFeature, sourceCRS: string) => Promise<void>
 }) => {
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [currentPage, setCurrentPage] = useState(1)
-    const { view } = useContext(MapContext)
 
     // Calculate total pages based on items per page
     const totalPages = useMemo(() =>
@@ -191,7 +192,7 @@ const LayerCard = ({
 }
 
 const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarInsetWithPaginationProps) => {
-    const { view } = useContext(MapContext)
+    const { view } = useMap()
     const buttons = useGetPopupButtons()
 
     const sectionIds = useMemo(
@@ -245,6 +246,7 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
         <div className="flex flex-1 flex-col gap-4 px-2 overflow-y-auto select-text h-full scrollable-container">
             {layerContent.map((layer) => (
                 <LayerCard
+                    view={view}
                     key={`${contentKey}-${layer.groupLayerTitle}-${layer.layerTitle}`}
                     layer={layer}
                     buttons={buttons}
