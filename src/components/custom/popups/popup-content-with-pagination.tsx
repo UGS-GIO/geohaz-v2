@@ -89,16 +89,15 @@ const PopupPagination = ({ currentPage, totalPages, handlePageChange, itemsPerPa
 }
 
 const LayerCard = ({
-    view,
     layer,
     buttons,
     handleZoomToFeature
 }: {
-    view: __esri.MapView | __esri.SceneView | undefined,
     layer: LayerContentProps,
     buttons: React.ReactNode[] | null,
     handleZoomToFeature: (feature: ExtendedFeature, sourceCRS: string) => Promise<void>
 }) => {
+    const { view } = useMap();
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [currentPage, setCurrentPage] = useState(1)
 
