@@ -16,7 +16,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as LoginIndexImport } from './routes/login/index'
 import { Route as HazardsIndexImport } from './routes/hazards/index'
 import { Route as HazardsReviewIndexImport } from './routes/hazards-review/index'
-import { Route as CcusIndexImport } from './routes/ccus/index'
+import { Route as CarbonstorageIndexImport } from './routes/carbonstorage/index'
 
 // Create Virtual Routes
 
@@ -69,11 +69,13 @@ const HazardsReviewIndexRoute = HazardsReviewIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const CcusIndexRoute = CcusIndexImport.update({
-  id: '/ccus/',
-  path: '/ccus/',
+const CarbonstorageIndexRoute = CarbonstorageIndexImport.update({
+  id: '/carbonstorage/',
+  path: '/carbonstorage/',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/ccus/index.lazy').then((d) => d.Route))
+} as any).lazy(() =>
+  import('./routes/carbonstorage/index.lazy').then((d) => d.Route),
+)
 
 const HazardsReportAoiLazyRoute = HazardsReportAoiLazyImport.update({
   id: '/hazards/report/$aoi',
@@ -117,11 +119,11 @@ const HazardsReportNewreportIndexLazyRoute =
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/ccus/': {
-      id: '/ccus/'
-      path: '/ccus'
-      fullPath: '/ccus'
-      preLoaderRoute: typeof CcusIndexImport
+    '/carbonstorage/': {
+      id: '/carbonstorage/'
+      path: '/carbonstorage'
+      fullPath: '/carbonstorage'
+      preLoaderRoute: typeof CarbonstorageIndexImport
       parentRoute: typeof rootRoute
     }
     '/hazards-review/': {
@@ -193,7 +195,7 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/ccus': typeof CcusIndexRoute
+  '/carbonstorage': typeof CarbonstorageIndexRoute
   '/hazards-review': typeof HazardsReviewIndexRoute
   '/hazards': typeof HazardsIndexRoute
   '/login': typeof LoginIndexRoute
@@ -206,7 +208,7 @@ export interface FileRoutesByFullPath {
 }
 
 export interface FileRoutesByTo {
-  '/ccus': typeof CcusIndexRoute
+  '/carbonstorage': typeof CarbonstorageIndexRoute
   '/hazards-review': typeof HazardsReviewIndexRoute
   '/hazards': typeof HazardsIndexRoute
   '/login': typeof LoginIndexRoute
@@ -220,7 +222,7 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/ccus/': typeof CcusIndexRoute
+  '/carbonstorage/': typeof CarbonstorageIndexRoute
   '/hazards-review/': typeof HazardsReviewIndexRoute
   '/hazards/': typeof HazardsIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -235,7 +237,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/ccus'
+    | '/carbonstorage'
     | '/hazards-review'
     | '/hazards'
     | '/login'
@@ -247,7 +249,7 @@ export interface FileRouteTypes {
     | '/hazards/report/newreport'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/ccus'
+    | '/carbonstorage'
     | '/hazards-review'
     | '/hazards'
     | '/login'
@@ -259,7 +261,7 @@ export interface FileRouteTypes {
     | '/hazards/report/newreport'
   id:
     | '__root__'
-    | '/ccus/'
+    | '/carbonstorage/'
     | '/hazards-review/'
     | '/hazards/'
     | '/login/'
@@ -273,7 +275,7 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
-  CcusIndexRoute: typeof CcusIndexRoute
+  CarbonstorageIndexRoute: typeof CarbonstorageIndexRoute
   HazardsReviewIndexRoute: typeof HazardsReviewIndexRoute
   HazardsIndexRoute: typeof HazardsIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -286,7 +288,7 @@ export interface RootRouteChildren {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  CcusIndexRoute: CcusIndexRoute,
+  CarbonstorageIndexRoute: CarbonstorageIndexRoute,
   HazardsReviewIndexRoute: HazardsReviewIndexRoute,
   HazardsIndexRoute: HazardsIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
@@ -308,7 +310,7 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/ccus/",
+        "/carbonstorage/",
         "/hazards-review/",
         "/hazards/",
         "/login/",
@@ -320,8 +322,8 @@ export const routeTree = rootRoute
         "/hazards/report/newreport/"
       ]
     },
-    "/ccus/": {
-      "filePath": "ccus/index.tsx"
+    "/carbonstorage/": {
+      "filePath": "carbonstorage/index.tsx"
     },
     "/hazards-review/": {
       "filePath": "hazards-review/index.tsx"
