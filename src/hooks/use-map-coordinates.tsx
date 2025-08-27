@@ -26,24 +26,17 @@ const convertToDisplayFormat = (x: string, y: string, isDD: boolean, convertDDTo
 };
 
 export function useMapCoordinates() {
-    // 1. Get ONLY what's needed from the context.
-    // The isDecimalDegrees state is no longer managed by the provider.
     const { view } = useMap();
     const isMobile = useIsMobile();
     const navigate = useNavigate();
     const search = useSearch({ from: '__root__' });
-
-    // 2. DERIVE the state directly from the URL. This is the single source of truth.
-    // We default to 'dd' if the parameter is not present.
     const isDecimalDegrees = search.coordinate_format !== 'dms';
-
     const [scale, setScale] = useState<number>(view?.scale || 0);
     const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "", y: "" });
     const lastDecimalCoordinates = useRef<{ x: string; y: string }>({ x: "", y: "" });
 
     const locationCoordinateFormat = isDecimalDegrees ? "Decimal Degrees" : "Degrees, Minutes, Seconds";
 
-    // This effect correctly updates the display when the derived `isDecimalDegrees` value changes.
     useEffect(() => {
         const { x, y } = lastDecimalCoordinates.current;
         if (x && y) {
@@ -123,7 +116,6 @@ export function useMapCoordinates() {
         }
     }, [view, isMobile, handleDesktopViewChange, handleMobileViewchange]);
 
-    // 3. The setter function now ONLY updates the URL.
     const setCoordinateFormat = useCallback((newIsDecimalDegrees: boolean) => {
         navigate({
             to: ".",
