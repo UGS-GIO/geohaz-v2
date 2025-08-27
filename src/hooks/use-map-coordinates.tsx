@@ -86,7 +86,7 @@ export function useMapCoordinates() {
         [updateDisplayedCoordinatesAndScale]
     );
 
-    const handleMobileViewchange = useCallback(
+    const handleMobileViewChange = useCallback(
         (currentView: __esri.MapView | __esri.SceneView) => {
             let stationaryWatcher: __esri.WatchHandle;
             currentView.when(() => {
@@ -108,13 +108,13 @@ export function useMapCoordinates() {
         if (view) {
             let cleanupFunction: () => void;
             if (isMobile) {
-                cleanupFunction = handleMobileViewchange(view);
+                cleanupFunction = handleMobileViewChange(view);
             } else {
                 cleanupFunction = handleDesktopViewChange(view);
             }
             return cleanupFunction;
         }
-    }, [view, isMobile, handleDesktopViewChange, handleMobileViewchange]);
+    }, [view, isMobile, handleDesktopViewChange, handleMobileViewChange]);
 
     const setCoordinateFormat = useCallback((newIsDecimalDegrees: boolean) => {
         navigate({
