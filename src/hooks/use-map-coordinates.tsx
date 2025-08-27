@@ -65,14 +65,12 @@ export function useMapCoordinates() {
 
             currentView.when(() => {
                 updateDisplayedCoordinatesAndScale(currentView.center, currentView.scale);
-
                 zoomWatcher = currentView.watch("zoom", () => {
                     updateDisplayedCoordinatesAndScale(
                         currentView.toMap(currentView.center) || currentView.center,
                         currentView.scale
                     );
                 });
-
                 pointerMoveHandler = currentView.on("pointer-move", (event: __esri.ViewPointerMoveEvent) => {
                     const mapPoint = currentView.toMap({ x: event.x, y: event.y });
                     updateDisplayedCoordinatesAndScale(mapPoint, currentView.scale);

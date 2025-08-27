@@ -1,89 +1,68 @@
-import { useEffect, useCallback, useRef, useState } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import Point from "@arcgis/core/geometry/Point.js";
 
-const useMapPositionUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) => {
+export const useMapPositionUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) => {
     const navigate = useNavigate();
-    const search = useSearch({
-        from: "__root__",
-    });
+    const search = useSearch({ from: "__root__" });
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const [mapState, setMapState] = useState({ zoom: 8, center: [-112, 39.5] });
 
-    // Update URL params for zoom and center
-    const updateUrlParams = useCallback(() => {
-        if (view) {
-            const { latitude, longitude } = view.center;
-            const zoom = view.zoom;
+    const updateUrlFromView = useCallback(() => {
+        if (!view) return;
 
-            const formattedLongitude = parseFloat(longitude?.toFixed(3) || '');
-            const formattedLatitude = parseFloat(latitude?.toFixed(3) || '');
+        const { latitude, longitude } = view.center;
+        const zoom = view.zoom;
 
-            // Update local state
-            setMapState({ zoom, center: [formattedLongitude, formattedLatitude] });
+        const formattedLongitude = parseFloat(longitude?.toFixed(3) || '');
+        const formattedLatitude = parseFloat(latitude?.toFixed(3) || '');
 
-            navigate({
-                to: ".",
-                search: {
-                    ...search,
-                    zoom: zoom,
-                    lat: formattedLatitude,
-                    lon: formattedLongitude,
-                },
-                replace: true,
-            });
-        }
-    }, [view, navigate, search]);
+        navigate({
+            to: ".",
+            search: (prev) => ({
+                ...prev,
+                zoom: zoom,
+                lat: formattedLatitude,
+                lon: formattedLongitude,
+            }),
+            replace: true,
+        });
+    }, [view, navigate]);
 
-    // Set up watchers for zoom and center changes
     useEffect(() => {
-
         if (!view) return;
 
         const handleUpdate = () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-            timeoutRef.current = setTimeout(updateUrlParams, 300);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(updateUrlFromView, 300);
         };
 
-        const zoomWatcher = view.watch("zoom", handleUpdate);
-        const centerWatcher = view.watch("center", handleUpdate);
+        const stationaryWatcher = view.watch("stationary", handleUpdate);
 
         return () => {
-            zoomWatcher.remove();
-            centerWatcher.remove();
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
+            stationaryWatcher.remove();
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
-    }, [view, updateUrlParams]);
+    }, [view, updateUrlFromView]);
 
     // Initialize map view based on URL parameters
     useEffect(() => {
-        if (view && search) {
-            const zoom = typeof search.zoom === 'number' ? search.zoom : parseFloat(search.zoom || '');
-            const lat = typeof search.lat === 'number' ? search.lat : parseFloat(search.lat || '');
-            const lon = typeof search.lon === 'number' ? search.lon : parseFloat(search.lon || '');
+        if (!view || !search) return;
 
-            // Only go to if zoom and coordinates are valid numbers
-            if (!isNaN(zoom) && !isNaN(lat) && !isNaN(lon)) {
-                setMapState({ zoom, center: [lon, lat] });
+        const zoom = typeof search.zoom === 'number' ? search.zoom : parseFloat(search.zoom || '');
+        const lat = typeof search.lat === 'number' ? search.lat : parseFloat(search.lat || '');
+        const lon = typeof search.lon === 'number' ? search.lon : parseFloat(search.lon || '');
 
-                // Only change the view if it's different from the current state
-                if (view.zoom !== zoom || view.center.latitude !== lat || view.center.longitude !== lon) {
-                    view.center = new Point({
-                        latitude: lat,
-                        longitude: lon
-                    });
-                    view.zoom = zoom;
-                }
+        if (!isNaN(zoom) && !isNaN(lat) && !isNaN(lon)) {
+            const isOutOfSync = view.zoom !== zoom ||
+                parseFloat(view.center?.latitude?.toFixed(3) || '') !== lat ||
+                parseFloat(view.center?.longitude?.toFixed(3) || '') !== lon;
+
+            if (isOutOfSync) {
+                view.goTo({
+                    center: new Point({ latitude: lat, longitude: lon }),
+                    zoom: zoom
+                });
             }
         }
-    }, [view, search]);
-
-    // Return the current map state
-    return { zoom: mapState.zoom, center: mapState.center as [number, number] };
+    }, [view, search.zoom, search.lat, search.lon]);
 };
-
-export { useMapPositionUrlParams };
