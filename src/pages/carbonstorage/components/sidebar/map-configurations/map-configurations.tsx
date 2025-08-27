@@ -80,7 +80,6 @@ interface FormationMapping {
     label: string; // user-friendly alias (e.g., 'Green River')
 }
 
-// --- Data Fetching Functions ---
 const fetchFormationData = async (): Promise<FormationMapping[]> => {
     const { postgrestUrl, tableName, fieldsToSelect, displayField, columnNameField, acceptProfile } = formationNameMappingConfig;
     const url = `${postgrestUrl}/${tableName}?select=${fieldsToSelect}`;
