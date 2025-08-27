@@ -1,3 +1,14 @@
+## [1.12.1](https://github.com/UGS-GIO/geohaz-v2/compare/v1.12.0...v1.12.1) (2025-08-14)
+
+
+### ccus
+
+* **♻️ Refactors**(`ccus`): finalize the order of the layers* **♻️ Refactors**(`ccus`): format popups, add coming soon message for georegions* **🐛 Bug Fixes**(`ccus`): geological units doesn't need sentence case ([#262](https://github.com/UGS-GIO/geohaz-v2/issues/262))
+
+### common
+
+* **♻️ Refactors**(`common`): removing dead code, use crs that is given to us by postgrest if it exists ([#265](https://github.com/UGS-GIO/geohaz-v2/issues/265))* **🐛 Bug Fixes**(`common`): top level definition of proj4, refactor searching by searchbox and highlighting ([#260](https://github.com/UGS-GIO/geohaz-v2/issues/260))
+
 ## [1.12.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.11.1...v1.12.0) (2025-08-05)
 
 

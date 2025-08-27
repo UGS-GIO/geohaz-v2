@@ -7,6 +7,24 @@ export const MAPPING_WORKSPACE = 'mapping';
 export const GEOCODE_PROXY_FUNCTION_URL = 'http://127.0.0.1:5001/ut-dnr-ugs-maps-dev/us-central1/geocodeProxy';
 export const MASQUERADE_GEOCODER_URL = 'https://masquerade.ugrc.utah.gov/arcgis/rest/services/UtahLocator/GeocodeServer';
 
+// Constants for symbol generation
+export const SYMBOL_CONSTANTS = {
+    SVG_WIDTH: 32,
+    SVG_HEIGHT: 20,
+    LINE_Y_CENTER: 10,
+    LINE_START_X: 2,
+    LINE_END_X: 30,
+    MIN_LINE_WIDTH: 2,
+    LINE_WIDTH_ENHANCEMENT: 1,
+    TRIANGLE_HEIGHT: 6,
+    TRIANGLE_COUNT: 4,
+    PATTERN_TILE_SIZE: 8,
+    POINT_TO_PIXEL_RATIO: 4 / 3,
+    IMAGE_SCALING_RATIO: 5 / 4,
+    MAX_POINT_SIZE: 17,
+    DEFAULT_POINT_SIZE: 16
+} as const;
+
 export interface LayerFetchConfig {
     tableName: string;
     acceptProfile: string;
@@ -17,7 +35,7 @@ export const layerFetchConfigs: Record<string, LayerFetchConfig> = {
         tableName: 'hazlayerinfo',
         acceptProfile: 'hazards'
     },
-    'ccus': {
+    'ccs': {
         tableName: 'ccuslayerinfo',
         acceptProfile: 'emp'
     },

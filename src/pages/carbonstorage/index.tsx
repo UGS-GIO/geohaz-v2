@@ -1,3 +1,4 @@
+import { useSearch } from '@tanstack/react-router';
 import { Layout } from '@/components/custom/layout'
 import ThemeSwitch from '@/components/theme-switch'
 import { TopNav } from '@/components/top-nav'
@@ -6,12 +7,15 @@ import { cn } from '@/lib/utils'
 import MapContainer from './components/map-container'
 import Sidebar from '@/components/sidebar'
 import { useSidebar } from '@/hooks/use-sidebar'
+import { useLayerUrl } from '@/context/layer-url-provider'
 import { PROD_POSTGREST_URL } from '@/lib/constants'
-import { wellWithTopsLayerName, wellWithTopsWMSTitle } from '@/pages/ccus/data/layers'
+import { wellWithTopsLayerName, wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers'
 import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleCollectionSelect, handleSearchSelect, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox'
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
+  const search = useSearch({ from: '/carbonstorage/' });
+  const { updateLayerSelection } = useLayerUrl();
 
   const searchConfig: SearchSourceConfig[] = [
     defaultMasqueradeConfig,
@@ -63,16 +67,16 @@ export default function Map() {
 
           {/* ===== Main ===== */}
           <Layout.Body>
-            <MapContainer />
+            <MapContainer
+              searchParams={search}
+              updateLayerSelection={updateLayerSelection}
+            />
           </Layout.Body>
 
           {/* ===== Footer ===== */}
-          {/* no footer on mobile */}
           <Layout.Footer className={cn('hidden md:flex z-10')} dynamicContent={<MapFooter />} />
-
         </Layout>
       </main>
     </div>
   )
 }
-
