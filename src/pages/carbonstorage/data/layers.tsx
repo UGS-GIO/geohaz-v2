@@ -779,7 +779,7 @@ const geothermalPowerplantsWMSConfig: WMSLayerProps = {
 };
 
 // Energy and Minerals Group Layer
-const ccusResourcesConfig: LayerProps = {
+const ccsResourcesConfig: LayerProps = {
     type: 'group',
     title: 'Carbon Storage Resources',
     visible: true,
@@ -832,7 +832,7 @@ const subsurfaceDataConfig: LayerProps = {
 
 
 const layersConfig: LayerProps[] = [
-    ccusResourcesConfig,
+    ccsResourcesConfig,
     subsurfaceDataConfig,
     geologicalInformationConfig,
     infrastructureAndLandUseConfig,

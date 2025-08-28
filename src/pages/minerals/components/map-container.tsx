@@ -35,7 +35,7 @@ export default function ArcGISMap() {
                 container={popupContainer}
                 drawerTriggerRef={drawerTriggerRef}
                 popupContent={popupContent}
-                popupTitle="CCUS Information"
+                popupTitle="CCS Information"
             />
             <div ref={setPopupContainer} />
         </>

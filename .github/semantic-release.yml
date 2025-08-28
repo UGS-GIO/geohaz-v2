@@ -47,9 +47,9 @@ jobs:
           # Filter for minerals commits only for this release
           npx semantic-release --extends ./release-config-minerals.js
           
-      - name: CCUS App Release
+      - name: CCS App Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Filter for ccus commits only for this release
-          npx semantic-release --extends ./release-config-ccus.js
+          # Filter for ccs commits only for this release
+          npx semantic-release --extends ./release-config-ccs.js
