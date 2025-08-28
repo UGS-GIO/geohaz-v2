@@ -52,7 +52,7 @@ const basinNamesWMSConfig: WMSLayerProps = {
                         return "#808080"; // Gray for "Coming Soon"
                     }
 
-                    const rank = typeof value === 'number' ? value : parseFloat(value);
+                    const rank = typeof value === 'number' ? value : parseInt(value, 10);
                     if (isNaN(rank)) {
                         return "#808080"; // Default gray for non-numeric values
                     }
