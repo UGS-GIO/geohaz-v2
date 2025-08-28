@@ -5,8 +5,9 @@ import Map from '@/pages/carbonstorage';
 
 const ccsSearchSchema = z.object({
     core: z.enum(['yes', 'no']).optional(),
+    las: z.enum(['yes', 'no']).optional(),
     formations: z.string().optional(),
-    formation_operator: z.enum(['and']).optional(), // 'and' explicitly set, undefined defaults to 'or'
+    formation_operator: z.enum(['and']).optional(),
     coordinate_format: z.enum(['dd', 'dms']).optional(),
     filters: z.record(z.string()).optional(),
 }).strip();
@@ -14,7 +15,7 @@ const ccsSearchSchema = z.object({
 export const Route = createFileRoute('/carbonstorage/')({
     component: () => <Map />,
     validateSearch: (search: Record<string, unknown>) => {
-        let { core, formations, formation_operator, coordinate_format, filters } = ccsSearchSchema.parse(search);
+        let { core, las, formations, formation_operator, coordinate_format, filters } = ccsSearchSchema.parse(search);
 
         const layers = z.object({
             selected: z.array(z.string()).optional(),
@@ -27,19 +28,23 @@ export const Route = createFileRoute('/carbonstorage/')({
         // Rule 1: If the Wells Database layer is not selected, its filters must be cleared.
         if (!newSelectedSet.has(wellWithTopsWMSTitle)) {
             core = undefined;
+            las = undefined;
             formations = undefined;
             formation_operator = undefined;
         }
 
-        // Parse formations from comma-separated string
         const formationArray = formations ? formations.split(',').filter(Boolean) : [];
 
-        // Build the filter string from the (now validated) UI params.
+        // Build the simple CQL filter string
         const wellFilterParts: string[] = [];
 
-        // Only add core filter if it's explicitly 'yes' or 'no'
+        // Core filter logic
         if (core === "yes") wellFilterParts.push(`hascore = 'True'`);
         if (core === "no") wellFilterParts.push(`hascore = 'False'`);
+
+        // LAS filter logic
+        if (las === "yes") wellFilterParts.push(`has_las = 'True'`);
+        if (las === "no") wellFilterParts.push(`has_las = 'False'`);
 
         // Build formation filter with configurable AND/OR logic for multiple formations
         if (formationArray.length > 0) {
@@ -66,7 +71,8 @@ export const Route = createFileRoute('/carbonstorage/')({
 
         // Return the final, synchronized search object.
         return {
-            core: core,
+            core,
+            las,
             formations,
             formation_operator,
             coordinate_format,
@@ -79,4 +85,4 @@ export const Route = createFileRoute('/carbonstorage/')({
     },
 });
 
-export type CCSSearch = z.infer<typeof ccsSearchSchema>
+export type CCSSearch = z.infer<typeof ccsSearchSchema>;
