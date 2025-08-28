@@ -104,7 +104,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
 
     useEffect(() => {
         // Provide default values for the initial load if params are not in the URL
-        const zoom = typeof search.zoom === 'number' ? search.zoom : 8;
+        const zoom = typeof search.zoom === 'number' ? search.zoom : 7;
         const lat = typeof search.lat === 'number' ? search.lat : 39.5;
         const lon = typeof search.lon === 'number' ? search.lon : -112;
         const center = [lon, lat] as [number, number];
