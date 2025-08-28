@@ -55,11 +55,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release --extends ./release-config-minerals.js
 
-      - name: CCUS App Release (if master)
+      - name: CCS App Release (if master)
         if: github.ref == 'refs/heads/master'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release --extends ./release-config-ccus.js
+        run: npx semantic-release --extends ./release-config-ccs.js
 
       # === Firebase Deployment ===
       # Set correct Firebase Service Account and Project ID based on the branch

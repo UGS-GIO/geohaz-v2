@@ -1,6 +1,5 @@
-import { useRef, useContext, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useSearch } from '@tanstack/react-router';
-import { MapContext } from '@/context/map-provider';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
@@ -11,8 +10,9 @@ import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { LayerProps } from '@/lib/types/mapping-types';
 import { useLayerUrl } from '@/context/layer-url-provider';
-import { wellWithTopsWMSTitle } from '@/pages/ccus/data/layers';
-import { findAndApplyWMSFilter } from '@/pages/ccus/components/sidebar/map-configurations/map-configurations';
+import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
+import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
+import { useMap } from '@/context/map-provider';
 
 const preprocessLayerVisibility = (
     layers: LayerProps[],
@@ -21,9 +21,7 @@ const preprocessLayerVisibility = (
 ): LayerProps[] => {
     const process = (layerArray: LayerProps[], parentIsHidden: boolean): LayerProps[] => {
         return layerArray.map(layer => {
-
             const isHiddenByGroup = parentIsHidden || hiddenGroupTitles.has(layer.title || '');
-
             if (layer.type === 'group' && 'layers' in layer) {
                 const newChildLayers = process(layer.layers || [], isHiddenByGroup);
                 const isGroupEffectivelyVisible = newChildLayers.some(child => child.visible);
@@ -45,13 +43,13 @@ interface UseMapContainerProps {
 
 export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContainerProps) {
     const mapRef = useRef<HTMLDivElement>(null);
-    const { loadMap, view, isSketching } = useContext(MapContext);
+    const { loadMap, view, isSketching } = useMap();
     const { coordinates, setCoordinates } = useMapCoordinates();
     const { handleOnContextMenu, getVisibleLayers } = useMapInteractions();
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null);
     const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
     const drawerTriggerRef = useRef<HTMLButtonElement>(null);
-    const { zoom, center } = useMapPositionUrlParams(view);
+    useMapPositionUrlParams(view);
     const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
     const search = useSearch({ from: '__root__' });
@@ -67,7 +65,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const { clickOrDragHandlers } = useMapClickOrDrag({
         onClick: (e) => {
             if (!view || isSketching) return;
-            clearGraphics(view)
+            clearGraphics(view);
             const layers = getVisibleLayers({ view });
             setVisibleLayersMap(layers.layerVisibilityMap);
             const mapPoint = view.toMap({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY }) || new Point();
@@ -75,7 +73,6 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         }
     });
 
-    // This useEffect handles opening/closing the feature info drawer
     useEffect(() => {
         if (featureInfoQuery.isSuccess) {
             const popupContent = featureInfoQuery.data || [];
@@ -96,7 +93,6 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
 
     // apply filters on initial load
     useEffect(() => {
-        // Wait for the map and filters to be ready
         if (!view || !view.map) return;
         const filtersFromUrl = search.filters ?? {};
         const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
@@ -107,7 +103,13 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     }, [view, search.filters, updateLayerSelection]);
 
     useEffect(() => {
-        if (mapRef.current && loadMap && zoom && center && layersConfig) {
+        // Provide default values for the initial load if params are not in the URL
+        const zoom = typeof search.zoom === 'number' ? search.zoom : 7;
+        const lat = typeof search.lat === 'number' ? search.lat : 39.5;
+        const lon = typeof search.lon === 'number' ? search.lon : -112;
+        const center = [lon, lat] as [number, number];
+
+        if (mapRef.current && loadMap && layersConfig) {
             const finalLayersConfig = preprocessLayerVisibility(layersConfig, selectedLayerTitles, hiddenGroupTitles);
             loadMap({
                 container: mapRef.current,
@@ -116,7 +118,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
                 layers: finalLayersConfig,
             });
         }
-    }, [loadMap, zoom, center, layersConfig, selectedLayerTitles, hiddenGroupTitles]);
+    }, [loadMap, search.zoom, search.lat, search.lon, layersConfig, selectedLayerTitles, hiddenGroupTitles]);
 
     return {
         mapRef,

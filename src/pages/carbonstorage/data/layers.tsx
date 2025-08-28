@@ -2,10 +2,11 @@ import { Link } from "@/components/custom/link";
 import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 import { addThousandsSeparator, toTitleCase, toSentenceCase } from "@/lib/utils";
+import { GeoJsonProperties } from "geojson";
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
-const basinNamesWMSTitle = 'GeoRegions';
+const basinNamesWMSTitle = 'Geo-region Carbon Storage Ranking';
 const basinNamesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -21,37 +22,58 @@ const basinNamesWMSConfig: WMSLayerProps = {
                 'Name': { field: 'name', type: 'string' },
                 'Description': { field: 'description', type: 'string' },
                 'Report Link': { field: 'reportlink', type: 'string' },
+                'Ranked Formation': { field: 'rankedformation', type: 'string' },
                 'Rank': {
-                    field: 'rank',
-                    type: 'string',
-                    transform: (value: string | null): string | null => {
-                        if (value === null) {
+                    type: 'custom',
+                    field: 'ranknumber',
+                    transform: (properties: GeoJsonProperties): string => {
+                        if (!properties) {
+                            return '';
+                        }
+
+                        const rankNumber = properties.ranknumber;
+                        const rankingText = properties.ranking;
+
+                        if (rankNumber === null || rankNumber === undefined || rankNumber === 0) {
                             return "Coming Soon";
                         }
 
-                        const rank = parseInt(value, 10);
-                        if (rank === 0 || isNaN(rank)) {
-                            return "Coming Soon"; // Transform rank 0 or invalid to "Coming Soon"
+                        if (rankingText) {
+                            return `${rankNumber} - ${rankingText}`;
+                        } else {
+                            return String(rankNumber);
                         }
-
-                        return rank.toString(); // Return rank as a string
                     }
-                }
+                },
             },
             colorCodingMap: {
-                'rank': (value: string | number) => {
-                    // Handle "Coming Soon" case
+                'ranknumber': (value: string | number) => {
                     if (value === "Coming Soon") {
                         return "#808080"; // Gray for "Coming Soon"
                     }
 
                     const rank = typeof value === 'number' ? value : parseInt(value, 10);
+                    if (isNaN(rank)) {
+                        return "#808080"; // Default gray for non-numeric values
+                    }
 
-                    console.log(`Parsed rank: ${rank}`);
-                    if (rank === 1) return "#FF0000"; // Red
-                    if (rank === 2) return "#FFFF00"; // Yellow
-                    if (rank === 3) return "#00FF00"; // Green
-                    return "#808080"; // Gray for other cases
+                    // Limited: <3 (Solid Orange)
+                    if (rank < 3) {
+                        return "#FFA500"; // Orange
+                    }
+
+                    // Moderate: 3-6 (Solid Yellow)
+                    if (rank < 6) {
+                        return "#FFFF00"; // Yellow
+                    }
+
+                    // Excellent: >=6 (Solid Green)
+                    if (rank >= 6) {
+                        return "#00FF00"; // Green
+                    }
+
+                    // Default case
+                    return "#808080"; // Gray for any other cases
                 }
             }
         },
@@ -108,7 +130,7 @@ const pipelinesWMSConfig: WMSLayerProps = {
 
 // SCO2 WMS Layer
 const sco2LayerName = 'sco2_draft_13aug24';
-const sco2WMSTitle = 'Storage Resource Estimates';
+const sco2WMSTitle = 'Statewide Storage Resource Estimates';
 const sco2WMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -254,7 +276,7 @@ const transmissionLinesWMSConfig: WMSLayerProps = {
 
 // Seamless Geological Units WMS Layer
 const seamlessGeolunitsLayerName = 'seamlessgeolunits';
-const seamlessGeolunitsWMSTitle = 'Geological Units (500k)';
+const seamlessGeolunitsWMSTitle = 'Geologic Units (500k)';
 const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -734,7 +756,7 @@ const ccsExclusionAreasWMSConfig: WMSLayerProps = {
 
 
 const geothermalPowerplantsLayerName = 'ccus_geothermalpowerplants';
-const geothermalPowerplantsWMSTitle = 'Geothermal Powerplants';
+const geothermalPowerplantsWMSTitle = 'Geothermal Power Plants';
 const geothermalPowerplantsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -757,9 +779,9 @@ const geothermalPowerplantsWMSConfig: WMSLayerProps = {
 };
 
 // Energy and Minerals Group Layer
-const ccusResourcesConfig: LayerProps = {
+const ccsResourcesConfig: LayerProps = {
     type: 'group',
-    title: 'CCUS Resources',
+    title: 'Carbon Storage Resources',
     visible: true,
     layers: [
         sco2WMSConfig,
@@ -810,7 +832,7 @@ const subsurfaceDataConfig: LayerProps = {
 
 
 const layersConfig: LayerProps[] = [
-    ccusResourcesConfig,
+    ccsResourcesConfig,
     subsurfaceDataConfig,
     geologicalInformationConfig,
     infrastructureAndLandUseConfig,

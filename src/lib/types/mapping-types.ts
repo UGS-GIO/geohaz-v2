@@ -137,7 +137,7 @@ export type MapImageLayerRenderer = {
 
 export type RegularLayerRenderer = {
     type: 'regular-layer-renderer';
-    renderer: __esri.Symbol;
+    renderer: __esri.Symbol | CompositeSymbolResult | HTMLElement;
     id: string;
     label: string;
     url: string;
@@ -205,4 +205,12 @@ interface DisplayField {
     field: string;
     label?: string;
     transform?: (value: string) => React.ReactNode;
+}
+
+// Interface for composite symbol results
+interface CompositeSymbolResult {
+    symbol?: __esri.Symbol;
+    html?: HTMLElement;
+    isComposite: boolean;
+    symbolizers: any[];
 }

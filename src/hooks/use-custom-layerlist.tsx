@@ -1,11 +1,11 @@
-import { useMemo, useContext, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 import { useLayerItemState } from '@/hooks/use-layer-item-state';
 import { LayerProps } from '@/lib/types/mapping-types';
-import { MapContext } from '@/context/map-provider';
+import { useMap } from '@/context/map-provider';
 import { findLayerByTitle } from '@/lib/map/utils';
 import { useLayerExtent } from '@/hooks/use-layer-extent';
 import { useFetchLayerDescriptions } from '@/hooks/use-fetch-layer-descriptions';
@@ -25,7 +25,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
         handleSelectAllToggle,
     } = useLayerItemState(layerConfig);
 
-    const { view } = useContext(MapContext);
+    const { view } = useMap();
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions } = useFetchLayerDescriptions();
     const isMobile = useIsMobile();

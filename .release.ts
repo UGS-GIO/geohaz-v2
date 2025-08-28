@@ -94,7 +94,7 @@ module.exports = {
                     commitGroups: [
                         { title: "Hazards", route: "hazards" },
                         { title: "Minerals", route: "minerals" },
-                        { title: "CCUS", route: "ccus" },
+                        { title: "CCS", route: "ccs" },
                         { title: "Common Changes", route: "common" }
                     ]
                 }

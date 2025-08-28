@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { RendererFactory } from '@/lib/legend/renderer-factory';
 import { getRenderer } from '@/lib/legend/utils';
-import { MapContext } from '@/context/map-provider';
-import { useContext } from 'react';
 import { MapImageLayerRenderer, RegularLayerRenderer } from '@/lib/types/mapping-types';
+import { useMap } from '@/context/map-provider';
 
 const useLegendPreview = (layerId: string, url: string) => {
-    const { view } = useContext(MapContext);
+    const { view } = useMap();
 
     const fetchLegendData = async () => {
         if (!view || !view.map) return [];

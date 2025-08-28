@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -9,7 +9,7 @@ import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from 'geojson
 import { featureCollection, point as turfPoint } from '@turf/helpers';
 import { useDebounce } from 'use-debounce';
 import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
-import { MapContext } from '@/context/map-provider';
+import { useMap } from '@/context/map-provider';
 import { convertBbox } from '@/lib/map/conversion-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
 import { highlightFeature, clearGraphics } from '@/lib/map/highlight-utils';
@@ -111,7 +111,7 @@ function SearchCombobox({
     const [debouncedSearch] = useDebounce(search, 500);
     const [activeSourceIndex, setActiveSourceIndex] = useState<number | null>(null);
     const [isShaking, setIsShaking] = useState(false);
-    const { view, map } = useContext(MapContext)
+    const { view } = useMap()
     const commandRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
 
@@ -119,7 +119,7 @@ function SearchCombobox({
         layerTitle: string | undefined,
         contextMessage: string
     ) => {
-        if (!map) {
+        if (!view?.map) {
             console.error(`Map is not defined. Cannot ensure layer visibility for ${contextMessage}.`);
             return;
         }
@@ -127,7 +127,7 @@ function SearchCombobox({
             return;
         }
 
-        const foundLayer = findLayerByTitle(map, layerTitle);
+        const foundLayer = findLayerByTitle(view.map, layerTitle);
         if (foundLayer) {
             foundLayer.visible = true;
         } else {
@@ -660,8 +660,6 @@ const handleSearchSelect = (
 
         // Handle Masquerade type as a specific case first
         if (sourceConfig.type === 'masquerade') {
-            console.log(`Masquerade source detected at index ${sourceIndex}. Using outSR: ${sourceConfig.outSR ?? 4326}`);
-
             sourceCRS = `EPSG:${sourceConfig.outSR ?? 4326}`;
         }
         // For all other types (like PostgREST)
@@ -677,7 +675,6 @@ const handleSearchSelect = (
         }
         // Priority 3: Check the explicit search configuration.
         else if (sourceConfig.type === 'postgREST' && sourceConfig.crs) {
-            console.log(`Using explicit CRS from search config: ${sourceConfig.crs}`);
             sourceCRS = sourceConfig.crs;
         }
         // Priority 4: Final fallback to WGS84.

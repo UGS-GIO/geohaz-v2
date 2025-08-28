@@ -1,11 +1,11 @@
-import { useContext, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Feature, Geometry, GeoJsonProperties } from "geojson"
 import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
 import { ColorCodingRecordFunction, FieldConfig, LinkFields, ProcessedRasterSource, RelatedTable } from "@/lib/types/mapping-types"
-import { MapContext } from "@/context/map-provider"
+import { useMap } from "@/context/map-provider"
 import { clearGraphics, highlightFeature } from '@/lib/map/highlight-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,6 +25,7 @@ export interface LayerContentProps {
     relatedTables?: RelatedTable[]
     linkFields?: LinkFields
     colorCodingMap?: ColorCodingRecordFunction
+    customLayerParameters?: { cql_filter?: string, [key: string]: any }
     rasterSource?: ProcessedRasterSource
     visible: boolean
     queryable?: boolean
@@ -96,9 +97,9 @@ const LayerCard = ({
     buttons: React.ReactNode[] | null,
     handleZoomToFeature: (feature: ExtendedFeature, sourceCRS: string) => Promise<void>
 }) => {
+    const { view } = useMap();
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [currentPage, setCurrentPage] = useState(1)
-    const { view } = useContext(MapContext)
 
     // Calculate total pages based on items per page
     const totalPages = useMemo(() =>
@@ -190,7 +191,7 @@ const LayerCard = ({
 }
 
 const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarInsetWithPaginationProps) => {
-    const { view } = useContext(MapContext)
+    const { view } = useMap()
     const buttons = useGetPopupButtons()
 
     const sectionIds = useMemo(

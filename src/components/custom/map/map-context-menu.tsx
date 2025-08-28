@@ -1,10 +1,10 @@
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { useMapCoordinates } from '@/hooks/use-map-coordinates';
-import { RefObject, useCallback, useContext, useMemo } from 'react';
+import { RefObject, useCallback, useMemo } from 'react';
 import { ClipboardCopy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { convertDDToDMS } from '@/lib/map/conversion-utils';
-import { MapContext } from '@/context/map-provider';
+import { useMap } from '@/context/map-provider';
 import { clearGraphics } from '@/lib/map/highlight-utils';
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 
 const MapContextMenu = ({ hiddenTriggerRef, coordinates }: Props) => {
     const { isDecimalDegrees } = useMapCoordinates();
-    const { view } = useContext(MapContext);
+    const { view } = useMap();
 
     // Function to convert coordinates based on current setting
     const formattedCoordinates = useMemo(() => {

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useCallback, useContext, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -9,8 +9,7 @@ import useScreenSize from "@/hooks/use-screen-size";
 import { XIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { clearGraphics } from "@/lib/map/highlight-utils";
-import { MapContext } from "@/context/map-provider";
-
+import { useMap } from "@/context/map-provider";
 interface CombinedSidebarDrawerProps {
     container: HTMLDivElement | null;
     popupContent: LayerContentProps[];
@@ -29,7 +28,7 @@ function PopupDrawer({
     const [activeLayerTitle, setActiveLayerTitle] = useState<string>("");
     const screenSize = useScreenSize()
     const isMobile = useIsMobile();
-    const { view } = useContext(MapContext)
+    const { view } = useMap()
 
     const layerContent = useMemo(() => popupContent, [popupContent]);
 
