@@ -35,7 +35,7 @@ export const layerFetchConfigs: Record<string, LayerFetchConfig> = {
         tableName: 'hazlayerinfo',
         acceptProfile: 'hazards'
     },
-    'ccs': {
+    'carbonstorage': {
         tableName: 'ccuslayerinfo',
         acceptProfile: 'emp'
     },

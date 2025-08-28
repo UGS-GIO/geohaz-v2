@@ -53,8 +53,15 @@ export const findAndApplyWMSFilter = (
 };
 
 type YesNoAll = "yes" | "no" | "all";
+
+// --- Configuration Objects ---
 const wellsHasCoreFilterConfig = {
     label: "Cores/Cuttings Available?",
+    options: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "all", label: "All" }] as const,
+};
+
+const wellsHasLasFilterConfig = {
+    label: "LAS Data Available?",
     options: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "all", label: "All" }] as const,
 };
 
@@ -88,9 +95,7 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
     data.forEach(item => {
         const alias = item[displayField];
         const columnName = item[columnNameField];
-        if (alias && columnName && !uniqueMappings.has(alias)) {
-            uniqueMappings.set(alias, columnName);
-        }
+        if (alias && columnName && !uniqueMappings.has(alias)) uniqueMappings.set(alias, columnName);
     });
     return Array.from(uniqueMappings, ([label, value]) => ({ label, value })).sort((a, b) => a.label.localeCompare(b.label));
 };
@@ -101,55 +106,52 @@ function MapConfigurations() {
     const navigate = useNavigate({ from: '/carbonstorage' });
     const search = useSearch({ from: '/carbonstorage/' });
 
-    // Move the formation data query to the parent component level
-    // This ensures it loads immediately on page load
     const { data: formationMappings = [], isLoading: isFormationLoading, error: formationError } = useQuery({
         queryKey: ['formationMappings'],
         queryFn: fetchFormationData,
-        staleTime: 1000 * 60 * 60,
+        staleTime: 1000 * 60 * 60, // 1 hour
     });
 
     // Parse formations as array from URL params
     const selectedFormations = useMemo(() => {
         if (!search.formations) return [];
-        if (typeof search.formations === 'string') {
-            return search.formations.split(',').filter(Boolean);
-        }
+        if (typeof search.formations === 'string') return search.formations.split(',').filter(Boolean);
         return Array.isArray(search.formations) ? search.formations : [];
     }, [search.formations]);
 
     // Parse formation operator from URL params (defaults to OR/false)
-    const useAndOperator = useMemo(() => {
-        return search.formation_operator === 'and';
-    }, [search.formation_operator]);
+    const useAndOperator = useMemo(() => search.formation_operator === 'and', [search.formation_operator]);
 
     useEffect(() => {
-        const filterFromSearchState = search.filters?.[wellWithTopsWMSTitle] ?? null;
-        findAndApplyWMSFilter(view?.map, wellWithTopsWMSTitle, filterFromSearchState);
+        const filterFromUrl = search.filters?.[wellWithTopsWMSTitle] ?? null;
+        findAndApplyWMSFilter(view?.map, wellWithTopsWMSTitle, filterFromUrl);
     }, [view, search.filters]);
 
     const handleCoordFormatChange = (value: 'dd' | 'dms') => {
         if (setIsDecimalDegrees) setIsDecimalDegrees(value === 'dd');
         navigate({
             search: (prev) => ({ ...prev, coordinate_format: value }),
-            replace: true,
+            replace: true
         });
     };
 
     const handleHasCoreChange = (value: YesNoAll) => {
         navigate({
             search: (prev) => ({ ...prev, core: value === "all" ? undefined : value }),
-            replace: true,
+            replace: true
         });
+    };
+
+    const handleHasLasChange = (value: YesNoAll) => {
+        navigate({ search: (prev) => ({ ...prev, las: value === "all" ? undefined : value }), replace: true });
     };
 
     const handleFormationChange = (formations: string[]) => {
         navigate({
             search: (prev) => ({
-                ...prev,
-                formations: formations.length === 0 ? undefined : formations.join(',')
+                ...prev, formations: formations.length === 0 ? undefined : formations.join(',')
             }),
-            replace: true,
+            replace: true
         });
     };
 
@@ -159,7 +161,7 @@ function MapConfigurations() {
                 ...prev,
                 formation_operator: useAnd ? 'and' : undefined // undefined defaults to OR
             }),
-            replace: true,
+            replace: true
         });
     };
 
@@ -220,6 +222,10 @@ function MapConfigurations() {
                             value={search.core ?? 'all'}
                             onChange={handleHasCoreChange}
                         />
+                        <WellLasFilter
+                            value={search.las ?? 'all'}
+                            onChange={handleHasLasChange}
+                        />
                         <WellFormationFilter
                             value={selectedFormations}
                             onChange={handleFormationChange}
@@ -264,6 +270,32 @@ const WellCoreFilter = ({ value, onChange }: { value: YesNoAll, onChange: (value
         </RadioGroup>
     </div>
 );
+
+const WellLasFilter = ({ value, onChange }: { value: YesNoAll, onChange: (value: YesNoAll) => void }) => (
+    <div>
+        <Label className="text-sm font-medium text-muted-foreground mb-2 block">
+            {wellsHasLasFilterConfig.label}
+        </Label>
+        <RadioGroup value={value} onValueChange={onChange} className="grid grid-cols-3 gap-2">
+            {wellsHasLasFilterConfig.options.map(option => (
+                <div key={option.value}>
+                    <RadioGroupItem
+                        value={option.value}
+                        id={`haslas-filter-${option.value}`}
+                        className="peer sr-only"
+                    />
+                    <Label
+                        htmlFor={`haslas-filter-${option.value}`}
+                        className="flex flex-1 items-center justify-center rounded-md border-2 border-transparent bg-popover p-2 text-xs text-center cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
+                    >
+                        {option.label}
+                    </Label>
+                </div>
+            ))}
+        </RadioGroup>
+    </div>
+);
+
 
 interface WellFormationFilterProps {
     value: string[];
