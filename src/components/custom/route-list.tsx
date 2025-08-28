@@ -74,14 +74,14 @@ export function RouteList() {
             // Add more descriptions as needed
         };
 
-        return descriptions[path] || `Navigate to ${path}`;
+        return descriptions[path] || `Maps to ${path}`;
     };
 
     const routes = getAllRoutes();
 
     return (
-        <div className="space-y-4">
-            <div className="mb-6">
+        <div className="flex flex-col items-center space-y-8 p-4">
+            <div className="mb-6 text-center">
                 <h2 className="text-2xl font-bold mb-2">Available Routes</h2>
                 <p className="text-muted-foreground">
                     Navigate to any of the available pages in the application.
@@ -137,8 +137,8 @@ export function SimpleRouteList() {
     // Manually define your routes if the programmatic approach doesn't work
     const routes: RouteInfo[] = [
         {
-            path: '/ccus',
-            fullPath: '/ccus/',
+            path: '/carbonstorage',
+            fullPath: '/carbonstorage/',
             title: 'Carbon Storage Portal',
             description: 'A tool for the public, scientists, and industry professionals interested in Utah carbon capture, utilization, and storage resources.'
         },
@@ -151,7 +151,7 @@ export function SimpleRouteList() {
     ];
 
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col items-center space-y-8 p-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {routes.map((route) => (
                     <Card key={route.fullPath} className="transition-all hover:shadow-md">
