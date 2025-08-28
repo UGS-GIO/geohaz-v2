@@ -139,26 +139,19 @@ export function SimpleRouteList() {
         {
             path: '/ccus',
             fullPath: '/ccus/',
-            title: 'CCUS Mapping',
-            description: 'Carbon Capture, Utilization & Storage mapping interface with advanced filtering and visualization tools.'
+            title: 'Carbon Storage Portal',
+            description: 'A tool for the public, scientists, and industry professionals interested in Utah carbon capture, utilization, and storage resources.'
         },
         {
             path: '/hazards',
             fullPath: '/hazards/',
-            title: 'Hazards Portal',
-            description: 'Explore and review geological hazards data with interactive maps and detailed information.'
+            title: 'Geologic Hazards portal',
+            description: 'Information on the type, location, and relative susceptibility of mapped geologic hazards in Utah.'
         }
     ];
 
     return (
         <div className="space-y-4">
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">Available Pages</h2>
-                <p className="text-muted-foreground">
-                    Navigate to any of the available pages in the application.
-                </p>
-            </div>
-
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {routes.map((route) => (
                     <Card key={route.fullPath} className="transition-all hover:shadow-md">
