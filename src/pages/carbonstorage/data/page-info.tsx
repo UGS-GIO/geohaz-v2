@@ -1,6 +1,6 @@
 import { Link } from "@/components/custom/link";
 
-const appTitle = 'Carbon Storage Portal';
+const appTitle = 'Carbon Storage Portal (beta)';
 
 const references = (
     <div>
