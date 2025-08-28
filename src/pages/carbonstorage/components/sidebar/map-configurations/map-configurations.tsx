@@ -28,6 +28,7 @@ import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/map/utils';
 import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
 import { Badge } from '@/components/ui/badge';
+import { YesNoAll } from '@/lib/types/filter-types';
 
 export const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
@@ -52,7 +53,6 @@ export const findAndApplyWMSFilter = (
     }
 };
 
-type YesNoAll = "yes" | "no" | "all";
 const wellsHasCoreFilterConfig = {
     label: "Cores/Cuttings Available?",
     options: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "all", label: "All" }] as const,

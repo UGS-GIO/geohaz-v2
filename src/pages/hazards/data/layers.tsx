@@ -723,7 +723,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
     ],
 }
 
-const alluvialFanLayerName = 'alluvialfan_current';
+const alluvialFanLayerName = 'alluvialfantest_current';
 const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility (Source: Division of Emergency Management)';
 const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
