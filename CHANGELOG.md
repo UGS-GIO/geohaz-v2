@@ -1,3 +1,18 @@
+## [1.13.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.12.1...v1.13.0) (2025-08-28)
+
+
+### ccs
+
+* **♻️ Refactors**(`ccs`): add beta in portal title ([#282](https://github.com/UGS-GIO/geohaz-v2/issues/282))* **♻️ Refactors**(`ccs`): add disabled states to layer filters and a conditional message to turn on layer ([#284](https://github.com/UGS-GIO/geohaz-v2/issues/284))* **♻️ Refactors**(`ccs`): add las filter ([#280](https://github.com/UGS-GIO/geohaz-v2/issues/280))* **♻️ Refactors**(`ccs`): add the color ranking to the geo region layer ([#281](https://github.com/UGS-GIO/geohaz-v2/issues/281))* **🐛 Bug Fixes**(`ccs`): fix layer descriptions ([#279](https://github.com/UGS-GIO/geohaz-v2/issues/279))* **♻️ Refactors**(`ccs`): refactor ccus to either ccs or carbonstorage ([#278](https://github.com/UGS-GIO/geohaz-v2/issues/278))
+
+### ccus
+
+* **♻️ Refactors**(`ccus`): allow for multiple formations to be queried ([#272](https://github.com/UGS-GIO/geohaz-v2/issues/272))* **♻️ Refactors**(`ccus`): change layer Geothermal Powerplants to Geothermal Power Plants ([#269](https://github.com/UGS-GIO/geohaz-v2/issues/269))* **🐛 Bug Fixes**(`ccus`): rename layer to make layer description info accordion work ([#270](https://github.com/UGS-GIO/geohaz-v2/issues/270))* **♻️ Refactors**(`ccus`): update layer names ([#276](https://github.com/UGS-GIO/geohaz-v2/issues/276))* **♻️ Refactors**(`ccus`): update map details, data sources, references, and acknowledgements ([#268](https://github.com/UGS-GIO/geohaz-v2/issues/268))
+
+### common
+
+* **✨ Features**(`common`): add a landing page ([#273](https://github.com/UGS-GIO/geohaz-v2/issues/273))* **✨ Features**(`common`): add legend functionality for graphicstroke and graphicfill in sld* **✨ Features**(`common`): convert symbol generation to native svg, remove esri symbol deps ([#263](https://github.com/UGS-GIO/geohaz-v2/issues/263))* **♻️ Refactors**(`common`): create useMap hook, simplify MapProvider, and remove unused variables ([#277](https://github.com/UGS-GIO/geohaz-v2/issues/277))* **♻️ Refactors**(`common`): decrease zoom value on load, fix bad link ([#286](https://github.com/UGS-GIO/geohaz-v2/issues/286))* **♻️ Refactors**(`common`): ensure that cql filters are added with click requests ([#266](https://github.com/UGS-GIO/geohaz-v2/issues/266))* **♻️ Refactors**(`common`): make index.html file generic for now ([#283](https://github.com/UGS-GIO/geohaz-v2/issues/283))* **♻️ Refactors**(`common`): more ccus mentioned removed ([#285](https://github.com/UGS-GIO/geohaz-v2/issues/285))* **✨ Features**(`common`): return text-only legend item for SLD rules with only name elements as children ([#267](https://github.com/UGS-GIO/geohaz-v2/issues/267))
+
 ## [1.12.1](https://github.com/UGS-GIO/geohaz-v2/compare/v1.12.0...v1.12.1) (2025-08-14)
 
 
