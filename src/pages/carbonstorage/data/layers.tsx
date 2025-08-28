@@ -63,7 +63,7 @@ const basinNamesWMSConfig: WMSLayerProps = {
                     }
 
                     // Moderate: 3-6 (Solid Yellow)
-                    if (rank >= 3 && rank < 6) {
+                    if (rank < 6) {
                         return "#FFFF00"; // Yellow
                     }
 
