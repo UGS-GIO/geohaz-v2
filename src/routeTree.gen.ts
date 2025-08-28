@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as IndexImport } from './routes/index'
 import { Route as LoginIndexImport } from './routes/login/index'
 import { Route as HazardsIndexImport } from './routes/hazards/index'
 import { Route as HazardsReviewIndexImport } from './routes/hazards-review/index'
@@ -34,6 +35,12 @@ const HazardsReportNewreportIndexLazyImport = createFileRoute(
 )()
 
 // Create/Update Routes
+
+const IndexRoute = IndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const WetlandsIndexLazyRoute = WetlandsIndexLazyImport.update({
   id: '/wetlands/',
@@ -119,6 +126,13 @@ const HazardsReportNewreportIndexLazyRoute =
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
     '/carbonstorage/': {
       id: '/carbonstorage/'
       path: '/carbonstorage'
@@ -195,6 +209,7 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/carbonstorage': typeof CarbonstorageIndexRoute
   '/hazards-review': typeof HazardsReviewIndexRoute
   '/hazards': typeof HazardsIndexRoute
@@ -208,6 +223,7 @@ export interface FileRoutesByFullPath {
 }
 
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/carbonstorage': typeof CarbonstorageIndexRoute
   '/hazards-review': typeof HazardsReviewIndexRoute
   '/hazards': typeof HazardsIndexRoute
@@ -222,6 +238,7 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/': typeof IndexRoute
   '/carbonstorage/': typeof CarbonstorageIndexRoute
   '/hazards-review/': typeof HazardsReviewIndexRoute
   '/hazards/': typeof HazardsIndexRoute
@@ -237,6 +254,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/carbonstorage'
     | '/hazards-review'
     | '/hazards'
@@ -249,6 +267,7 @@ export interface FileRouteTypes {
     | '/hazards/report/newreport'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/carbonstorage'
     | '/hazards-review'
     | '/hazards'
@@ -261,6 +280,7 @@ export interface FileRouteTypes {
     | '/hazards/report/newreport'
   id:
     | '__root__'
+    | '/'
     | '/carbonstorage/'
     | '/hazards-review/'
     | '/hazards/'
@@ -275,6 +295,7 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   CarbonstorageIndexRoute: typeof CarbonstorageIndexRoute
   HazardsReviewIndexRoute: typeof HazardsReviewIndexRoute
   HazardsIndexRoute: typeof HazardsIndexRoute
@@ -288,6 +309,7 @@ export interface RootRouteChildren {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   CarbonstorageIndexRoute: CarbonstorageIndexRoute,
   HazardsReviewIndexRoute: HazardsReviewIndexRoute,
   HazardsIndexRoute: HazardsIndexRoute,
@@ -310,6 +332,7 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
+        "/",
         "/carbonstorage/",
         "/hazards-review/",
         "/hazards/",
@@ -321,6 +344,9 @@ export const routeTree = rootRoute
         "/hazards/report/$aoi",
         "/hazards/report/newreport/"
       ]
+    },
+    "/": {
+      "filePath": "index.tsx"
     },
     "/carbonstorage/": {
       "filePath": "carbonstorage/index.tsx"
