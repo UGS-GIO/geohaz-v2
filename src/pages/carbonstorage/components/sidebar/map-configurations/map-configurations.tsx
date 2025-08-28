@@ -28,6 +28,9 @@ import WMSLayer from "@arcgis/core/layers/WMSLayer.js";
 import { findLayerByTitle } from '@/lib/map/utils';
 import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
 import { Badge } from '@/components/ui/badge';
+import { useSidebar } from '@/hooks/use-sidebar';
+import Layers from '@/components/sidebar/layers';
+import { LayersIcon } from '@radix-ui/react-icons';
 
 export const findAndApplyWMSFilter = (
     mapInstance: __esri.Map | null | undefined,
@@ -105,12 +108,25 @@ function MapConfigurations() {
     const { view } = useMap();
     const navigate = useNavigate({ from: '/carbonstorage' });
     const search = useSearch({ from: '/carbonstorage/' });
+    const { setCurrentContent } = useSidebar();
 
     const { data: formationMappings = [], isLoading: isFormationLoading, error: formationError } = useQuery({
         queryKey: ['formationMappings'],
         queryFn: fetchFormationData,
         staleTime: 1000 * 60 * 60, // 1 hour
     });
+
+    /**
+     * Determine if the Wells Database layer is currently visible based on URL params
+     */
+    const isWellsLayerVisible = useMemo(() => {
+        const visibleLayers = search.layers.selected;
+        if (!visibleLayers) return false;
+
+        const layers = Array.isArray(visibleLayers) ? visibleLayers : String(visibleLayers).split(',');
+        return layers.includes(wellWithTopsWMSTitle);
+    }, [search.layers.selected]);
+
 
     // Parse formations as array from URL params
     const selectedFormations = useMemo(() => {
@@ -218,15 +234,39 @@ function MapConfigurations() {
                         <CardTitle className="text-base">Filter Wells Database</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 space-y-4">
+                        {!isWellsLayerVisible && (
+                            <div className="rounded-md border bg-muted p-3 text-sm">
+                                <p className="text-center text-muted-foreground">
+                                    To filter features, turn on the Wells Database layer in the
+                                    <Button
+                                        variant="link"
+                                        className="h-auto p-1 inline-flex text-sm align-baseline"
+                                        onClick={() => setCurrentContent({
+                                            title: 'Layers',
+                                            label: '',
+                                            icon: <LayersIcon />,
+                                            componentPath: '/src/components/sidebar/layers',
+                                            component: Layers
+                                        })}
+                                    >
+                                        layers panel
+                                    </Button>
+                                    .
+                                </p>
+                            </div>
+                        )}
                         <WellCoreFilter
+                            disabled={!isWellsLayerVisible}
                             value={search.core ?? 'all'}
                             onChange={handleHasCoreChange}
                         />
                         <WellLasFilter
+                            disabled={!isWellsLayerVisible}
                             value={search.las ?? 'all'}
                             onChange={handleHasLasChange}
                         />
                         <WellFormationFilter
+                            disabled={!isWellsLayerVisible}
                             value={selectedFormations}
                             onChange={handleFormationChange}
                             mappings={formationMappings}
@@ -242,12 +282,13 @@ function MapConfigurations() {
     );
 }
 
-const WellCoreFilter = ({ value, onChange }: { value: YesNoAll, onChange: (value: YesNoAll) => void }) => (
+const WellCoreFilter = ({ value, onChange, disabled }: { value: YesNoAll, onChange: (value: YesNoAll) => void, disabled: boolean }) => (
     <div>
         <Label className="text-sm font-medium text-muted-foreground mb-2 block">
             {wellsHasCoreFilterConfig.label}
         </Label>
         <RadioGroup
+            disabled={disabled}
             value={value}
             onValueChange={onChange}
             className="grid grid-cols-3 gap-2"
@@ -271,12 +312,12 @@ const WellCoreFilter = ({ value, onChange }: { value: YesNoAll, onChange: (value
     </div>
 );
 
-const WellLasFilter = ({ value, onChange }: { value: YesNoAll, onChange: (value: YesNoAll) => void }) => (
+const WellLasFilter = ({ value, onChange, disabled }: { value: YesNoAll, onChange: (value: YesNoAll) => void, disabled: boolean }) => (
     <div>
         <Label className="text-sm font-medium text-muted-foreground mb-2 block">
             {wellsHasLasFilterConfig.label}
         </Label>
-        <RadioGroup value={value} onValueChange={onChange} className="grid grid-cols-3 gap-2">
+        <RadioGroup disabled={disabled} value={value} onValueChange={onChange} className="grid grid-cols-3 gap-2">
             {wellsHasLasFilterConfig.options.map(option => (
                 <div key={option.value}>
                     <RadioGroupItem
@@ -298,6 +339,7 @@ const WellLasFilter = ({ value, onChange }: { value: YesNoAll, onChange: (value:
 
 
 interface WellFormationFilterProps {
+    disabled: boolean;
     value: string[];
     onChange: (value: string[]) => void;
     mappings: FormationMapping[];
@@ -308,6 +350,7 @@ interface WellFormationFilterProps {
 }
 
 const WellFormationFilter = ({
+    disabled,
     value,
     onChange,
     mappings,
@@ -404,6 +447,7 @@ const WellFormationFilter = ({
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
+                        disabled={disabled || isLoading || !!error}
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
