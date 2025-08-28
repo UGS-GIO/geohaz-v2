@@ -44,7 +44,7 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Learn More',
     label: '',
-    href: 'https://geology.utah.gov/energy-minerals/carbonstorage/',
+    href: 'https://geology.utah.gov/energy-minerals/ccus/',
     icon: <ExternalLink className='stroke-foreground' />,
     // This link is external and does not need a component
   }
