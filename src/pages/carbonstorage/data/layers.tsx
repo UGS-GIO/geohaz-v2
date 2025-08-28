@@ -21,8 +21,9 @@ const basinNamesWMSConfig: WMSLayerProps = {
                 'Name': { field: 'name', type: 'string' },
                 'Description': { field: 'description', type: 'string' },
                 'Report Link': { field: 'reportlink', type: 'string' },
+                'Ranked Formation': { field: 'rankedformation', type: 'string' },
                 'Rank': {
-                    field: 'rank',
+                    field: 'ranknumber',
                     type: 'string',
                     transform: (value: string | null): string | null => {
                         if (value === null) {
@@ -39,19 +40,33 @@ const basinNamesWMSConfig: WMSLayerProps = {
                 }
             },
             colorCodingMap: {
-                'rank': (value: string | number) => {
-                    // Handle "Coming Soon" case
+                'ranknumber': (value: string | number) => {
                     if (value === "Coming Soon") {
                         return "#808080"; // Gray for "Coming Soon"
                     }
 
-                    const rank = typeof value === 'number' ? value : parseInt(value, 10);
+                    const rank = typeof value === 'number' ? value : parseFloat(value);
+                    if (isNaN(rank)) {
+                        return "#808080"; // Default gray for non-numeric values
+                    }
 
-                    console.log(`Parsed rank: ${rank}`);
-                    if (rank === 1) return "#FF0000"; // Red
-                    if (rank === 2) return "#FFFF00"; // Yellow
-                    if (rank === 3) return "#00FF00"; // Green
-                    return "#808080"; // Gray for other cases
+                    // Limited: <3 (Solid Orange)
+                    if (rank < 3) {
+                        return "#FFA500"; // Orange
+                    }
+
+                    // Moderate: 3-6 (Solid Yellow)
+                    if (rank >= 3 && rank < 6) {
+                        return "#FFFF00"; // Yellow
+                    }
+
+                    // Excellent: >=6 (Solid Green)
+                    if (rank >= 6) {
+                        return "#00FF00"; // Green
+                    }
+
+                    // Default case
+                    return "#808080"; // Gray for any other cases
                 }
             }
         },
