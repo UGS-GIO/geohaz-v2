@@ -2,6 +2,7 @@ import { Link } from "@/components/custom/link";
 import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 import { addThousandsSeparator, toTitleCase, toSentenceCase } from "@/lib/utils";
+import { GeoJsonProperties } from "geojson";
 
 // GeoRegions WMS Layer
 const basinNamesLayerName = 'basin_names';
@@ -23,21 +24,27 @@ const basinNamesWMSConfig: WMSLayerProps = {
                 'Report Link': { field: 'reportlink', type: 'string' },
                 'Ranked Formation': { field: 'rankedformation', type: 'string' },
                 'Rank': {
+                    type: 'custom',
                     field: 'ranknumber',
-                    type: 'string',
-                    transform: (value: string | null): string | null => {
-                        if (value === null) {
+                    transform: (properties: GeoJsonProperties): string => {
+                        if (!properties) {
+                            return '';
+                        }
+
+                        const rankNumber = properties.ranknumber;
+                        const rankingText = properties.ranking;
+
+                        if (rankNumber === null || rankNumber === undefined || rankNumber === 0) {
                             return "Coming Soon";
                         }
 
-                        const rank = parseInt(value, 10);
-                        if (rank === 0 || isNaN(rank)) {
-                            return "Coming Soon"; // Transform rank 0 or invalid to "Coming Soon"
+                        if (rankingText) {
+                            return `${rankNumber} - ${rankingText}`;
+                        } else {
+                            return String(rankNumber);
                         }
-
-                        return rank.toString(); // Return rank as a string
                     }
-                }
+                },
             },
             colorCodingMap: {
                 'ranknumber': (value: string | number) => {
