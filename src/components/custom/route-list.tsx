@@ -68,7 +68,7 @@ export function RouteList() {
     // Helper function to generate descriptions
     const getRouteDescription = (path: string): string => {
         const descriptions: Record<string, string> = {
-            '/ccus': 'Carbon Capture, Utilization & Storage mapping interface',
+            '/ccs': 'Carbon Capture, Utilization & Storage mapping interface',
             '/about': 'Learn more about our platform',
             '/contact': 'Get in touch with us',
             // Add more descriptions as needed
