@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth'
 import { z } from 'zod';
 
 const hazardsReviewSearchSchema = z.object({
-  review_status: z.enum(['standard', 'review', 'all']).default('standard'),
+  review_status: z.enum(['standard', 'review', 'all']).default('review'),
   coordinate_format: z.enum(['dd', 'dms']).optional(),
 });
 
@@ -32,8 +32,6 @@ export const Route = createFileRoute('/hazards-review/')({
       })
     }
   },
-  validateSearch: (search: Record<string, unknown>) => {
-    return hazardsReviewSearchSchema.parse(search);
-  },
+  validateSearch: hazardsReviewSearchSchema,
   component: HazardsReviewPage,
 })

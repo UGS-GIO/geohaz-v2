@@ -22,10 +22,50 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User } from 'lucide-react';
+import { useMap } from '@/context/map-provider';
+import { useSearch } from '@tanstack/react-router';
+import { useEffect, useMemo } from 'react';
+
+const applyGlobalWMSFilter = (map: __esri.Map | undefined, cqlFilter: string | null) => {
+  console.log('Applying global WMS filter:', cqlFilter);
+
+  if (!map) return;
+  map.allLayers.forEach(layer => {
+    if (layer.type === 'wms') {
+      const wmsLayer = layer as __esri.WMSLayer;
+      const newCustomParameters = { ...(wmsLayer.customParameters || {}) };
+      if (cqlFilter) newCustomParameters.cql_filter = cqlFilter;
+      else delete newCustomParameters.cql_filter;
+      if (JSON.stringify(wmsLayer.customParameters) !== JSON.stringify(newCustomParameters)) {
+        wmsLayer.customParameters = newCustomParameters;
+        wmsLayer.refresh();
+      }
+    }
+  });
+};
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
   const { user } = useAuth();
+  const { view } = useMap();
+  const search = useSearch({ from: '/hazards-review/' });
+  const reviewStatus = useMemo(() => search.review_status, [search.review_status]);
+
+  useEffect(() => {
+    let cqlFilter: string | null = null;
+    switch (reviewStatus) {
+      case 'standard':
+        cqlFilter = "is_current = 'Y'";
+        break;
+      case 'review':
+        cqlFilter = "is_current = 'R'";
+        break;
+      case 'all':
+        cqlFilter = "is_current IN ('Y', 'R')";
+        break;
+    }
+    applyGlobalWMSFilter(view?.map, cqlFilter);
+  }, [view, reviewStatus]); // This runs when the map is ready or the URL status changes
 
   const searchConfig: SearchSourceConfig[] = [
     defaultMasqueradeConfig,
