@@ -4,7 +4,6 @@ import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
 import { LayerOrderConfig, useGetLayerConfig } from "@/hooks/use-get-layer-config";
-import { highlightFeature } from '@/lib/map/highlight-utils';
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { useLayerUrl } from '@/context/layer-url-provider';
@@ -13,6 +12,7 @@ import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/
 import { useMap } from '@/context/map-provider';
 import { useLayerVisibility } from '@/hooks/use-layer-visibility';
 import { useMapClickHandler } from '@/hooks/use-map-click-handler';
+import { useFeatureResponseHandler } from '@/hooks/use-feature-response-handler';
 
 interface UseMapContainerProps {
     wmsUrl: string;
@@ -46,6 +46,13 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         layerOrderConfigs
     });
 
+    useFeatureResponseHandler({
+        isSuccess: featureInfoQuery.isSuccess,
+        featureData: featureInfoQuery.data || [],
+        view,
+        drawerTriggerRef
+    });
+
     // Extract the click handling logic
     const { handleMapClick } = useMapClickHandler({
         view,
@@ -66,23 +73,6 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         }
     });
 
-    useEffect(() => {
-        if (featureInfoQuery.isSuccess) {
-            const popupContent = featureInfoQuery.data || [];
-            const hasFeatures = popupContent.length > 0;
-            const firstFeature = popupContent[0]?.features[0];
-            const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
-
-            if (hasFeatures && firstFeature && view) {
-                highlightFeature(firstFeature, view, popupContent[0].sourceCRS);
-            }
-            if (!hasFeatures && drawerState === 'open') {
-                drawerTriggerRef.current?.click();
-            } else if (hasFeatures && drawerState !== 'open') {
-                drawerTriggerRef.current?.click();
-            }
-        }
-    }, [featureInfoQuery.isSuccess, featureInfoQuery.data, view]);
 
     // apply filters on initial load
     useEffect(() => {
