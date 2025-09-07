@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { RendererFactory } from '@/lib/legend/renderer-factory';
 import { getRenderer } from '@/lib/legend/utils';
 import { MapImageLayerRenderer, RegularLayerRenderer } from '@/lib/types/mapping-types';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 
 const useLegendPreview = (layerId: string, url: string) => {
     const { view } = useMap();

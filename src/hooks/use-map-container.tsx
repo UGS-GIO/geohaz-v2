@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from 'react';
-import { useSearch } from '@tanstack/react-router';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
@@ -7,18 +6,28 @@ import { LayerOrderConfig, useGetLayerConfig } from "@/hooks/use-get-layer-confi
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { useLayerUrl } from '@/context/layer-url-provider';
-import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
-import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import { useLayerVisibility } from '@/hooks/use-layer-visibility';
 import { useMapClickHandler } from '@/hooks/use-map-click-handler';
 import { useFeatureResponseHandler } from '@/hooks/use-feature-response-handler';
+import { useMapUrlSync } from '@/hooks/use-map-url-sync';
+import { useDomainFilters } from '@/hooks/use-domain-filters';
 
 interface UseMapContainerProps {
     wmsUrl: string;
     layerOrderConfigs?: LayerOrderConfig[];
 }
 
+/**
+ * Main map container hook that orchestrates all map-related functionality.
+ * Coordinates layer visibility, click handling, feature queries, and URL synchronization.
+ * Designed to be gradually migrated from ArcGIS to MapLibre by extracting concerns
+ * into separate, testable hooks.
+ * 
+ * @param wmsUrl - Base URL for WMS feature info queries
+ * @param layerOrderConfigs - Optional configuration for reordering layers in popups
+ * @returns Map container state and event handlers
+ */
 export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContainerProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const { loadMap, view, isSketching } = useMap();
@@ -30,15 +39,22 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     useMapPositionUrlParams(view);
     const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
-    const search = useSearch({ from: '__root__' });
     const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection } = useLayerUrl();
 
+    // Extract URL synchronization
+    const { center, zoom, filters } = useMapUrlSync();
+
+    // Extract domain-specific filter handling
+    useDomainFilters({ view, filters, updateLayerSelection });
+
+    // Process layers based on visibility state
     const processedLayers = useLayerVisibility(
         layersConfig || [],
         selectedLayerTitles,
         hiddenGroupTitles
     );
 
+    // Feature info query handling
     const featureInfoQuery = useFeatureInfoQuery({
         view,
         wmsUrl,
@@ -46,6 +62,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         layerOrderConfigs
     });
 
+    // Handle side effects of feature query responses
     useFeatureResponseHandler({
         isSuccess: featureInfoQuery.isSuccess,
         featureData: featureInfoQuery.data || [],
@@ -53,7 +70,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         drawerTriggerRef
     });
 
-    // Extract the click handling logic
+    // Handle map clicks
     const { handleMapClick } = useMapClickHandler({
         view,
         isSketching,
@@ -64,6 +81,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         setVisibleLayersMap
     });
 
+    // Handle click or drag events on the map
     const { clickOrDragHandlers } = useMapClickOrDrag({
         onClick: (e) => {
             handleMapClick({
@@ -73,30 +91,17 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         }
     });
 
-
-    // apply filters on initial load
+    // Initialize the map when the container is ready
     useEffect(() => {
-        if (!view || !view.map) return;
-        const filtersFromUrl = search.filters ?? {};
-        const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
-        findAndApplyWMSFilter(view.map, wellWithTopsWMSTitle, wellFilter);
-        if (wellFilter) {
-            updateLayerSelection(wellWithTopsWMSTitle, true);
-        }
-    }, [view, search.filters, updateLayerSelection]);
-
-    useEffect(() => {
-        const center = [search.lon, search.lat] as [number, number];
-
         if (mapRef.current && loadMap && layersConfig) {
             loadMap({
                 container: mapRef.current,
-                zoom: search.zoom,
+                zoom,
                 center,
                 layers: processedLayers,
             });
         }
-    }, [loadMap, search.zoom, search.lat, search.lon, layersConfig, processedLayers]);
+    }, [loadMap, zoom, center, layersConfig, processedLayers]);
 
     return {
         mapRef,

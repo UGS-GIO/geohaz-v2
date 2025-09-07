@@ -4,7 +4,7 @@ import { RefObject, useCallback, useMemo } from 'react';
 import { ClipboardCopy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { convertDDToDMS } from '@/lib/map/conversion-utils';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import { clearGraphics } from '@/lib/map/highlight-utils';
 
 interface Props {

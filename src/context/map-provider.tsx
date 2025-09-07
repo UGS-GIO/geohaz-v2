@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useState } from "react";
 import type SceneView from "@arcgis/core/views/SceneView";
 import type MapView from "@arcgis/core/views/MapView";
 import { LayerProps } from "@/lib/types/mapping-types";
@@ -90,12 +90,4 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
             {children}
         </MapContext.Provider>
     )
-}
-
-export function useMap() {
-    const context = useContext(MapContext);
-    if (context === undefined) {
-        throw new Error("useMap must be used within a MapProvider");
-    }
-    return context;
 }

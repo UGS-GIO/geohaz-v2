@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import SketchViewModel from "@arcgis/core/widgets/Sketch/SketchViewModel";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Layer from "@arcgis/core/layers/Layer";
