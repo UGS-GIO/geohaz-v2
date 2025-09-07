@@ -8,33 +8,11 @@ import { clearGraphics, highlightFeature } from '@/lib/map/highlight-utils';
 import Point from '@arcgis/core/geometry/Point';
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
-import { LayerProps } from '@/lib/types/mapping-types';
 import { useLayerUrl } from '@/context/layer-url-provider';
 import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
 import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
 import { useMap } from '@/context/map-provider';
-
-const preprocessLayerVisibility = (
-    layers: LayerProps[],
-    selectedLayerTitles: Set<string>,
-    hiddenGroupTitles: Set<string>
-): LayerProps[] => {
-    const process = (layerArray: LayerProps[], parentIsHidden: boolean): LayerProps[] => {
-        return layerArray.map(layer => {
-            const isHiddenByGroup = parentIsHidden || hiddenGroupTitles.has(layer.title || '');
-            if (layer.type === 'group' && 'layers' in layer) {
-                const newChildLayers = process(layer.layers || [], isHiddenByGroup);
-                const isGroupEffectivelyVisible = newChildLayers.some(child => child.visible);
-                return { ...layer, visible: isGroupEffectivelyVisible, layers: newChildLayers };
-            }
-
-            // A layer is only visible if it's selected AND its group hierarchy is not hidden.
-            const isVisible = selectedLayerTitles.has(layer.title || '') && !isHiddenByGroup;
-            return { ...layer, visible: isVisible };
-        });
-    };
-    return process(layers, false);
-};
+import { useLayerVisibility } from '@/hooks/use-layer-visibility';
 
 interface UseMapContainerProps {
     wmsUrl: string;
@@ -54,6 +32,12 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
     const search = useSearch({ from: '__root__' });
     const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection } = useLayerUrl();
+
+    const processedLayers = useLayerVisibility(
+        layersConfig || [],
+        selectedLayerTitles,
+        hiddenGroupTitles
+    );
 
     const featureInfoQuery = useFeatureInfoQuery({
         view,
@@ -106,15 +90,14 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         const center = [search.lon, search.lat] as [number, number];
 
         if (mapRef.current && loadMap && layersConfig) {
-            const finalLayersConfig = preprocessLayerVisibility(layersConfig, selectedLayerTitles, hiddenGroupTitles);
             loadMap({
                 container: mapRef.current,
                 zoom: search.zoom,
                 center,
-                layers: finalLayersConfig,
+                layers: processedLayers,
             });
         }
-    }, [loadMap, search.zoom, search.lat, search.lon, layersConfig, selectedLayerTitles, hiddenGroupTitles]);
+    }, [loadMap, search.zoom, search.lat, search.lon, layersConfig, processedLayers]);
 
     return {
         mapRef,
@@ -128,6 +111,6 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         coordinates,
         setCoordinates,
         view,
-        layersConfig
+        layersConfig: processedLayers
     };
 }
