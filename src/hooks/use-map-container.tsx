@@ -4,8 +4,7 @@ import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
 import { LayerOrderConfig, useGetLayerConfig } from "@/hooks/use-get-layer-config";
-import { clearGraphics, highlightFeature } from '@/lib/map/highlight-utils';
-import Point from '@arcgis/core/geometry/Point';
+import { highlightFeature } from '@/lib/map/highlight-utils';
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { useLayerUrl } from '@/context/layer-url-provider';
@@ -13,6 +12,7 @@ import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
 import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
 import { useMap } from '@/context/map-provider';
 import { useLayerVisibility } from '@/hooks/use-layer-visibility';
+import { useMapClickHandler } from '@/hooks/use-map-click-handler';
 
 interface UseMapContainerProps {
     wmsUrl: string;
@@ -46,14 +46,23 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         layerOrderConfigs
     });
 
+    // Extract the click handling logic
+    const { handleMapClick } = useMapClickHandler({
+        view,
+        isSketching,
+        onPointClick: (mapPoint) => {
+            featureInfoQuery.fetchForPoint(mapPoint);
+        },
+        getVisibleLayers,
+        setVisibleLayersMap
+    });
+
     const { clickOrDragHandlers } = useMapClickOrDrag({
         onClick: (e) => {
-            if (!view || isSketching) return;
-            clearGraphics(view);
-            const layers = getVisibleLayers({ view });
-            setVisibleLayersMap(layers.layerVisibilityMap);
-            const mapPoint = view.toMap({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY }) || new Point();
-            featureInfoQuery.fetchForPoint(mapPoint);
+            handleMapClick({
+                screenX: e.nativeEvent.offsetX,
+                screenY: e.nativeEvent.offsetY
+            });
         }
     });
 

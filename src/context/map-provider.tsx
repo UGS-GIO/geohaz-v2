@@ -19,7 +19,7 @@ type MapContextProps = {
         center?: [number, number],
         layers?: LayerProps[]
     }) => Promise<void>,
-    isSketching?: boolean
+    isSketching: boolean
     setIsSketching?: (isSketching: boolean) => void
 }
 
@@ -27,6 +27,8 @@ export const MapContext = createContext<MapContextProps>({
     view: undefined,
     map: undefined,
     loadMap: async () => { },
+    isSketching: false,
+    setIsSketching: () => { }
 });
 
 export function MapProvider({ children }: { children: React.ReactNode }) {
