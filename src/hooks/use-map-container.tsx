@@ -103,17 +103,13 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     }, [view, search.filters, updateLayerSelection]);
 
     useEffect(() => {
-        // Provide default values for the initial load if params are not in the URL
-        const zoom = typeof search.zoom === 'number' ? search.zoom : 7;
-        const lat = typeof search.lat === 'number' ? search.lat : 39.5;
-        const lon = typeof search.lon === 'number' ? search.lon : -112;
-        const center = [lon, lat] as [number, number];
+        const center = [search.lon, search.lat] as [number, number];
 
         if (mapRef.current && loadMap && layersConfig) {
             const finalLayersConfig = preprocessLayerVisibility(layersConfig, selectedLayerTitles, hiddenGroupTitles);
             loadMap({
                 container: mapRef.current,
-                zoom,
+                zoom: search.zoom,
                 center,
                 layers: finalLayersConfig,
             });
