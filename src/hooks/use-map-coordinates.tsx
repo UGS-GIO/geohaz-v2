@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import { convertDDToDMS } from '@/lib/map/conversion-utils';
 import * as webMercatorUtils from '@arcgis/core/geometry/support/webMercatorUtils';
 import Point from '@arcgis/core/geometry/Point';

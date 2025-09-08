@@ -5,7 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 import { useLayerItemState } from '@/hooks/use-layer-item-state';
 import { LayerProps } from '@/lib/types/mapping-types';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import { findLayerByTitle } from '@/lib/map/utils';
 import { useLayerExtent } from '@/hooks/use-layer-extent';
 import { useFetchLayerDescriptions } from '@/hooks/use-fetch-layer-descriptions';

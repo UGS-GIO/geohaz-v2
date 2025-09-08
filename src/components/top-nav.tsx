@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/custom/button';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import { BasemapIcon } from '@/assets/basemap-icons';
 import Basemap from "@arcgis/core/Basemap.js";
 

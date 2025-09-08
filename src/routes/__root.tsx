@@ -13,9 +13,9 @@ const RootComponent = () => {
 };
 
 const rootSearchSchema = z.object({
-    zoom: z.coerce.number().optional(),
-    lat: z.coerce.number().optional(),
-    lon: z.coerce.number().optional(),
+    zoom: z.coerce.number().optional().default(7),
+    lat: z.coerce.number().optional().default(39.5),
+    lon: z.coerce.number().optional().default(-112),
     filters: z.record(z.string()).optional(),
     coordinate_format: z.enum(['dd', 'dms']).optional(),
     layers: z.preprocess((val) => {
