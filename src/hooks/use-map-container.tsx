@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
@@ -12,10 +12,12 @@ import { useMapClickHandler } from '@/hooks/use-map-click-handler';
 import { useFeatureResponseHandler } from '@/hooks/use-feature-response-handler';
 import { useMapUrlSync } from '@/hooks/use-map-url-sync';
 import { useDomainFilters } from '@/hooks/use-domain-filters';
+import { createCoordinateAdapter, CoordinateAdapter } from '@/lib/map/coordinate-adapter';
 
 interface UseMapContainerProps {
     wmsUrl: string;
     layerOrderConfigs?: LayerOrderConfig[];
+    mapType?: 'arcgis' | 'maplibre'; // New prop to specify map type
 }
 
 /**
@@ -26,9 +28,14 @@ interface UseMapContainerProps {
  * 
  * @param wmsUrl - Base URL for WMS feature info queries
  * @param layerOrderConfigs - Optional configuration for reordering layers in popups
+ * @param mapType - Type of map library to use ('arcgis' or 'maplibre')
  * @returns Map container state and event handlers
  */
-export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContainerProps) {
+export function useMapContainer({
+    wmsUrl,
+    layerOrderConfigs = [],
+    mapType = 'arcgis' // Default to ArcGIS for backwards compatibility
+}: UseMapContainerProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const { loadMap, view, isSketching } = useMap();
     const { coordinates, setCoordinates } = useMapCoordinates();
@@ -40,6 +47,11 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
     const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection } = useLayerUrl();
+
+    // Create coordinate adapter based on map type
+    const coordinateAdapter: CoordinateAdapter = useMemo(() => {
+        return createCoordinateAdapter(mapType);
+    }, [mapType]);
 
     // Extract URL synchronization
     const { center, zoom, filters } = useMapUrlSync();
@@ -54,12 +66,13 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         hiddenGroupTitles
     );
 
-    // Feature info query handling
+    // Feature info query handling with coordinate adapter
     const featureInfoQuery = useFeatureInfoQuery({
         view,
         wmsUrl,
         visibleLayersMap,
-        layerOrderConfigs
+        layerOrderConfigs,
+        coordinateAdapter
     });
 
     // Handle side effects of feature query responses
@@ -70,7 +83,7 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         drawerTriggerRef
     });
 
-    // Handle map clicks
+    // Handle map clicks with coordinate adapter
     const { handleMapClick } = useMapClickHandler({
         view,
         isSketching,
@@ -78,7 +91,8 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
             featureInfoQuery.fetchForPoint(mapPoint);
         },
         getVisibleLayers,
-        setVisibleLayersMap
+        setVisibleLayersMap,
+        coordinateAdapter
     });
 
     // Handle click or drag events on the map
@@ -115,6 +129,6 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         coordinates,
         setCoordinates,
         view,
-        layersConfig: processedLayers
+        layersConfig: processedLayers,
     };
 }

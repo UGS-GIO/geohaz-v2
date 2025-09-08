@@ -1,15 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import Point from '@arcgis/core/geometry/Point';
 import { Feature } from 'geojson';
 import { LayerOrderConfig } from "@/hooks/use-get-layer-config";
 import { LayerContentProps } from '@/components/custom/popups/popup-content-with-pagination';
-import { createBbox } from "@/lib/map/utils";
 import { useLayerUrl } from '@/context/layer-url-provider';
+import { MapPoint, CoordinateAdapter } from '@/lib/map/coordinate-adapter';
 import { GeoServerGeoJSON } from '@/lib/types/geoserver-types';
 
 interface WMSQueryProps {
-    mapPoint: __esri.Point;
+    mapPoint: MapPoint;
     view: __esri.MapView | __esri.SceneView;
     layers: string[];
     url: string;
@@ -19,6 +18,7 @@ interface WMSQueryProps {
     buffer?: number;
     featureCount?: number;
     cql_filter?: string | null;
+    coordinateAdapter: CoordinateAdapter;
 }
 
 export async function fetchWMSFeatureInfo({
@@ -31,14 +31,15 @@ export async function fetchWMSFeatureInfo({
     infoFormat = 'application/json',
     buffer = 10,
     featureCount = 50,
-    cql_filter = null
+    cql_filter = null,
+    coordinateAdapter
 }: WMSQueryProps): Promise<any> {
     if (layers.length === 0) {
         console.warn('No layers specified to query.');
         return null;
     }
 
-    const bbox = createBbox({
+    const bbox = coordinateAdapter.createBoundingBox({
         mapPoint,
         resolution: view.resolution,
         buffer
@@ -79,7 +80,8 @@ export async function fetchWMSFeatureInfo({
         params.set('cql_filter', cql_filter);
     }
 
-    const response = await fetch(`${url}?${params.toString()}`, { headers });
+    const fullUrl = `${url}?${params.toString()}`;
+    const response = await fetch(fullUrl, { headers });
 
     if (!response.ok) {
         throw new Error(`GetFeatureInfo request failed with status ${response.status}`);
@@ -204,10 +206,17 @@ interface UseFeatureInfoQueryProps {
     wmsUrl: string;
     visibleLayersMap: Record<string, LayerContentProps>;
     layerOrderConfigs: LayerOrderConfig[];
+    coordinateAdapter: CoordinateAdapter;
 }
 
-export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrderConfigs }: UseFeatureInfoQueryProps) {
-    const [mapPoint, setMapPoint] = useState<Point | null>(null);
+export function useFeatureInfoQuery({
+    view,
+    wmsUrl,
+    visibleLayersMap,
+    layerOrderConfigs,
+    coordinateAdapter
+}: UseFeatureInfoQueryProps) {
+    const [mapPoint, setMapPoint] = useState<MapPoint | null>(null);
     const { activeFilters } = useLayerUrl();
 
     const queryFn = async (): Promise<LayerContentProps[]> => {
@@ -282,7 +291,9 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
             view,
             layers: queryableLayers,
             url: wmsUrl,
-            cql_filter: combinedCqlFilter
+            cql_filter: combinedCqlFilter,
+            coordinateAdapter,
+            buffer: 1000
         });
 
         if (!featureInfo || !featureInfo.features) return [];
@@ -298,10 +309,23 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
                     layerTitle: value.layerTitle,
                     groupLayerTitle: value.groupLayerTitle,
                     sourceCRS: sourceCRS,
-                    features: featureInfo.features.filter((feature: Feature) =>
-                        feature.id?.toString().includes(key.split(':')[0]) ||
-                        feature.id?.toString().split('.')[0].includes(key.split(':')[1])
-                    ),
+                    features: featureInfo.features.filter((feature: Feature) => {
+                        const featureId = feature.id?.toString() || '';
+                        const keyParts = key.split(':');
+
+                        // Handle different layer key formats
+                        if (keyParts.length >= 2) {
+                            // Format: "namespace:layername"
+                            const namespace = keyParts[0];
+                            const layerName = keyParts[1];
+
+                            // Check if feature ID contains the layer name (common GeoServer pattern)
+                            return featureId.includes(layerName) || featureId.includes(namespace);
+                        } else {
+                            // Fallback: check if feature ID contains the full key
+                            return featureId.includes(key);
+                        }
+                    }),
                     popupFields: value.popupFields,
                     linkFields: value.linkFields,
                     colorCodingMap: value.colorCodingMap,
@@ -320,6 +344,7 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
                         view,
                         layers: [value.rasterSource.layerName],
                         url: value.rasterSource.url,
+                        coordinateAdapter
                     });
                     baseLayerInfo.rasterSource = { ...value.rasterSource, data: rasterFeatureInfo };
                 }
@@ -336,13 +361,13 @@ export function useFeatureInfoQuery({ view, wmsUrl, visibleLayersMap, layerOrder
     };
 
     const { data, isFetching, isSuccess, refetch } = useQuery({
-        queryKey: ['wmsFeatureInfo', mapPoint?.toJSON(), activeFilters],
+        queryKey: ['wmsFeatureInfo', coordinateAdapter.toJSON(mapPoint), activeFilters],
         queryFn,
         enabled: false,
         refetchOnWindowFocus: false,
     });
 
-    const fetchForPoint = (point: Point) => {
+    const fetchForPoint = (point: MapPoint) => {
         setMapPoint(point);
     };
 
