@@ -1,4 +1,4 @@
-import { House, Info as InfoIcon, Layers as LayersIcon, Settings, ExternalLink } from 'lucide-react'
+import { House, Info as InfoIcon, Layers as LayersIcon, Settings, ExternalLink, MessageSquare } from 'lucide-react'
 import Info from '@/components/sidebar/info'
 import Layers from '@/components/sidebar/layers'
 import MapConfigurations from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations'
@@ -47,5 +47,11 @@ export const sidelinks: SideLink[] = [
     href: 'https://geology.utah.gov/energy-minerals/ccus/',
     icon: <ExternalLink className='stroke-foreground' />,
     // This link is external and does not need a component
+  },
+  {
+    title: 'Feedback',
+    label: '',
+    href: 'https://forms.gle/RnwEi6a92grdqqFk9',
+    icon: <MessageSquare className='text-ring' />,
   }
 ];
