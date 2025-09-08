@@ -9,7 +9,7 @@ import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from 'geojson
 import { featureCollection, point as turfPoint } from '@turf/helpers';
 import { useDebounce } from 'use-debounce';
 import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import { convertBbox } from '@/lib/map/conversion-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
 import { highlightFeature, clearGraphics } from '@/lib/map/highlight-utils';

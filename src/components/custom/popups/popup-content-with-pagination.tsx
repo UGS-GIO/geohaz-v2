@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Shrink } from "lucide-react"
 import { PopupContentDisplay } from "@/components/custom/popups/popup-content-display"
 import { ColorCodingRecordFunction, FieldConfig, LinkFields, ProcessedRasterSource, RelatedTable } from "@/lib/types/mapping-types"
-import { useMap } from "@/context/map-provider"
+import { useMap } from "@/hooks/use-map"
 import { clearGraphics, highlightFeature } from '@/lib/map/highlight-utils';
 import { useGetPopupButtons } from "@/hooks/use-get-popup-buttons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

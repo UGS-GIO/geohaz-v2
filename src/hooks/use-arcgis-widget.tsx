@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils.js";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils.js";
-import { useMap } from "@/context/map-provider";
+import { useMap } from "@/hooks/use-map";
 import { UIPositionOptions } from "@/lib/types/mapping-types";
 import Point from "@arcgis/core/geometry/Point";
 import { useIsMobile } from "@/hooks/use-mobile";

@@ -9,7 +9,7 @@ import useScreenSize from "@/hooks/use-screen-size";
 import { XIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { clearGraphics } from "@/lib/map/highlight-utils";
-import { useMap } from "@/context/map-provider";
+import { useMap } from "@/hooks/use-map";
 interface CombinedSidebarDrawerProps {
     container: HTMLDivElement | null;
     popupContent: LayerContentProps[];
