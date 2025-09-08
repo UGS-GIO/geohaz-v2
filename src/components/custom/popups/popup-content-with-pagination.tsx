@@ -95,11 +95,12 @@ const LayerCard = ({
 }: {
     layer: LayerContentProps,
     buttons: React.ReactNode[] | null,
-    handleZoomToFeature: (feature: ExtendedFeature, sourceCRS: string) => Promise<void>
+    handleZoomToFeature: (feature: ExtendedFeature, sourceCRS: string, title: string) => Promise<void>
 }) => {
     const { view } = useMap();
     const [itemsPerPage, setItemsPerPage] = useState(ITEMS_PER_PAGE_OPTIONS[0])
     const [currentPage, setCurrentPage] = useState(1)
+    const title = layer.layerTitle || layer.groupLayerTitle;
 
     // Calculate total pages based on items per page
     const totalPages = useMemo(() =>
@@ -126,14 +127,13 @@ const LayerCard = ({
         if (itemsPerPage === 1 && newPaginatedFeatures.length > 0) {
             if (!view) return
             clearGraphics(view)
-
-            highlightFeature(newPaginatedFeatures[0], view, layer.sourceCRS)
+            highlightFeature(newPaginatedFeatures[0], view, layer.sourceCRS, title)
         }
     }
 
     const PopupButtons = ({ feature }: { feature: ExtendedFeature }) => (
         <div className="flex justify-start gap-2">
-            <Button variant="ghost" onClick={() => handleZoomToFeature(feature, layer.sourceCRS)} className="flex gap-x-2">
+            <Button variant="ghost" onClick={() => handleZoomToFeature(feature, layer.sourceCRS, title)} className="flex gap-x-2">
                 <Shrink className="h-5 w-5" />
                 <span className="hidden md:flex">Zoom to Feature</span>
                 <span className="md:hidden">Zoom</span>
@@ -229,10 +229,10 @@ const PopupContentWithPagination = ({ layerContent, onSectionChange }: SidebarIn
 
         return () => observer.disconnect()
     }, [sectionIds, onSectionChange])
-    const handleZoomToFeature = async (feature: ExtendedFeature, sourceCRS: string) => {
+    const handleZoomToFeature = async (feature: ExtendedFeature, sourceCRS: string, title: string) => {
         if (!view) return
         clearGraphics(view)
-        highlightFeature(feature, view, sourceCRS)
+        highlightFeature(feature, view, sourceCRS, title)
         zoomToFeature(feature, view, sourceCRS)
     }
 
