@@ -51,7 +51,7 @@ export const sidelinks: SideLink[] = [
   {
     title: 'Feedback',
     label: '',
-    href: 'https://forms.gle/RnwEi6a92grdqqFk9',
+    href: 'https://docs.google.com/forms/d/e/1FAIpQLSca4G-LogxiNrJUTTtlxyqMutgFVyh2jtNB-tozlQ4D4QOvPA/viewform',
     icon: <MessageSquare className='text-ring' />,
   }
 ];
