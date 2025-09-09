@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useCallback } from "react";
 import type SceneView from "@arcgis/core/views/SceneView";
 import type MapView from "@arcgis/core/views/MapView";
 import { LayerProps } from "@/lib/types/mapping-types";
@@ -37,7 +37,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     const [isSketching, setIsSketching] = useState<boolean>(false);
     const isMobile = useIsMobile();
 
-    async function loadMap({
+    const loadMap = useCallback(async ({
         container,
         zoom = 10,
         center = [0, 0],
@@ -47,9 +47,9 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         zoom?: number,
         center?: [number, number],
         layers?: LayerProps[]
-    }) {
+    }) => {
         // If the view already exists, we just sync visibility without rebuilding the map.
-        if (view) {
+        if (view && map) {
             // Create a simple lookup map of what *should* be visible from the URL state
             const visibilityMap = new Map();
 
@@ -67,7 +67,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
             populateVisibilityMap(layers);
 
             // Iterate through the LIVE layers on the map and update them
-            view.map.allLayers.forEach(liveLayer => {
+            map.allLayers.forEach(liveLayer => {
                 const shouldBeVisible = visibilityMap.get(liveLayer.title);
                 if (shouldBeVisible !== undefined && liveLayer.visible !== shouldBeVisible) {
                     liveLayer.visible = shouldBeVisible;
@@ -77,13 +77,15 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
         // If the view does NOT exist, run the initial creation logic.
         else {
-            const { view: initView, map } = init(container, isMobile, { zoom, center }, layers, 'map');
+            const { view: initView, map: initMap } = init(container, isMobile, { zoom, center }, layers, 'map');
+
+            // Wait for the view to be ready before setting state
+            await initView.when();
+
             setView(initView);
-            setMap(map);
+            setMap(initMap);
         }
-    }
-
-
+    }, [view, map, isMobile]);
 
     return (
         <MapContext.Provider value={{ view, map, loadMap, isSketching, setIsSketching }}>

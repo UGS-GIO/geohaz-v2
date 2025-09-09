@@ -105,7 +105,7 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
 
 function MapConfigurations() {
     const { setIsDecimalDegrees } = useMapCoordinates();
-    const { view } = useMap();
+    const { map } = useMap();
     const navigate = useNavigate({ from: '/carbonstorage' });
     const search = useSearch({ from: '/carbonstorage/' });
     const { setCurrentContent } = useSidebar();
@@ -140,8 +140,8 @@ function MapConfigurations() {
 
     useEffect(() => {
         const filterFromUrl = search.filters?.[wellWithTopsWMSTitle] ?? null;
-        findAndApplyWMSFilter(view?.map, wellWithTopsWMSTitle, filterFromUrl);
-    }, [view, search.filters]);
+        findAndApplyWMSFilter(map, wellWithTopsWMSTitle, filterFromUrl);
+    }, [map, search.filters]);
 
     const handleCoordFormatChange = (value: 'dd' | 'dms') => {
         if (setIsDecimalDegrees) setIsDecimalDegrees(value === 'dd');
