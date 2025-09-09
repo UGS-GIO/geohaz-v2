@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User } from 'lucide-react';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import { useSearch } from '@tanstack/react-router';
 import { useEffect, useMemo } from 'react';
 
