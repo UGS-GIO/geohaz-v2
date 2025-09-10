@@ -167,40 +167,6 @@ export const createLayer = (layer: LayerProps) => {
     return undefined;
 }
 
-interface Bbox {
-    minX: number;
-    minY: number;
-    maxX: number;
-    maxY: number;
-}
-
-interface CreateBboxProps {
-    mapPoint: __esri.Point;
-    resolution?: number;
-    buffer?: number;
-}
-
-// Create a bounding box around the clicked map point
-export function createBbox({ mapPoint, resolution = 1, buffer = 10 }: CreateBboxProps): Bbox {
-    // Apply buffer and scale it by resolution if needed
-    const scaleFactor = 50; // Scale factor calculated above
-
-    // Apply buffer and scale it by resolution and the calculated scale factor
-    const scaledBuffer = buffer * resolution * scaleFactor;
-
-    const minX = mapPoint.x - scaledBuffer;
-    const minY = mapPoint.y - scaledBuffer;
-    const maxX = mapPoint.x + scaledBuffer;
-    const maxY = mapPoint.y + scaledBuffer;
-
-    return {
-        minX,
-        minY,
-        maxX,
-        maxY,
-    };
-}
-
 export const zoomToFeature = (
     feature: ExtendedFeature,
     view: __esri.MapView | __esri.SceneView,

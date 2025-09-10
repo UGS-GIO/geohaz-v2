@@ -1,47 +1,41 @@
-import { useRef, useState, useEffect } from 'react';
-import { useSearch } from '@tanstack/react-router';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
 import { LayerOrderConfig, useGetLayerConfig } from "@/hooks/use-get-layer-config";
-import { clearGraphics, highlightFeature } from '@/lib/map/highlight-utils';
-import Point from '@arcgis/core/geometry/Point';
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
-import { LayerProps } from '@/lib/types/mapping-types';
 import { useLayerUrl } from '@/context/layer-url-provider';
-import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
-import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
-import { useMap } from '@/context/map-provider';
-
-const preprocessLayerVisibility = (
-    layers: LayerProps[],
-    selectedLayerTitles: Set<string>,
-    hiddenGroupTitles: Set<string>
-): LayerProps[] => {
-    const process = (layerArray: LayerProps[], parentIsHidden: boolean): LayerProps[] => {
-        return layerArray.map(layer => {
-            const isHiddenByGroup = parentIsHidden || hiddenGroupTitles.has(layer.title || '');
-            if (layer.type === 'group' && 'layers' in layer) {
-                const newChildLayers = process(layer.layers || [], isHiddenByGroup);
-                const isGroupEffectivelyVisible = newChildLayers.some(child => child.visible);
-                return { ...layer, visible: isGroupEffectivelyVisible, layers: newChildLayers };
-            }
-
-            // A layer is only visible if it's selected AND its group hierarchy is not hidden.
-            const isVisible = selectedLayerTitles.has(layer.title || '') && !isHiddenByGroup;
-            return { ...layer, visible: isVisible };
-        });
-    };
-    return process(layers, false);
-};
+import { useMap } from '@/hooks/use-map';
+import { useLayerVisibility } from '@/hooks/use-layer-visibility';
+import { useMapClickHandler } from '@/hooks/use-map-click-handler';
+import { useFeatureResponseHandler } from '@/hooks/use-feature-response-handler';
+import { useMapUrlSync } from '@/hooks/use-map-url-sync';
+import { useDomainFilters } from '@/hooks/use-domain-filters';
+import { createCoordinateAdapter, CoordinateAdapter } from '@/lib/map/coordinate-adapter';
 
 interface UseMapContainerProps {
     wmsUrl: string;
     layerOrderConfigs?: LayerOrderConfig[];
+    mapType?: 'arcgis' | 'maplibre'; // New prop to specify map type
 }
 
-export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContainerProps) {
+/**
+ * Main map container hook that orchestrates all map-related functionality.
+ * Coordinates layer visibility, click handling, feature queries, and URL synchronization.
+ * Designed to be gradually migrated from ArcGIS to MapLibre by extracting concerns
+ * into separate, testable hooks.
+ * 
+ * @param wmsUrl - Base URL for WMS feature info queries
+ * @param layerOrderConfigs - Optional configuration for reordering layers in popups
+ * @param mapType - Type of map library to use ('arcgis' or 'maplibre')
+ * @returns Map container state and event handlers
+ */
+export function useMapContainer({
+    wmsUrl,
+    layerOrderConfigs = [],
+    mapType = 'arcgis' // Default to ArcGIS for backwards compatibility
+}: UseMapContainerProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const { loadMap, view, isSketching } = useMap();
     const { coordinates, setCoordinates } = useMapCoordinates();
@@ -52,73 +46,76 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
     useMapPositionUrlParams(view);
     const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
-    const search = useSearch({ from: '__root__' });
     const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection } = useLayerUrl();
 
+    // Create coordinate adapter based on map type
+    const coordinateAdapter: CoordinateAdapter = useMemo(() => {
+        return createCoordinateAdapter(mapType);
+    }, [mapType]);
+
+    // Extract URL synchronization
+    const { center, zoom, filters } = useMapUrlSync();
+
+    // Extract domain-specific filter handling
+    useDomainFilters({ view, filters, updateLayerSelection });
+
+    // Process layers based on visibility state
+    const processedLayers = useLayerVisibility(
+        layersConfig || [],
+        selectedLayerTitles,
+        hiddenGroupTitles
+    );
+
+    // Feature info query handling with coordinate adapter
     const featureInfoQuery = useFeatureInfoQuery({
         view,
         wmsUrl,
         visibleLayersMap,
-        layerOrderConfigs
+        layerOrderConfigs,
+        coordinateAdapter
     });
 
+    // Handle side effects of feature query responses
+    useFeatureResponseHandler({
+        isSuccess: featureInfoQuery.isSuccess,
+        featureData: featureInfoQuery.data || [],
+        view,
+        drawerTriggerRef
+    });
+
+    // Handle map clicks with coordinate adapter
+    const { handleMapClick } = useMapClickHandler({
+        view,
+        isSketching,
+        onPointClick: (mapPoint) => {
+            featureInfoQuery.fetchForPoint(mapPoint);
+        },
+        getVisibleLayers,
+        setVisibleLayersMap,
+        coordinateAdapter
+    });
+
+    // Handle click or drag events on the map
     const { clickOrDragHandlers } = useMapClickOrDrag({
         onClick: (e) => {
-            if (!view || isSketching) return;
-            clearGraphics(view);
-            const layers = getVisibleLayers({ view });
-            setVisibleLayersMap(layers.layerVisibilityMap);
-            const mapPoint = view.toMap({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY }) || new Point();
-            featureInfoQuery.fetchForPoint(mapPoint);
+            handleMapClick({
+                screenX: e.nativeEvent.offsetX,
+                screenY: e.nativeEvent.offsetY
+            });
         }
     });
 
+    // Initialize the map when the container is ready
     useEffect(() => {
-        if (featureInfoQuery.isSuccess) {
-            const popupContent = featureInfoQuery.data || [];
-            const hasFeatures = popupContent.length > 0;
-            const firstFeature = popupContent[0]?.features[0];
-            const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
-
-            if (hasFeatures && firstFeature && view) {
-                highlightFeature(firstFeature, view, popupContent[0].sourceCRS);
-            }
-            if (!hasFeatures && drawerState === 'open') {
-                drawerTriggerRef.current?.click();
-            } else if (hasFeatures && drawerState !== 'open') {
-                drawerTriggerRef.current?.click();
-            }
-        }
-    }, [featureInfoQuery.isSuccess, featureInfoQuery.data, view]);
-
-    // apply filters on initial load
-    useEffect(() => {
-        if (!view || !view.map) return;
-        const filtersFromUrl = search.filters ?? {};
-        const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
-        findAndApplyWMSFilter(view.map, wellWithTopsWMSTitle, wellFilter);
-        if (wellFilter) {
-            updateLayerSelection(wellWithTopsWMSTitle, true);
-        }
-    }, [view, search.filters, updateLayerSelection]);
-
-    useEffect(() => {
-        // Provide default values for the initial load if params are not in the URL
-        const zoom = typeof search.zoom === 'number' ? search.zoom : 7;
-        const lat = typeof search.lat === 'number' ? search.lat : 39.5;
-        const lon = typeof search.lon === 'number' ? search.lon : -112;
-        const center = [lon, lat] as [number, number];
-
         if (mapRef.current && loadMap && layersConfig) {
-            const finalLayersConfig = preprocessLayerVisibility(layersConfig, selectedLayerTitles, hiddenGroupTitles);
             loadMap({
                 container: mapRef.current,
                 zoom,
                 center,
-                layers: finalLayersConfig,
+                layers: processedLayers,
             });
         }
-    }, [loadMap, search.zoom, search.lat, search.lon, layersConfig, selectedLayerTitles, hiddenGroupTitles]);
+    }, [loadMap, zoom, center, layersConfig, processedLayers]);
 
     return {
         mapRef,
@@ -132,6 +129,6 @@ export function useMapContainer({ wmsUrl, layerOrderConfigs = [] }: UseMapContai
         coordinates,
         setCoordinates,
         view,
-        layersConfig
+        layersConfig: processedLayers,
     };
 }

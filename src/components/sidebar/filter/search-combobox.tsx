@@ -9,7 +9,7 @@ import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from 'geojson
 import { featureCollection, point as turfPoint } from '@turf/helpers';
 import { useDebounce } from 'use-debounce';
 import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import { convertBbox } from '@/lib/map/conversion-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
 import { highlightFeature, clearGraphics } from '@/lib/map/highlight-utils';
@@ -689,7 +689,8 @@ const handleSearchSelect = (
             ...searchResult,
             namespace: (searchResult as ExtendedFeature).namespace || ''
         };
-        highlightFeature(featureToHighlight, view, sourceCRS);
+
+        highlightFeature(featureToHighlight, view, sourceCRS, 'Search Box Single Feature Highlight');
 
         const featureBbox = turf.bbox(geom);
         if (!featureBbox || !featureBbox.every(isFinite)) {
@@ -772,7 +773,8 @@ const handleCollectionSelect = (
             highlightFeature(
                 extendedFeature,
                 view,
-                sourceCRS, // Use the single source of truth
+                sourceCRS,
+                'Search Box Collection Highlight'
             );
         });
 

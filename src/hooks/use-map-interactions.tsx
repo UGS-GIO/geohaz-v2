@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import Collection from "@arcgis/core/core/Collection.js";
-import { useMap } from "@/context/map-provider";
+import { useMap } from "@/hooks/use-map";
 import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
 import { useGetLayerConfig } from "./use-get-layer-config";
 import { createPinGraphic, clearGraphics } from "@/lib/map/highlight-utils";

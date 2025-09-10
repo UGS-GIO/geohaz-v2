@@ -5,7 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 import { useLayerItemState } from '@/hooks/use-layer-item-state';
 import { LayerProps } from '@/lib/types/mapping-types';
-import { useMap } from '@/context/map-provider';
+import { useMap } from '@/hooks/use-map';
 import { findLayerByTitle } from '@/lib/map/utils';
 import { useLayerExtent } from '@/hooks/use-layer-extent';
 import { useFetchLayerDescriptions } from '@/hooks/use-fetch-layer-descriptions';
@@ -14,6 +14,7 @@ import LayerControls from '@/components/custom/layer-controls';
 import Extent from '@arcgis/core/geometry/Extent';
 import { useIsMobile } from './use-mobile';
 import Layer from '@arcgis/core/layers/Layer';
+import { clearGraphics } from '@/lib/map/highlight-utils';
 
 const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerProps; isTopLevel: boolean }) => {
     const {
@@ -54,6 +55,8 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
 
     // This handler now explicitly sets the accordion state.
     const handleLocalToggle = (checked: boolean) => {
+        if (!view) return;
+        clearGraphics(view, layerConfig.title || '');
         handleToggleSelection(checked);
         setIsUserExpanded(checked);
     };
