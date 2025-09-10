@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
+import React from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -55,6 +56,13 @@ export const findAndApplyWMSFilter = (
 
 type YesNoAll = "yes" | "no" | "all";
 
+interface FilterState {
+    core: YesNoAll;
+    las: YesNoAll;
+    formations: string[];
+    formation_operator?: 'and';
+}
+
 const wellsHasCoreFilterConfig = {
     label: "Cores/Cuttings Available?",
     options: [
@@ -106,7 +114,9 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
         }
     });
 
-    if (!response.ok) throw new Error(`HTTP error fetching formation mappings! status: ${response.status}`);
+    if (!response.ok) {
+        throw new Error(`HTTP error fetching formation mappings! status: ${response.status}`);
+    }
 
     const data: Array<Record<string, any>> = await response.json();
     const uniqueMappings = new Map<string, string>();
@@ -123,61 +133,90 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
         .sort((a, b) => a.label.localeCompare(b.label));
 };
 
+/**
+ * Parses a CQL filter string into a simplified filter state object.
+ * Handles 'hascore', 'has_las', and formation presence filters.
+ * @param cqlFilter - The CQL filter string from the URL or null/undefined.
+ * @returns A FilterState object representing the simplified filter state.
+ **/
+const parseCQLFilter = (cqlFilter: string | null | undefined): FilterState => {
+    if (!cqlFilter) return { core: 'all' as YesNoAll, las: 'all' as YesNoAll, formations: [], formation_operator: undefined };
+
+    const core: YesNoAll = cqlFilter.includes(`hascore = 'True'`)
+        ? 'yes'
+        : cqlFilter.includes(`hascore = 'False'`)
+            ? 'no'
+            : 'all';
+
+    const las: YesNoAll = cqlFilter.includes(`has_las = 'True'`)
+        ? 'yes'
+        : cqlFilter.includes(`has_las = 'False'`)
+            ? 'no'
+            : 'all';
+
+    // Check for an explicit AND between formation filters, otherwise default to OR
+    const formationOperatorIsAnd = /\)\s+AND\s+\(/.test(cqlFilter) ||
+        (cqlFilter.match(/IS NOT NULL/g) || []).length > 1 && cqlFilter.includes(' AND ');
+    const formation_operator = formationOperatorIsAnd ? 'and' : undefined;
+
+    const formationMatches = cqlFilter.match(/\b([a-zA-Z0-9_]+)\s+IS NOT NULL/g) || [];
+    const formations = formationMatches.map(match => match.split(' ')[0]);
+
+    return { core, las, formations, formation_operator };
+};
+
+const generateCQLFilter = (state: FilterState) => {
+    const { core, las, formations, formation_operator } = state;
+
+    const wellFilterParts: string[] = [];
+    if (core === "yes") wellFilterParts.push(`hascore = 'True'`);
+    if (core === "no") wellFilterParts.push(`hascore = 'False'`);
+    if (las === "yes") wellFilterParts.push(`has_las = 'True'`);
+    if (las === "no") wellFilterParts.push(`has_las = 'False'`);
+
+    if (formations && formations.length > 0) {
+        const operator = formation_operator === 'and' ? ' AND ' : ' OR ';
+        const formationFilter = formations.map(f => `${f} IS NOT NULL`).join(operator);
+        wellFilterParts.push(formations.length > 1 ? `(${formationFilter})` : formationFilter);
+    }
+
+    return wellFilterParts.join(' AND ');
+};
+
+/**
+    * Custom hook to manage well filter state and URL synchronization.
+    * Encapsulates logic for parsing URL filters and updating them.
+    * @returns An object containing the simplified filter state and an update function.
+**/
 const useWellFilterManager = () => {
     const navigate = useNavigate({ from: '/carbonstorage' });
     const search = useSearch({ from: '/carbonstorage/' });
-    const cqlFilter = useMemo(() => search.filters?.[wellWithTopsWMSTitle], [search.filters]);
 
-    // 1. Derive simple UI state by parsing the complex CQL string from the URL
-    const simpleState = useMemo(() => {
-        const core: YesNoAll = cqlFilter?.includes(`hascore = 'True'`)
-            ? 'yes'
-            : cqlFilter?.includes(`hascore = 'False'`)
-                ? 'no'
-                : 'all';
+    const cqlFilter = useMemo(() =>
+        search.filters?.[wellWithTopsWMSTitle],
+        [search.filters]
+    );
 
-        const las: YesNoAll = cqlFilter?.includes(`has_las = 'True'`)
-            ? 'yes'
-            : cqlFilter?.includes(`has_las = 'False'`)
-                ? 'no'
-                : 'all';
+    const simpleState = useMemo(() =>
+        parseCQLFilter(cqlFilter),
+        [cqlFilter]
+    );
 
-        // Check for an explicit AND between formation filters, otherwise default to OR
-        const formationOperatorIsAnd = /\)\s+AND\s+\(/.test(cqlFilter || '') ||
-            (cqlFilter?.match(/IS NOT NULL/g) || []).length > 1 && cqlFilter?.includes(' AND ');
-        const formation_operator = formationOperatorIsAnd ? 'and' : undefined;
+    // Memoize the update function to prevent unnecessary re-renders
+    const updateFilters = useCallback((newState: Partial<FilterState>) => {
+        const updatedState: FilterState = {
+            ...simpleState,
+            ...newState
+        };
 
-        const formationMatches = cqlFilter?.match(/\b([a-zA-Z0-9_]+)\s+IS NOT NULL/g) || [];
-        const formations = formationMatches.map(match => match.split(' ')[0]);
-
-        return { core, las, formations, formation_operator };
-    }, [cqlFilter]);
-
-    // 2. This function reconstructs the CQL filter from simple state and updates the URL
-    const updateFilters = (newState: Partial<typeof simpleState>) => {
-        const updatedState = { ...simpleState, ...newState };
-        const { core, las, formations, formation_operator } = updatedState;
-
-        const wellFilterParts: string[] = [];
-        if (core === "yes") wellFilterParts.push(`hascore = 'True'`);
-        if (core === "no") wellFilterParts.push(`hascore = 'False'`);
-        if (las === "yes") wellFilterParts.push(`has_las = 'True'`);
-        if (las === "no") wellFilterParts.push(`has_las = 'False'`);
-
-        if (formations && formations.length > 0) {
-            const operator = formation_operator === 'and' ? ' AND ' : ' OR ';
-            const formationFilter = formations.map(f => `${f} IS NOT NULL`).join(operator);
-            wellFilterParts.push(formations.length > 1 ? `(${formationFilter})` : formationFilter);
-        }
-
-        const combinedWellFilter = wellFilterParts.join(' AND ');
+        const combinedWellFilter = generateCQLFilter(updatedState);
         const currentFilters = search.filters || {};
         let newFilters: Record<string, string> | undefined;
 
         if (combinedWellFilter) {
             newFilters = { ...currentFilters, [wellWithTopsWMSTitle]: combinedWellFilter };
         } else {
-            const { [wellWithTopsWMSTitle]: _, ...rest } = currentFilters; // Remove the well filter
+            const { [wellWithTopsWMSTitle]: _, ...rest } = currentFilters;
             newFilters = Object.keys(rest).length > 0 ? rest : undefined;
         }
 
@@ -185,12 +224,12 @@ const useWellFilterManager = () => {
             search: (prev) => ({ ...prev, filters: newFilters }),
             replace: true,
         });
-    };
+    }, [simpleState, search.filters, navigate]);
 
     return { simpleState, updateFilters };
 };
 
-function MapConfigurations() {
+const MapConfigurations = () => {
     const { map } = useMap();
     const navigate = useNavigate({ from: '/carbonstorage' });
     const search = useSearch({ from: '/carbonstorage/' });
@@ -213,25 +252,49 @@ function MapConfigurations() {
         return search.layers?.selected?.includes(wellWithTopsWMSTitle) ?? false;
     }, [search.layers?.selected]);
 
-    // This effect remains to apply the filter from the URL to the live map layer
+    // Apply filter to map when it changes
     useEffect(() => {
         const filterFromUrl = search.filters?.[wellWithTopsWMSTitle] ?? null;
         findAndApplyWMSFilter(map, wellWithTopsWMSTitle, filterFromUrl);
     }, [map, search.filters]);
 
-    const handleCoordFormatChange = (value: 'dd' | 'dms') => {
+    // Memoize event handlers
+    const handleCoordFormatChange = useCallback((value: 'dd' | 'dms') => {
         navigate({
             search: (prev) => ({ ...prev, coordinate_format: value }),
             replace: true
         });
-    };
+    }, [navigate]);
 
-    const handleHasCoreChange = (value: YesNoAll) => updateFilters({ core: value });
-    const handleHasLasChange = (value: YesNoAll) => updateFilters({ las: value });
-    const handleFormationChange = (newFormations: string[]) => updateFilters({ formations: newFormations });
-    const handleFormationOperatorChange = (useAnd: boolean) => updateFilters({
-        formation_operator: useAnd ? 'and' : undefined
-    });
+    const handleHasCoreChange = useCallback((value: YesNoAll) =>
+        updateFilters({ core: value }),
+        [updateFilters]
+    );
+
+    const handleHasLasChange = useCallback((value: YesNoAll) =>
+        updateFilters({ las: value }),
+        [updateFilters]
+    );
+
+    const handleFormationChange = useCallback((newFormations: string[]) =>
+        updateFilters({ formations: newFormations }),
+        [updateFilters]
+    );
+
+    const handleFormationOperatorChange = useCallback((useAnd: boolean) =>
+        updateFilters({ formation_operator: useAnd ? 'and' : undefined }),
+        [updateFilters]
+    );
+
+    // Memoize the layers panel click handler
+    const handleLayersPanelClick = useCallback(() => {
+        setCurrentContent({
+            title: 'Layers',
+            label: '',
+            icon: <LayersIcon />,
+            component: Layers
+        });
+    }, [setCurrentContent]);
 
     return (
         <>
@@ -295,12 +358,7 @@ function MapConfigurations() {
                                     <Button
                                         variant="link"
                                         className="h-auto p-1 inline-flex text-sm align-baseline"
-                                        onClick={() => setCurrentContent({
-                                            title: 'Layers',
-                                            label: '',
-                                            icon: <LayersIcon />,
-                                            component: Layers
-                                        })}
+                                        onClick={handleLayersPanelClick}
                                     >
                                         layers panel
                                     </Button>.
@@ -338,7 +396,7 @@ function MapConfigurations() {
 }
 
 // --- SUB-COMPONENTS ---
-const WellCoreFilter = ({
+const WellCoreFilter = React.memo(({
     value,
     onChange,
     disabled
@@ -374,9 +432,9 @@ const WellCoreFilter = ({
             ))}
         </RadioGroup>
     </div>
-);
+));
 
-const WellLasFilter = ({
+const WellLasFilter = React.memo(({
     value,
     onChange,
     disabled
@@ -412,7 +470,7 @@ const WellLasFilter = ({
             ))}
         </RadioGroup>
     </div>
-);
+));
 
 interface WellFormationFilterProps {
     disabled: boolean;
@@ -425,7 +483,7 @@ interface WellFormationFilterProps {
     onOperatorChange: (useAnd: boolean) => void;
 }
 
-const WellFormationFilter = ({
+const WellFormationFilter = React.memo(({
     disabled,
     value,
     onChange,
@@ -437,7 +495,7 @@ const WellFormationFilter = ({
 }: WellFormationFilterProps) => {
     const [open, setOpen] = useState(false);
 
-    const handleSelect = (formationValue: string) => {
+    const handleSelect = useCallback((formationValue: string) => {
         const isSelected = value.includes(formationValue);
         if (formationValue === "") {
             onChange([]);
@@ -446,10 +504,17 @@ const WellFormationFilter = ({
         } else {
             onChange([...value, formationValue]);
         }
-    };
+    }, [value, onChange]);
 
-    const removeFormation = (formationValue: string) =>
-        onChange(value.filter(v => v !== formationValue));
+    const removeFormation = useCallback((formationValue: string) =>
+        onChange(value.filter(v => v !== formationValue)),
+        [value, onChange]
+    );
+
+    const formationLabels = useMemo(() =>
+        new Map(mappings.map(m => [m.value, m.label])),
+        [mappings]
+    );
 
     return (
         <div>
@@ -493,8 +558,7 @@ const WellFormationFilter = ({
             {value.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-2">
                     {value.map((formationValue, index) => {
-                        const label = mappings.find(m => m.value === formationValue)?.label
-                            || formationValue;
+                        const label = formationLabels.get(formationValue) || formationValue;
                         return (
                             <div key={formationValue} className="flex items-center">
                                 {index > 0 && (
@@ -580,6 +644,10 @@ const WellFormationFilter = ({
             </Popover>
         </div>
     );
-};
+});
 
-export default MapConfigurations;
+WellCoreFilter.displayName = 'WellCoreFilter';
+WellLasFilter.displayName = 'WellLasFilter';
+WellFormationFilter.displayName = 'WellFormationFilter';
+
+export default React.memo(MapConfigurations);
