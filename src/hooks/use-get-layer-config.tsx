@@ -23,7 +23,7 @@ export const findLayerByName = (layers: LayerProps[], name: string): { layer: La
     return null;
 };
 
-const useGetLayerConfig = (layerOrderConfigs?: LayerOrderConfig[]) => {
+const useGetLayerConfig = (pageName?: string, layerOrderConfigs?: LayerOrderConfig[]) => {
     const currentPage = useGetCurrentPage();
     const [layerConfig, setLayerConfig] = useState<LayerProps[] | null>(null);
 
@@ -37,7 +37,7 @@ const useGetLayerConfig = (layerOrderConfigs?: LayerOrderConfig[]) => {
             if (currentPage === '') return setLayerConfig(null);
 
             try {
-                const config = await import(`@/pages/${currentPage}/data/layers.tsx`);
+                const config = await import(`@/pages/${currentPage}/data/${pageName ? pageName : 'layers'}.tsx`);
                 let processedConfig = [...config.default];
 
                 // If we have layer order configurations, process them
