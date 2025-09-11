@@ -190,8 +190,9 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
 };
 
 
-export const useCustomLayerList = () => {
-    const layersConfig = useGetLayerConfig();
+export const useCustomLayerList = (config?: { layersConfig?: LayerProps[] }) => {
+    const defaultLayersConfig = useGetLayerConfig();
+    const layersConfig = config?.layersConfig || defaultLayersConfig;
 
     const layerList = useMemo(() => {
         if (!layersConfig) return [];
