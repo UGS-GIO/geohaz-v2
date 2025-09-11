@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
 import Collection from "@arcgis/core/core/Collection.js";
 import { useMap } from "@/hooks/use-map";
-import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
+import { ColorCodingRecordFunction, LayerProps, LinkFields, RelatedTable, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
 import { useGetLayerConfig } from "./use-get-layer-config";
 import { createPinGraphic, clearGraphics } from "@/lib/map/highlight-utils";
+import { isGroupLayer, isGroupMapLayer, isWMSLayer, isWMSMapLayer } from "@/lib/map/utils";
 
 type VisibleLayer = {
     visible: boolean;
@@ -39,25 +40,6 @@ export const useMapInteractions = () => {
         layerVisibilityMap: LayerVisibilityMapProps;
         filteredWMSLayers: __esri.Collection<__esri.Layer>;
     };
-
-    // Type guard to check if the layer is a WMSLayerProps
-    function isWMSLayer(layer: LayerProps): layer is WMSLayerProps {
-        return layer.type === 'wms';
-    }
-
-    // Type guard to check if the layer is a GroupLayerProps
-    function isGroupLayer(layer: LayerProps): layer is GroupLayerProps {
-        return layer.type === 'group';
-    }
-
-    function isWMSMapLayer(layer: __esri.Layer): layer is __esri.WMSLayer {
-        return layer.type === 'wms';
-    }
-
-    function isGroupMapLayer(layer: __esri.Layer): layer is __esri.GroupLayer {
-        return layer.type === 'group';
-    }
-
 
     // Function to crosscheck and filter WMS layers
     function crossCheckAndFilterWMS({
