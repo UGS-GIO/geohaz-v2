@@ -1,0 +1,100 @@
+import { useQuery } from '@tanstack/react-query';
+import { PROD_POSTGREST_URL } from "@/lib/constants";
+import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
+import { LayerProps } from '@/lib/types/mapping-types';
+import { isGroupLayer, isWMSLayer } from '@/lib/map/utils';
+
+interface ReviewableLayerInfo {
+    schema_name: string;
+    matview_name: string;
+    has_r_values: boolean;
+}
+
+export interface LayerOption {
+    value: string; // The raw name, e.g., 'hazards:quaternaryfaults_current'
+    label: string; // The friendly title, e.g., 'Hazardous (Quaternary age) Faults - Statewide'
+}
+
+const fetchReviewableLayers = async (): Promise<ReviewableLayerInfo[]> => {
+    const functionUrl = `${PROD_POSTGREST_URL}/rpc/find_r_values_in_current_matviews`;
+
+    const response = await fetch(functionUrl, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Accept-Profile': 'mapping',
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch reviewable layers: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+};
+
+export const useFetchReviewableLayers = () => {
+    const layerConfig = useGetLayerConfig();
+
+    return useQuery<ReviewableLayerInfo[], Error, LayerOption[]>({
+        queryKey: ['reviewableLayers', layerConfig],
+        queryFn: fetchReviewableLayers,
+        enabled: !!layerConfig,
+        select: (data) => {
+            // Log Step 1: The initial data from the API and the config file
+            console.log("Step 1: Raw data from API & Layer Config", {
+                apiData: data,
+                layerConfig: layerConfig
+            });
+            if (!layerConfig) return [];
+
+            const titleMap = new Map<string, string>();
+
+            const recursivelyFindTitles = (layers: LayerProps[]) => {
+                for (const layer of layers) {
+                    // If it's a WMS layer, process its sublayers to build the map
+                    if (isWMSLayer(layer) && layer.sublayers) {
+                        for (const sublayer of layer.sublayers) {
+                            if (sublayer.name && layer.title) {
+                                const sublayerWithSchema = sublayer;
+                                if (!sublayer.name.includes(':') && sublayerWithSchema.schema) {
+                                    titleMap.set(`${sublayerWithSchema.schema}:${sublayer.name}`, layer.title);
+                                } else {
+                                    titleMap.set(sublayer.name, layer.title);
+                                }
+                            }
+                        }
+                    }
+                    // Else if it's a Group layer, recurse into its nested layers
+                    else if (isGroupLayer(layer) && layer.layers) {
+                        recursivelyFindTitles(layer.layers);
+                    }
+                }
+            };
+            recursivelyFindTitles(layerConfig);
+
+            // Log Step 2: The generated map for looking up titles
+            console.log("Step 2: Built titleMap for lookups", new Map(titleMap));
+
+            const finalOptions = data
+                .filter(layer => layer.has_r_values === null)
+                .flatMap(layer => {
+                    const rawNameWithSchema = `${layer.schema_name}:${layer.matview_name}`;
+                    const label = titleMap.get(rawNameWithSchema);
+                    if (label) {
+                        return [{ value: rawNameWithSchema, label: label }];
+                    }
+                    return [];
+                })
+                .sort((a, b) => a.label.localeCompare(b.label));
+
+            // Log Step 3: The final processed data being returned
+            console.log("Step 3: Final processed options for dropdown", finalOptions);
+
+            return finalOptions;
+        },
+        staleTime: 1000 * 60 * 60, // 1 hour
+    });
+};
