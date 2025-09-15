@@ -6,10 +6,10 @@ import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
 import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
-import { CCSSearch } from '@/routes/carbonstorage';
+import { CcsSearchParams } from '@/routes/carbonstorage';
 
 interface MapContainerProps {
-    searchParams: CCSSearch;
+    searchParams: CcsSearchParams;
     updateLayerSelection: (layerTitle: string, selected: boolean) => void;
 }
 

@@ -3,8 +3,11 @@ import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
+import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 
 export default function ArcGISMap() {
+    const defaultLayersConfig = useGetLayerConfig('layers');
+
     const {
         mapRef,
         contextMenuTriggerRef,
@@ -17,7 +20,8 @@ export default function ArcGISMap() {
         coordinates,
         setCoordinates,
     } = useMapContainer({
-        wmsUrl: `${PROD_GEOSERVER_URL}wms`
+        wmsUrl: `${PROD_GEOSERVER_URL}wms`,
+        layersConfig: defaultLayersConfig
     });
 
     return (

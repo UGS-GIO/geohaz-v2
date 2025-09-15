@@ -17,6 +17,7 @@ import { createCoordinateAdapter, CoordinateAdapter } from '@/lib/map/coordinate
 interface UseMapContainerProps {
     wmsUrl: string;
     layerOrderConfigs?: LayerOrderConfig[];
+    layersConfig?: ReturnType<typeof useGetLayerConfig>;
     mapType?: 'arcgis' | 'maplibre'; // New prop to specify map type
 }
 
@@ -34,7 +35,8 @@ interface UseMapContainerProps {
 export function useMapContainer({
     wmsUrl,
     layerOrderConfigs = [],
-    mapType = 'arcgis' // Default to ArcGIS for backwards compatibility
+    layersConfig,
+    mapType = 'arcgis'
 }: UseMapContainerProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const { loadMap, view, isSketching } = useMap();
@@ -44,7 +46,6 @@ export function useMapContainer({
     const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
     const drawerTriggerRef = useRef<HTMLButtonElement>(null);
     useMapPositionUrlParams(view);
-    const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
     const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection } = useLayerUrl();
 

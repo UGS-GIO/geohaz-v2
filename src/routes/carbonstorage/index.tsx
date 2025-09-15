@@ -11,6 +11,8 @@ const ccsSearchSchema = z.object({
     }).optional().default({}),
 });
 
+export type CcsSearchParams = z.infer<typeof ccsSearchSchema>;
+
 export const Route = createFileRoute('/carbonstorage/')({
     component: () => <Map />,
     validateSearch: ccsSearchSchema,
