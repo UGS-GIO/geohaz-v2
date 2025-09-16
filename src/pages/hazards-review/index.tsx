@@ -22,9 +22,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User } from 'lucide-react';
+import { useLayerUrl } from '@/context/layer-url-provider';
+import { useSearch } from '@tanstack/react-router';
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
+  const search = useSearch({ from: '/hazards-review/' });
+  const { updateLayerSelection } = useLayerUrl();
   const { user } = useAuth();
   const searchConfig: SearchSourceConfig[] = [
     defaultMasqueradeConfig,
@@ -115,7 +119,10 @@ export default function Map() {
           </Layout.Header>
 
           <Layout.Body>
-            <MapContainer />
+            <MapContainer
+              searchParams={search}
+              updateLayerSelection={updateLayerSelection}
+            />
           </Layout.Body>
 
           <Layout.Footer className={cn('hidden md:flex z-10')} dynamicContent={<MapFooter />} />

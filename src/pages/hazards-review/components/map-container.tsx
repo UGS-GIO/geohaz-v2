@@ -4,8 +4,16 @@ import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
+import { HazardsReviewSearchParams } from '@/routes/hazards-review';
+import { useEffect } from 'react';
 
-export default function MapContainer() {
+
+interface MapContainerProps {
+    searchParams: HazardsReviewSearchParams;
+    updateLayerSelection: (layerTitle: string, selected: boolean) => void;
+}
+
+export default function MapContainer({ searchParams, updateLayerSelection }: MapContainerProps) {
     const reviewLayersConfig = useGetLayerConfig('review-layers');
     const defaultLayersConfig = useGetLayerConfig('layers');
 
@@ -23,10 +31,19 @@ export default function MapContainer() {
         handleOnContextMenu,
         coordinates,
         setCoordinates,
+        view,
     } = useMapContainer({
         wmsUrl: `${PROD_GEOSERVER_URL}wms`,
         layersConfig: layersConfig
     });
+
+
+    // hazards-review-specific effect for applying filters on initial load
+    useEffect(() => {
+        // Wait for the map and filters to be ready
+        if (!view || !view.map) return;
+    }, [view, searchParams.filters, updateLayerSelection]);
+
 
     return (
         <>

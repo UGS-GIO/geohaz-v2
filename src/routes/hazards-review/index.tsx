@@ -5,11 +5,15 @@ import { z } from 'zod';
 
 const hazardsReviewSearchSchema = z.object({
   coordinate_format: z.enum(['dd', 'dms']).optional(),
+  filters: z.record(z.string()).optional(),
+  layers: z.object({
+    selected: z.array(z.string()).optional().default([]),
+    hidden: z.array(z.string()).optional().default([]),
+  }).optional().default({})
 });
 
-function HazardsReviewPage() {
-  return <Map />
-}
+export type HazardsReviewSearchParams = z.infer<typeof hazardsReviewSearchSchema>;
+
 
 export const Route = createFileRoute('/hazards-review/')({
   beforeLoad: async ({ location }) => {
@@ -31,6 +35,6 @@ export const Route = createFileRoute('/hazards-review/')({
       })
     }
   },
+  component: () => <Map />,
   validateSearch: hazardsReviewSearchSchema,
-  component: HazardsReviewPage,
 })

@@ -2,15 +2,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
-import { useMapCoordinates } from '@/hooks/use-map-coordinates';
+import { useCallback } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import React from 'react';
 
 function MapConfigurations() {
-    const { setIsDecimalDegrees, locationCoordinateFormat } = useMapCoordinates();
-    const handleCoordFormatChange = (value: string) => {
-        if (value && setIsDecimalDegrees) {
-            setIsDecimalDegrees(value === "Decimal Degrees");
-        }
-    };
+    const navigate = useNavigate({ from: '/hazards-review' });
+    const search = useSearch({ from: '/hazards-review/' });
+
+    const handleCoordFormatChange = useCallback((value: 'dd' | 'dms') => {
+        navigate({
+            search: (prev) => ({ ...prev, coordinate_format: value }),
+            replace: true
+        });
+    }, [navigate]);
 
 
     return (
@@ -29,24 +34,32 @@ function MapConfigurations() {
                     </CardHeader>
                     <CardContent>
                         <RadioGroup
-                            value={locationCoordinateFormat}
+                            value={search.coordinate_format ?? 'dd'}
                             onValueChange={handleCoordFormatChange}
-                            className="grid grid-cols-1 sm:grid-cols-2 gap-2"
+                            className="grid grid-cols-2 gap-2"
                         >
-                            <div className="flex">
-                                <RadioGroupItem value="Decimal Degrees" id="decimal-degrees" className="peer sr-only" />
+                            <div>
+                                <RadioGroupItem
+                                    value="dd"
+                                    id="dd-radio"
+                                    className="peer sr-only"
+                                />
                                 <Label
-                                    htmlFor="decimal-degrees"
-                                    className="flex flex-1 items-center justify-center rounded-sm bg-popover p-3 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-primary-foreground"
+                                    htmlFor="dd-radio"
+                                    className="flex flex-1 items-center justify-center rounded-md border-2 border-transparent bg-popover p-3 text-center cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
                                 >
                                     Decimal Degrees
                                 </Label>
                             </div>
-                            <div className="flex">
-                                <RadioGroupItem value="Degrees, Minutes, Seconds" id="dms" className="peer sr-only" />
+                            <div>
+                                <RadioGroupItem
+                                    value="dms"
+                                    id="dms-radio"
+                                    className="peer sr-only"
+                                />
                                 <Label
-                                    htmlFor="dms"
-                                    className="flex flex-1 items-center justify-center rounded-sm bg-popover p-3 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground [&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-primary-foreground"
+                                    htmlFor="dms-radio"
+                                    className="flex flex-1 items-center justify-center rounded-md border-2 border-transparent bg-popover p-3 text-center cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
                                 >
                                     Degrees, Minutes, Seconds
                                 </Label>
@@ -59,4 +72,4 @@ function MapConfigurations() {
     );
 }
 
-export default MapConfigurations;
+export default React.memo(MapConfigurations);
