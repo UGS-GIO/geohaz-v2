@@ -860,47 +860,11 @@ const studyAreasWMSConfig: WMSLayerProps = {
     ],
 }
 
-const alluvialFanLayerNameReview = 'alluvialfantest_review';
-const alluvialFanWMSTitleReview = 'Alluvial Fan Flooding Susceptibility (Source: Division of Emergency Management) - Review';
-const alluvialFanWMSConfigReview: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: alluvialFanWMSTitleReview,
-    visible: false,
-    opacity: 0.75,
-    sublayers: [
-        {
-            name: `${HAZARDS_WORKSPACE}:${alluvialFanLayerNameReview}`,
-            popupEnabled: false,
-            queryable: true,
-            popupFields: {
-                'Mapped Scale': { field: 'aafmappedscale', type: 'string' },
-            },
-            relatedTables: [
-                {
-                    fieldLabel: '',
-                    matchingField: 'relate_id',
-                    targetField: 'aafhazardunit',
-                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
-                    headers: {
-                        "Accept-Profile": 'hazards',
-                        "Accept": "application/json",
-                        "Cache-Control": "no-cache",
-                    },
-                    displayFields: [
-                        { field: 'description' }
-                    ]
-                }
-            ]
-        },
-    ],
-}
-
 const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards',
     visible: false,
-    layers: [shallowGroundwaterWMSConfig, alluvialFanWMSConfig, alluvialFanWMSConfigReview],
+    layers: [shallowGroundwaterWMSConfig, alluvialFanWMSConfig],
 };
 
 const earthquakesConfig: LayerProps = {
@@ -972,7 +936,7 @@ export const karstFeaturesReviewConfig: WMSLayerProps = { ...karstFeaturesWMSCon
 export const studyAreasReviewConfig: WMSLayerProps = { ...studyAreasWMSConfig, customLayerParameters: { cql_filter: IS_REVIEW_CQL } };
 
 // --- New "Review" Groupings Using the Filtered Layers ---
-export const floodHazardsReviewConfig: LayerProps = { ...floodHazardsConfig, layers: [shallowGroundwaterReviewConfig, alluvialFanReviewConfig, alluvialFanWMSConfigReview] };
+export const floodHazardsReviewConfig: LayerProps = { ...floodHazardsConfig, layers: [shallowGroundwaterReviewConfig, alluvialFanReviewConfig] };
 export const earthquakesReviewConfig: LayerProps = { ...earthquakesConfig, layers: [qFaultsReviewConfig, surfaceFaultRuptureReviewConfig, liquefactionReviewConfig, groundshakingReviewConfig] };
 export const landslidesReviewConfig: LayerProps = { ...landslidesConfig, layers: [rockfallHazardReviewConfig, landslideInventoryReviewConfig, landslideSusceptibilityReviewConfig, landslideLegacyReviewConfig] };
 export const soilHazardsReviewConfig: LayerProps = { ...soilHazardsConfig, layers: [collapsibleSoilReviewConfig, corrosiveSoilRockReviewConfig, earthFissureReviewConfig, expansiveSoilRockReviewConfig, erosionHazardZoneReviewConfig, karstFeaturesReviewConfig, pipingAndErosionReviewConfig, radonSusceptibilityReviewConfig, saltTectonicsDeformationReviewConfig, shallowBedrockReviewConfig, solubleSoilAndRockReviewConfig, windBlownSandWMSConfig] };
