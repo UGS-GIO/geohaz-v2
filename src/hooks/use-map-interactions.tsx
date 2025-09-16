@@ -11,16 +11,20 @@ type VisibleLayer = {
     groupLayerTitle: string;
 }
 
+type UseMapInteractionsType = {
+    layersConfig: ReturnType<typeof useGetLayerConfig>;
+};
+
 /** 
     * This hook manages map interactions, including layer visibility and context menu handling.
     * It provides functionality to get visible layers based on the current map view and layer configuration.
     * It also handles right-click events to show a context menu and update coordinates. 
+    * @param layersConfig - Configuration for map layers.
     * @returns An object containing the context menu handler, visible layers, and a function to get visible layers.
 */
-export const useMapInteractions = () => {
+export const useMapInteractions = ({ layersConfig }: UseMapInteractionsType) => {
     const [visibleLayers, setVisibleLayers] = useState<Record<string, VisibleLayer>>();
     const { view } = useMap();
-    const layersConfig = useGetLayerConfig();
 
     type LayerVisibilityMapProps = Record<string, {
         visible: boolean;

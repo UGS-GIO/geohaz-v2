@@ -17,7 +17,7 @@ import { createCoordinateAdapter, CoordinateAdapter } from '@/lib/map/coordinate
 interface UseMapContainerProps {
     wmsUrl: string;
     layerOrderConfigs?: LayerOrderConfig[];
-    layersConfig?: ReturnType<typeof useGetLayerConfig>;
+    layersConfig: ReturnType<typeof useGetLayerConfig>;
     mapType?: 'arcgis' | 'maplibre'; // New prop to specify map type
 }
 
@@ -41,7 +41,7 @@ export function useMapContainer({
     const mapRef = useRef<HTMLDivElement>(null);
     const { loadMap, view, isSketching } = useMap();
     const { coordinates, setCoordinates } = useMapCoordinates();
-    const { handleOnContextMenu, getVisibleLayers } = useMapInteractions();
+    const { handleOnContextMenu, getVisibleLayers } = useMapInteractions({ layersConfig: layersConfig });
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null);
     const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
     const drawerTriggerRef = useRef<HTMLButtonElement>(null);
