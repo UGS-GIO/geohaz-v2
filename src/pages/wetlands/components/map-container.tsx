@@ -5,7 +5,7 @@ import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 
-export default function ArcGISMap() {
+export default function MapContainer() {
     const layersConfig = useGetLayerConfig('layers');
 
     const {
