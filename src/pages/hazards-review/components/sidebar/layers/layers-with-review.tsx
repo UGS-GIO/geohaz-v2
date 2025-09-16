@@ -1,13 +1,89 @@
+import { useMemo, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Layers from "@/components/sidebar/layers";
-import MapConfigurations from "@/pages/hazards-review/components/sidebar/map-configurations/map-configurations";
+import { useCustomLayerList } from "@/hooks/use-custom-layerlist";
+import { useFetchReviewableLayers } from "@/hooks/use-fetch-reviewable-layers";
+import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
+import { LayerProps } from "@/lib/types/mapping-types";
+import { isGroupLayer, isWMSLayer } from "@/lib/map/utils";
+
+const getFilteredLayers = (
+    layers: LayerProps[],
+    reviewableNames: Set<string>
+): LayerProps[] => {
+    return layers
+        .map((layer): LayerProps | null => {
+            if (isWMSLayer(layer)) {
+                const sublayers = layer.sublayers?.filter(sub => sub.name !== undefined && reviewableNames.has(sub.name));
+                return sublayers?.length ? { ...layer, sublayers } : null;
+            }
+
+            if (isGroupLayer(layer)) {
+                const nestedLayers = layer.layers ? getFilteredLayers(layer.layers, reviewableNames) : [];
+                return nestedLayers.length ? { ...layer, layers: nestedLayers } : null;
+            }
+
+            return null;
+        })
+        .filter(Boolean) as LayerProps[];
+};
 
 const LayersWithReview = () => {
+    const [view, setView] = useState<'review' | 'default'>('review');
+    const layerConfig = useGetLayerConfig('review-layers');
+    const { data: reviewableLayers } = useFetchReviewableLayers();
+
+    const filteredLayerConfig = useMemo(() => {
+        if (!layerConfig || !reviewableLayers) return [];
+
+        const reviewableNames = new Set(reviewableLayers.map(layer => layer.value));
+        return getFilteredLayers(layerConfig, reviewableNames);
+    }, [layerConfig, reviewableLayers]);
+
+    const reviewLayerList = useCustomLayerList({ config: filteredLayerConfig });
+
     return (
-        <div>
-            <MapConfigurations />
-            <Layers />
-        </div>
+        <Card className="border-none shadow-none">
+            <CardHeader>
+                <CardTitle>Layer Controls</CardTitle>
+                <div className="pt-2">
+                    <ToggleGroup
+                        type="single"
+                        value={view}
+                        onValueChange={(value) => {
+                            if (value) setView(value as 'review' | 'default');
+                        }}
+                        className="justify-start"
+                    >
+                        <ToggleGroupItem value="review">Review Layers</ToggleGroupItem>
+                        <ToggleGroupItem value="default">Live Layers</ToggleGroupItem>
+                    </ToggleGroup>
+                </div>
+                <CardDescription className="pt-2">
+                    {view === 'review'
+                        ? "Showing only layers that are currently under review."
+                        : "Showing all available hazard layers."}
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Collapsible open={view === 'review'}>
+                    <CollapsibleContent>
+                        <div className="overflow-y-visible">
+                            {reviewLayerList}
+                        </div>
+                    </CollapsibleContent>
+                </Collapsible>
+
+                <Collapsible open={view === 'default'}>
+                    <CollapsibleContent>
+                        <Layers />
+                    </CollapsibleContent>
+                </Collapsible>
+            </CardContent>
+        </Card>
     );
-}
+};
 
 export { LayersWithReview };

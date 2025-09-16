@@ -4,7 +4,6 @@ import { auth } from '@/lib/auth'
 import { z } from 'zod';
 
 const hazardsReviewSearchSchema = z.object({
-  review_status: z.enum(['standard', 'review', 'all']).default('review'),
   coordinate_format: z.enum(['dd', 'dms']).optional(),
 });
 

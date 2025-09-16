@@ -36,7 +36,7 @@ const fetchReviewableLayers = async (): Promise<ReviewableLayerInfo[]> => {
 };
 
 export const useFetchReviewableLayers = () => {
-    const layerConfig = useGetLayerConfig();
+    const layerConfig = useGetLayerConfig('review-layers');
 
     return useQuery<ReviewableLayerInfo[], Error, LayerOption[]>({
         queryKey: ['reviewableLayers', layerConfig],
