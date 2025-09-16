@@ -16,7 +16,7 @@ export interface LayerOption {
 }
 
 const fetchReviewableLayers = async (): Promise<ReviewableLayerInfo[]> => {
-    const functionUrl = `${PROD_POSTGREST_URL}/rpc/find_r_values_in_current_matviews`;
+    const functionUrl = `${PROD_POSTGREST_URL}/rpc/find_r_values_in_review_matviews`;
 
     const response = await fetch(functionUrl, {
         method: 'GET',
@@ -79,7 +79,7 @@ export const useFetchReviewableLayers = () => {
             console.log("Step 2: Built titleMap for lookups", new Map(titleMap));
 
             const finalOptions = data
-                .filter(layer => layer.has_r_values === null)
+                .filter(layer => layer.has_r_values === true)
                 .flatMap(layer => {
                     const rawNameWithSchema = `${layer.schema_name}:${layer.matview_name}`;
                     const label = titleMap.get(rawNameWithSchema);
