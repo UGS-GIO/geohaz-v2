@@ -7,6 +7,7 @@ import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
 import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
 import { CcsSearchParams } from '@/routes/carbonstorage';
+import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 
 interface MapContainerProps {
     searchParams: CcsSearchParams;
@@ -14,6 +15,8 @@ interface MapContainerProps {
 }
 
 export default function MapContainer({ searchParams, updateLayerSelection }: MapContainerProps) {
+    const defaultLayersConfig = useGetLayerConfig('layers');
+
     const {
         mapRef,
         contextMenuTriggerRef,
@@ -28,6 +31,7 @@ export default function MapContainer({ searchParams, updateLayerSelection }: Map
         view,
     } = useMapContainer({
         wmsUrl: `${PROD_GEOSERVER_URL}wms`,
+        layersConfig: defaultLayersConfig,
     });
 
     // ccs-specific effect for applying filters on initial load
