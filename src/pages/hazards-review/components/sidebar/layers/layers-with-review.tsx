@@ -67,21 +67,20 @@ const LayersWithReview = () => {
                         : "Showing all publicly available hazard layers."}
                 </CardDescription>
             </CardHeader>
-            <CardContent>
-                <Collapsible open={view === 'review'}>
-                    <CollapsibleContent>
-                        <div className="overflow-y-visible">
-                            {reviewLayerList}
-                        </div>
-                    </CollapsibleContent>
-                </Collapsible>
 
-                <Collapsible open={view === 'default'}>
-                    <CollapsibleContent>
-                        <Layers />
-                    </CollapsibleContent>
-                </Collapsible>
-            </CardContent>
+            <Collapsible open={view === 'review'}>
+                <CollapsibleContent>
+                    <div className="overflow-y-visible">
+                        {reviewLayerList}
+                    </div>
+                </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible open={view === 'default'}>
+                <CollapsibleContent>
+                    <Layers />
+                </CollapsibleContent>
+            </Collapsible>
         </Card>
     );
 };
