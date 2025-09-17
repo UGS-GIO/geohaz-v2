@@ -159,7 +159,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
 };
 
 const groundshakingLayerName = 'groundshaking_review';
-const groundshakingWMSTitle = 'Earthquake Ground Shaking - Statewide';
+const groundshakingWMSTitle = 'Earthquake Ground Shaking - Statewide: Review';
 const groundshakingWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -196,7 +196,7 @@ export interface QFaultsFeatureType {
     strandnames: string[];
 }
 export const qFaultsLayerName = 'quaternaryfaults_review';
-export const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults - Statewide';
+export const qFaultsWMSTitle = 'Hazardous (Quaternary age) Faults - Statewide: Review';
 const qFaultsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -236,7 +236,7 @@ const qFaultsWMSConfig: WMSLayerProps = {
 };
 
 const surfaceFaultRuptureLayerName = 'surfacefaultrupture_review';
-const surfaceFaultRuptureWMSTitle = 'Surface Fault Rupture Special Study Zones';
+const surfaceFaultRuptureWMSTitle = 'Surface Fault Rupture Special Study Zones: Review';
 const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -272,7 +272,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
 }
 
 const windBlownSandLayerName = 'windblownsand_review';
-const windBlownSandWMSTitle = 'Wind-Blown Sand Susceptibility';
+const windBlownSandWMSTitle = 'Wind-Blown Sand Susceptibility: Review';
 const windBlownSandWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -306,7 +306,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
 }
 
 const saltTectonicsDeformationLayerName = 'salttectonicsdeformation_review';
-const saltTectonicsDeformationWMSTitle = 'Salt Tectonics-Related Ground Deformation';
+const saltTectonicsDeformationWMSTitle = 'Salt Tectonics-Related Ground Deformation: Review';
 const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -342,7 +342,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
 }
 
 const shallowBedrockLayerName = 'shallowbedrock_review';
-const shallowBedrockWMSTitle = 'Shallow Bedrock Potential';
+const shallowBedrockWMSTitle = 'Shallow Bedrock Potential: Review';
 const shallowBedrockWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -378,7 +378,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
 }
 
 const rockfallHazardLayerName = 'rockfall_review';
-const rockfallHazardWMSTitle = 'Rockfall Hazard';
+const rockfallHazardWMSTitle = 'Rockfall Hazard: Review';
 const rockfallHazardWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -414,7 +414,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
 }
 
 const pipingAndErosionLayerName = 'pipinganderosion_review';
-const pipingAndErosionWMSTitle = 'Piping and Erosion Susceptibility';
+const pipingAndErosionWMSTitle = 'Piping and Erosion Susceptibility: Review';
 const pipingAndErosionWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -450,7 +450,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
 }
 
 const expansiveSoilRockLayerName = 'expansivesoilrock_review';
-const expansiveSoilRockWMSTitle = 'Expansive Soil and Rock Susceptibility';
+const expansiveSoilRockWMSTitle = 'Expansive Soil and Rock Susceptibility: Review';
 const expansiveSoilRockWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -486,7 +486,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
 }
 
 const shallowGroundwaterLayerName = 'shallowgroundwater_review';
-const shallowGroundwaterWMSTitle = 'Shallow Groundwater Susceptibility';
+const shallowGroundwaterWMSTitle = 'Shallow Groundwater Susceptibility: Review';
 const shallowGroundwaterWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -522,7 +522,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
 }
 
 const radonSusceptibilityLayerName = 'radonsusceptibility_review';
-const radonSusceptibilityWMSTitle = 'Geologic Radon Susceptibility';
+const radonSusceptibilityWMSTitle = 'Geologic Radon Susceptibility: Review';
 const radonSusceptibilityWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -558,7 +558,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
 }
 
 const corrosiveSoilRockLayerName = 'corrosivesoilrock_review';
-const corrosiveSoilRockWMSTitle = 'Corrosive Soil and Rock Susceptibility';
+const corrosiveSoilRockWMSTitle = 'Corrosive Soil and Rock Susceptibility: Review';
 const corrosiveSoilRockWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -594,7 +594,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
 }
 
 const collapsibleSoilLayerName = 'collapsiblesoil_review';
-const collapsibleSoilWMSTitle = 'Collapsible Soil Susceptibility';
+const collapsibleSoilWMSTitle = 'Collapsible Soil Susceptibility: Review';
 const collapsibleSoilWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -630,7 +630,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
 }
 
 const solubleSoilAndRockLayerName = 'solublesoilandrock_review';
-const solubleSoilAndRockWMSTitle = 'Soluble Soil and Rock Susceptibility';
+const solubleSoilAndRockWMSTitle = 'Soluble Soil and Rock Susceptibility: Review';
 const solubleSoilAndRockWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -666,7 +666,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
 }
 
 const alluvialFanLayerName = 'alluvialfan_review';
-const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility (Source: Division of Emergency Management)';
+const alluvialFanWMSTitle = 'Alluvial Fan Flooding Susceptibility (Source: Division of Emergency Management): Review';
 const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -702,7 +702,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
 }
 
 const earthFissureLayerName = 'earthfissure_review';
-const earthFissureWMSTitle = 'Earth Fissure Hazard';
+const earthFissureWMSTitle = 'Earth Fissure Hazard: Review';
 const earthFissureWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -737,7 +737,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
 }
 
 const erosionHazardZoneLayerName = 'erosionhazardzone_review';
-const erosionHazardZoneWMSTitle = 'J.E. Fuller Flood Erosion Hazard Zones';
+const erosionHazardZoneWMSTitle = 'J.E. Fuller Flood Erosion Hazard Zones: Review';
 const erosionHazardZoneWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -773,7 +773,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
 }
 
 const karstFeaturesLayerName = 'karstfeatures_review';
-const karstFeaturesWMSTitle = 'Karst Features';
+const karstFeaturesWMSTitle = 'Karst Features: Review';
 const karstFeaturesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -808,7 +808,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
 }
 
 const quads24kLayerName = '24kquads';
-const quads24kWMSTitle = 'USGS 1:24,000-Scale Quadrangle Boundaries';
+const quads24kWMSTitle = 'USGS 1:24,000-Scale Quadrangle Boundaries: Review';
 const quads24kWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
@@ -862,28 +862,28 @@ const studyAreasWMSConfig: WMSLayerProps = {
 
 const floodHazardsConfig: LayerProps = {
     type: 'group',
-    title: 'Flooding Hazards',
+    title: 'Flooding Hazards: Review',
     visible: false,
     layers: [shallowGroundwaterWMSConfig, alluvialFanWMSConfig],
 };
 
 const earthquakesConfig: LayerProps = {
     type: 'group',
-    title: 'Earthquake Hazards',
+    title: 'Earthquake Hazards: Review',
     visible: true,
     layers: [qFaultsWMSConfig, surfaceFaultRuptureWMSConfig, liquefactionWMSConfig, groundshakingWMSConfig],
 };
 
 const landslidesConfig: LayerProps = {
     type: 'group',
-    title: 'Landslide Hazards',
+    title: 'Landslide Hazards: Review',
     visible: false,
     layers: [rockfallHazardWMSConfig, landslideInventoryWMSConfig, landslideSusceptibilityWMSConfig, landslideLegacyWMSConfig],
 };
 
 const soilHazardsConfig: LayerProps = {
     type: 'group',
-    title: 'Problem Soil and Rock Hazards',
+    title: 'Problem Soil and Rock Hazards: Review',
     visible: false,
     layers: [
         collapsibleSoilWMSConfig,
