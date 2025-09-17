@@ -43,11 +43,6 @@ export const useFetchReviewableLayers = () => {
         queryFn: fetchReviewableLayers,
         enabled: !!layerConfig,
         select: (data) => {
-            // Log Step 1: The initial data from the API and the config file
-            console.log("Step 1: Raw data from API & Layer Config", {
-                apiData: data,
-                layerConfig: layerConfig
-            });
             if (!layerConfig) return [];
 
             const titleMap = new Map<string, string>();
@@ -75,9 +70,6 @@ export const useFetchReviewableLayers = () => {
             };
             recursivelyFindTitles(layerConfig);
 
-            // Log Step 2: The generated map for looking up titles
-            console.log("Step 2: Built titleMap for lookups", new Map(titleMap));
-
             const finalOptions = data
                 .filter(layer => layer.has_r_values === true)
                 .flatMap(layer => {
@@ -89,9 +81,6 @@ export const useFetchReviewableLayers = () => {
                     return [];
                 })
                 .sort((a, b) => a.label.localeCompare(b.label));
-
-            // Log Step 3: The final processed data being returned
-            console.log("Step 3: Final processed options for dropdown", finalOptions);
 
             return finalOptions;
         },
