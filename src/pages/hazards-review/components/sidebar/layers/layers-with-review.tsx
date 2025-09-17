@@ -64,7 +64,7 @@ const LayersWithReview = () => {
                 <CardDescription className="pt-2">
                     {view === 'review'
                         ? "Showing only layers that are currently under review."
-                        : "Showing all available hazard layers."}
+                        : "Showing all publicly available hazard layers."}
                 </CardDescription>
             </CardHeader>
             <CardContent>
