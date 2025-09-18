@@ -13,7 +13,7 @@ const landslideLegacyWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: landslideLegacyWMSTitle,
-    visible: false,
+    visible: true,
     opacity: 0.75,
     sublayers: [
         {
@@ -45,11 +45,12 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: landslideInventoryWMSTitle,
-    visible: false,
+    visible: true,
     opacity: 0.75,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideInventoryLayerName}`,
+            visible: true,
             popupEnabled: false,
             queryable: true,
             popupFields: {
@@ -89,7 +90,7 @@ const landslideSusceptibilityWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: landslideSusceptibilityWMSTitle,
-    visible: false,
+    visible: true,
     opacity: 0.75,
     sublayers: [
         {
@@ -127,7 +128,7 @@ const liquefactionWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: liquefactionWMSTitle,
-    visible: false,
+    visible: true,
     opacity: 0.75,
     sublayers: [
         {
@@ -164,7 +165,7 @@ const groundshakingWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: groundshakingWMSTitle,
-    visible: false,
+    visible: true,
     opacity: 0.5,
     sublayers: [
         {
@@ -241,7 +242,7 @@ const surfaceFaultRuptureWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: surfaceFaultRuptureWMSTitle,
-    visible: false,
+    visible: true,
     opacity: 0.75,
     sublayers: [
         {
@@ -278,7 +279,7 @@ const windBlownSandWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: windBlownSandWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${windBlownSandLayerName}`,
@@ -312,7 +313,7 @@ const saltTectonicsDeformationWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: saltTectonicsDeformationWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${saltTectonicsDeformationLayerName}`,
@@ -348,7 +349,7 @@ const shallowBedrockWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: shallowBedrockWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${shallowBedrockLayerName}`,
@@ -383,7 +384,7 @@ const rockfallHazardWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: rockfallHazardWMSTitle,
-    visible: false,
+    visible: true,
     opacity: 0.75,
     sublayers: [
         {
@@ -420,7 +421,7 @@ const pipingAndErosionWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: pipingAndErosionWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${pipingAndErosionLayerName}`,
@@ -456,7 +457,7 @@ const expansiveSoilRockWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: expansiveSoilRockWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${expansiveSoilRockLayerName}`,
@@ -491,7 +492,7 @@ const shallowGroundwaterWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: shallowGroundwaterWMSTitle,
-    visible: false,
+    visible: true,
     opacity: 0.75,
     sublayers: [
         {
@@ -528,7 +529,7 @@ const radonSusceptibilityWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: radonSusceptibilityWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${radonSusceptibilityLayerName}`,
@@ -564,7 +565,7 @@ const corrosiveSoilRockWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: corrosiveSoilRockWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${corrosiveSoilRockLayerName}`,
@@ -600,7 +601,7 @@ const collapsibleSoilWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: collapsibleSoilWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${collapsibleSoilLayerName}`,
@@ -636,7 +637,7 @@ const solubleSoilAndRockWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: solubleSoilAndRockWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${solubleSoilAndRockLayerName}`,
@@ -671,7 +672,7 @@ const alluvialFanWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: alluvialFanWMSTitle,
-    visible: false,
+    visible: true,
     opacity: 0.75,
     sublayers: [
         {
@@ -707,7 +708,7 @@ const earthFissureWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: earthFissureWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${earthFissureLayerName}`,
@@ -743,7 +744,7 @@ const erosionHazardZoneWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: erosionHazardZoneWMSTitle,
     opacity: 0.75,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${erosionHazardZoneLayerName}`,
@@ -778,7 +779,7 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: karstFeaturesWMSTitle,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${karstFeaturesLayerName}`,
@@ -863,7 +864,7 @@ const studyAreasWMSConfig: WMSLayerProps = {
 const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards: Review',
-    visible: false,
+    visible: true,
     layers: [shallowGroundwaterWMSConfig, alluvialFanWMSConfig],
 };
 
@@ -877,14 +878,14 @@ const earthquakesConfig: LayerProps = {
 const landslidesConfig: LayerProps = {
     type: 'group',
     title: 'Landslide Hazards: Review',
-    visible: false,
+    visible: true,
     layers: [rockfallHazardWMSConfig, landslideInventoryWMSConfig, landslideSusceptibilityWMSConfig, landslideLegacyWMSConfig],
 };
 
 const soilHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Problem Soil and Rock Hazards: Review',
-    visible: false,
+    visible: true,
     layers: [
         collapsibleSoilWMSConfig,
         corrosiveSoilRockWMSConfig,
@@ -948,7 +949,7 @@ export const reviewLayersConfig: LayerProps[] = [
     landslidesReviewConfig,
     soilHazardsReviewConfig,
     studyAreasReviewConfig,
-    quads24kWMSConfig, // This layer is for reference and does not have/need a filter
+    // quads24kWMSConfig, // This layer is for reference and does not have/need a filter
 ];
 
 // The original default export
