@@ -1,7 +1,8 @@
 import { createContext, useContext, useCallback, ReactNode, useMemo, useEffect, useRef } from 'react';
 import { useSearch, useNavigate, useLocation } from '@tanstack/react-router';
 import { LayerProps } from '@/lib/types/mapping-types';
-import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
+import { useGetLayerConfigs, LayerOrderConfig } from '@/hooks/use-get-layer-configs';
+import { useGetCurrentPage } from '@/hooks/use-get-current-page';
 
 type ActiveFilters = Record<string, string>;
 
@@ -47,10 +48,15 @@ const getDefaultVisible = (layers: LayerProps[]): { selected: string[], hidden: 
     return { selected, hidden };
 };
 
-export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
+interface LayerUrlProviderProps {
+    children: ReactNode;
+    layerOrderConfigs?: LayerOrderConfig[];
+}
+
+export const LayerUrlProvider = ({ children, layerOrderConfigs }: LayerUrlProviderProps) => {
     const navigate = useNavigate();
     const { layers: urlLayers, filters: urlFilters } = useSearch({ from: '__root__' });
-    const layersConfig = useGetLayerConfig();
+    const layersConfig = useGetLayerConfigs(layerOrderConfigs);
     const hasInitializedForPath = useRef<string | null>(null);
     const location = useLocation();
 
@@ -96,7 +102,7 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
 
     }, [layersConfig, navigate, urlLayers, urlFilters, location.pathname]);
 
-    // 1. NEW: Create a map to find a layer's parent group title.
+    // Create a map to find a layer's parent group title
     const childToParentMap = useMemo(() => {
         const map = new Map<string, string>();
         if (!layersConfig) return map;
@@ -126,12 +132,11 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
         return map;
     }, [layersConfig]);
 
-
     const selectedLayerTitles = useMemo(() => new Set(urlLayers?.selected || []), [urlLayers]);
     const hiddenGroupTitles = useMemo(() => new Set(urlLayers?.hidden || []), [urlLayers]);
     const activeFilters: ActiveFilters = useMemo(() => urlFilters || {}, [urlFilters]);
 
-    // 2. ENHANCED: This function now turns on the parent group when a child is selected.
+    // This function now turns on the parent group when a child is selected
     const updateLayerSelection = useCallback((titles: string | string[], shouldBeSelected: boolean) => {
         const titlesToUpdate = Array.isArray(titles) ? titles : [titles];
 
@@ -145,7 +150,7 @@ export const LayerUrlProvider = ({ children }: { children: ReactNode }) => {
                 if (shouldBeSelected) {
                     titlesToUpdate.forEach(title => {
                         currentSelected.add(title);
-                        // **FIX**: If selecting a child, ensure its parent group is not hidden.
+                        // If selecting a child, ensure its parent group is not hidden
                         const parentTitle = childToParentMap.get(title);
                         if (parentTitle) {
                             currentHidden.delete(parentTitle);

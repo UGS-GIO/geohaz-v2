@@ -8,7 +8,7 @@ import Sidebar from '@/components/sidebar';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleCollectionSelect, handleSearchSelect, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox';
 import { PROD_POSTGREST_URL } from '@/lib/constants';
-import { qFaultsWMSTitle } from './data/layers';
+import { qFaultsWMSTitle } from './data/layers/layers';
 import { signOut } from '@/lib/auth';
 import { useAuth } from '@/context/auth-provider';
 import { Button } from '@/components/ui/button';

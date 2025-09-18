@@ -37,7 +37,7 @@ const useGetLayerConfig = (pageName?: string, layerOrderConfigs?: LayerOrderConf
             if (currentPage === '') return setLayerConfig(null);
 
             try {
-                const config = await import(`@/pages/${currentPage}/data/${pageName ? pageName : 'layers'}.tsx`);
+                const config = await import(`@/pages/${currentPage}/data/layers/${pageName ? pageName : 'layers'}.tsx`);
                 let processedConfig = [...config.default];
 
                 // If we have layer order configurations, process them
