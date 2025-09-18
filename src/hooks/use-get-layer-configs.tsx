@@ -84,9 +84,6 @@ const useGetLayerConfigs = (layerOrderConfigs?: LayerOrderConfig[]) => {
                     path.includes(`/pages/${currentPage}/data/layers/`)
                 );
 
-                // Also check for the main layers.tsx file
-                const mainLayersPath = `@/pages/${currentPage}/data/layers.tsx`;
-
                 let allConfigs: LayerProps[] = [];
 
                 // Try to load the main layers.tsx file first

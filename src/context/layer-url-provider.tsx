@@ -2,7 +2,6 @@ import { createContext, useContext, useCallback, ReactNode, useMemo, useEffect, 
 import { useSearch, useNavigate, useLocation } from '@tanstack/react-router';
 import { LayerProps } from '@/lib/types/mapping-types';
 import { useGetLayerConfigs, LayerOrderConfig } from '@/hooks/use-get-layer-configs';
-import { useGetCurrentPage } from '@/hooks/use-get-current-page';
 
 type ActiveFilters = Record<string, string>;
 
