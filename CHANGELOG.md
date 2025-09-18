@@ -1,3 +1,14 @@
+## [1.13.1](https://github.com/UGS-GIO/geohaz-v2/compare/v1.13.0...v1.13.1) (2025-09-10)
+
+
+### ccs
+
+* **♻️ Refactors**(`ccs`): add a feedback form for the carbon storage app ([#291](https://github.com/UGS-GIO/geohaz-v2/issues/291))
+
+### common
+
+* **♻️ Refactors**(`common`): extract feature response handling into dedicated hook* **♻️ Refactors**(`common`): extract layer visibility logic into reusable hook* **♻️ Refactors**(`common`): extract map click handling into reusable hook* **♻️ Refactors**(`common`): make a coordinate adapter to make a map library agnostic coordinate functionality* **♻️ Refactors**(`common`): move useMap to its own hook file, abstract filters and position to useDomainFilter and useMapUrlSync* **🐛 Bug Fixes**(`common`): remove a highligh/selection graphic from a feature if layer is turned off ([#290](https://github.com/UGS-GIO/geohaz-v2/issues/290))* **♻️ Refactors**(`common`): store zoom, lat, lon, in the root search schema
+
 ## [1.13.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.12.1...v1.13.0) (2025-08-28)
 
 

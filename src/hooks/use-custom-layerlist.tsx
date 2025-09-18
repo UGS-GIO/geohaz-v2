@@ -13,6 +13,7 @@ import LayerControls from '@/components/custom/layer-controls';
 import Extent from '@arcgis/core/geometry/Extent';
 import { useIsMobile } from './use-mobile';
 import Layer from '@arcgis/core/layers/Layer';
+import { clearGraphics } from '@/lib/map/highlight-utils';
 
 const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerProps; isTopLevel: boolean }) => {
     const {
@@ -53,6 +54,8 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
 
     // This handler now explicitly sets the accordion state.
     const handleLocalToggle = (checked: boolean) => {
+        if (!view) return;
+        clearGraphics(view, layerConfig.title || '');
         handleToggleSelection(checked);
         setIsUserExpanded(checked);
     };

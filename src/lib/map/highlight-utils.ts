@@ -68,7 +68,8 @@ export interface HighlightOptions {
 
 const createEsriGraphics = (
     esriGeometry: __esri.Geometry,
-    options: Required<HighlightOptions>
+    options: Required<HighlightOptions>,
+    title: string
 ): Graphic[] => {
     if (!esriGeometry) return [];
     try {
@@ -85,9 +86,10 @@ const createEsriGraphics = (
                     size: options.pointSize + 2,
                     outline: { color: [0, 0, 0, .5], width: options.outlineWidth / 2 }
                 });
+                const attributes = { title: title };
                 return [
-                    new Graphic({ geometry: esriGeometry, symbol: pointSymbol }),
-                    new Graphic({ geometry: esriGeometry, symbol: outlineSymbol })
+                    new Graphic({ geometry: esriGeometry, symbol: pointSymbol, attributes }),
+                    new Graphic({ geometry: esriGeometry, symbol: outlineSymbol, attributes })
                 ];
             }
             case 'polyline': {
@@ -96,9 +98,10 @@ const createEsriGraphics = (
                     color: [0, 0, 0, .5],
                     width: options.outlineWidth + 2
                 });
+                const attributes = { title: title };
                 return [
-                    new Graphic({ geometry: esriGeometry, symbol: outlineSymbol }),
-                    new Graphic({ geometry: esriGeometry, symbol: lineSymbol })
+                    new Graphic({ geometry: esriGeometry, symbol: outlineSymbol, attributes }),
+                    new Graphic({ geometry: esriGeometry, symbol: lineSymbol, attributes })
                 ];
             }
             case 'polygon': {
@@ -110,9 +113,10 @@ const createEsriGraphics = (
                     color: [0, 0, 0, 0],
                     outline: { color: [0, 0, 0, 1], width: options.outlineWidth + 2 }
                 });
+                const attributes = { title: title };
                 return [
-                    new Graphic({ geometry: esriGeometry, symbol: outlineSymbol }),
-                    new Graphic({ geometry: esriGeometry, symbol: fillSymbol })
+                    new Graphic({ geometry: esriGeometry, symbol: outlineSymbol, attributes }),
+                    new Graphic({ geometry: esriGeometry, symbol: fillSymbol, attributes })
                 ];
             }
             default:
@@ -131,6 +135,7 @@ export const highlightFeature = async (
     feature: Feature<Geometry, GeoJsonProperties>,
     view: __esri.MapView | __esri.SceneView,
     sourceCRS: string,
+    title: string,
     options?: HighlightOptions
 ): Promise<Graphic | null> => {
 
@@ -156,7 +161,8 @@ export const highlightFeature = async (
         pointSize: 12
     };
     const finalOptions = { ...defaultHighlightOptions, ...options };
-    const graphics = createEsriGraphics(esriGeom, finalOptions);
+    const graphics = createEsriGraphics(esriGeom, finalOptions, title);
+
     if (!graphics || graphics.length === 0) return null;
 
     // 4. Add the graphics to the view
@@ -166,12 +172,21 @@ export const highlightFeature = async (
     return graphics[0];
 };
 
-// --- Other Utility Functions ---
-export const clearGraphics = (view: __esri.MapView | __esri.SceneView) => {
-    if (view && view.graphics) {
-        view.graphics.removeAll();
+
+/**
+ * Clears graphics from the view. If a title is provided, only graphics with that title are removed.
+ * Otherwise, all graphics are removed.
+ * @param view - The MapView or SceneView from which to clear graphics.
+ * @param title - Optional title to filter which graphics to remove.
+ * @returns void
+ */
+export const clearGraphics = (view: __esri.MapView | __esri.SceneView, title?: string
+) => {
+    if (title) {
+        const graphicsToRemove = view.graphics.filter(graphic => graphic.attributes?.title === title);
+        view.graphics.removeMany(graphicsToRemove);
     } else {
-        console.warn("clearGraphics: View or graphics layer is not available.");
+        view.graphics.removeAll();
     }
 }
 

@@ -30,12 +30,14 @@ export function useFeatureResponseHandler({
 
         const popupContent = featureData || [];
         const hasFeatures = popupContent.length > 0;
-        const firstFeature = popupContent[0]?.features[0];
+        const firstLayer = popupContent[0];
+        const firstFeature = firstLayer?.features[0];
         const drawerState = drawerTriggerRef.current?.getAttribute('data-state');
 
         // Handle feature highlighting
-        if (hasFeatures && firstFeature && view) {
-            highlightFeature(firstFeature, view, popupContent[0].sourceCRS);
+        if (hasFeatures && firstFeature && view && firstLayer) {
+            const title = firstLayer.layerTitle || firstLayer.groupLayerTitle;
+            highlightFeature(firstFeature, view, firstLayer.sourceCRS, title);
         }
 
         // Handle drawer visibility

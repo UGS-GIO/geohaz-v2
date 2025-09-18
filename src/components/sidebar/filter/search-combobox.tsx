@@ -689,7 +689,8 @@ const handleSearchSelect = (
             ...searchResult,
             namespace: (searchResult as ExtendedFeature).namespace || ''
         };
-        highlightFeature(featureToHighlight, view, sourceCRS);
+
+        highlightFeature(featureToHighlight, view, sourceCRS, 'Search Box Single Feature Highlight');
 
         const featureBbox = turf.bbox(geom);
         if (!featureBbox || !featureBbox.every(isFinite)) {
@@ -772,7 +773,8 @@ const handleCollectionSelect = (
             highlightFeature(
                 extendedFeature,
                 view,
-                sourceCRS, // Use the single source of truth
+                sourceCRS,
+                'Search Box Collection Highlight'
             );
         });
 
