@@ -11,7 +11,6 @@ import { useLayerVisibility } from '@/hooks/use-layer-visibility';
 import { useMapClickHandler } from '@/hooks/use-map-click-handler';
 import { useFeatureResponseHandler } from '@/hooks/use-feature-response-handler';
 import { useMapUrlSync } from '@/hooks/use-map-url-sync';
-import { useDomainFilters } from '@/hooks/use-domain-filters';
 import { createCoordinateAdapter, CoordinateAdapter } from '@/lib/map/coordinate-adapter';
 
 interface UseMapContainerProps {
@@ -47,7 +46,7 @@ export function useMapContainer({
     const drawerTriggerRef = useRef<HTMLButtonElement>(null);
     useMapPositionUrlParams(view);
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
-    const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection } = useLayerUrl();
+    const { selectedLayerTitles, hiddenGroupTitles } = useLayerUrl();
 
     // Create coordinate adapter based on map type
     const coordinateAdapter: CoordinateAdapter = useMemo(() => {
@@ -55,10 +54,7 @@ export function useMapContainer({
     }, [mapType]);
 
     // Extract URL synchronization
-    const { center, zoom, filters } = useMapUrlSync();
-
-    // Extract domain-specific filter handling
-    useDomainFilters({ view, filters, updateLayerSelection });
+    const { center, zoom } = useMapUrlSync();
 
     // Process layers based on visibility state
     const processedLayers = useLayerVisibility(
