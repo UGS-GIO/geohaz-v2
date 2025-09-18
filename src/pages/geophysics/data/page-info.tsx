@@ -1,6 +1,6 @@
 import { Link } from "@/components/custom/link";
 
-const appTitle = 'Geophysical Data Portal';
+const appTitle = 'Geophysical & Geothermal Data Portal';
 
 const references = (
     <ul className="list-disc ml-5 space-y-4">
