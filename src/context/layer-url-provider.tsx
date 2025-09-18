@@ -1,7 +1,7 @@
 import { createContext, useContext, useCallback, ReactNode, useMemo, useEffect, useRef } from 'react';
 import { useSearch, useNavigate, useLocation } from '@tanstack/react-router';
 import { LayerProps } from '@/lib/types/mapping-types';
-import { useGetLayerConfigs, LayerOrderConfig } from '@/hooks/use-get-layer-configs';
+import { useGetLayerConfigs } from '@/hooks/use-get-layer-configs';
 
 type ActiveFilters = Record<string, string>;
 
@@ -49,13 +49,12 @@ const getDefaultVisible = (layers: LayerProps[]): { selected: string[], hidden: 
 
 interface LayerUrlProviderProps {
     children: ReactNode;
-    layerOrderConfigs?: LayerOrderConfig[];
 }
 
-export const LayerUrlProvider = ({ children, layerOrderConfigs }: LayerUrlProviderProps) => {
+export const LayerUrlProvider = ({ children }: LayerUrlProviderProps) => {
     const navigate = useNavigate();
     const { layers: urlLayers, filters: urlFilters } = useSearch({ from: '__root__' });
-    const layersConfig = useGetLayerConfigs(layerOrderConfigs);
+    const layersConfig = useGetLayerConfigs();
     const hasInitializedForPath = useRef<string | null>(null);
     const location = useLocation();
 

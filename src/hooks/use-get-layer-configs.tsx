@@ -65,7 +65,7 @@ const applyLayerOrdering = (layers: LayerProps[], orderConfigs: LayerOrderConfig
     return processedConfig;
 };
 
-const useGetLayerConfigs = (layerOrderConfigs?: LayerOrderConfig[]) => {
+const useGetLayerConfigs = (pageName?: string, layerOrderConfigs?: LayerOrderConfig[]) => {
     const currentPage = useGetCurrentPage();
     const [layerConfigs, setLayerConfigs] = useState<LayerProps[] | null>(null);
 
@@ -74,53 +74,55 @@ const useGetLayerConfigs = (layerOrderConfigs?: LayerOrderConfig[]) => {
 
     useEffect(() => {
         const loadConfigs = async () => {
-            // Check if currentPage is empty, if so, set layerConfigs to null
-            if (currentPage === '') return setLayerConfigs(null);
+            if (pageName) {
+                // Single config workflow - load specific config from current page
+                if (currentPage === '') return setLayerConfigs(null);
 
-            try {
-                // Get all layer config file paths for the current page
-                const layerConfigPaths = import.meta.glob(`@/pages/*/data/layers/*.tsx`);
-                const currentPagePaths = Object.keys(layerConfigPaths).filter(path =>
-                    path.includes(`/pages/${currentPage}/data/layers/`)
-                );
-
-                let allConfigs: LayerProps[] = [];
-
-                // Try to load the main layers.tsx file first
                 try {
-                    const mainConfig = await import(`@/pages/${currentPage}/data/layers.tsx`) as { default: LayerProps[] };
-                    if (mainConfig.default && Array.isArray(mainConfig.default)) {
-                        allConfigs.push(...mainConfig.default);
+                    const config = await import(`@/pages/${currentPage}/data/layers/${pageName}.tsx`) as { default: LayerProps[] };
+                    if (config.default && Array.isArray(config.default)) {
+
+                        // Apply layer ordering if specified
+                        const processedConfigs = applyLayerOrdering(config.default, memoizedLayerOrderConfigs || []);
+                        setLayerConfigs(processedConfigs);
+                    } else {
+                        setLayerConfigs(null);
                     }
                 } catch (error) {
-                    // Main layers.tsx doesn't exist, that's fine
-                    console.debug(`No main layers.tsx found for ${currentPage}`);
+                    console.error(`Error loading layer configuration ${pageName}:`, error);
+                    setLayerConfigs(null);
                 }
+            } else {
+                // Get all configs workflow - use glob to find and load all configs
+                try {
+                    const layerConfigPaths = import.meta.glob(`@/pages/*/data/layers/*.tsx`);
+                    let allConfigs: LayerProps[] = [];
 
-                // Load all additional layer config files
-                for (const path of currentPagePaths) {
-                    try {
-                        const config = await layerConfigPaths[path]() as { default: LayerProps[] };
-                        if (config.default && Array.isArray(config.default)) {
-                            allConfigs.push(...config.default);
+                    // Load all layer config files
+                    for (const path of Object.keys(layerConfigPaths)) {
+                        try {
+                            const config = await layerConfigPaths[path]() as { default: LayerProps[] };
+                            if (config.default && Array.isArray(config.default)) {
+                                allConfigs.push(...config.default);
+                            }
+                        } catch (error) {
+                            console.warn(`Failed to load layer config from ${path}:`, error);
                         }
-                    } catch (error) {
-                        console.warn(`Failed to load layer config from ${path}:`, error);
                     }
+
+
+                    // Apply layer ordering if specified
+                    const processedConfigs = applyLayerOrdering(allConfigs, memoizedLayerOrderConfigs || []);
+                    setLayerConfigs(processedConfigs.length > 0 ? processedConfigs : null);
+                } catch (error) {
+                    console.error('Error loading layer configurations:', error);
+                    setLayerConfigs(null);
                 }
-
-                // Apply layer ordering if specified
-                const processedConfigs = applyLayerOrdering(allConfigs, memoizedLayerOrderConfigs || []);
-
-                setLayerConfigs(processedConfigs.length > 0 ? processedConfigs : null);
-            } catch (error) {
-                console.error('Error loading layer configurations:', error);
-                setLayerConfigs(null);
             }
         };
 
         loadConfigs();
-    }, [currentPage, memoizedLayerOrderConfigs]);
+    }, [pageName, currentPage, memoizedLayerOrderConfigs]);
 
     return layerConfigs;
 };

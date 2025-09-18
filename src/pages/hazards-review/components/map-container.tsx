@@ -3,9 +3,9 @@ import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
-import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
 import { HazardsReviewSearchParams } from '@/routes/hazards-review';
 import { useEffect } from 'react';
+import { useGetLayerConfigs } from '@/hooks/use-get-layer-configs';
 
 
 interface MapContainerProps {
@@ -14,11 +14,7 @@ interface MapContainerProps {
 }
 
 export default function MapContainer({ searchParams, updateLayerSelection }: MapContainerProps) {
-    const reviewLayersConfig = useGetLayerConfig('review-layers');
-    const defaultLayersConfig = useGetLayerConfig('layers');
-
-    // merge configs into one array
-    const layersConfig = [...(defaultLayersConfig || []), ...(reviewLayersConfig || [])];
+    const layersConfig = useGetLayerConfigs();
 
     const {
         mapRef,

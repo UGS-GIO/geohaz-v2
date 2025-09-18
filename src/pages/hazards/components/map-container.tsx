@@ -3,10 +3,10 @@ import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
-import { useGetLayerConfig } from '@/hooks/use-get-layer-config';
+import { useGetLayerConfigs } from '@/hooks/use-get-layer-configs';
 
 export default function MapContainer() {
-    const defaultLayersConfig = useGetLayerConfig('layers');
+    const defaultLayersConfig = useGetLayerConfigs('layers');
 
     const {
         mapRef,

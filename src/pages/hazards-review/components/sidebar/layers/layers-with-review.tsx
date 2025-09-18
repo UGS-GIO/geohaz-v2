@@ -5,9 +5,9 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Layers from "@/components/sidebar/layers";
 import { useCustomLayerList } from "@/hooks/use-custom-layerlist";
 import { useFetchReviewableLayers } from "@/hooks/use-fetch-reviewable-layers";
-import { useGetLayerConfig } from "@/hooks/use-get-layer-config";
 import { LayerProps } from "@/lib/types/mapping-types";
 import { isGroupLayer, isWMSLayer } from "@/lib/map/utils";
+import { useGetLayerConfigs } from "@/hooks/use-get-layer-configs";
 
 const getFilteredLayers = (
     layers: LayerProps[],
@@ -32,7 +32,7 @@ const getFilteredLayers = (
 
 const LayersWithReview = () => {
     const [view, setView] = useState<'review' | 'default'>('review');
-    const layerConfig = useGetLayerConfig('review-layers');
+    const layerConfig = useGetLayerConfigs('review-layers');
     const { data: reviewableLayers } = useFetchReviewableLayers();
 
     const filteredLayerConfig = useMemo(() => {
