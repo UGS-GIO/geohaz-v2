@@ -17,6 +17,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as LoginIndexImport } from './routes/login/index'
 import { Route as HazardsIndexImport } from './routes/hazards/index'
 import { Route as HazardsReviewIndexImport } from './routes/hazards-review/index'
+import { Route as GeophysicsIndexImport } from './routes/geophysics/index'
 import { Route as CarbonstorageIndexImport } from './routes/carbonstorage/index'
 
 // Create Virtual Routes
@@ -73,6 +74,12 @@ const HazardsIndexRoute = HazardsIndexImport.update({
 const HazardsReviewIndexRoute = HazardsReviewIndexImport.update({
   id: '/hazards-review/',
   path: '/hazards-review/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const GeophysicsIndexRoute = GeophysicsIndexImport.update({
+  id: '/geophysics/',
+  path: '/geophysics/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -138,6 +145,13 @@ declare module '@tanstack/react-router' {
       path: '/carbonstorage'
       fullPath: '/carbonstorage'
       preLoaderRoute: typeof CarbonstorageIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/geophysics/': {
+      id: '/geophysics/'
+      path: '/geophysics'
+      fullPath: '/geophysics'
+      preLoaderRoute: typeof GeophysicsIndexImport
       parentRoute: typeof rootRoute
     }
     '/hazards-review/': {
@@ -211,6 +225,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/carbonstorage': typeof CarbonstorageIndexRoute
+  '/geophysics': typeof GeophysicsIndexRoute
   '/hazards-review': typeof HazardsReviewIndexRoute
   '/hazards': typeof HazardsIndexRoute
   '/login': typeof LoginIndexRoute
@@ -225,6 +240,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/carbonstorage': typeof CarbonstorageIndexRoute
+  '/geophysics': typeof GeophysicsIndexRoute
   '/hazards-review': typeof HazardsReviewIndexRoute
   '/hazards': typeof HazardsIndexRoute
   '/login': typeof LoginIndexRoute
@@ -240,6 +256,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/carbonstorage/': typeof CarbonstorageIndexRoute
+  '/geophysics/': typeof GeophysicsIndexRoute
   '/hazards-review/': typeof HazardsReviewIndexRoute
   '/hazards/': typeof HazardsIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -256,6 +273,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/carbonstorage'
+    | '/geophysics'
     | '/hazards-review'
     | '/hazards'
     | '/login'
@@ -269,6 +287,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/carbonstorage'
+    | '/geophysics'
     | '/hazards-review'
     | '/hazards'
     | '/login'
@@ -282,6 +301,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/carbonstorage/'
+    | '/geophysics/'
     | '/hazards-review/'
     | '/hazards/'
     | '/login/'
@@ -297,6 +317,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CarbonstorageIndexRoute: typeof CarbonstorageIndexRoute
+  GeophysicsIndexRoute: typeof GeophysicsIndexRoute
   HazardsReviewIndexRoute: typeof HazardsReviewIndexRoute
   HazardsIndexRoute: typeof HazardsIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -311,6 +332,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CarbonstorageIndexRoute: CarbonstorageIndexRoute,
+  GeophysicsIndexRoute: GeophysicsIndexRoute,
   HazardsReviewIndexRoute: HazardsReviewIndexRoute,
   HazardsIndexRoute: HazardsIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
@@ -334,6 +356,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/carbonstorage/",
+        "/geophysics/",
         "/hazards-review/",
         "/hazards/",
         "/login/",
@@ -350,6 +373,9 @@ export const routeTree = rootRoute
     },
     "/carbonstorage/": {
       "filePath": "carbonstorage/index.tsx"
+    },
+    "/geophysics/": {
+      "filePath": "geophysics/index.tsx"
     },
     "/hazards-review/": {
       "filePath": "hazards-review/index.tsx"
