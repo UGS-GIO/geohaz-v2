@@ -8,7 +8,7 @@ import Sidebar from '@/components/sidebar';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleCollectionSelect, handleSearchSelect, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox';
 import { PROD_POSTGREST_URL } from '@/lib/constants';
-import { qFaultsWMSTitle } from './data/layers';
+import { qFaultsWMSTitle } from '@/pages/hazards/data/layers/layers';
 
 export default function Map() {
   const { isCollapsed } = useSidebar();

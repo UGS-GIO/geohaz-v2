@@ -8,7 +8,7 @@ export interface NavLink {
   label?: string
   href?: string
   icon: JSX.Element
-  component?: () => JSX.Element
+  component?: React.ComponentType;
   componentPath?: string
 }
 
