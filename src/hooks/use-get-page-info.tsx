@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useGetCurrentPage } from "@/hooks/use-get-current-page";
 
 interface WebsiteInfo {
@@ -12,26 +12,20 @@ interface WebsiteInfo {
     appTitle: string;
 }
 
-const useGetPageInfo = () => {
+/**
+ * Fetches page-specific information using TanStack Query for robust
+ * caching and state management.
+ */
+export const useGetPageInfo = () => {
     const currentPage = useGetCurrentPage();
-    const [info, setInfo] = useState<WebsiteInfo | null>(null);
 
-    useEffect(() => {
-        const loadPageInfo = async () => {
-            try {
-                // Dynamically import the config file based on the page
-                const websiteInfo = await import(`@/pages/${currentPage}/data/page-info.tsx`);
-                setInfo(websiteInfo);
-            } catch (error) {
-                console.error('Error loading sidebar configuration:', error);
-                setInfo(null);
-            }
-        };
-
-        loadPageInfo();
-    }, [currentPage]);
-
-    return info;
+    return useQuery<WebsiteInfo, Error>({
+        queryKey: ['page-info', currentPage],
+        queryFn: async () => {
+            const module = await import(`@/pages/${currentPage}/data/page-info.tsx`);
+            return module
+        },
+        enabled: !!currentPage,
+        staleTime: Infinity,
+    });
 };
-
-export { useGetPageInfo };

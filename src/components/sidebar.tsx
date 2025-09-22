@@ -1,27 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { IconChevronsLeft, IconMenu2, IconX } from '@tabler/icons-react';
 import { Layout } from './custom/layout';
 import { Button } from './custom/button';
 import Nav from './nav';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/use-sidebar';
-import { useGetSidebarLinks } from '@/hooks/use-get-sidebar-links';
-import { SideLink } from '@/lib/types/sidelink-types';
-import { useGetPageInfo } from '@/hooks/use-get-page-info';
 import { Link } from '@/components/custom/link';
+import { useGetSidebarLinks } from '@/hooks/use-get-sidebar-links';
+import { useGetPageInfo } from '@/hooks/use-get-page-info';
+import { NavSkeleton } from './sidebar/sidebar-skeleton';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> { }
 
-export default function Sidebar({
-  className,
-}: SidebarProps) {
+export default function Sidebar({ className }: SidebarProps) {
   const { navOpened, setNavOpened, isCollapsed, setIsCollapsed } = useSidebar();
-  const transitionDuration = 700; // Duration in milliseconds
-  const isTransitioning = useRef(false); // Ref to manage transition state
-  const [sidebarLinks, setSidebarLinks] = useState<SideLink[] | null>(null);
-  const [title, setTitle] = useState<string | undefined>(undefined);
-  const pageInfo = useGetPageInfo();
-  const sideLinks = useGetSidebarLinks();
+  const { data: sidebarLinks, isLoading: areLinksLoading } = useGetSidebarLinks();
+  const { data: pageInfo } = useGetPageInfo();
 
   /* Make body not scrollable when navBar is opened */
   useEffect(() => {
@@ -32,22 +26,13 @@ export default function Sidebar({
     }
   }, [navOpened]);
 
-  // loading the page specific elements
-  useEffect(() => {
-    setSidebarLinks(sideLinks);
-    setTitle(pageInfo?.appTitle);
-  }, [sideLinks, pageInfo]);
-
+  // Mobile menu click handler is simplified (no setTimeout needed unless for specific animation)
   const handleMenuClick = () => {
-    if (isTransitioning.current) return; // Prevent action if a transition is active
-    isTransitioning.current = true; // Set the transition flag
-    setNavOpened(!navOpened);
-
-    // change the content after a setTimeout has been completed
-    setTimeout(() => {
-      setIsCollapsed((prev) => !prev);
-      isTransitioning.current = false; // Reset the transition flag
-    }, transitionDuration);
+    setNavOpened((prev) => !prev);
+    // You can decide if you still want the collapse logic tied to the mobile menu
+    if (!isCollapsed) {
+      setIsCollapsed(true);
+    }
   };
 
   return (
@@ -58,10 +43,9 @@ export default function Sidebar({
         className
       )}
     >
-      {/* Overlay in mobile */}
       <div
         onClick={() => setNavOpened(false)}
-        className={`absolute inset-0 transition-[opacity] delay-100 duration-${transitionDuration} ${navOpened ? 'h-svh opacity-50' : 'h-0 opacity-0'
+        className={`absolute inset-0 transition-opacity duration-700 ${navOpened ? 'h-svh opacity-50' : 'h-0 opacity-0'
           } w-full bg-black md:hidden`}
       />
 
@@ -81,7 +65,7 @@ export default function Sidebar({
             </Link>
             {!isCollapsed && (
               <div className="flex flex-col justify-end truncate transition-all duration-300">
-                <span className='font-medium text-wrap'>{title}</span>
+                <span className='font-medium text-wrap'>{pageInfo?.appTitle}</span>
                 <span className='text-sm'>Utah Geological Survey</span>
               </div>
             )}
@@ -102,17 +86,19 @@ export default function Sidebar({
         </Layout.Header>
 
         {/* Navigation links */}
-        <Nav
-          id='sidebar-menu'
-          className={cn(
-            'h-full flex-1 overflow-hidden z-40',
-            navOpened ? 'max-h-screen' : 'max-h-0 py-0 md:max-h-screen md:py-2'
-          )}
-          closeNav={() => setNavOpened(!navOpened)}
-          isCollapsed={isCollapsed}
-          setIsCollapsed={setIsCollapsed}
-          links={sidebarLinks || []}
-        />
+        {areLinksLoading ?
+          <NavSkeleton className='hidden h-full flex-1 md:flex' />
+          : <Nav
+            id='sidebar-menu'
+            className={cn(
+              'h-full flex-1 overflow-hidden z-40',
+              navOpened ? 'max-h-screen' : 'max-h-0 py-0 md:max-h-screen md:py-2'
+            )}
+            closeNav={() => setNavOpened(!navOpened)}
+            isCollapsed={isCollapsed}
+            setIsCollapsed={setIsCollapsed}
+            links={sidebarLinks || []}
+          />}
 
         {/* Scrollbar width toggle button */}
         <Button
@@ -123,7 +109,7 @@ export default function Sidebar({
         >
           <IconChevronsLeft
             stroke={1.5}
-            className={`h-5 w-5 ${isCollapsed ? 'rotate-180' : ''}`}
+            className={`h-5 w-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
           />
         </Button>
       </Layout>
