@@ -1,5 +1,4 @@
 import Info from '@/components/sidebar/info';
-import useLocalStorage from '@/hooks/use-local-storage';
 import { SideLink } from '@/lib/types/sidelink-types';
 import { useGetSidebarLinks } from '@/hooks/use-get-sidebar-links';
 import { InfoIcon } from 'lucide-react';
@@ -32,39 +31,31 @@ const defaultInfoLink: SideLink = {
     componentPath: 'src/components/sidebar/info.tsx',
 };
 
-// --- Provider Component (Updated Logic) ---
 export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const navigate = useNavigate();
     const search = useSearch({ from: '__root__' });
 
     const { data: dynamicLinks } = useGetSidebarLinks();
-
-    const [isCollapsed, setIsCollapsed] = useLocalStorage({
-        key: 'collapsed-sidebar',
-        defaultValue: false,
-    });
     const [navOpened, setNavOpened] = useState<boolean>(false);
 
     const allAvailableLinks = useMemo(() => {
-        // Now `dynamicLinks` is correctly either an array or undefined.
         return dynamicLinks ? [defaultInfoLink, ...dynamicLinks] : [defaultInfoLink];
     }, [dynamicLinks]);
 
+    // --- Derive State From URL ---
     const currentTab = search.tab;
+    const isCollapsed = search.sidebar_collapsed;
+
     const currentContent =
-        // 1. If the tab is 'home', explicitly set content to `null` to show the link list.
         currentTab === 'home'
             ? null
-            // 2. Otherwise, find the link that matches the tab.
             : allAvailableLinks.find(
                 (link) => link.title.toLowerCase() === currentTab?.toLowerCase()
-            ) || null; // 3. Fallback to null (or the Home view) if the tab is invalid.
+            ) || null;
 
+    // --- URL-Updating Setters ---
     const handleSetCurrentContent = useCallback((content: SideLink | null) => {
-        // If content is null (for "Home"), `newTab` is undefined, removing it from the URL.
-        // Otherwise, set the tab to the link's title (e.g., "info", "layers").
         const newTab = content ? content.title.toLowerCase() : 'home';
-
         navigate({
             to: '.',
             search: (prev) => ({
@@ -75,13 +66,25 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
         });
     }, [navigate]);
 
+    const handleSetIsCollapsed = useCallback((value: boolean | ((prevState: boolean) => boolean)) => {
+        const newCollapsedValue = typeof value === 'function' ? value(isCollapsed) : value;
+        navigate({
+            to: '.',
+            search: (prev) => ({
+                ...prev,
+                sidebar_collapsed: newCollapsedValue ? true : undefined,
+            }),
+            replace: true,
+        });
+    }, [navigate, isCollapsed]);
+
     return (
         <SidebarContext.Provider
             value={{
                 currentContent,
                 setCurrentContent: handleSetCurrentContent,
                 isCollapsed,
-                setIsCollapsed,
+                setIsCollapsed: handleSetIsCollapsed,
                 navOpened,
                 setNavOpened,
             }}

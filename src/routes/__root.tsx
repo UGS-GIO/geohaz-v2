@@ -24,6 +24,7 @@ const rootSearchSchema = z.object({
     lon: z.coerce.number().optional().default(-112),
     filters: z.record(z.string()).optional(),
     tab: z.string().optional().default('info'),
+    sidebar_collapsed: z.coerce.boolean().optional().default(false),
     coordinate_format: z.enum(['dd', 'dms']).optional(),
     layers: z.preprocess((val) => {
         if (typeof val === 'string') {
