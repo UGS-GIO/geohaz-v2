@@ -2,12 +2,18 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { z } from 'zod';
 import { LayerUrlProvider } from '@/context/layer-url-provider';
+import { SidebarProvider } from '@/context/sidebar-provider';
+import { MapProvider } from '@/context/map-provider';
 
 const RootComponent = () => {
     return (
         <LayerUrlProvider>
-            <Outlet />
-            {import.meta.env.MODE !== 'production' && <TanStackRouterDevtools />}
+            <SidebarProvider>
+                <MapProvider>
+                    <Outlet />
+                    {import.meta.env.MODE !== 'production' && <TanStackRouterDevtools />}
+                </MapProvider>
+            </SidebarProvider>
         </LayerUrlProvider>
     );
 };
