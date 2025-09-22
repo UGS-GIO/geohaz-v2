@@ -3,6 +3,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Accordion, AccordionContent, AccordionHeader, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ExternalLink, Layers as LayersIcon } from 'lucide-react';
 import { Button } from '../custom/button';
+import { LoadingSpinner } from '../custom/loading-spinner';
 import Layers from '@/components/sidebar/layers';
 import { BackToMenuButton } from '../custom/back-to-menu-button';
 import { useSidebar } from '@/hooks/use-sidebar';
@@ -18,7 +19,7 @@ function Info() {
   const [isMapDetailsExpanded, setIsMapDetailsExpanded] = useState(true);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
   const drawerTriggerRef = useRef<HTMLButtonElement>(null);
-  const pageInfo = useGetPageInfo()
+  const { data: pageInfo, isLoading: isInfoLoading } = useGetPageInfo();
 
   const toggleMapDetails = () => {
     setIsMapDetailsExpanded(!isMapDetailsExpanded);
@@ -45,6 +46,18 @@ function Info() {
     }
   };
 
+  // Show loading spinner while page info is loading
+  if (isInfoLoading) {
+    return (
+      <div className="flex flex-col h-full">
+        <BackToMenuButton />
+        <div className="flex-1 flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       <BackToMenuButton />
@@ -65,7 +78,11 @@ function Info() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          {!isMapDetailsExpanded && <div>{pageInfo?.mapDetailsShortened}</div>}
+          {!isMapDetailsExpanded && (
+            <div>
+              {pageInfo?.mapDetailsShortened}
+            </div>
+          )}
         </div>
 
         {/* Data Sources Accordion */}
@@ -79,10 +96,22 @@ function Info() {
                   </div>
                 </AccordionTrigger>
               </AccordionHeader>
-              <AccordionContent>{pageInfo?.dataSources}</AccordionContent>
+              <AccordionContent>
+                {pageInfo?.dataSources || (
+                  <div className="flex justify-center py-4">
+                    <LoadingSpinner />
+                  </div>
+                )}
+              </AccordionContent>
             </AccordionItem>
           </Accordion>
-          {!isDataSourcesExpanded && <div>{pageInfo?.dataSourcesShortened}</div>}
+          {!isDataSourcesExpanded && (
+            <div>
+              {pageInfo?.dataSourcesShortened || (
+                <div className="animate-pulse h-4 bg-gray-200 rounded w-2/3"></div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Desktop Modal Buttons */}
@@ -97,7 +126,6 @@ function Info() {
             Contact Webmaster&nbsp;<ExternalLink size={16} />
           </Button>
         </div>
-
 
         {/* Mobile Modal Buttons */}
         <div className="flex flex-wrap justify-center mx-2 md:hidden">
@@ -126,9 +154,21 @@ function Info() {
               {modalType === 'acknowledgments' && <DrawerHeader><DrawerTitle>Acknowledgments</DrawerTitle></DrawerHeader>}
             </div>
             <div data-vaul-no-drag className="overflow-y-auto p-4">
-              {modalType === 'disclaimer' && <DrawerDescription>{pageInfo?.dataDisclaimer}</DrawerDescription>}
-              {modalType === 'references' && <DrawerDescription>{pageInfo?.references}</DrawerDescription>}
-              {modalType === 'acknowledgments' && <DrawerDescription>{pageInfo?.acknowledgments}</DrawerDescription>}
+              {modalType === 'disclaimer' && (
+                <DrawerDescription>
+                  {pageInfo?.dataDisclaimer}
+                </DrawerDescription>
+              )}
+              {modalType === 'references' && (
+                <DrawerDescription>
+                  {pageInfo?.references}
+                </DrawerDescription>
+              )}
+              {modalType === 'acknowledgments' && (
+                <DrawerDescription>
+                  {pageInfo?.acknowledgments}
+                </DrawerDescription>
+              )}
             </div>
           </DrawerContent>
         </Drawer>
@@ -144,7 +184,9 @@ function Info() {
                 <DialogHeader>
                   <DialogTitle>Data Disclaimer</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>{pageInfo?.dataDisclaimer}</DialogDescription>
+                <DialogDescription>
+                  {pageInfo?.dataDisclaimer}
+                </DialogDescription>
               </>
             )}
             {modalType === 'references' && (
@@ -152,7 +194,9 @@ function Info() {
                 <DialogHeader>
                   <DialogTitle>References</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>{pageInfo?.references}</DialogDescription>
+                <DialogDescription>
+                  {pageInfo?.references}
+                </DialogDescription>
               </>
             )}
             {modalType === 'acknowledgments' && (
@@ -160,7 +204,9 @@ function Info() {
                 <DialogHeader>
                   <DialogTitle>Acknowledgments</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>{pageInfo?.acknowledgments}</DialogDescription>
+                <DialogDescription>
+                  {pageInfo?.acknowledgments}
+                </DialogDescription>
               </>
             )}
           </DialogContent>

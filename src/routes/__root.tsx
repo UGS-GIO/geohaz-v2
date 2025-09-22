@@ -2,12 +2,18 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { z } from 'zod';
 import { LayerUrlProvider } from '@/context/layer-url-provider';
+import { SidebarProvider } from '@/context/sidebar-provider';
+import { MapProvider } from '@/context/map-provider';
 
 const RootComponent = () => {
     return (
         <LayerUrlProvider>
-            <Outlet />
-            {import.meta.env.MODE !== 'production' && <TanStackRouterDevtools />}
+            <SidebarProvider>
+                <MapProvider>
+                    <Outlet />
+                    {import.meta.env.MODE !== 'production' && <TanStackRouterDevtools />}
+                </MapProvider>
+            </SidebarProvider>
         </LayerUrlProvider>
     );
 };
@@ -17,6 +23,8 @@ const rootSearchSchema = z.object({
     lat: z.coerce.number().optional().default(39.5),
     lon: z.coerce.number().optional().default(-112),
     filters: z.record(z.string()).optional(),
+    tab: z.string().optional().default('info'),
+    sidebar_collapsed: z.coerce.boolean().optional().default(false),
     coordinate_format: z.enum(['dd', 'dms']).optional(),
     layers: z.preprocess((val) => {
         if (typeof val === 'string') {
