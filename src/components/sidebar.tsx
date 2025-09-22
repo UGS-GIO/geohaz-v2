@@ -36,7 +36,7 @@ export default function Sidebar({
   useEffect(() => {
     setSidebarLinks(sideLinks);
     setTitle(pageInfo?.appTitle);
-  }, [sideLinks]);
+  }, [sideLinks, pageInfo]);
 
   const handleMenuClick = () => {
     if (isTransitioning.current) return; // Prevent action if a transition is active
@@ -69,23 +69,22 @@ export default function Sidebar({
         {/* Header */}
         <Layout.Header
           sticky
-          className='z-50 flex justify-between px-4 py-3 shadow-sm md:px-4'
+          className={`z-50 flex justify-between px-4 py-3 shadow-sm md:px-4 ${isCollapsed ? 'md:mt-3' : ''}`}
         >
-          <div className={`flex items-center ${!isCollapsed ? 'gap-2' : ''}`}>
+          <div className={`flex items-center ${!isCollapsed ? 'gap-4' : ''}`}>
             <Link to="https://geology.utah.gov/" className="cursor-pointer">
               <img
                 src='/logo_main.png'
                 alt='Utah Geological Survey Logo'
-                className={`transition-all ${isCollapsed ? 'h-6 w-6' : 'h-8 w-[1.75rem]'}`}
+                className={`transition-all duration-300 ${isCollapsed ? 'h-6 w-6' : 'h-8 w-[1.75rem]'}`}
               />
             </Link>
-            <div
-              className={`flex flex-col justify-end truncate ${isCollapsed ? 'invisible w-0' : 'visible w-auto'
-                }`}
-            >
-              <span className='font-medium text-wrap'>{title}</span>
-              <span className='text-sm'>Utah Geological Survey</span>
-            </div>
+            {!isCollapsed && (
+              <div className="flex flex-col justify-end truncate transition-all duration-300">
+                <span className='font-medium text-wrap'>{title}</span>
+                <span className='text-sm'>Utah Geological Survey</span>
+              </div>
+            )}
           </div>
 
           {/* Toggle Button in mobile */}
