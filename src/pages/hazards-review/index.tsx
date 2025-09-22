@@ -8,7 +8,7 @@ import Sidebar from '@/components/sidebar';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleCollectionSelect, handleSearchSelect, handleSuggestionSelect } from '@/components/sidebar/filter/search-combobox';
 import { PROD_POSTGREST_URL } from '@/lib/constants';
-import { qFaultsWMSTitle } from './data/layers';
+import { qFaultsWMSTitle } from './data/layers/layers';
 import { signOut } from '@/lib/auth';
 import { useAuth } from '@/context/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -22,11 +22,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User } from 'lucide-react';
+import { useLayerUrl } from '@/context/layer-url-provider';
+import { useSearch } from '@tanstack/react-router';
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
+  const search = useSearch({ from: '/hazards-review/' });
+  const { updateLayerSelection } = useLayerUrl();
   const { user } = useAuth();
-
   const searchConfig: SearchSourceConfig[] = [
     defaultMasqueradeConfig,
     {
@@ -116,7 +119,10 @@ export default function Map() {
           </Layout.Header>
 
           <Layout.Body>
-            <MapContainer />
+            <MapContainer
+              searchParams={search}
+              updateLayerSelection={updateLayerSelection}
+            />
           </Layout.Body>
 
           <Layout.Footer className={cn('hidden md:flex z-10')} dynamicContent={<MapFooter />} />

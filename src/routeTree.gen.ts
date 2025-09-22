@@ -87,9 +87,7 @@ const CarbonstorageIndexRoute = CarbonstorageIndexImport.update({
   id: '/carbonstorage/',
   path: '/carbonstorage/',
   getParentRoute: () => rootRoute,
-} as any).lazy(() =>
-  import('./routes/carbonstorage/index.lazy').then((d) => d.Route),
-)
+} as any)
 
 const HazardsReportAoiLazyRoute = HazardsReportAoiLazyImport.update({
   id: '/hazards/report/$aoi',

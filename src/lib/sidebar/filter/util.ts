@@ -1,5 +1,7 @@
 import { ExtendedGeometry } from "@/components/sidebar/filter/search-combobox";
+import { findLayerByTitle } from "@/lib/map/utils";
 import Extent from "@arcgis/core/geometry/Extent";
+import WMSLayer from "@arcgis/core/layers/WMSLayer";
 import { Feature, GeoJsonProperties } from "geojson";
 
 export interface SearchResult {
@@ -25,3 +27,29 @@ export const zoomToExtent = (xmin: number, ymin: number, xmax: number, ymax: num
         }
     });
 }
+
+export const findAndApplyWMSFilter = (
+    mapInstance: __esri.Map | null | undefined,
+    layerTitle: string,
+    cqlFilter: string | null
+) => {
+    if (!mapInstance) return;
+
+    const layer = findLayerByTitle(mapInstance, layerTitle);
+
+    if (layer?.type === 'wms') {
+        const wmsLayer = layer as WMSLayer;
+        const newCustomParameters = { ...(wmsLayer.customParameters || {}) };
+
+        if (cqlFilter) {
+            newCustomParameters.cql_filter = cqlFilter;
+        } else {
+            delete newCustomParameters.cql_filter;
+        }
+
+        if (JSON.stringify(wmsLayer.customParameters) !== JSON.stringify(newCustomParameters)) {
+            wmsLayer.customParameters = newCustomParameters;
+            wmsLayer.refresh();
+        }
+    }
+};
