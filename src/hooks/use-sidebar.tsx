@@ -8,7 +8,7 @@ export function useSidebar() {
     // Ensure the hook is used within the SidebarContextProvider
     if (!context) {
         throw new Error(
-            'useSidebar must be used within the scope of SidebarContextProvider'
+            'useSidebar must be used within the scope of SidebarProvider'
         );
     }
 
@@ -16,8 +16,12 @@ export function useSidebar() {
 
     useEffect(() => {
         const handleResize = () => {
-            // Update isCollapsed based on window.innerWidth
-            setIsCollapsed(window.innerWidth < 768 ? false : isCollapsed);
+            const isMobile = window.innerWidth < 768;
+            // On mobile, always start uncollapsed when resizing
+            // On desktop, maintain current state
+            if (isMobile && isCollapsed) {
+                setIsCollapsed(false);
+            }
         };
 
         // Initial setup
