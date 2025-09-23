@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps } from '@/lib/types/mapping-types';
 import { isGroupLayer, isWMSLayer } from '@/lib/map/utils';
-import { useGetLayerConfigs } from './use-get-layer-configs';
+import { useGetLayerConfigsData } from './use-get-layer-configs';
 
 interface ReviewableLayerInfo {
     schema_name: string;
@@ -36,7 +36,7 @@ const fetchReviewableLayers = async (): Promise<ReviewableLayerInfo[]> => {
 };
 
 export const useFetchReviewableLayers = () => {
-    const layerConfig = useGetLayerConfigs('review-layers');
+    const layerConfig = useGetLayerConfigsData('review-layers');
 
     return useQuery<ReviewableLayerInfo[], Error, LayerOption[]>({
         queryKey: ['reviewableLayers', layerConfig],

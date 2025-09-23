@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useMemo } from 'react';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
-import { LayerOrderConfig, useGetLayerConfigs } from "@/hooks/use-get-layer-configs";
+import { LayerOrderConfig, useGetLayerConfigsData } from "@/hooks/use-get-layer-configs";
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { useLayerUrl } from '@/context/layer-url-provider';
@@ -16,7 +16,7 @@ import { createCoordinateAdapter, CoordinateAdapter } from '@/lib/map/coordinate
 interface UseMapContainerProps {
     wmsUrl: string;
     layerOrderConfigs?: LayerOrderConfig[];
-    layersConfig: ReturnType<typeof useGetLayerConfigs>;
+    layersConfig: ReturnType<typeof useGetLayerConfigsData>;
     mapType?: 'arcgis' | 'maplibre'; // New prop to specify map type
 }
 

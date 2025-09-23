@@ -4,9 +4,9 @@ import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { useDomainFilters } from "@/hooks/use-domain-filters";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
-import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
+import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers/layers';
 import { CcsSearchParams } from '@/routes/carbonstorage';
-import { useGetLayerConfigs } from '@/hooks/use-get-layer-configs';
+import { useGetLayerConfigsData } from '@/hooks/use-get-layer-configs';
 
 interface MapContainerProps {
     searchParams: CcsSearchParams;
@@ -22,7 +22,7 @@ const CCS_FILTER_MAPPING = {
 };
 
 export default function MapContainer({ searchParams, updateLayerSelection }: MapContainerProps) {
-    const defaultLayersConfig = useGetLayerConfigs('layers');
+    const defaultLayersConfig = useGetLayerConfigsData('layers');
 
     const {
         mapRef,

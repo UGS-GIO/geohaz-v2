@@ -20,7 +20,7 @@ import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BackToMenuButton } from '@/components/custom/back-to-menu-button';
 import { useMap } from '@/hooks/use-map';
-import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
+import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers/layers';
 import { Badge } from '@/components/ui/badge';
 import { useSidebar } from '@/hooks/use-sidebar';
 import Layers from '@/components/sidebar/layers';

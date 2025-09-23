@@ -4,7 +4,7 @@ import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { HazardsReviewSearchParams } from '@/routes/hazards-review';
-import { useGetLayerConfigs } from '@/hooks/use-get-layer-configs';
+import { useGetLayerConfigsData } from '@/hooks/use-get-layer-configs';
 
 
 interface MapContainerProps {
@@ -12,13 +12,8 @@ interface MapContainerProps {
     updateLayerSelection?: (layerTitle: string, selected: boolean) => void;
 }
 
-export default function MapContainer({ searchParams, updateLayerSelection }: MapContainerProps) {
-    console.log({
-        searchParams,
-        updateLayerSelection
-    });
-
-    const layersConfig = useGetLayerConfigs();
+export default function MapContainer({ }: MapContainerProps) {
+    const layersConfig = useGetLayerConfigsData();
 
     const {
         mapRef,

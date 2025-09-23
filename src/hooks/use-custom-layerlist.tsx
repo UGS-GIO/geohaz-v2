@@ -196,13 +196,15 @@ export const useCustomLayerList = ({ config }: { config: LayerProps[] | null }) 
 
     const layerList = useMemo(() => {
         if (!config) return [];
-        return [...config].map(layer => (
-            <LayerAccordionItem
-                key={layer.title}
-                layerConfig={layer}
-                isTopLevel={true}
-            />
-        ));
+        return [...config].map(layer => {
+            return (
+                <LayerAccordionItem
+                    key={layer.title}
+                    layerConfig={layer}
+                    isTopLevel={true}
+                />
+            )
+        });
     }, [config]);
 
     return layerList;

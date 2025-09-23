@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import Collection from "@arcgis/core/core/Collection.js";
 import { useMap } from "@/hooks/use-map";
 import { ColorCodingRecordFunction, LayerProps, LinkFields, RelatedTable, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
-import { useGetLayerConfigs } from "./use-get-layer-configs";
+import { useGetLayerConfigsData } from "./use-get-layer-configs";
 import { createPinGraphic, clearGraphics } from "@/lib/map/highlight-utils";
 import { isGroupLayer, isGroupMapLayer, isWMSLayer, isWMSMapLayer } from "@/lib/map/utils";
 
@@ -12,7 +12,7 @@ type VisibleLayer = {
 }
 
 type UseMapInteractionsType = {
-    layersConfig: ReturnType<typeof useGetLayerConfigs>;
+    layersConfig: ReturnType<typeof useGetLayerConfigsData>;
 };
 
 /** 
