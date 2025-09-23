@@ -186,3 +186,21 @@ export const zoomToFeature = (
         });
     }
 }
+
+// Type guard to check if the layer is a WMSLayerProps
+export const isWMSLayer = (layer: LayerProps): layer is WMSLayerProps => {
+    return layer.type === 'wms';
+}
+
+// Type guard to check if the layer is a GroupLayerProps
+export const isGroupLayer = (layer: LayerProps): layer is GroupLayerProps => {
+    return layer.type === 'group';
+}
+
+export const isWMSMapLayer = (layer: __esri.Layer): layer is __esri.WMSLayer => {
+    return layer.type === 'wms';
+}
+
+export const isGroupMapLayer = (layer: __esri.Layer): layer is __esri.GroupLayer => {
+    return layer.type === 'group';
+}

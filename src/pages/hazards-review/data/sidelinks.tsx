@@ -1,13 +1,13 @@
 import { House, Info as InfoIcon, Layers as LayersIcon, Settings } from 'lucide-react'
 import Info from '@/components/sidebar/info'
-import Layers from '@/components/sidebar/layers'
-import MapConfigurations from '@/pages/hazards/components/sidebar/map-configurations/map-configurations'
+import MapConfigurations from '@/pages/hazards-review/components/sidebar/map-configurations/map-configurations'
+import { LayersWithReview } from '@/pages/hazards-review/components/sidebar/layers/layers-with-review'
 export interface NavLink {
   title: string
   label?: string
   href?: string
   icon: JSX.Element
-  component?: () => JSX.Element
+  component?: React.ComponentType
   componentPath?: string
 }
 
@@ -32,7 +32,7 @@ export const sidelinks: SideLink[] = [
     title: 'Layers',
     label: '',
     icon: <LayersIcon className='stroke-foreground' />,
-    component: Layers, // Direct component reference
+    component: LayersWithReview, // Direct component reference
   },
   {
     title: 'Map Configurations',

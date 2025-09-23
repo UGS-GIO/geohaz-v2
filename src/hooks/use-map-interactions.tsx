@@ -1,25 +1,30 @@
 import { useCallback, useState } from "react";
 import Collection from "@arcgis/core/core/Collection.js";
 import { useMap } from "@/hooks/use-map";
-import { ColorCodingRecordFunction, GroupLayerProps, LayerProps, LinkFields, RelatedTable, WMSLayerProps, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
-import { useGetLayerConfig } from "./use-get-layer-config";
+import { ColorCodingRecordFunction, LayerProps, LinkFields, RelatedTable, RasterSource, FieldConfig } from "@/lib/types/mapping-types";
+import { useGetLayerConfigsData } from "./use-get-layer-configs";
 import { createPinGraphic, clearGraphics } from "@/lib/map/highlight-utils";
+import { isGroupLayer, isGroupMapLayer, isWMSLayer, isWMSMapLayer } from "@/lib/map/utils";
 
 type VisibleLayer = {
     visible: boolean;
     groupLayerTitle: string;
 }
 
+type UseMapInteractionsType = {
+    layersConfig: ReturnType<typeof useGetLayerConfigsData>;
+};
+
 /** 
     * This hook manages map interactions, including layer visibility and context menu handling.
     * It provides functionality to get visible layers based on the current map view and layer configuration.
     * It also handles right-click events to show a context menu and update coordinates. 
+    * @param layersConfig - Configuration for map layers.
     * @returns An object containing the context menu handler, visible layers, and a function to get visible layers.
 */
-export const useMapInteractions = () => {
+export const useMapInteractions = ({ layersConfig }: UseMapInteractionsType) => {
     const [visibleLayers, setVisibleLayers] = useState<Record<string, VisibleLayer>>();
     const { view } = useMap();
-    const layersConfig = useGetLayerConfig();
 
     type LayerVisibilityMapProps = Record<string, {
         visible: boolean;
@@ -39,25 +44,6 @@ export const useMapInteractions = () => {
         layerVisibilityMap: LayerVisibilityMapProps;
         filteredWMSLayers: __esri.Collection<__esri.Layer>;
     };
-
-    // Type guard to check if the layer is a WMSLayerProps
-    function isWMSLayer(layer: LayerProps): layer is WMSLayerProps {
-        return layer.type === 'wms';
-    }
-
-    // Type guard to check if the layer is a GroupLayerProps
-    function isGroupLayer(layer: LayerProps): layer is GroupLayerProps {
-        return layer.type === 'group';
-    }
-
-    function isWMSMapLayer(layer: __esri.Layer): layer is __esri.WMSLayer {
-        return layer.type === 'wms';
-    }
-
-    function isGroupMapLayer(layer: __esri.Layer): layer is __esri.GroupLayer {
-        return layer.type === 'group';
-    }
-
 
     // Function to crosscheck and filter WMS layers
     function crossCheckAndFilterWMS({

@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useMemo } from 'react';
 import { useMapCoordinates } from "@/hooks/use-map-coordinates";
 import { useMapInteractions } from "@/hooks/use-map-interactions";
 import { useMapPositionUrlParams } from "@/hooks/use-map-position-url-params";
-import { LayerOrderConfig, useGetLayerConfig } from "@/hooks/use-get-layer-config";
+import { LayerOrderConfig, useGetLayerConfigsData } from "@/hooks/use-get-layer-configs";
 import { useMapClickOrDrag } from "@/hooks/use-map-click-or-drag";
 import { useFeatureInfoQuery } from "@/hooks/use-feature-info-query";
 import { useLayerUrl } from '@/context/layer-url-provider';
@@ -11,12 +11,12 @@ import { useLayerVisibility } from '@/hooks/use-layer-visibility';
 import { useMapClickHandler } from '@/hooks/use-map-click-handler';
 import { useFeatureResponseHandler } from '@/hooks/use-feature-response-handler';
 import { useMapUrlSync } from '@/hooks/use-map-url-sync';
-import { useDomainFilters } from '@/hooks/use-domain-filters';
 import { createCoordinateAdapter, CoordinateAdapter } from '@/lib/map/coordinate-adapter';
 
 interface UseMapContainerProps {
     wmsUrl: string;
     layerOrderConfigs?: LayerOrderConfig[];
+    layersConfig: ReturnType<typeof useGetLayerConfigsData>;
     mapType?: 'arcgis' | 'maplibre'; // New prop to specify map type
 }
 
@@ -34,19 +34,19 @@ interface UseMapContainerProps {
 export function useMapContainer({
     wmsUrl,
     layerOrderConfigs = [],
-    mapType = 'arcgis' // Default to ArcGIS for backwards compatibility
+    layersConfig,
+    mapType = 'arcgis'
 }: UseMapContainerProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const { loadMap, view, isSketching } = useMap();
     const { coordinates, setCoordinates } = useMapCoordinates();
-    const { handleOnContextMenu, getVisibleLayers } = useMapInteractions();
+    const { handleOnContextMenu, getVisibleLayers } = useMapInteractions({ layersConfig: layersConfig });
     const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null);
     const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
     const drawerTriggerRef = useRef<HTMLButtonElement>(null);
     useMapPositionUrlParams(view);
-    const layersConfig = useGetLayerConfig();
     const [visibleLayersMap, setVisibleLayersMap] = useState({});
-    const { selectedLayerTitles, hiddenGroupTitles, updateLayerSelection } = useLayerUrl();
+    const { selectedLayerTitles, hiddenGroupTitles } = useLayerUrl();
 
     // Create coordinate adapter based on map type
     const coordinateAdapter: CoordinateAdapter = useMemo(() => {
@@ -54,10 +54,7 @@ export function useMapContainer({
     }, [mapType]);
 
     // Extract URL synchronization
-    const { center, zoom, filters } = useMapUrlSync();
-
-    // Extract domain-specific filter handling
-    useDomainFilters({ view, filters, updateLayerSelection });
+    const { center, zoom } = useMapUrlSync();
 
     // Process layers based on visibility state
     const processedLayers = useLayerVisibility(

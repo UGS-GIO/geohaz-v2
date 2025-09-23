@@ -1,19 +1,29 @@
-import { useEffect } from 'react';
 import { MapWidgets } from '@/pages/carbonstorage/components/map-widgets';
 import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
+import { useDomainFilters } from "@/hooks/use-domain-filters";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
-import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers';
-import { findAndApplyWMSFilter } from '@/pages/carbonstorage/components/sidebar/map-configurations/map-configurations';
-import { CCSSearch } from '@/routes/carbonstorage';
+import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers/layers';
+import { CcsSearchParams } from '@/routes/carbonstorage';
+import { useGetLayerConfigsData } from '@/hooks/use-get-layer-configs';
 
 interface MapContainerProps {
-    searchParams: CCSSearch;
+    searchParams: CcsSearchParams;
     updateLayerSelection: (layerTitle: string, selected: boolean) => void;
 }
 
+// Carbon Storage specific filter configuration
+const CCS_FILTER_MAPPING = {
+    [wellWithTopsWMSTitle]: {
+        layerTitle: wellWithTopsWMSTitle,
+        autoSelectLayer: true
+    }
+};
+
 export default function MapContainer({ searchParams, updateLayerSelection }: MapContainerProps) {
+    const defaultLayersConfig = useGetLayerConfigsData('layers');
+
     const {
         mapRef,
         contextMenuTriggerRef,
@@ -28,21 +38,16 @@ export default function MapContainer({ searchParams, updateLayerSelection }: Map
         view,
     } = useMapContainer({
         wmsUrl: `${PROD_GEOSERVER_URL}wms`,
+        layersConfig: defaultLayersConfig,
     });
 
-    // ccs-specific effect for applying filters on initial load
-    useEffect(() => {
-        // Wait for the map and filters to be ready
-        if (!view || !view.map) return;
-
-        const filtersFromUrl = searchParams.filters ?? {};
-        const wellFilter = filtersFromUrl[wellWithTopsWMSTitle] || null;
-
-        findAndApplyWMSFilter(view.map, wellWithTopsWMSTitle, wellFilter);
-        if (wellFilter) {
-            updateLayerSelection(wellWithTopsWMSTitle, true);
-        }
-    }, [view, searchParams.filters, updateLayerSelection]);
+    // Use the generalized domain filters hook
+    useDomainFilters({
+        view,
+        filters: searchParams.filters,
+        updateLayerSelection,
+        filterMapping: CCS_FILTER_MAPPING
+    });
 
     return (
         <>

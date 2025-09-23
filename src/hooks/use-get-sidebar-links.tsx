@@ -1,27 +1,23 @@
-import { useState, useEffect } from "react";
+// src/hooks/use-get-sidebar-links.ts
+import { useQuery } from '@tanstack/react-query';
 import { useGetCurrentPage } from "./use-get-current-page";
 import { SideLink } from "@/lib/types/sidelink-types";
 
-const useGetSidebarLinks = () => {
+/**
+ * Fetches the sidebar links for the current page using TanStack Query.
+ */
+export const useGetSidebarLinks = () => {
     const currentPage = useGetCurrentPage();
-    const [sidebarLinks, setSidebarLinks] = useState<SideLink[] | null>(null);
 
-    useEffect(() => {
-        const loadSidebarLinks = async () => {
-            try {
-                // Dynamically import the config file based on the page
-                const links = await import(`@/pages/${currentPage}/data/sidelinks.tsx`);
-                setSidebarLinks(links.sidelinks);
-            } catch (error) {
-                console.error('Error loading sidebar configuration:', error);
-                setSidebarLinks(null);
-            }
-        };
+    return useQuery<SideLink[], Error>({
+        queryKey: ['sidebar-links', currentPage],
 
-        loadSidebarLinks();
-    }, [currentPage]);
-
-    return sidebarLinks;
+        // The function that performs the async data fetching.
+        queryFn: async () => {
+            const module = await import(`@/pages/${currentPage}/data/sidelinks.tsx`);
+            return module.sidelinks || [];
+        },
+        enabled: !!currentPage,
+        staleTime: Infinity,    // These links are static, so we can cache them forever.
+    });
 };
-
-export { useGetSidebarLinks };

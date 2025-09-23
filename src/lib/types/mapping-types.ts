@@ -82,7 +82,7 @@ export type CustomSublayerProps = {
     schema?: string; // postgreSQL schema name, used for the accept-profile header in postgrest requests because the schema name does not necessarilly match the workspace name in geoserver
 };
 
-type ExtendedSublayerProperties =
+export type ExtendedSublayerProperties =
     __esri.SublayerProperties &
     __esri.WMSSublayerProperties &
     CustomSublayerProps;
