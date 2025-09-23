@@ -12,12 +12,7 @@ interface MapContainerProps {
     updateLayerSelection?: (layerTitle: string, selected: boolean) => void;
 }
 
-export default function MapContainer({ searchParams, updateLayerSelection }: MapContainerProps) {
-    console.log({
-        searchParams,
-        updateLayerSelection
-    });
-
+export default function MapContainer({ }: MapContainerProps) {
     const layersConfig = useGetLayerConfigsData();
 
     const {

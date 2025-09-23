@@ -1,12 +1,12 @@
 import { useCustomLayerList } from "@/hooks/use-custom-layerlist";
 import { BackToMenuButton } from "../custom/back-to-menu-button";
-import { useGetLayerConfigsData } from "@/hooks/use-get-layer-configs";
+import { useGetLayerConfigs } from "@/hooks/use-get-layer-configs";
 
 function Layers() {
-  const layersConfig = useGetLayerConfigsData('layers');
+  const { layerConfigs: layersConfig, isLoading } = useGetLayerConfigs('layers');
   const layerList = useCustomLayerList({ config: layersConfig });
 
-  if (!layerList?.length) {
+  if (isLoading) {
     return <div>Loading layers...</div>;
   }
 

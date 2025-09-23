@@ -158,7 +158,7 @@ const useGetLayerConfigs = (pageName?: string, layerOrderConfigs?: LayerOrderCon
     }) as UseQueryResult<LayerProps[] | null, Error>;
 
     return {
-        layerConfigs: query.data,
+        layerConfigs: query.data || null,
         isLoading: query.isLoading,
         error: query.error,
         isError: query.isError,
