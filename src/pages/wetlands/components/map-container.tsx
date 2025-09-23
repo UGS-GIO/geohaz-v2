@@ -4,6 +4,7 @@ import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { useGetLayerConfigsData } from '@/hooks/use-get-layer-configs';
+import MapLoadingSpinner from '@/components/custom/map/map-loading-spinner';
 
 export default function MapContainer() {
     const layersConfig = useGetLayerConfigsData('layers');
@@ -34,6 +35,7 @@ export default function MapContainer() {
                 {...clickOrDragHandlers}
             >
                 <MapWidgets />
+                <MapLoadingSpinner />
             </div>
             <PopupDrawer
                 container={popupContainer}
