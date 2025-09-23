@@ -1,3 +1,14 @@
+## [1.15.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.14.0...v1.15.0) (2025-09-23)
+
+
+### common
+
+* **✨ Features**(`common`): add use-is-map-loading hook and maploadingspinner component to track map loading state ([#300](https://github.com/UGS-GIO/geohaz-v2/issues/300))
+
+### data-reviewer
+
+* **♻️ Refactors**(`data-reviewer`): alter visibility layers ([#297](https://github.com/UGS-GIO/geohaz-v2/issues/297))
+
 ## [1.14.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.13.1...v1.14.0) (2025-09-23)
 
 
