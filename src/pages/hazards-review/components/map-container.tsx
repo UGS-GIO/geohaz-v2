@@ -5,6 +5,7 @@ import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { HazardsReviewSearchParams } from '@/routes/hazards-review';
 import { useGetLayerConfigsData } from '@/hooks/use-get-layer-configs';
+import MapLoadingSpinner from '@/components/custom/map/map-loading-spinner';
 
 
 interface MapContainerProps {
@@ -41,6 +42,7 @@ export default function MapContainer({ }: MapContainerProps) {
                 {...clickOrDragHandlers}
             >
                 <MapWidgets />
+                <MapLoadingSpinner />
             </div>
             <PopupDrawer
                 container={popupContainer}
