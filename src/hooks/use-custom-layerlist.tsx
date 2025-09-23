@@ -16,6 +16,8 @@ import Layer from '@arcgis/core/layers/Layer';
 import { clearGraphics } from '@/lib/map/highlight-utils';
 
 const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerProps; isTopLevel: boolean }) => {
+    console.log('Rendering LayerAccordionItem for:', layerConfig.title, layerConfig);
+
     const {
         isSelected,
         handleToggleSelection,
@@ -24,6 +26,8 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
         groupCheckboxState,
         handleSelectAllToggle,
     } = useLayerItemState(layerConfig);
+    console.log('LayerAccordionItem render:', layerConfig.title, 'isSelected:', isSelected, 'isGroupVisible:', isGroupVisible, 'groupCheckboxState:', groupCheckboxState);
+
 
     const { view } = useMap();
     const { setIsCollapsed, setNavOpened } = useSidebar();
@@ -196,13 +200,15 @@ export const useCustomLayerList = ({ config }: { config: LayerProps[] | null }) 
 
     const layerList = useMemo(() => {
         if (!config) return [];
-        return [...config].map(layer => (
-            <LayerAccordionItem
-                key={layer.title}
-                layerConfig={layer}
-                isTopLevel={true}
-            />
-        ));
+        return [...config].map(layer => {
+            return (
+                <LayerAccordionItem
+                    key={layer.title}
+                    layerConfig={layer}
+                    isTopLevel={true}
+                />
+            )
+        });
     }, [config]);
 
     return layerList;

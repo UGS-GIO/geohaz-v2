@@ -1,9 +1,9 @@
 import { useCustomLayerList } from "@/hooks/use-custom-layerlist";
 import { BackToMenuButton } from "../custom/back-to-menu-button";
-import { useGetLayerConfigs } from "@/hooks/use-get-layer-configs";
+import { useGetLayerConfigsData } from "@/hooks/use-get-layer-configs";
 
 function Layers() {
-  const layersConfig = useGetLayerConfigs('layers');
+  const layersConfig = useGetLayerConfigsData('layers');
   const layerList = useCustomLayerList({ config: layersConfig });
 
   if (!layerList?.length) {

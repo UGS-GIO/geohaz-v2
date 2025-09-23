@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { LayerProps } from "@/lib/types/mapping-types";
 import { useGetCurrentPage } from "./use-get-current-page";
 
@@ -65,66 +66,114 @@ const applyLayerOrdering = (layers: LayerProps[], orderConfigs: LayerOrderConfig
     return processedConfig;
 };
 
+// Query functions
+const loadSingleLayerConfig = async (currentPage: string, pageName: string): Promise<LayerProps[]> => {
+    if (!currentPage) {
+        throw new Error('No current page available');
+    }
+
+    try {
+        const config = await import(`@/pages/${currentPage}/data/layers/${pageName}.tsx`) as { default: LayerProps[] };
+        if (config.default && Array.isArray(config.default)) {
+            return config.default;
+        } else {
+            throw new Error('Invalid config format');
+        }
+    } catch (error) {
+        console.error(`Error loading layer configuration ${pageName}:`, error);
+        throw error;
+    }
+};
+
+const loadAllLayerConfigs = async (currentPage: string): Promise<LayerProps[]> => {
+    try {
+        const layerConfigPaths = import.meta.glob(`@/pages/*/data/layers/*.tsx`);
+
+        // filter for layerconfig paths in the /pages/{currentPage}/data/layers/ directory
+        const filteredLayerConfigPaths: Record<string, () => Promise<any>> = {};
+        for (const path of Object.keys(layerConfigPaths)) {
+            if (path.includes(`/pages/${currentPage}/data/layers/`)) {
+                filteredLayerConfigPaths[path] = layerConfigPaths[path];
+            }
+        }
+
+        let allConfigs: LayerProps[] = [];
+
+        // Load all layer config files
+        for (const path of Object.keys(filteredLayerConfigPaths)) {
+            try {
+                const config = await filteredLayerConfigPaths[path]() as { default: LayerProps[] };
+                if (config.default && Array.isArray(config.default)) {
+                    allConfigs.push(...config.default);
+                }
+            } catch (error) {
+                console.warn(`Failed to load layer config from ${path}:`, error);
+            }
+        }
+
+        return allConfigs;
+    } catch (error) {
+        console.error('Error loading layer configurations:', error);
+        throw error;
+    }
+};
+
+// Main hook that returns the full query object
 const useGetLayerConfigs = (pageName?: string, layerOrderConfigs?: LayerOrderConfig[]) => {
     const currentPage = useGetCurrentPage();
-    const [layerConfigs, setLayerConfigs] = useState<LayerProps[] | null>(null);
 
     // Memoize the layerOrderConfigs to prevent unnecessary re-renders
     const memoizedLayerOrderConfigs = useMemo(() => layerOrderConfigs, [JSON.stringify(layerOrderConfigs)]);
 
-    useEffect(() => {
-        const loadConfigs = async () => {
-            if (pageName) {
-                // Single config workflow - load specific config from current page
-                if (currentPage === '') return setLayerConfigs(null);
-
-                try {
-                    const config = await import(`@/pages/${currentPage}/data/layers/${pageName}.tsx`) as { default: LayerProps[] };
-                    if (config.default && Array.isArray(config.default)) {
-
-                        // Apply layer ordering if specified
-                        const processedConfigs = applyLayerOrdering(config.default, memoizedLayerOrderConfigs || []);
-                        setLayerConfigs(processedConfigs);
-                    } else {
-                        setLayerConfigs(null);
-                    }
-                } catch (error) {
-                    console.error(`Error loading layer configuration ${pageName}:`, error);
-                    setLayerConfigs(null);
-                }
-            } else {
-                // Get all configs workflow - use glob to find and load all configs
-                try {
-                    const layerConfigPaths = import.meta.glob(`@/pages/*/data/layers/*.tsx`);
-                    let allConfigs: LayerProps[] = [];
-
-                    // Load all layer config files
-                    for (const path of Object.keys(layerConfigPaths)) {
-                        try {
-                            const config = await layerConfigPaths[path]() as { default: LayerProps[] };
-                            if (config.default && Array.isArray(config.default)) {
-                                allConfigs.push(...config.default);
-                            }
-                        } catch (error) {
-                            console.warn(`Failed to load layer config from ${path}:`, error);
-                        }
-                    }
-
-
-                    // Apply layer ordering if specified
-                    const processedConfigs = applyLayerOrdering(allConfigs, memoizedLayerOrderConfigs || []);
-                    setLayerConfigs(processedConfigs.length > 0 ? processedConfigs : null);
-                } catch (error) {
-                    console.error('Error loading layer configurations:', error);
-                    setLayerConfigs(null);
-                }
-            }
-        };
-
-        loadConfigs();
+    // Create a stable query key that includes namespace (currentPage)
+    const queryKey = useMemo(() => {
+        if (pageName) {
+            return ['layerConfigs', 'single', 'namespace', currentPage, 'pageName', pageName, 'orderConfigs', memoizedLayerOrderConfigs];
+        } else {
+            return ['layerConfigs', 'all', 'namespace', currentPage, 'orderConfigs', memoizedLayerOrderConfigs];
+        }
     }, [pageName, currentPage, memoizedLayerOrderConfigs]);
 
-    return layerConfigs;
+    const query = useQuery({
+        queryKey,
+        queryFn: async (): Promise<LayerProps[] | null> => {
+            if (pageName) {
+                // Single config workflow
+                if (!currentPage) {
+                    return null;
+                }
+                const configs = await loadSingleLayerConfig(currentPage, pageName);
+                return applyLayerOrdering(configs, memoizedLayerOrderConfigs || []);
+            } else {
+                // All configs workflow
+                const allConfigs = await loadAllLayerConfigs(currentPage);
+                const processedConfigs = applyLayerOrdering(allConfigs, memoizedLayerOrderConfigs || []);
+                return processedConfigs.length > 0 ? processedConfigs : null;
+            }
+        },
+        enabled: !pageName || !!currentPage, // Only run query if we have currentPage (for single config) or we're loading all configs
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime in v3)
+        retry: 2,
+    }) as UseQueryResult<LayerProps[] | null, Error>;
+
+    return {
+        layerConfigs: query.data,
+        isLoading: query.isLoading,
+        error: query.error,
+        isError: query.isError,
+        refetch: query.refetch,
+        isFetching: query.isFetching,
+        // Don't spread the entire query to avoid duplicate keys
+        isSuccess: query.isSuccess,
+        status: query.status
+    };
 };
 
-export { useGetLayerConfigs };
+// Convenience hook that returns just the data (for backward compatibility)
+const useGetLayerConfigsData = (pageName?: string, layerOrderConfigs?: LayerOrderConfig[]): LayerProps[] | null => {
+    const { layerConfigs } = useGetLayerConfigs(pageName, layerOrderConfigs);
+    return layerConfigs || null;
+};
+
+export { useGetLayerConfigs, useGetLayerConfigsData };
