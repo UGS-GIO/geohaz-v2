@@ -25,7 +25,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
         handleSelectAllToggle,
     } = useLayerItemState(layerConfig);
 
-    const { view } = useMap();
+    const { map, view } = useMap();
     const { setIsCollapsed, setNavOpened } = useSidebar();
     const { data: layerDescriptions } = useFetchLayerDescriptions();
     const isMobile = useIsMobile();
@@ -40,9 +40,9 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
     });
 
     const liveLayer = useMemo(() => {
-        if (!view?.map || !layerConfig.title) return null;
-        return findLayerByTitle(view.map, layerConfig.title);
-    }, [view, view?.map.allLayers, layerConfig.title]);
+        if (!map || !layerConfig.title) return null;
+        return findLayerByTitle(map, layerConfig.title);
+    }, [map, map?.allLayers, layerConfig.title]);
 
     const { refetch: fetchExtent, data: cachedExtent, isLoading: isExtentLoading } = useLayerExtent(liveLayer || new Layer());
 
@@ -54,7 +54,7 @@ const LayerAccordionItem = ({ layerConfig, isTopLevel }: { layerConfig: LayerPro
 
     // This handler now explicitly sets the accordion state.
     const handleLocalToggle = (checked: boolean) => {
-        if (!view) return;
+        if (!view || !map) return;
         clearGraphics(view, layerConfig.title || '');
         handleToggleSelection(checked);
         setIsUserExpanded(checked);

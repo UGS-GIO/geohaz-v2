@@ -183,14 +183,21 @@ export const useMapInteractions = ({ layersConfig }: UseMapInteractionsType) => 
 
     // Handle map click to get visible layers
     const getVisibleLayers = ({ view }: { view: __esri.MapView | __esri.SceneView }): VisibleLayersResult => {
-        if (!view) return {
-            layerVisibilityMap: {},
-            filteredWMSLayers: new Collection(),
-        };
+        if (!view) {
+            return {
+                layerVisibilityMap: {},
+                filteredWMSLayers: new Collection(),
+            };
+        }
 
+        // Ensure mapLayers is never undefined
+        const mapLayers = view.map?.layers ?? new Collection();
 
         // Step 4: Get the filtered requests
-        const { layerVisibilityMap, filteredWMSLayers } = crossCheckAndFilterWMS({ layerConfig: layersConfig, mapLayers: view.map.layers });
+        const { layerVisibilityMap, filteredWMSLayers } = crossCheckAndFilterWMS({
+            layerConfig: layersConfig,
+            mapLayers: mapLayers,
+        });
         setVisibleLayers(layerVisibilityMap);
 
         // Step 5: Log the requests
