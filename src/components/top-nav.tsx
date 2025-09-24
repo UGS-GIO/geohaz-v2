@@ -77,19 +77,19 @@ const BasemapDropdown = ({ links, trigger, onBasemapChange, activeBasemap }: Bas
 };
 
 function TopNav({ className, ...props }: TopNavProps) {
-  const { view } = useMap();
+  const { map } = useMap();
   const [activeBasemap, setActiveBasemap] = useState<string | __esri.Basemap>(
     basemapList.find(b => b.isActive)!.basemapStyle
   );
 
   const handleBasemapChange = (basemapStyle: string, customBasemap?: __esri.Basemap) => {
-    if (!view) return;
+    if (!map) return;
 
     if (customBasemap) {
-      view.map.basemap = customBasemap;
+      map.basemap = customBasemap;
       setActiveBasemap(customBasemap);
     } else {
-      view.map.basemap = basemapStyle as unknown as __esri.Basemap;
+      map.basemap = basemapStyle as unknown as __esri.Basemap;
       setActiveBasemap(basemapStyle);
     }
   };

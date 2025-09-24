@@ -1,4 +1,5 @@
-import { clone, coordEach } from "@turf/turf";
+import { coordEach } from "@turf/meta";
+import { clone } from "@turf/clone";
 import { Geometry, Position } from "geojson";
 import proj4 from "proj4";
 
