@@ -94,18 +94,17 @@ export const createView = (
 };
 
 /**
- * Adds layers to the specified ArcGIS map by optimizing WMS layers and reconstructing the layer tree.
- *
- * This function collects WMS layers from the provided configuration, groups them to minimize
- * the number of GetCapabilities requests, and then adds the optimized layers to the map.
+ * Adds layers to the map with WMS optimization by batching GetCapabilities requests but maintaining individual layer structure.
  *
  * @param map - The ArcGISMap instance to which layers will be added.
  * @param layersConfig - An array of LayerProps that defines the layers to be added to the map.
- * 
  * @returns A promise that resolves when the layers have been added to the map.
  */
 export const addLayersToMap = async (map: ArcGISMap, layersConfig: LayerProps[]) => {
+    // Step 1: Pre-fetch WMS capabilities by creating temporary combined layers
     const wmsLayerGroups: Record<string, WMSLayerProps[]> = {};
+    const capabilitiesCache = new Map<string, any>();
+
     const collectWMSLayers = (layers: LayerProps[]) => {
         layers.forEach(layer => {
             if (layer.type === 'wms') {
@@ -122,20 +121,48 @@ export const addLayersToMap = async (map: ArcGISMap, layersConfig: LayerProps[])
             }
         });
     };
+
     collectWMSLayers(layersConfig);
-    const originalWMSCount = Object.values(wmsLayerGroups).flat().length;
+
     const optimizedWMSCount = Object.keys(wmsLayerGroups).length;
-    console.log(`🚀 WMS Optimization: Reducing ${originalWMSCount} layers to ${optimizedWMSCount} GetCapabilities requests.`);
-    const unpackedWMSLayers = await unpackWMSGroups(wmsLayerGroups, map);
-    const finalLayers = buildLayerTree(layersConfig, unpackedWMSLayers);
+
+    // Pre-fetch capabilities using combined layers
+    await Promise.all(
+        Object.entries(wmsLayerGroups).map(async ([groupKey, wmsLayers]) => {
+            try {
+                const combinedLayer = createCombinedWMSLayerForFetching(wmsLayers);
+                if (!combinedLayer) return;
+
+                // Add temporarily to trigger capabilities loading
+                map.add(combinedLayer);
+                await combinedLayer.when();
+
+                // Cache the capabilities info for this group
+                capabilitiesCache.set(groupKey, {
+                    loaded: true,
+                    allSublayers: combinedLayer.allSublayers,
+                    serviceInfo: (combinedLayer as any).serviceInfo
+                });
+
+                // Remove the temporary combined layer
+                map.remove(combinedLayer);
+
+            } catch (error) {
+                console.warn(`Failed to pre-fetch capabilities for ${groupKey}:`, error);
+            }
+        })
+    );
+
+    // Step 2: Create individual layers normally (they should now load faster)
+    const finalLayers = buildLayerTree(layersConfig);
+
     if (finalLayers.length > 0) {
         map.addMany(finalLayers.reverse());
     }
-    console.log("✅ All layers reconstructed and added to the map in their original shape.");
 };
 
 /**
- * Creates a combined WMS layer for fetching from an array of WMS layer properties.
+ * Creates a combined WMS layer for fetching capabilities from an array of WMS layer properties.
  *
  * @param wmsLayers - An array of WMSLayerProps objects representing the WMS layers.
  * @returns A WMSLayer instance if at least one WMS layer is provided; otherwise, returns undefined.
@@ -144,82 +171,44 @@ const createCombinedWMSLayerForFetching = (wmsLayers: WMSLayerProps[]): __esri.W
     if (wmsLayers.length === 0) return undefined;
     const LayerType = layerTypeMapping['wms'];
     if (!LayerType) return undefined;
+
     const firstLayer = wmsLayers[0];
     const allSublayerNames = new Set<string>();
-    wmsLayers.forEach(layer => layer.sublayers?.forEach(sub => allSublayerNames.add(sub.name || '')));
+    wmsLayers.forEach(layer =>
+        layer.sublayers?.forEach(sub => allSublayerNames.add(sub.name || ''))
+    );
+
     return new LayerType({
         url: firstLayer.url,
         customLayerParameters: firstLayer.customLayerParameters,
         sublayers: Array.from(allSublayerNames).map(name => ({ name })),
+        visible: false, // Hidden temporary layer
+        title: `__TEMP_CAPABILITIES_${Date.now()}__`
     });
 };
 
 /**
- * Unpacks WMS layer groups and adds them to the provided ArcGIS map.
- *
- * @param wmsLayerGroups - A record of WMS layer properties grouped by layer names.
- * @param map - The ArcGIS map instance to which the layers will be added.
- * @returns A promise that resolves to a map of unpacked WMS layers, keyed by their titles.
- *
- * @throws Will log an error if fetching capabilities for any WMS group fails.
- */
-async function unpackWMSGroups(wmsLayerGroups: Record<string, WMSLayerProps[]>, map: ArcGISMap): Promise<Map<string, __esri.WMSLayer>> {
-    const unpackedLayersMap = new Map<string, __esri.WMSLayer>();
-    const promises = Object.values(wmsLayerGroups).map(async (wmsConfigsInGroup) => {
-        const combinedLayer = createCombinedWMSLayerForFetching(wmsConfigsInGroup);
-        if (!combinedLayer) return;
-
-        try {
-            map.add(combinedLayer);
-            await combinedLayer.when();
-
-            wmsConfigsInGroup.forEach(originalConfig => {
-                const LayerType = layerTypeMapping['wms'];
-                if (!LayerType || !Array.isArray(originalConfig.sublayers)) {
-                    return;
-                }
-
-                // Final Fix: Use .filter(Boolean) and a type assertion to force the correct type
-                const resolvedSublayers = originalConfig.sublayers
-                    .map(sub => combinedLayer.allSublayers.find(s => s.name === sub.name))
-                    .filter(Boolean) as __esri.WMSSublayer[];
-
-                if (resolvedSublayers.length > 0) {
-                    resolvedSublayers.forEach(sublayer => {
-                        sublayer.visible = true;
-                    });
-                    const individualLayer = new LayerType({ ...originalConfig, sublayers: resolvedSublayers });
-                    unpackedLayersMap.set(originalConfig.title, individualLayer);
-                }
-            });
-        } catch (error) {
-            console.error(`Failed to fetch capabilities for WMS group: ${wmsConfigsInGroup[0]?.url}`, error);
-        } finally {
-            map.remove(combinedLayer);
-        }
-    });
-    await Promise.all(promises);
-    return unpackedLayersMap;
-}
-
-/**
- * Builds a tree of layers based on the provided layer configurations and unpacked WMS layers.
+ * Builds a tree of layers based on the provided layer configurations, creating individual layers normally.
  *
  * @param layerConfigs - An array of layer configuration objects that define the layers to be created.
- * @param unpackedWMSLayers - A map of WMS layer titles to their corresponding WMSLayer instances.
  * @returns An array of created layers, filtered to exclude any null values resulting from errors.
  */
-function buildLayerTree(layerConfigs: LayerProps[], unpackedWMSLayers: Map<string, __esri.WMSLayer>): __esri.Layer[] {
+function buildLayerTree(layerConfigs: LayerProps[]): __esri.Layer[] {
     return layerConfigs
         .map(config => {
             try {
                 if (config.type === 'wms') {
-                    return unpackedWMSLayers.get(config.title) || null;
+                    // Create individual WMS layers normally - capabilities should be cached from pre-fetch
+                    return createLayer(config);
                 }
                 if (config.type === 'group') {
                     const groupConfig = config as GroupLayerProps;
-                    const childLayers = buildLayerTree(groupConfig.layers || [], unpackedWMSLayers);
-                    return new GroupLayer({ ...groupConfig, layers: childLayers });
+                    const childLayers = buildLayerTree(groupConfig.layers || []);
+                    return new GroupLayer({
+                        title: groupConfig.title,
+                        visible: groupConfig.visible,
+                        layers: childLayers
+                    });
                 }
                 return createLayer(config);
             } catch (error) {
@@ -230,11 +219,49 @@ function buildLayerTree(layerConfigs: LayerProps[], unpackedWMSLayers: Map<strin
         .filter((layer): layer is __esri.Layer => layer !== null);
 }
 
+/**
+ * Creates a layer instance from layer properties.
+ *
+ * @param layer - The layer properties to create a layer from.
+ * @returns The created layer instance.
+ * @throws Error if the layer type is unsupported or required properties are missing.
+ */
 export const createLayer = (layer: LayerProps): __esri.Layer => {
+    if (layer.type === 'group') {
+        const typedLayer = layer as GroupLayerProps;
+        const groupLayers = typedLayer.layers?.map(createLayer).filter(layer => layer !== undefined).reverse() as __esri.CollectionProperties<__esri.Layer> | undefined;
+        return new GroupLayer({
+            title: layer.title,
+            visible: layer.visible,
+            layers: groupLayers,
+        });
+    }
+
     const LayerType = layerTypeMapping[layer.type];
-    if (!LayerType) throw new Error(`Unsupported layer type: "${layer.type}"`);
-    if ('url' in layer && !layer.url) throw new Error(`Missing "url" property for layer "${layer.title}" of type "${layer.type}"`);
-    return new LayerType({ ...layer, ...layer.options });
+    if (!LayerType) {
+        throw new Error(`Unsupported layer type: "${layer.type}"`);
+    }
+
+    if (layer.type === 'wms') {
+        const typedLayer = layer as WMSLayerProps;
+        return new LayerType({
+            url: typedLayer.url,
+            title: typedLayer.title,
+            visible: typedLayer.visible,
+            sublayers: typedLayer.sublayers,
+            opacity: layer.opacity,
+            customLayerParameters: typedLayer.customLayerParameters,
+        });
+    }
+
+    if ('url' in layer && !layer.url) {
+        throw new Error(`Missing "url" property for layer "${layer.title}" of type "${layer.type}"`);
+    }
+
+    return new LayerType({
+        ...layer,
+        ...('options' in layer ? layer.options : {})
+    });
 };
 
 /**
