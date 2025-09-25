@@ -124,8 +124,6 @@ export const addLayersToMap = async (map: ArcGISMap, layersConfig: LayerProps[])
 
     collectWMSLayers(layersConfig);
 
-    const optimizedWMSCount = Object.keys(wmsLayerGroups).length;
-
     // Pre-fetch capabilities using combined layers
     await Promise.all(
         Object.entries(wmsLayerGroups).map(async ([groupKey, wmsLayers]) => {
