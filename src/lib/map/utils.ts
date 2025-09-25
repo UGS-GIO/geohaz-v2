@@ -2,7 +2,7 @@ import SceneView from '@arcgis/core/views/SceneView'
 import MapView from '@arcgis/core/views/MapView'
 import { GroupLayerProps, MapApp, WMSLayerProps } from '@/lib/types/mapping-types'
 import GroupLayer from "@arcgis/core/layers/GroupLayer";
-import Map from '@arcgis/core/Map'
+import ArcGISMap from '@arcgis/core/Map'
 import { LayerProps, layerTypeMapping } from "@/lib/types/mapping-types";
 import Popup from "@arcgis/core/widgets/Popup";
 import { basemapList } from '@/components/top-nav';
@@ -28,306 +28,222 @@ export function findLayerByTitle(mapInstance: __esri.Map, title: string): __esri
     return foundLayer;
 }
 
-/** Initializes the map application by creating a new map and view, and adding layers.
- * @param {HTMLDivElement} container - The HTML container element for the map view.
- * @param {boolean} isMobile - Flag indicating if the device is mobile.
- * @param {{ zoom: number, center: [number, number] }} initialView - Initial zoom level and center coordinates.
- * @param {LayerProps[]} layers - Array of layer properties to add to the map.
- * @param {'map' | 'scene'} [initialView='scene'] - Type of view to create ('map' for 2D, 'scene' for 3D).
- * @returns {{ map: __esri.Map, view: __esri.MapView | __esri.SceneView }} The created map and view instances.
- * */
-export function init(
+/**
+ * Initializes a map and its view within a specified container.
+ *
+ * @param container - The HTMLDivElement that will contain the map view.
+ * @param isMobile - A boolean indicating if the view should be optimized for mobile devices.
+ * @param options - An object containing the initial zoom level and center coordinates.
+ * @param layers - An array of layer properties to be added to the map.
+ * @param initialView - An optional parameter that specifies whether to initialize as a 'map' or 'scene' view.
+ * @returns A promise that resolves to an object containing the initialized map and view.
+ */
+export async function init(
     container: HTMLDivElement,
     isMobile: boolean,
     { zoom, center }: { zoom: number, center: [number, number] },
     layers: LayerProps[],
     initialView?: 'map' | 'scene',
-): { map: __esri.Map, view: __esri.MapView | __esri.SceneView } {
+): Promise<{ map: __esri.Map, view: __esri.MapView | __esri.SceneView }> {
     if (app.view) {
         app.view.destroy();
     }
-
-    // Create a new map and view
     const map = createMap();
-
-    // Create the view
     const view = createView(container, map, initialView, isMobile, { zoom, center });
-
-    // Add layers to the map with optimization
-    addLayersToMap(map, layers);
-
+    await addLayersToMap(map, layers);
     return { map, view };
 }
 
-/** Creates and returns a new ArcGIS Map instance with the active basemap.
- * @returns {__esri.Map} The created Map instance.
- * */
 export const createMap = () => {
-    const map = new Map({
+    return new ArcGISMap({
         basemap: basemapList.find(item => item.isActive)?.basemapStyle,
     });
-    return map;
 }
 
-/** Creates and returns a new MapView or SceneView instance based on the specified type.
- * @param {HTMLDivElement} container - The HTML container element for the map view.
- * @param {__esri.Map} map - The ArcGIS Map instance to associate with the view.
- * @param {'map' | 'scene'} [viewType='scene'] - Type of view to create ('map' for 2D, 'scene' for 3D).
- * @param {boolean} isMobile - Flag indicating if the device is mobile.
- * @param {{ zoom: number, center: [number, number] }} initialView - Initial zoom level and center coordinates.
- * @returns {__esri.MapView | __esri.SceneView} The created MapView or SceneView instance.
- * */
+/**
+ * Creates a MapView or SceneView instance.
+ *
+ * @param container - The HTMLDivElement that will contain the view.
+ * @param map - The ArcGISMap instance to be displayed in the view.
+ * @param viewType - The type of view to create, either 'map' or 'scene'. Defaults to 'scene'.
+ * @param isMobile - A boolean indicating if the view is for a mobile device.
+ * @param initialView - An object specifying the initial zoom level and center coordinates.
+ * @returns A MapView or SceneView instance based on the viewType parameter.
+ */
 export const createView = (
     container: HTMLDivElement,
-    map: Map,
+    map: ArcGISMap,
     viewType: 'map' | 'scene' = 'scene',
     isMobile: boolean,
     initialView: { zoom: number; center: [number, number] }
-) => {
+): __esri.MapView | __esri.SceneView => {
     const commonOptions = {
         container,
         map,
         zoom: initialView.zoom,
         center: initialView.center,
-        ui: {
-            components: ['zoom', 'compass', 'attribution'],
-        },
+        ui: { components: ['zoom', 'compass', 'attribution'] },
         ...(!isMobile && {
             popup: new Popup({
                 dockEnabled: true,
-                dockOptions: {
-                    buttonEnabled: false,
-                    breakpoint: false,
-                    position: 'bottom-left',
-                },
+                dockOptions: { buttonEnabled: false, breakpoint: false, position: 'bottom-left' },
             }),
         }),
     };
-
-    return viewType === 'scene'
-        ? new SceneView({ ...commonOptions })
-        : new MapView({ ...commonOptions });
+    return viewType === 'scene' ? new SceneView(commonOptions) : new MapView(commonOptions);
 };
 
-/** Adds multiple layers to the map, with true WMS optimization using combined layers only.
- * NOTE: This approach trades individual layer control for maximum network efficiency.
- * @param {__esri.Map} map - The ArcGIS Map instance to add layers to.
- * @param {LayerProps[]} layers - Array of layer properties to add to the map.
- * */
-export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
-    // Extract all WMS layers and group by server + workspace
+/**
+ * Adds layers to the specified ArcGIS map by optimizing WMS layers and reconstructing the layer tree.
+ *
+ * This function collects WMS layers from the provided configuration, groups them to minimize
+ * the number of GetCapabilities requests, and then adds the optimized layers to the map.
+ *
+ * @param map - The ArcGISMap instance to which layers will be added.
+ * @param layersConfig - An array of LayerProps that defines the layers to be added to the map.
+ * 
+ * @returns A promise that resolves when the layers have been added to the map.
+ */
+export const addLayersToMap = async (map: ArcGISMap, layersConfig: LayerProps[]) => {
     const wmsLayerGroups: Record<string, WMSLayerProps[]> = {};
-    const processedLayers: __esri.Layer[] = [];
-
-    const processLayer = (layer: LayerProps): __esri.Layer | null => {
-        if (layer.type === 'wms') {
-            const wmsLayer = layer as WMSLayerProps;
-            let groupKey: string = wmsLayer.url || 'default';
-
-            if (wmsLayer.sublayers && Array.isArray(wmsLayer.sublayers) && wmsLayer.sublayers.length > 0) {
-                const firstSublayer = wmsLayer.sublayers[0];
-                if (firstSublayer?.name && firstSublayer.name.includes(':')) {
-                    const workspace = firstSublayer.name.split(':')[0];
+    const collectWMSLayers = (layers: LayerProps[]) => {
+        layers.forEach(layer => {
+            if (layer.type === 'wms') {
+                const wmsLayer = layer as WMSLayerProps;
+                let groupKey = wmsLayer.url || 'default';
+                if (Array.isArray(wmsLayer.sublayers) && wmsLayer.sublayers[0]?.name?.includes(':')) {
+                    const workspace = wmsLayer.sublayers[0].name.split(':')[0];
                     groupKey = `${wmsLayer.url}::${workspace}`;
                 }
+                if (!wmsLayerGroups[groupKey]) wmsLayerGroups[groupKey] = [];
+                wmsLayerGroups[groupKey].push(wmsLayer);
+            } else if (layer.type === 'group') {
+                collectWMSLayers((layer as GroupLayerProps).layers || []);
             }
-
-            if (!wmsLayerGroups[groupKey]) {
-                wmsLayerGroups[groupKey] = [];
-            }
-            wmsLayerGroups[groupKey].push(wmsLayer);
-            return null; // Will be created as combined layer
-        }
-        else if (layer.type === 'group') {
-            const groupLayer = layer as GroupLayerProps;
-            const childLayers = groupLayer.layers?.map(processLayer).filter((layer): layer is __esri.Layer => layer !== null) || [];
-
-            return new GroupLayer({
-                title: layer.title,
-                visible: layer.visible,
-                layers: childLayers as __esri.CollectionProperties<__esri.Layer>,
-            });
-        }
-        else {
-            return createLayer(layer);
-        }
+        });
     };
-
-    // Process all layers
-    layers.forEach(layer => {
-        const processedLayer = processLayer(layer);
-        if (processedLayer) {
-            processedLayers.push(processedLayer);
-        }
-    });
-
-    // Create combined WMS layers
-    const combinedWMSLayers: __esri.Layer[] = [];
-    Object.entries(wmsLayerGroups).forEach(([groupKey, wmsLayers]) => {
-        const combinedLayer = createOptimizedWMSLayer(wmsLayers, groupKey);
-        if (combinedLayer) {
-            combinedWMSLayers.push(combinedLayer);
-        }
-    });
-
-    const originalWMSCount = Object.values(wmsLayerGroups).reduce((total, group) => total + group.length, 0);
+    collectWMSLayers(layersConfig);
+    const originalWMSCount = Object.values(wmsLayerGroups).flat().length;
     const optimizedWMSCount = Object.keys(wmsLayerGroups).length;
-
-    console.log(`🚀 WMS Optimization: Reduced ${originalWMSCount} individual WMS requests to ${optimizedWMSCount} combined requests`);
-    console.warn(`⚠️  Note: Individual WMS layer control is limited - using ${optimizedWMSCount} combined layers for efficiency`);
-
-    // Add all layers
-    const allLayers = [...processedLayers, ...combinedWMSLayers];
-    if (allLayers.length > 0) {
-        map.addMany(allLayers.reverse());
+    console.log(`🚀 WMS Optimization: Reducing ${originalWMSCount} layers to ${optimizedWMSCount} GetCapabilities requests.`);
+    const unpackedWMSLayers = await unpackWMSGroups(wmsLayerGroups, map);
+    const finalLayers = buildLayerTree(layersConfig, unpackedWMSLayers);
+    if (finalLayers.length > 0) {
+        map.addMany(finalLayers.reverse());
     }
-}
+    console.log("✅ All layers reconstructed and added to the map in their original shape.");
+};
 
-/** Creates an optimized WMS layer by combining multiple WMS layers into a single layer for efficient loading.
- * @param {WMSLayerProps[]} wmsLayers - An array of WMSLayerProps objects representing the WMS layers to combine.
- * @param {string} groupKey - A string used to determine the workspace name for the combined layer title.
- * @returns {__esri.Layer | undefined} A Layer object for batched loading; undefined if no layers provided.
- * */
-const createOptimizedWMSLayer = (wmsLayers: WMSLayerProps[], groupKey: string): __esri.Layer | undefined => {
+/**
+ * Creates a combined WMS layer for fetching from an array of WMS layer properties.
+ *
+ * @param wmsLayers - An array of WMSLayerProps objects representing the WMS layers.
+ * @returns A WMSLayer instance if at least one WMS layer is provided; otherwise, returns undefined.
+ */
+const createCombinedWMSLayerForFetching = (wmsLayers: WMSLayerProps[]): __esri.WMSLayer | undefined => {
     if (wmsLayers.length === 0) return undefined;
-
     const LayerType = layerTypeMapping['wms'];
     if (!LayerType) return undefined;
-
     const firstLayer = wmsLayers[0];
-
-    // Combine all sublayers from all WMS layers in this group
-    const allSublayers: any[] = [];
-    let hasVisibleLayer = false;
-
-    wmsLayers.forEach(layer => {
-        if (layer.sublayers && Array.isArray(layer.sublayers)) {
-            // Preserve original visibility settings
-            const modifiedSublayers = layer.sublayers.map(sublayer => ({
-                ...sublayer,
-                visible: layer.visible !== false,
-            }));
-            allSublayers.push(...modifiedSublayers);
-
-            if (layer.visible !== false) {
-                hasVisibleLayer = true;
-            }
-        }
-    });
-
-    // Extract workspace name for title
-    const workspace = groupKey.includes('::')
-        ? groupKey.split('::')[1]
-        : 'Combined';
-
-    const title = wmsLayers.length === 1
-        ? wmsLayers[0].title
-        : `${workspace.charAt(0).toUpperCase() + workspace.slice(1)} Layers (${wmsLayers.length} combined)`;
-
+    const allSublayerNames = new Set<string>();
+    wmsLayers.forEach(layer => layer.sublayers?.forEach(sub => allSublayerNames.add(sub.name || '')));
     return new LayerType({
         url: firstLayer.url,
-        title,
-        visible: hasVisibleLayer,
-        sublayers: allSublayers,
-        opacity: firstLayer.opacity || 1,
         customLayerParameters: firstLayer.customLayerParameters,
-    });
-}
-
-// /** Creates a layer instance from the given layer properties and layer constructor.
-//  * @param {LayerProps} layer - The properties of the layer to create.
-//  * @param {LayerConstructor} LayerType - The constructor function for the specific layer type.
-//  * @return {__esri.FeatureLayer | __esri.GeoJSONLayer | __esri.MapImageLayer | __esri.WMSLayer | __esri.TileLayer | __esri.ImageryLayer | undefined} The created layer instance, or undefined if creation failed.
-//  * */
-// function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
-//     if (!LayerType) {
-//         console.warn(`Unsupported layer type: ${layer.type}`);
-//         return undefined;
-//     }
-
-//     if (layer.type === 'wms') {
-//         const typedLayer = layer as WMSLayerProps;
-//         return new LayerType({
-//             url: typedLayer.url,
-//             title: typedLayer.title,
-//             visible: typedLayer.visible,
-//             sublayers: typedLayer.sublayers,
-//             opacity: layer.opacity,
-//             customLayerParameters: typedLayer.customLayerParameters,
-//         });
-//     }
-
-//     if (layer.url) {
-//         return new LayerType({
-//             url: layer.url,
-//             title: layer.title,
-//             visible: layer.visible,
-//             opacity: layer.opacity,
-//             ...layer.options,
-//         });
-//     }
-
-//     console.warn(`Missing URL in layer props: ${JSON.stringify(layer)}`);
-//     return undefined;
-// }
-
-/** Recursively creates a layer (or group layer) from the given layer properties.
- * @param {LayerProps} layer - The properties of the layer to create.
- * @return {GroupLayer | __esri.FeatureLayer | __esri.GeoJSONLayer | __esri.MapImageLayer | __esri.WMSLayer | __esri.TileLayer | __esri.ImageryLayer | undefined} The created layer instance, or undefined if creation failed.
- * */
-/**
- * Recursively creates a layer (or group layer) from the given layer properties.
- * This function will throw an error if layer creation fails.
- * @param {LayerProps} layer - The properties of the layer to create.
- * @returns {__esri.Layer} The created layer instance.
- * @throws {Error} If the layer type is unsupported or required properties are missing.
- */
-export const createLayer = (layer: LayerProps): __esri.Layer => {
-    if (layer.type === 'group') {
-        const typedLayer = layer as GroupLayerProps;
-        const groupLayers = typedLayer.layers
-            ?.map(childLayer => {
-                try {
-                    // Recursively call createLayer and catch any errors from children
-                    return createLayer(childLayer);
-                } catch (error) {
-                    console.error(`Skipping invalid layer in group "${typedLayer.title}":`, error);
-                    return null; // Return null to be filtered out
-                }
-            })
-            .filter((layer): layer is __esri.Layer => layer !== null) // Filter out nulls
-            .reverse() as __esri.CollectionProperties<__esri.Layer> | undefined;
-
-        return new GroupLayer({
-            title: layer.title,
-            visible: layer.visible,
-            layers: groupLayers,
-        });
-    }
-
-    const LayerType = layerTypeMapping[layer.type];
-
-    if (!LayerType) {
-        throw new Error(`Unsupported layer type: "${layer.type}"`);
-    }
-
-    // Check for a URL on layer types that require it
-    if ('url' in layer && !layer.url) {
-        throw new Error(`Missing "url" property for layer "${layer.title}" of type "${layer.type}"`);
-    }
-
-    // Create the layer instance with all available properties
-    return new LayerType({
-        ...layer, // Pass all properties from the config object
-        ...layer.options, // Spread any additional options
+        sublayers: Array.from(allSublayerNames).map(name => ({ name })),
     });
 };
 
-/** Zooms the map view to the extent of the given feature, converting the bounding box if necessary.
- * @param {ExtendedFeature} feature - The feature to zoom to, which may include a bounding box.
- * @param {__esri.MapView | __esri.SceneView} view - The map view to perform the zoom action on.
- * @param {string} sourceCRS - The coordinate reference system of the feature's bounding box.
- * */
+/**
+ * Unpacks WMS layer groups and adds them to the provided ArcGIS map.
+ *
+ * @param wmsLayerGroups - A record of WMS layer properties grouped by layer names.
+ * @param map - The ArcGIS map instance to which the layers will be added.
+ * @returns A promise that resolves to a map of unpacked WMS layers, keyed by their titles.
+ *
+ * @throws Will log an error if fetching capabilities for any WMS group fails.
+ */
+async function unpackWMSGroups(wmsLayerGroups: Record<string, WMSLayerProps[]>, map: ArcGISMap): Promise<Map<string, __esri.WMSLayer>> {
+    const unpackedLayersMap = new Map<string, __esri.WMSLayer>();
+    const promises = Object.values(wmsLayerGroups).map(async (wmsConfigsInGroup) => {
+        const combinedLayer = createCombinedWMSLayerForFetching(wmsConfigsInGroup);
+        if (!combinedLayer) return;
+
+        try {
+            map.add(combinedLayer);
+            await combinedLayer.when();
+
+            wmsConfigsInGroup.forEach(originalConfig => {
+                const LayerType = layerTypeMapping['wms'];
+                if (!LayerType || !Array.isArray(originalConfig.sublayers)) {
+                    return;
+                }
+
+                // Final Fix: Use .filter(Boolean) and a type assertion to force the correct type
+                const resolvedSublayers = originalConfig.sublayers
+                    .map(sub => combinedLayer.allSublayers.find(s => s.name === sub.name))
+                    .filter(Boolean) as __esri.WMSSublayer[];
+
+                if (resolvedSublayers.length > 0) {
+                    resolvedSublayers.forEach(sublayer => {
+                        sublayer.visible = true;
+                    });
+                    const individualLayer = new LayerType({ ...originalConfig, sublayers: resolvedSublayers });
+                    unpackedLayersMap.set(originalConfig.title, individualLayer);
+                }
+            });
+        } catch (error) {
+            console.error(`Failed to fetch capabilities for WMS group: ${wmsConfigsInGroup[0]?.url}`, error);
+        } finally {
+            map.remove(combinedLayer);
+        }
+    });
+    await Promise.all(promises);
+    return unpackedLayersMap;
+}
+
+/**
+ * Builds a tree of layers based on the provided layer configurations and unpacked WMS layers.
+ *
+ * @param layerConfigs - An array of layer configuration objects that define the layers to be created.
+ * @param unpackedWMSLayers - A map of WMS layer titles to their corresponding WMSLayer instances.
+ * @returns An array of created layers, filtered to exclude any null values resulting from errors.
+ */
+function buildLayerTree(layerConfigs: LayerProps[], unpackedWMSLayers: Map<string, __esri.WMSLayer>): __esri.Layer[] {
+    return layerConfigs
+        .map(config => {
+            try {
+                if (config.type === 'wms') {
+                    return unpackedWMSLayers.get(config.title) || null;
+                }
+                if (config.type === 'group') {
+                    const groupConfig = config as GroupLayerProps;
+                    const childLayers = buildLayerTree(groupConfig.layers || [], unpackedWMSLayers);
+                    return new GroupLayer({ ...groupConfig, layers: childLayers });
+                }
+                return createLayer(config);
+            } catch (error) {
+                console.error(`Skipping invalid layer "${config.title}":`, error);
+                return null;
+            }
+        })
+        .filter((layer): layer is __esri.Layer => layer !== null);
+}
+
+export const createLayer = (layer: LayerProps): __esri.Layer => {
+    const LayerType = layerTypeMapping[layer.type];
+    if (!LayerType) throw new Error(`Unsupported layer type: "${layer.type}"`);
+    if ('url' in layer && !layer.url) throw new Error(`Missing "url" property for layer "${layer.title}" of type "${layer.type}"`);
+    return new LayerType({ ...layer, ...layer.options });
+};
+
+/**
+ * Zooms the map or scene view to the bounding box of the specified feature.
+ *
+ * @param feature - The feature to zoom to, which must include a bounding box (bbox).
+ * @param view - The MapView or SceneView instance to perform the zoom action on.
+ * @param sourceCRS - The coordinate reference system of the feature's bounding box.
+ */
 export const zoomToFeature = (
     feature: ExtendedFeature,
     view: __esri.MapView | __esri.SceneView,
@@ -335,47 +251,16 @@ export const zoomToFeature = (
 ) => {
     if (feature.bbox) {
         const bbox = convertBbox(feature.bbox, sourceCRS);
-
         view?.goTo({
             target: new Extent({
-                xmin: bbox[0],
-                ymin: bbox[1],
-                xmax: bbox[2],
-                ymax: bbox[3],
+                xmin: bbox[0], ymin: bbox[1], xmax: bbox[2], ymax: bbox[3],
                 spatialReference: { wkid: 4326 }
             })
         });
     }
 }
 
-/** Type guard to check if a layer is a WMS layer.
- * @param {LayerProps} layer - The layer to check.
- * @returns {layer is WMSLayerProps} True if the layer is a WMS layer.
- * */
-export const isWMSLayer = (layer: LayerProps): layer is WMSLayerProps => {
-    return layer.type === 'wms';
-}
-
-/** Type guard to check if a layer is a group layer.
- * @param {LayerProps} layer - The layer to check.
- * @returns {layer is GroupLayerProps} True if the layer is a group layer.
- * */
-export const isGroupLayer = (layer: LayerProps): layer is GroupLayerProps => {
-    return layer.type === 'group';
-}
-
-/** Type guard to check if a map layer is a WMS layer.
- * @param {__esri.Layer} layer - The map layer to check.
- * @returns {layer is __esri.WMSLayer} True if the map layer is a WMS layer.
- * */
-export const isWMSMapLayer = (layer: __esri.Layer): layer is __esri.WMSLayer => {
-    return layer.type === 'wms';
-}
-
-/** Type guard to check if a map layer is a group layer.
- * @param {__esri.Layer} layer - The map layer to check.
- * @returns {layer is __esri.GroupLayer} True if the map layer is a group layer.
- * */
-export const isGroupMapLayer = (layer: __esri.Layer): layer is __esri.GroupLayer => {
-    return layer.type === 'group';
-}
+export const isWMSLayer = (layer: LayerProps): layer is WMSLayerProps => layer.type === 'wms';
+export const isGroupLayer = (layer: LayerProps): layer is GroupLayerProps => layer.type === 'group';
+export const isWMSMapLayer = (layer: __esri.Layer): layer is __esri.WMSLayer => layer.type === 'wms';
+export const isGroupMapLayer = (layer: __esri.Layer): layer is __esri.GroupLayer => layer.type === 'group';

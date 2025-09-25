@@ -77,7 +77,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
 
         // If the view does NOT exist, run the initial creation logic.
         else {
-            const { view: initView, map: initMap } = init(container, isMobile, { zoom, center }, layers, 'map');
+            const { view: initView, map: initMap } = await init(container, isMobile, { zoom, center }, layers, 'map');
 
             // Wait for the view to be ready before setting state
             await initView.when();

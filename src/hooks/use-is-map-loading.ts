@@ -1,54 +1,43 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRef, useMemo } from 'react';
+import { useRef, useEffect } from 'react';
 import { useGetCurrentPage } from '@/hooks/use-get-current-page';
 
 interface UseIsMapLoadingProps {
     view?: __esri.MapView | __esri.SceneView | undefined;
     debounceMs?: number;
     initialLoadOnly?: boolean;
-    watchLayerViews?: boolean; // Optional: also watch individual layer loading
+    watchLayerViews?: boolean;
 }
 
 export function useIsMapLoading({
     view,
-    debounceMs = 100,
+    debounceMs = 200, // Increased default for a smoother experience
     initialLoadOnly = true,
     watchLayerViews = false
 }: UseIsMapLoadingProps): boolean {
-    const hasInitiallyLoadedRef = useRef(false);
-    const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const handlersSetRef = useRef(false);
-    const currentLoadingStateRef = useRef(false);
-    const layerViewHandlesRef = useRef<__esri.Handle[]>([]);
-    const currentPage = useGetCurrentPage();
     const queryClient = useQueryClient();
+    const currentPage = useGetCurrentPage();
+    const queryKey = ['mapLoading', currentPage];
 
-    const queryKey = ['mapLoading', `${currentPage}`];
+    // Refs to manage state and side effects without causing re-renders
+    const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const hasInitiallyLoadedRef = useRef(false);
+    const handlesRef = useRef<__esri.Handle[]>([]);
 
-    // Use mutation to update the loading state reactively
     const { mutate: setLoadingState } = useMutation({
-        mutationFn: (isLoading: boolean) => Promise.resolve(isLoading),
+        mutationFn: async (isLoading: boolean) => isLoading,
         onSuccess: (isLoading) => {
-            // Update the query cache with the new loading state
             queryClient.setQueryData(queryKey, isLoading);
-            currentLoadingStateRef.current = isLoading;
         }
     });
 
-    // Set up watchers only once when view changes
-    useMemo(() => {
-        // Clean up previous watchers
-        if (handlersSetRef.current) {
-            handlersSetRef.current = false;
-        }
-
-        // Clean up layer view handles
-        layerViewHandlesRef.current.forEach(handle => handle.remove());
-        layerViewHandlesRef.current = [];
-
+    // Effect to watch the view and update loading state
+    useEffect(() => {
+        // --- Cleanup previous effects ---
+        handlesRef.current.forEach(handle => handle.remove());
+        handlesRef.current = [];
         if (debounceTimeoutRef.current) {
             clearTimeout(debounceTimeoutRef.current);
-            debounceTimeoutRef.current = null;
         }
 
         if (!view) {
@@ -56,112 +45,94 @@ export function useIsMapLoading({
             return;
         }
 
-        // Reset state for new view
+        // Reset initial load flag when view changes
         hasInitiallyLoadedRef.current = false;
 
-        const checkLayerViewsLoading = (): boolean => {
-            if (!watchLayerViews) return false;
-
-            // Check if any layer views are still updating
-            const layerViews = view.layerViews.toArray();
-            return layerViews.some(layerView => layerView.updating);
-        };
-
-        const updateLoadingState = () => {
-            // Check multiple loading indicators for more comprehensive coverage
-            const isViewUpdating = view.updating;
-            const isNavigating = view.navigating;
-            const isStationary = view.stationary;
-            const areLayerViewsUpdating = checkLayerViewsLoading();
-
-            // Loading check
-            const isDataLoading = (isViewUpdating && !isNavigating) || !isStationary || areLayerViewsUpdating;
-
-            // Early return if we only want initial load and we've already loaded
+        const updateLoadingStatus = () => {
+            // If we only care about the initial load and it's already done, stop watching.
             if (initialLoadOnly && hasInitiallyLoadedRef.current) {
-                if (debounceTimeoutRef.current) {
-                    clearTimeout(debounceTimeoutRef.current);
-                    debounceTimeoutRef.current = null;
-                }
-                if (currentLoadingStateRef.current !== false) {
-                    setLoadingState(false);
-                }
+                // Detach all event listeners to prevent further updates
+                handlesRef.current.forEach(handle => handle.remove());
+                handlesRef.current = [];
                 return;
             }
 
-            // Clear existing timeout
-            if (debounceTimeoutRef.current) {
-                clearTimeout(debounceTimeoutRef.current);
-                debounceTimeoutRef.current = null;
-            }
+            const isAnyLayerViewUpdating = watchLayerViews
+                ? view.layerViews.some(lv => lv.updating)
+                : false;
 
-            if (isDataLoading) {
-                // Show loading after debounce delay
+            const isCurrentlyLoading = view.updating || !view.stationary || isAnyLayerViewUpdating;
+
+            // Clear any pending timeout to turn loading OFF
+            clearTimeout(debounceTimeoutRef.current!);
+
+            if (isCurrentlyLoading) {
+                // If we are loading, set the state to true immediately.
+                // We only want to debounce the "off" state.
+                const currentState = queryClient.getQueryData(queryKey);
+                if (currentState !== true) {
+                    setLoadingState(true);
+                }
+            } else {
+                // If we are NOT loading, wait debounceMs before setting state to false.
+                // This prevents the loading indicator from flickering off during brief pauses.
                 debounceTimeoutRef.current = setTimeout(() => {
-                    if (currentLoadingStateRef.current !== true) {
-                        setLoadingState(true);
+                    setLoadingState(false);
+                    if (initialLoadOnly && !hasInitiallyLoadedRef.current) {
+                        hasInitiallyLoadedRef.current = true;
+                        // Now that the first load is officially over, we can detach the listeners.
+                        handlesRef.current.forEach(handle => handle.remove());
+                        handlesRef.current = [];
                     }
                 }, debounceMs);
-            } else {
-                // Hide loading immediately when done
-                if (currentLoadingStateRef.current !== false) {
-                    setLoadingState(false);
-                }
-                if (!hasInitiallyLoadedRef.current) {
-                    hasInitiallyLoadedRef.current = true;
-                }
             }
         };
 
-        // Set up layer view watchers if enabled
-        if (watchLayerViews) {
-            const setupLayerViewWatchers = () => {
-                // Clean up existing layer view handles
-                layerViewHandlesRef.current.forEach(handle => handle.remove());
-                layerViewHandlesRef.current = [];
+        // --- Set up watchers ---
+        const mainHandles = [
+            view.watch("updating", updateLoadingStatus),
+            view.watch("stationary", updateLoadingStatus)
+        ];
 
-                // Watch each layer view's updating property
+        if (watchLayerViews) {
+            // This function (re)builds watchers for all current layer views
+            const setupLayerViewWatchers = () => {
+                // First, remove any handles that are specifically for layer views
+                handlesRef.current = handlesRef.current.filter(h => {
+                    // A bit of a hack to identify layer view handles vs main handles
+                    if ((h as any)._layerViewHandle) {
+                        h.remove();
+                        return false;
+                    }
+                    return true;
+                });
+
                 view.layerViews.forEach(layerView => {
-                    const handle = layerView.watch("updating", updateLoadingState);
-                    layerViewHandlesRef.current.push(handle);
+                    const handle = layerView.watch("updating", updateLoadingStatus);
+                    (handle as any)._layerViewHandle = true; // Mark it for easy removal
+                    handlesRef.current.push(handle);
                 });
             };
 
-            // Set up initial layer view watchers
             setupLayerViewWatchers();
-
-            // Watch for layer view additions/removals
-            layerViewHandlesRef.current.push(
-                view.layerViews.on("after-add", setupLayerViewWatchers),
-                view.layerViews.on("after-remove", setupLayerViewWatchers)
-            );
+            mainHandles.push(view.layerViews.on("after-add", setupLayerViewWatchers));
+            mainHandles.push(view.layerViews.on("after-remove", setupLayerViewWatchers));
         }
 
-        // Watch main view properties
-        const handles = [
-            view.watch("updating", updateLoadingState),
-            view.watch("navigating", updateLoadingState),
-            view.watch("stationary", updateLoadingState)
-        ];
+        handlesRef.current = mainHandles;
 
-        handlersSetRef.current = true;
+        // Check initial state
+        updateLoadingStatus();
 
-        // Set initial state
-        updateLoadingState();
-
-        // Return cleanup function
+        // --- Final cleanup function ---
         return () => {
-            handles.forEach(handle => handle.remove());
-            layerViewHandlesRef.current.forEach(handle => handle.remove());
-            layerViewHandlesRef.current = [];
+            handlesRef.current.forEach(handle => handle.remove());
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
-                debounceTimeoutRef.current = null;
             }
         };
-    }, [view, debounceMs, initialLoadOnly, watchLayerViews, setLoadingState]);
+    }, [view, debounceMs, initialLoadOnly, watchLayerViews, setLoadingState, queryClient, queryKey]);
 
-    // Get current loading state from query cache
     const cachedState = queryClient.getQueryData<boolean>(queryKey);
-    return cachedState ?? false;
+    return cachedState ?? true; // Default to true on first render until the effect runs
 }
