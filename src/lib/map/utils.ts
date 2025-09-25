@@ -234,43 +234,47 @@ const createOptimizedWMSLayer = (wmsLayers: WMSLayerProps[], groupKey: string): 
     });
 }
 
-/** Creates a layer instance from the given layer properties and layer constructor.
+// /** Creates a layer instance from the given layer properties and layer constructor.
+//  * @param {LayerProps} layer - The properties of the layer to create.
+//  * @param {LayerConstructor} LayerType - The constructor function for the specific layer type.
+//  * @return {__esri.FeatureLayer | __esri.GeoJSONLayer | __esri.MapImageLayer | __esri.WMSLayer | __esri.TileLayer | __esri.ImageryLayer | undefined} The created layer instance, or undefined if creation failed.
+//  * */
+// function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
+//     if (!LayerType) {
+//         console.warn(`Unsupported layer type: ${layer.type}`);
+//         return undefined;
+//     }
+
+//     if (layer.type === 'wms') {
+//         const typedLayer = layer as WMSLayerProps;
+//         return new LayerType({
+//             url: typedLayer.url,
+//             title: typedLayer.title,
+//             visible: typedLayer.visible,
+//             sublayers: typedLayer.sublayers,
+//             opacity: layer.opacity,
+//             customLayerParameters: typedLayer.customLayerParameters,
+//         });
+//     }
+
+//     if (layer.url) {
+//         return new LayerType({
+//             url: layer.url,
+//             title: layer.title,
+//             visible: layer.visible,
+//             opacity: layer.opacity,
+//             ...layer.options,
+//         });
+//     }
+
+//     console.warn(`Missing URL in layer props: ${JSON.stringify(layer)}`);
+//     return undefined;
+// }
+
+/** Recursively creates a layer (or group layer) from the given layer properties.
  * @param {LayerProps} layer - The properties of the layer to create.
- * @param {LayerConstructor} LayerType - The constructor function for the specific layer type.
- * @return {__esri.FeatureLayer | __esri.GeoJSONLayer | __esri.MapImageLayer | __esri.WMSLayer | __esri.TileLayer | __esri.ImageryLayer | undefined} The created layer instance, or undefined if creation failed.
+ * @return {GroupLayer | __esri.FeatureLayer | __esri.GeoJSONLayer | __esri.MapImageLayer | __esri.WMSLayer | __esri.TileLayer | __esri.ImageryLayer | undefined} The created layer instance, or undefined if creation failed.
  * */
-function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
-    if (!LayerType) {
-        console.warn(`Unsupported layer type: ${layer.type}`);
-        return undefined;
-    }
-
-    if (layer.type === 'wms') {
-        const typedLayer = layer as WMSLayerProps;
-        return new LayerType({
-            url: typedLayer.url,
-            title: typedLayer.title,
-            visible: typedLayer.visible,
-            sublayers: typedLayer.sublayers,
-            opacity: layer.opacity,
-            customLayerParameters: typedLayer.customLayerParameters,
-        });
-    }
-
-    if (layer.url) {
-        return new LayerType({
-            url: layer.url,
-            title: layer.title,
-            visible: layer.visible,
-            opacity: layer.opacity,
-            ...layer.options,
-        });
-    }
-
-    console.warn(`Missing URL in layer props: ${JSON.stringify(layer)}`);
-    return undefined;
-}
-
 /**
  * Recursively creates a layer (or group layer) from the given layer properties.
  * This function will throw an error if layer creation fails.
