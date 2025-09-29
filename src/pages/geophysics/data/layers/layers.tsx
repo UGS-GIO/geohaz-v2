@@ -194,12 +194,11 @@ const transmissionLinesWMSConfig: WMSLayerProps = {
 }
  
 // Seamless Geological Units WMS Layer
-//const seamlessGeolunitsLayerName = 'seamlessgeolunitsx';
 const seamlessGeolunitsLayerName = 'mapping_geolunits_500k'
 const seamlessGeolunitsWMSTitle = 'Geologic Units (500k) New';
 const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     type: 'wms',
-    url: 'https://ugs-geoserver-prod-flbcoqv7oa-uc.a.run.app/geoserver/mapping/wms',
+    url: `${PROD_GEOSERVER_URL}/mapping/wms`,
     title: seamlessGeolunitsWMSTitle,
     opacity: 0.5,
     visible: false,
