@@ -1,6 +1,6 @@
 import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
-
+import { toTitleCase, toSentenceCase } from "@/lib/utils";
 
 // Pipelines WMS Layer
 const pipelinesLayerName = 'pipelines';
