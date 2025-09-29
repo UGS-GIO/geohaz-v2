@@ -34,7 +34,7 @@ export const MapContext = createContext<MapContextProps>({
 export function MapProvider({ children }: { children: ReactNode }) {
     const viewRef = useRef<SceneView | MapView>();
     const mapRef = useRef<__esri.Map>();
-    const [isInitialized, setIsInitialized] = useState(false);
+    const [_isInitialized, setIsInitialized] = useState(false);
     const [isSketching, setIsSketching] = useState<boolean>(false);
     const isMobile = useIsMobile();
 

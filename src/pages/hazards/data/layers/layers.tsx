@@ -2,8 +2,6 @@ import { PROD_GEOSERVER_URL, HAZARDS_WORKSPACE, PROD_POSTGREST_URL, GEN_GIS_WORK
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 import GeoJSON from "geojson";
 
-const IS_CURRENT_CQL = `is_current = 'Y'`;
-
 export const landslideLegacyLayerName = 'landslidelegacy_current';
 const landslideLegacyWMSTitle = 'Legacy Landslide Compilation - Statewide';
 const landslideLegacyWMSConfig: WMSLayerProps = {
@@ -906,7 +904,7 @@ const layersConfig: LayerProps[] = [
     landslidesConfig,
     soilHazardsConfig,
     studyAreasWMSConfig,
-    // quads24kWMSConfig,
+    quads24kWMSConfig,
 ];
 
 export default layersConfig;
