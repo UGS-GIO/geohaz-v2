@@ -1,4 +1,4 @@
-import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL } from "@/lib/constants";
+import { ENERGY_MINERALS_WORKSPACE, HAZARDS_WORKSPACE, MAPPING_WORKSPACE, PROD_GEOSERVER_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 import { toTitleCase, toSentenceCase } from "@/lib/utils";
 
@@ -71,7 +71,7 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     url: `${PROD_GEOSERVER_URL}/mapping/wms`,
     title: seamlessGeolunitsWMSTitle,
     opacity: 0.5,
-    visible: false,
+    visible: true,
     sublayers: [
         {
             name: `${MAPPING_WORKSPACE}:${seamlessGeolunitsLayerName}`,
