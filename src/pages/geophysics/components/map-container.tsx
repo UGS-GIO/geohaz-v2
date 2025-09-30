@@ -40,7 +40,7 @@ export default function ArcGISMap() {
                 container={popupContainer}
                 drawerTriggerRef={drawerTriggerRef}
                 popupContent={popupContent}
-                popupTitle="Wetlands Information"
+                popupTitle="Feature Information"
             />
             <div ref={setPopupContainer} />
         </>
