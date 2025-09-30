@@ -24,12 +24,15 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LogOut, User } from 'lucide-react';
 import { useLayerUrl } from '@/context/layer-url-provider';
 import { useSearch } from '@tanstack/react-router';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from '@/components/ui/alert-dialog';
+import { useState } from 'react';
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
   const search = useSearch({ from: '/hazards-review/' });
   const { updateLayerSelection } = useLayerUrl();
   const { user } = useAuth();
+  const [showWelcomeDialog, setShowWelcomeDialog] = useState(true);
   const searchConfig: SearchSourceConfig[] = [
     defaultMasqueradeConfig,
     {
@@ -64,6 +67,47 @@ export default function Map() {
   return (
     <div className="relative h-full overflow-hidden bg-background">
       {/* User dropdown in top right corner */}
+
+      <AlertDialog open={showWelcomeDialog} onOpenChange={setShowWelcomeDialog}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>How to use this web application:</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <ul className="space-y-3 text-left">
+                <li className="flex gap-2">
+                  <span className="font-bold shrink-0">•</span>
+                  <span>
+                    <strong>Anticipate a brief loading period</strong>, as the application manages a substantial data volume and numerous layers.
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-bold shrink-0">•</span>
+                  <span>
+                    <strong>Toggle Review and Live hazard data</strong> using the dedicated tab buttons within the layer controls window. Each layer's visibility can be controlled independently.
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-bold shrink-0">•</span>
+                  <span>
+                    <strong>Select map features</strong> to view the corresponding hazard information as it would appear in the live Geologic Hazards Portal.
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-bold shrink-0">•</span>
+                  <span>
+                    <strong>Utilize the map interface</strong> to fully explore the data and send comments and/or screenshots to Geologic Hazards Program staff for revisions.
+                  </span>
+                </li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowWelcomeDialog(false)}>
+              Got it
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div className="absolute top-4 right-4 z-50">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
