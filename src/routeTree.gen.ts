@@ -17,6 +17,7 @@ import { Route as HazardsIndexRouteImport } from './routes/hazards/index'
 import { Route as HazardsReviewIndexRouteImport } from './routes/hazards-review/index'
 import { Route as GeophysicsIndexRouteImport } from './routes/geophysics/index'
 import { Route as CarbonstorageIndexRouteImport } from './routes/carbonstorage/index'
+import { Route as HazardsReportNewreportIndexRouteImport } from './routes/hazards/report/newreport/index'
 
 const WetlandsIndexLazyRouteImport = createFileRoute('/wetlands/')()
 const MineralsIndexLazyRouteImport = createFileRoute('/minerals/')()
@@ -28,9 +29,6 @@ const HazardsReviewReportNewreportLazyRouteImport = createFileRoute(
 )()
 const HazardsReviewReportAoiLazyRouteImport = createFileRoute(
   '/hazards-review/report/$aoi',
-)()
-const HazardsReportNewreportIndexLazyRouteImport = createFileRoute(
-  '/hazards/report/newreport/',
 )()
 
 const IndexRoute = IndexRouteImport.update({
@@ -102,14 +100,12 @@ const HazardsReviewReportAoiLazyRoute =
   } as any).lazy(() =>
     import('./routes/hazards-review/report/$aoi.lazy').then((d) => d.Route),
   )
-const HazardsReportNewreportIndexLazyRoute =
-  HazardsReportNewreportIndexLazyRouteImport.update({
+const HazardsReportNewreportIndexRoute =
+  HazardsReportNewreportIndexRouteImport.update({
     id: '/hazards/report/newreport/',
     path: '/hazards/report/newreport/',
     getParentRoute: () => rootRouteImport,
-  } as any).lazy(() =>
-    import('./routes/hazards/report/newreport/index.lazy').then((d) => d.Route),
-  )
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -123,7 +119,7 @@ export interface FileRoutesByFullPath {
   '/hazards-review/report/$aoi': typeof HazardsReviewReportAoiLazyRoute
   '/hazards-review/report/newreport': typeof HazardsReviewReportNewreportLazyRoute
   '/hazards/report/$aoi': typeof HazardsReportAoiLazyRoute
-  '/hazards/report/newreport': typeof HazardsReportNewreportIndexLazyRoute
+  '/hazards/report/newreport': typeof HazardsReportNewreportIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -137,7 +133,7 @@ export interface FileRoutesByTo {
   '/hazards-review/report/$aoi': typeof HazardsReviewReportAoiLazyRoute
   '/hazards-review/report/newreport': typeof HazardsReviewReportNewreportLazyRoute
   '/hazards/report/$aoi': typeof HazardsReportAoiLazyRoute
-  '/hazards/report/newreport': typeof HazardsReportNewreportIndexLazyRoute
+  '/hazards/report/newreport': typeof HazardsReportNewreportIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,7 +148,7 @@ export interface FileRoutesById {
   '/hazards-review/report/$aoi': typeof HazardsReviewReportAoiLazyRoute
   '/hazards-review/report/newreport': typeof HazardsReviewReportNewreportLazyRoute
   '/hazards/report/$aoi': typeof HazardsReportAoiLazyRoute
-  '/hazards/report/newreport/': typeof HazardsReportNewreportIndexLazyRoute
+  '/hazards/report/newreport/': typeof HazardsReportNewreportIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,7 +207,7 @@ export interface RootRouteChildren {
   HazardsReviewReportAoiLazyRoute: typeof HazardsReviewReportAoiLazyRoute
   HazardsReviewReportNewreportLazyRoute: typeof HazardsReviewReportNewreportLazyRoute
   HazardsReportAoiLazyRoute: typeof HazardsReportAoiLazyRoute
-  HazardsReportNewreportIndexLazyRoute: typeof HazardsReportNewreportIndexLazyRoute
+  HazardsReportNewreportIndexRoute: typeof HazardsReportNewreportIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -297,7 +293,7 @@ declare module '@tanstack/react-router' {
       id: '/hazards/report/newreport/'
       path: '/hazards/report/newreport'
       fullPath: '/hazards/report/newreport'
-      preLoaderRoute: typeof HazardsReportNewreportIndexLazyRouteImport
+      preLoaderRoute: typeof HazardsReportNewreportIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -315,7 +311,7 @@ const rootRouteChildren: RootRouteChildren = {
   HazardsReviewReportAoiLazyRoute: HazardsReviewReportAoiLazyRoute,
   HazardsReviewReportNewreportLazyRoute: HazardsReviewReportNewreportLazyRoute,
   HazardsReportAoiLazyRoute: HazardsReportAoiLazyRoute,
-  HazardsReportNewreportIndexLazyRoute: HazardsReportNewreportIndexLazyRoute,
+  HazardsReportNewreportIndexRoute: HazardsReportNewreportIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
