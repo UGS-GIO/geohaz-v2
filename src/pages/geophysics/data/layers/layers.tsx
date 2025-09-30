@@ -152,7 +152,6 @@ const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     ],
 };
 
-
 // SITLA Land Ownership Layer
 const SITLAConfig: LayerProps = {
     type: 'map-image',
