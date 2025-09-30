@@ -1,11 +1,10 @@
 
 import { createFileRoute } from '@tanstack/react-router'
-import { Suspense, useEffect } from 'react'
+import { Suspense } from 'react'
 import { Layout } from '@/components/custom/layout'
 import { HeroSection } from '@/components/custom/hero-section'
 import { Image } from '@/components/ui/image'
 import { MapFooter } from '@/components/custom/map/map-footer'
-import { useTheme } from '@/context/theme-provider'
 import ReportApp from '@/pages/hazards/report/report/ReportApp'
 import { z } from 'zod'
 
@@ -26,7 +25,6 @@ type Polygon = {
 }
 
 function ReportPage() {
-  const { setOverrideTheme } = useTheme()
   const { aoi: aoiParam } = Route.useParams()
 
   console.log('aoiParam:', aoiParam);
@@ -35,11 +33,6 @@ function ReportPage() {
   // Parse AOI from route param (TanStack Router auto-decodes it)
   const aoi = parseAOI(aoiParam)
 
-  // Force light theme for report page
-  useEffect(() => {
-    setOverrideTheme('light')
-    return () => setOverrideTheme(null)
-  }, [setOverrideTheme])
 
   const footerContent = <MapFooter />
 
