@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback, useRef, ReactNode } from "react";
+import { createContext, useState, useCallback } from "react";
 import type SceneView from "@arcgis/core/views/SceneView";
 import type MapView from "@arcgis/core/views/MapView";
 import { LayerProps } from "@/lib/types/mapping-types";
@@ -6,8 +6,8 @@ import { init } from "@/lib/map/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type MapContextProps = {
-    view?: SceneView | MapView;
-    map?: __esri.Map;
+    view?: SceneView | MapView,
+    map?: __esri.Map,
     loadMap?: ({
         container,
         zoom,
@@ -18,9 +18,9 @@ type MapContextProps = {
         zoom?: number,
         center?: [number, number],
         layers?: LayerProps[]
-    }) => Promise<void>;
-    isSketching: boolean;
-    setIsSketching?: (isSketching: boolean) => void;
+    }) => Promise<void>,
+    isSketching: boolean
+    setIsSketching?: (isSketching: boolean) => void
 }
 
 export const MapContext = createContext<MapContextProps>({
@@ -31,10 +31,9 @@ export const MapContext = createContext<MapContextProps>({
     setIsSketching: () => { }
 });
 
-export function MapProvider({ children }: { children: ReactNode }) {
-    const viewRef = useRef<SceneView | MapView>();
-    const mapRef = useRef<__esri.Map>();
-    const [_isInitialized, setIsInitialized] = useState(false);
+export function MapProvider({ children }: { children: React.ReactNode }) {
+    const [view, setView] = useState<SceneView | MapView>();
+    const [map, setMap] = useState<__esri.Map>();
     const [isSketching, setIsSketching] = useState<boolean>(false);
     const isMobile = useIsMobile();
 
@@ -49,11 +48,12 @@ export function MapProvider({ children }: { children: ReactNode }) {
         center?: [number, number],
         layers?: LayerProps[]
     }) => {
-        // Case 1: The map and view already exist, so we only sync layer visibility.
-        if (viewRef.current && mapRef.current) {
-            const map = mapRef.current;
+        // If the view already exists, we just sync visibility without rebuilding the map.
+        if (view && map) {
+            // Create a simple lookup map of what *should* be visible from the URL state
             const visibilityMap = new Map();
 
+            // Helper to recursively get all titles and their visibility
             const populateVisibilityMap = (layerConfigs: LayerProps[]) => {
                 layerConfigs.forEach(config => {
                     if (config.title) {
@@ -66,7 +66,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
             };
             populateVisibilityMap(layers);
 
-            // Iterate through the LIVE layers on the map and update their visibility
+            // Iterate through the LIVE layers on the map and update them
             map.allLayers.forEach(liveLayer => {
                 const shouldBeVisible = visibilityMap.get(liveLayer.title);
                 if (shouldBeVisible !== undefined && liveLayer.visible !== shouldBeVisible) {
@@ -74,26 +74,22 @@ export function MapProvider({ children }: { children: ReactNode }) {
                 }
             });
         }
-        // Case 2: The map has not been created yet.
+
+        // If the view does NOT exist, run the initial creation logic.
         else {
-            const { view: initView, map: initMap } = await init(container, isMobile, { zoom, center }, layers, 'map');
+            const { map: initMap, view: initView } = await init(container, isMobile, { zoom, center }, layers, 'map');
+
+            // Wait for the view to be ready before setting state
             await initView.when();
 
-            viewRef.current = initView;
-            mapRef.current = initMap;
-            setIsInitialized(true);
+            setView(initView);
+            setMap(initMap);
         }
-    }, [isMobile]);
+    }, [view, map, isMobile]);
 
     return (
-        <MapContext.Provider value={{
-            view: viewRef.current,
-            map: mapRef.current,
-            loadMap,
-            isSketching,
-            setIsSketching
-        }}>
+        <MapContext.Provider value={{ view, map, loadMap, isSketching, setIsSketching }}>
             {children}
         </MapContext.Provider>
-    );
+    )
 }
