@@ -2,50 +2,6 @@ import { ENERGY_MINERALS_WORKSPACE, GEN_GIS_WORKSPACE, HAZARDS_WORKSPACE, MAPPIN
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 import { toTitleCase, toSentenceCase } from "@/lib/utils";
 
-// Pipelines WMS Layer
-const pipelinesLayerName = 'pipelines';
-const pipelinesWMSTitle = 'Pipelines';
-const pipelinesWMSConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: pipelinesWMSTitle,
-    visible: false,
-    sublayers: [
-        {
-            name: `${ENERGY_MINERALS_WORKSPACE}:${pipelinesLayerName}`,
-            popupEnabled: false,
-            queryable: true,
-            popupFields: {
-                'Operator': { field: 'operator', type: 'string' },
-                'Commodity': { field: 'commodity', type: 'string' },
-                'Acronym': { field: 'acronym', type: 'string' },
-                'Code Remarks': { field: 'coderemarks', type: 'string' }
-            },
-        },
-    ],
-};
-
-
-// Rivers WMS Layer
-const riversLayerName = 'rivers';
-const riversWMSTitle = 'Major Rivers';
-const riversWMSConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: riversWMSTitle,
-    visible: false,
-    sublayers: [
-        {
-            name: `${GEN_GIS_WORKSPACE}:${riversLayerName}`,
-            popupEnabled: false,
-            queryable: true,
-            popupFields: {
-                'Name': { field: 'name', type: 'string', transform: (value) => toTitleCase(value || '') },
-                'Water Right Area': { field: 'drainage_a', type: 'number' }
-            },
-        },
-    ],
-};
 
 // Roads WMS Layer
 const roadsLayerName = 'ccus_majorroads';
@@ -109,7 +65,7 @@ const transmissionLinesWMSConfig: WMSLayerProps = {
  
 // Seamless Geological Units WMS Layer
 const seamlessGeolunitsLayerName = 'mapping_geolunits_500k'
-const seamlessGeolunitsWMSTitle = 'Geologic Units (500k) New';
+const seamlessGeolunitsWMSTitle = 'Geologic Units (500k)';
 const seamlessGeolunitsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/mapping/wms`,
@@ -276,30 +232,7 @@ const qFaultsWMSConfig: WMSLayerProps = {
     ],
 };
 
-const wildernessStudyAreasLayerName = 'ccus_wsa';
-const wildernessStudyAreasWMSTitle = 'Wilderness Study Areas';
-const wildernessStudyAreasWMSConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: wildernessStudyAreasWMSTitle,
-    visible: false,
-    opacity: 0.5,
-    sublayers: [
-        {
-            name: `${ENERGY_MINERALS_WORKSPACE}:${wildernessStudyAreasLayerName}`,
-            popupEnabled: false,
-            queryable: true,
-            popupFields: {
-                'Name': { field: 'nlcs_name', type: 'string' },
-                'Type': { field: 'wsa_values', type: 'string' },
-                'NLCS ID': { field: 'nlcs_id', type: 'string' },
-                'WSA Number ': { field: 'wsa_number', type: 'string' }
-            },
-        }
-    ],
-};
-
-
+// Geothermal Power Plants WMS Layer
 const geothermalPowerplantsLayerName = 'ccus_geothermalpowerplants';
 const geothermalPowerplantsWMSTitle = 'Geothermal Power Plants';
 const geothermalPowerplantsWMSConfig: WMSLayerProps = {
@@ -329,19 +262,16 @@ const infrastructureAndLandUseConfig: LayerProps = {
     visible: false,
     layers: [
         geothermalPowerplantsWMSConfig,
-        pipelinesWMSConfig,
-        riversWMSConfig,
         roadsWMSConfig,
         railroadsWMSConfig,
         transmissionLinesWMSConfig,
-        wildernessStudyAreasWMSConfig,
         SITLAConfig,
     ]
 }
 
 const geologicalInformationConfig: LayerProps = {
     type: 'group',
-    title: 'Geological Information New',
+    title: 'Geological Information',
     visible: false,
     layers: [
         qFaultsWMSConfig,
