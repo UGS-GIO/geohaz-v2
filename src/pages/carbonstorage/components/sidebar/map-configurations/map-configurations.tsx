@@ -131,7 +131,7 @@ const parseCQLFilter = (cqlFilter: string | null | undefined): FilterState => {
             ? 'no'
             : 'all';
 
-    const formationMatches = cqlFilter.match(/\b([a-zA-Z0-9_]+)\s+IS NOT NULL/g) || [];
+    const formationMatches = cqlFilter.match(/\b([a-zA-Z0-9_]+)\s+IS NOT NULL/gi) || [];
     const formations = formationMatches.map(match => match.split(' ')[0]);
 
     let formation_operator: 'and' | undefined = undefined;
@@ -143,7 +143,7 @@ const parseCQLFilter = (cqlFilter: string | null | undefined): FilterState => {
         // - handles variable whitespace (\s+)
         // - avoids the bug of matching ANDs between filter groups
         const hasAndBetweenFormations =
-            /IS\s+NOT\s+NULL\s+AND\s+[a-zA-Z0-9_]+\s+IS\s+NOT\s+NULL/i.test(cqlFilter);
+            /IS\s+NOT\s+NULL\s*\)?\s*AND\s*\(?\s*[a-zA-Z0-9_]+\s+IS\s+NOT\s+NULL/i.test(cqlFilter);
 
         if (hasAndBetweenFormations) {
             formation_operator = 'and';
