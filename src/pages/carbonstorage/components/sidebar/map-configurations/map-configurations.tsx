@@ -115,7 +115,9 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
  * @returns A FilterState object representing the simplified filter state.
  **/
 const parseCQLFilter = (cqlFilter: string | null | undefined): FilterState => {
-    if (!cqlFilter) return { core: 'all' as YesNoAll, las: 'all' as YesNoAll, formations: [], formation_operator: undefined };
+    if (!cqlFilter) {
+        return { core: 'all', las: 'all', formations: [], formation_operator: undefined };
+    }
 
     const core: YesNoAll = cqlFilter.includes(`hascore = 'True'`)
         ? 'yes'
@@ -129,13 +131,16 @@ const parseCQLFilter = (cqlFilter: string | null | undefined): FilterState => {
             ? 'no'
             : 'all';
 
-    // Check for an explicit AND between formation filters, otherwise default to OR
-    const formationOperatorIsAnd = /\)\s+AND\s+\(/.test(cqlFilter) ||
-        (cqlFilter.match(/IS NOT NULL/g) || []).length > 1 && cqlFilter.includes(' AND ');
-    const formation_operator = formationOperatorIsAnd ? 'and' : undefined;
-
     const formationMatches = cqlFilter.match(/\b([a-zA-Z0-9_]+)\s+IS NOT NULL/g) || [];
     const formations = formationMatches.map(match => match.split(' ')[0]);
+
+    let formation_operator: 'and' | undefined = undefined;
+    // Only determine the operator if there are multiple formations to join.
+    if (formations.length > 1) {
+        if (cqlFilter.includes("IS NOT NULL AND")) {
+            formation_operator = 'and';
+        }
+    }
 
     return { core, las, formations, formation_operator };
 };
