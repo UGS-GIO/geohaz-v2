@@ -1,3 +1,22 @@
+## [1.16.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.15.0...v1.16.0) (2025-10-01)
+
+
+### ccs
+
+* **🐛 Bug Fixes**(`ccs`): allow or operator for formation search ([#309](https://github.com/UGS-GIO/geohaz-v2/issues/309))
+
+### common
+
+* **♻️ Refactors**(`common`): remove tabler/react-icons in favor of lucide icons ([#302](https://github.com/UGS-GIO/geohaz-v2/issues/302))* **♻️ Refactors**(`common`): some optimizing, upgrade packages, remove unused packages, ([#304](https://github.com/UGS-GIO/geohaz-v2/issues/304))
+
+### data-reviewer
+
+* **✨ Features**(`data-reviewer`): add splash screen for reviewer ([#306](https://github.com/UGS-GIO/geohaz-v2/issues/306))* **🐛 Bug Fixes**(`data-reviewer`): reorg folder structure to move params to _map, clear params from login page ([#308](https://github.com/UGS-GIO/geohaz-v2/issues/308))
+
+### geophysics
+
+* **✨ Features**(`geophysics`): add layers ([#305](https://github.com/UGS-GIO/geohaz-v2/issues/305))
+
 ## [1.15.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.14.0...v1.15.0) (2025-09-23)
 
 
