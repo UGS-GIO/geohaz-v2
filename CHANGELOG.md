@@ -1,3 +1,10 @@
+## [1.16.1](https://github.com/UGS-GIO/geohaz-v2/compare/v1.16.0...v1.16.1) (2025-10-01)
+
+
+### data-reviewer
+
+* **🐛 Bug Fixes**(`data-reviewer`): remove wrong visibility flag for landslides review layer ([#310](https://github.com/UGS-GIO/geohaz-v2/issues/310)) ([#311](https://github.com/UGS-GIO/geohaz-v2/issues/311))
+
 ## [1.16.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.15.0...v1.16.0) (2025-10-01)
 
 
