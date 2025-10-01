@@ -6,7 +6,7 @@ import { z } from 'zod'
 export const HazardsReviewSearchParamsSchema = z.object({})
 
 export const Route = createFileRoute('/_map/hazards-review/')({
-  validateSearch: HazardsReviewSearchParamsSchema.parse,
+  validateSearch: HazardsReviewSearchParamsSchema,
   beforeLoad: async ({ location }) => {
     // Wait for auth to initialize
     await new Promise<void>((resolve) => {

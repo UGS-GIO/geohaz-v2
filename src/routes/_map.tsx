@@ -28,7 +28,7 @@ export type MapSearchParams = z.infer<typeof mapSearchSchema>;
 export type MapSearch = z.infer<typeof mapSearchSchema>
 
 export const Route = createFileRoute('/_map')({
-    validateSearch: mapSearchSchema.parse,
+    validateSearch: mapSearchSchema,
     component: () => (
         <LayerUrlProvider>
             <SidebarProvider>

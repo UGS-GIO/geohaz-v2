@@ -133,7 +133,7 @@ function LoginPage() {
 
 export const Route = createFileRoute('/_auth/login')({
     component: LoginPage,
-    validateSearch: loginSearchSchema.parse,
+    validateSearch: loginSearchSchema,
     search: {
         // remove all search params
         middlewares: [stripSearchParams(true)],
