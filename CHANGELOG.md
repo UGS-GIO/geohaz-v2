@@ -1,3 +1,29 @@
+## [1.15.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.14.0...v1.15.0) (2025-09-23)
+
+
+### common
+
+* **✨ Features**(`common`): add use-is-map-loading hook and maploadingspinner component to track map loading state ([#300](https://github.com/UGS-GIO/geohaz-v2/issues/300))
+
+### data-reviewer
+
+* **♻️ Refactors**(`data-reviewer`): alter visibility layers ([#297](https://github.com/UGS-GIO/geohaz-v2/issues/297))
+
+## [1.14.0](https://github.com/UGS-GIO/geohaz-v2/compare/v1.13.1...v1.14.0) (2025-09-23)
+
+
+### common
+
+* **♻️ Refactors**(`common`): fix the logo collapsed size, connect sidebar content and collapsed state to url, refactor usegetsidebarlink and usegetpageinfo to usequery ([#294](https://github.com/UGS-GIO/geohaz-v2/issues/294))* **🐛 Bug Fixes**(`common`): prevent usegetlayerconfigs from loading all config data ([#296](https://github.com/UGS-GIO/geohaz-v2/issues/296))
+
+### data-reviewer
+
+* **✨ Features**(`data-reviewer`): add dynamic review layers ([#288](https://github.com/UGS-GIO/geohaz-v2/issues/288))
+
+### geophysics
+
+* **♻️ Refactors**(`geophysics`): Initial map setup for geophysics app ([#293](https://github.com/UGS-GIO/geohaz-v2/issues/293))
+
 ## [1.13.1](https://github.com/UGS-GIO/geohaz-v2/compare/v1.13.0...v1.13.1) (2025-09-10)
 
 
