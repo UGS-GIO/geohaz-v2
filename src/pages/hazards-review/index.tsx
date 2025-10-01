@@ -29,7 +29,7 @@ import { useState } from 'react';
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
-  const search = useSearch({ from: '/hazards-review/' });
+  const search = useSearch({ from: '/_map/hazards-review/' });
   const { updateLayerSelection } = useLayerUrl();
   const { user } = useAuth();
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(true);

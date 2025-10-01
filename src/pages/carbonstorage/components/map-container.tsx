@@ -5,11 +5,11 @@ import { useMapContainer } from "@/hooks/use-map-container";
 import { useDomainFilters } from "@/hooks/use-domain-filters";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers/layers';
-import { CcsSearchParams } from '@/routes/carbonstorage';
 import { useGetLayerConfigsData } from '@/hooks/use-get-layer-configs';
+import { MapSearchParams } from '@/routes/_map';
 
 interface MapContainerProps {
-    searchParams: CcsSearchParams;
+    searchParams: MapSearchParams;
     updateLayerSelection: (layerTitle: string, selected: boolean) => void;
 }
 

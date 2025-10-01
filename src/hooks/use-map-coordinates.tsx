@@ -29,7 +29,7 @@ export function useMapCoordinates() {
     const { view } = useMap();
     const isMobile = useIsMobile();
     const navigate = useNavigate();
-    const search = useSearch({ from: '__root__' });
+    const search = useSearch({ from: '/_map' });
     const isDecimalDegrees = search.coordinate_format !== 'dms';
     const [scale, setScale] = useState<number>(view?.scale || 0);
     const [coordinates, setCoordinates] = useState<{ x: string; y: string }>({ x: "", y: "" });

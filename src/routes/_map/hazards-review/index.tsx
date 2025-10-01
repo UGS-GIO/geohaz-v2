@@ -1,21 +1,12 @@
 import Map from '@/pages/hazards-review'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { auth } from '@/lib/auth'
-import { z } from 'zod';
+import { z } from 'zod'
 
-const hazardsReviewSearchSchema = z.object({
-  coordinate_format: z.enum(['dd', 'dms']).optional(),
-  filters: z.record(z.string()).optional(),
-  layers: z.object({
-    selected: z.array(z.string()).optional().default([]),
-    hidden: z.array(z.string()).optional().default([]),
-  }).optional().default({})
-});
+export const HazardsReviewSearchParamsSchema = z.object({})
 
-export type HazardsReviewSearchParams = z.infer<typeof hazardsReviewSearchSchema>;
-
-
-export const Route = createFileRoute('/hazards-review/')({
+export const Route = createFileRoute('/_map/hazards-review/')({
+  validateSearch: HazardsReviewSearchParamsSchema,
   beforeLoad: async ({ location }) => {
     // Wait for auth to initialize
     await new Promise<void>((resolve) => {
@@ -36,5 +27,4 @@ export const Route = createFileRoute('/hazards-review/')({
     }
   },
   component: () => <Map />,
-  validateSearch: hazardsReviewSearchSchema,
 })
