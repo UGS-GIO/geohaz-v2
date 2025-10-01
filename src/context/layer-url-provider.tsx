@@ -53,7 +53,7 @@ interface LayerUrlProviderProps {
 
 export const LayerUrlProvider = ({ children }: LayerUrlProviderProps) => {
     const navigate = useNavigate();
-    const { layers: urlLayers, filters: urlFilters } = useSearch({ from: '__root__' });
+    const { layers: urlLayers, filters: urlFilters } = useSearch({ from: '/_map' });
     const layersConfig = useGetLayerConfigsData();
     const hasInitializedForPath = useRef<string | null>(null);
     const location = useLocation();

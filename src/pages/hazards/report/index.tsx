@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import ReportApp from '@/pages/hazards/report/report/ReportApp'
 import { useTheme } from '@/context/theme-provider';
-import { Route } from '@/routes/hazards/report/$aoi.lazy';
+import { Route } from '@/routes/_map/hazards/report/$aoi.lazy';
 
 export default function Report() {
 
