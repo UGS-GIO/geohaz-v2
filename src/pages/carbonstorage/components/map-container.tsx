@@ -7,7 +7,6 @@ import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { wellWithTopsWMSTitle } from '@/pages/carbonstorage/data/layers/layers';
 import { CcsSearchParams } from '@/routes/carbonstorage';
 import { useGetLayerConfigsData } from '@/hooks/use-get-layer-configs';
-import MapLoadingSpinner from '@/components/custom/map/map-loading-spinner';
 
 interface MapContainerProps {
     searchParams: CcsSearchParams;
@@ -60,7 +59,6 @@ export default function MapContainer({ searchParams, updateLayerSelection }: Map
                 {...clickOrDragHandlers}
             >
                 <MapWidgets />
-                <MapLoadingSpinner />
             </div>
             <PopupDrawer
                 container={popupContainer}

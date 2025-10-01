@@ -30,13 +30,23 @@ export function findLayerByTitle(mapInstance: __esri.Map, title: string): __esri
     return foundLayer;
 }
 
-export function init(
+/**
+ * Initializes a map and its view within a specified container.
+ *
+ * @param container - The HTMLDivElement that will contain the map view.
+ * @param isMobile - A boolean indicating if the view should be optimized for mobile devices.
+ * @param options - An object containing the initial zoom level and center coordinates.
+ * @param layers - An array of layer properties to be added to the map.
+ * @param initialView - An optional parameter that specifies whether to initialize as a 'map' or 'scene' view.
+ * @returns A promise that resolves to an object containing the initialized map and view.
+ */
+export async function init(
     container: HTMLDivElement,
     isMobile: boolean,
     { zoom, center }: { zoom: number, center: [number, number] },
     layers: LayerProps[],
     initialView?: 'map' | 'scene',
-): { map: __esri.Map, view: __esri.MapView | __esri.SceneView } {
+): Promise<{ map: __esri.Map, view: __esri.MapView | __esri.SceneView }> {
     // Destroy the view if it exists
     if (app.view) {
         app.view.destroy();
@@ -49,7 +59,7 @@ export function init(
     const view = createView(container, map, initialView, isMobile, { zoom, center });
 
     // Add layers to the map
-    addLayersToMap(map, layers);
+    await addLayersToMap(map, layers);
 
     return { map, view };
 }
@@ -102,17 +112,37 @@ export const createView = (
         : new MapView({ ...commonOptions });
 };
 
-// Dynamically add layers to the map
-export const addLayersToMap = (map: Map, layers: LayerProps[]) => {
-    // Add layers to the map in reverse order to maintain the correct drawing order
-    layers.reverse().forEach((layer: LayerProps) => {
+/**
+ * Adds layers to the map with WMS optimization by batching GetCapabilities requests but maintaining individual layer structure.
+ *
+ * @param map - The ArcGISMap instance to which layers will be added.
+ * @param layersConfig - An array of LayerProps that defines the layers to be added to the map.
+ * @returns A promise that resolves when the layers have been added to the map.
+ */
+export const addLayersToMap = async (map: Map, layersConfig: LayerProps[]) => {
+    // Create all layers first
+    const createdLayers: __esri.Layer[] = [];
+
+    for (const layer of layersConfig) {
         const createdLayer = createLayer(layer) as __esri.Layer;
         if (createdLayer) {
-            map.add(createdLayer)
+            createdLayers.push(createdLayer);
         }
-    })
+    }
+
+    // Add all layers at once in reverse order to maintain the correct drawing order
+    if (createdLayers.length > 0) {
+        map.addMany(createdLayers.reverse());
+    }
 }
 
+/**
+ * Creates a layer from the given URL and layer properties.
+ *
+ * @param layer - The properties of the layer to create.
+ * @param LayerType - The constructor for the layer type.
+ * @returns The created layer instance or undefined if the layer type is unsupported or if the URL is missing.
+ */
 function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
     if (!LayerType) {
         console.warn(`Unsupported layer type: ${layer.type}`);
@@ -145,6 +175,13 @@ function createLayerFromUrl(layer: LayerProps, LayerType: LayerConstructor) {
     return undefined;
 }
 
+/**
+ * Creates a layer instance from layer properties.
+ *
+ * @param layer - The layer properties to create a layer from.
+ * @returns The created layer instance.
+ * @throws Error if the layer type is unsupported or required properties are missing.
+ */
 export const createLayer = (layer: LayerProps) => {
     if (layer.type === 'group') {
         const typedLayer = layer as GroupLayerProps;
@@ -167,6 +204,13 @@ export const createLayer = (layer: LayerProps) => {
     return undefined;
 }
 
+/**
+ * Zooms the map or scene view to the bounding box of the specified feature.
+ *
+ * @param feature - The feature to zoom to, which must include a bounding box (bbox).
+ * @param view - The MapView or SceneView instance to perform the zoom action on.
+ * @param sourceCRS - The coordinate reference system of the feature's bounding box.
+ */
 export const zoomToFeature = (
     feature: ExtendedFeature,
     view: __esri.MapView | __esri.SceneView,
