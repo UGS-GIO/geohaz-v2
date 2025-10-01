@@ -20,7 +20,7 @@ interface UseMapUrlSyncProps {
  * @returns Current map state derived from URL parameters
  */
 export function useMapUrlSync({ onFiltersChange }: UseMapUrlSyncProps = {}): MapUrlState {
-    const search = useSearch({ from: '__root__' });
+    const search = useSearch({ from: '/_map' });
 
     useEffect(() => {
         if (onFiltersChange && search.filters) {

@@ -33,7 +33,7 @@ const defaultInfoLink: SideLink = {
 
 export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const navigate = useNavigate();
-    const search = useSearch({ from: '__root__' });
+    const search = useSearch({ from: '/_map' });
 
     const { data: dynamicLinks } = useGetSidebarLinks();
     const [navOpened, setNavOpened] = useState<boolean>(false);
