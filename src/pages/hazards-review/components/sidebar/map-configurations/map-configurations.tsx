@@ -8,7 +8,7 @@ import React from 'react';
 
 function MapConfigurations() {
     const navigate = useNavigate({ from: '/hazards-review' });
-    const search = useSearch({ from: '/hazards-review/' });
+    const search = useSearch({ from: '/_map/hazards-review/' });
 
     const handleCoordFormatChange = useCallback((value: 'dd' | 'dms') => {
         navigate({

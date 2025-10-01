@@ -4,7 +4,7 @@ import { HeroSection } from '@/components/custom/hero-section';
 import { Image } from '@/components/ui/image';
 import { MapFooter } from '@/components/custom/map/map-footer';
 
-export const Route = createLazyFileRoute('/hazards/report/newreport/')({
+export const Route = createLazyFileRoute('/_map/hazards/report/newreport/')({
   component: ReportSummaryPage,
 })
 function ReportSummaryPage() {
