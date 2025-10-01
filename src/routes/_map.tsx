@@ -23,6 +23,8 @@ const mapSearchSchema = z.object({
     }).optional())
 }).strip()
 
+export type MapSearchParams = z.infer<typeof mapSearchSchema>;
+
 export type MapSearch = z.infer<typeof mapSearchSchema>
 
 export const Route = createFileRoute('/_map')({

@@ -165,7 +165,7 @@ const generateCQLFilter = (state: FilterState) => {
 **/
 const useWellFilterManager = () => {
     const navigate = useNavigate({ from: '/carbonstorage' });
-    const search = useSearch({ from: '/carbonstorage/' });
+    const search = useSearch({ from: '/_map/carbonstorage/' });
 
     const cqlFilter = useMemo(() =>
         search.filters?.[wellWithTopsWMSTitle],
@@ -207,7 +207,7 @@ const useWellFilterManager = () => {
 const MapConfigurations = () => {
     const { map } = useMap();
     const navigate = useNavigate({ from: '/carbonstorage' });
-    const search = useSearch({ from: '/carbonstorage/' });
+    const search = useSearch({ from: '/_map/carbonstorage/' });
     const { setCurrentContent } = useSidebar();
 
     const { simpleState, updateFilters } = useWellFilterManager();
