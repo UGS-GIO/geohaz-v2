@@ -14,7 +14,7 @@ import { SearchCombobox, SearchSourceConfig, defaultMasqueradeConfig, handleColl
 
 export default function Map() {
   const { isCollapsed } = useSidebar();
-  const search = useSearch({ from: '/carbonstorage/' });
+  const search = useSearch({ from: '/_map/carbonstorage/' });
   const { updateLayerSelection } = useLayerUrl();
 
   const searchConfig: SearchSourceConfig[] = [
