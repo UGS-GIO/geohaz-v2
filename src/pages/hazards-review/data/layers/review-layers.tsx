@@ -50,7 +50,6 @@ const landslideInventoryWMSConfig: WMSLayerProps = {
     sublayers: [
         {
             name: `${HAZARDS_WORKSPACE}:${landslideInventoryLayerName}`,
-            visible: false,
             popupEnabled: false,
             queryable: true,
             popupFields: {
