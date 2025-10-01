@@ -7,6 +7,6 @@ const authSearchSchema = z.object({
 })
 
 export const Route = createFileRoute('/_auth')({
-    validateSearch: authSearchSchema.parse,
+    validateSearch: authSearchSchema,
     component: () => <Outlet />,
 })
