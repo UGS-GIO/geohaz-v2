@@ -7,13 +7,13 @@ import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from 'geojson';
 import { featureCollection, point as turfPoint } from '@turf/helpers';
+import { bbox } from "@turf/bbox";
 import { useDebounce } from 'use-debounce';
 import { MASQUERADE_GEOCODER_URL } from '@/lib/constants';
 import { useMap } from '@/hooks/use-map';
 import { convertBbox } from '@/lib/map/conversion-utils';
 import { zoomToExtent } from '@/lib/sidebar/filter/util';
 import { highlightFeature, clearGraphics } from '@/lib/map/highlight-utils';
-import * as turf from '@turf/turf';
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from "@/hooks/use-toast";
 import { findLayerByTitle } from '@/lib/map/utils';
@@ -692,7 +692,7 @@ const handleSearchSelect = (
 
         highlightFeature(featureToHighlight, view, sourceCRS, 'Search Box Single Feature Highlight');
 
-        const featureBbox = turf.bbox(geom);
+        const featureBbox = bbox(geom);
         if (!featureBbox || !featureBbox.every(isFinite)) {
             console.error("Invalid bounding box calculated by turf.bbox:", featureBbox);
             return;
@@ -758,7 +758,7 @@ const handleCollectionSelect = (
     }
 
     try {
-        const collectionBbox = turf.bbox(collection);
+        const collectionBbox = bbox(collection);
         if (!collectionBbox.every(isFinite)) {
             console.error("Invalid bounding box calculated for collection");
             return;

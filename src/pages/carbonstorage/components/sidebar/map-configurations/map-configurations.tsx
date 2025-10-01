@@ -115,7 +115,9 @@ const fetchFormationData = async (): Promise<FormationMapping[]> => {
  * @returns A FilterState object representing the simplified filter state.
  **/
 const parseCQLFilter = (cqlFilter: string | null | undefined): FilterState => {
-    if (!cqlFilter) return { core: 'all' as YesNoAll, las: 'all' as YesNoAll, formations: [], formation_operator: undefined };
+    if (!cqlFilter) {
+        return { core: 'all', las: 'all', formations: [], formation_operator: undefined };
+    }
 
     const core: YesNoAll = cqlFilter.includes(`hascore = 'True'`)
         ? 'yes'
@@ -129,13 +131,24 @@ const parseCQLFilter = (cqlFilter: string | null | undefined): FilterState => {
             ? 'no'
             : 'all';
 
-    // Check for an explicit AND between formation filters, otherwise default to OR
-    const formationOperatorIsAnd = /\)\s+AND\s+\(/.test(cqlFilter) ||
-        (cqlFilter.match(/IS NOT NULL/g) || []).length > 1 && cqlFilter.includes(' AND ');
-    const formation_operator = formationOperatorIsAnd ? 'and' : undefined;
-
-    const formationMatches = cqlFilter.match(/\b([a-zA-Z0-9_]+)\s+IS NOT NULL/g) || [];
+    const formationMatches = cqlFilter.match(/\b([a-zA-Z0-9_]+)\s+IS NOT NULL/gi) || [];
     const formations = formationMatches.map(match => match.split(' ')[0]);
+
+    let formation_operator: 'and' | undefined = undefined;
+
+    // Only determine the operator if there are multiple formations to join.
+    if (formations.length > 1) {
+        // this regex checks for "AND" between two "IS NOT NULL" clauses
+        // - case-insensitive (/i)
+        // - handles variable whitespace (\s+)
+        // - avoids the bug of matching ANDs between filter groups
+        const hasAndBetweenFormations =
+            /IS\s+NOT\s+NULL\s*\)?\s*AND\s*\(?\s*[a-zA-Z0-9_]+\s+IS\s+NOT\s+NULL/i.test(cqlFilter);
+
+        if (hasAndBetweenFormations) {
+            formation_operator = 'and';
+        }
+    }
 
     return { core, las, formations, formation_operator };
 };
@@ -165,7 +178,7 @@ const generateCQLFilter = (state: FilterState) => {
 **/
 const useWellFilterManager = () => {
     const navigate = useNavigate({ from: '/carbonstorage' });
-    const search = useSearch({ from: '/carbonstorage/' });
+    const search = useSearch({ from: '/_map/carbonstorage/' });
 
     const cqlFilter = useMemo(() =>
         search.filters?.[wellWithTopsWMSTitle],
@@ -207,7 +220,7 @@ const useWellFilterManager = () => {
 const MapConfigurations = () => {
     const { map } = useMap();
     const navigate = useNavigate({ from: '/carbonstorage' });
-    const search = useSearch({ from: '/carbonstorage/' });
+    const search = useSearch({ from: '/_map/carbonstorage/' });
     const { setCurrentContent } = useSidebar();
 
     const { simpleState, updateFilters } = useWellFilterManager();

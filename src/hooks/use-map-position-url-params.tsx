@@ -4,7 +4,7 @@ import Point from "@arcgis/core/geometry/Point.js";
 
 export const useMapPositionUrlParams = (view: __esri.MapView | __esri.SceneView | undefined) => {
     const navigate = useNavigate();
-    const search = useSearch({ from: "__root__" });
+    const search = useSearch({ from: "/_map" });
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const updateUrlFromView = useCallback(() => {

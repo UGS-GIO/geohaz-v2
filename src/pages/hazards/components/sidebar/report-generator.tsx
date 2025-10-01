@@ -211,12 +211,16 @@ function ReportGenerator() {
     };
 
     useEffect(() => {
+        // Only run if the view is available
+        if (!view) return;
+
         tempGraphicsLayer.current = new GraphicsLayer();
-        view?.map.add(tempGraphicsLayer.current as Layer);
+        // Correcty chain the check for '.map'
+        view.map?.add(tempGraphicsLayer.current as Layer);
 
         return () => {
             if (tempGraphicsLayer.current) {
-                view?.map.remove(tempGraphicsLayer.current as Layer);
+                view.map?.remove(tempGraphicsLayer.current as Layer);
             }
         };
     }, [view]);

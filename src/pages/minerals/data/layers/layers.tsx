@@ -505,6 +505,7 @@ const landAssessmentWMSConfig: WMSLayerProps = {
 // --- SITLA Land Ownership Layer ---
 const SITLAConfig: LayerProps = {
     type: 'feature',
+    title: 'SITLA Land Ownership',
     url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
     opacity: 0.45,
     options: {

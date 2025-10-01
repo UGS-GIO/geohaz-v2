@@ -1,6 +1,6 @@
 import { createLazyFileRoute } from '@tanstack/react-router';
 import Report from '@/pages/hazards/report';
 
-export const Route = createLazyFileRoute('/hazards/report/$aoi')({
+export const Route = createLazyFileRoute('/_map/hazards-review/report/$aoi')({
   component: Report
 });

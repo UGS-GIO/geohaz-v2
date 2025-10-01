@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { IconChevronsLeft, IconMenu2, IconX } from '@tabler/icons-react';
+import { ChevronsLeft, Menu, X } from 'lucide-react';
 import { Layout } from './custom/layout';
 import { Button } from './custom/button';
 import Nav from './nav';
@@ -81,7 +81,7 @@ export default function Sidebar({ className }: SidebarProps) {
             aria-expanded={navOpened}
             onClick={handleMenuClick}
           >
-            {navOpened ? <IconX /> : <IconMenu2 />}
+            {navOpened ? <X /> : <Menu />}
           </Button>
         </Layout.Header>
 
@@ -107,8 +107,8 @@ export default function Sidebar({ className }: SidebarProps) {
           variant='outline'
           className='absolute -right-5 top-1/2 z-40 hidden rounded-none md:inline-flex w-6'
         >
-          <IconChevronsLeft
-            stroke={1.5}
+          <ChevronsLeft
+            strokeWidth={1.5}
             className={`h-5 w-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
           />
         </Button>
