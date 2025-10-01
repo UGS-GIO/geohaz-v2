@@ -403,6 +403,7 @@ const ownershipLayerName = 'Land Ownership';
 const ownershipTitle = ownershipLayerName;
 const ownershipConfig: LayerProps = {
     type: 'feature',
+    title: ownershipTitle,
     url: 'https://gis.trustlands.utah.gov/mapping/rest/services/Land_Ownership_WM/MapServer/0',
     opacity: 0.45,
     options: {

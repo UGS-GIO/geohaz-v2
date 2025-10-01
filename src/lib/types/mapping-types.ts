@@ -91,8 +91,8 @@ export type ExtendedSublayerProperties =
 
 interface BaseLayerProps {
     type: 'feature' | 'tile' | 'map-image' | 'geojson' | 'imagery' | 'wms' | 'group';
+    title: string;
     url?: string;
-    title?: string;
     visible?: boolean;
     options?: any;
     opacity?: number;

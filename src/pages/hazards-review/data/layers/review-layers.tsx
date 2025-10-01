@@ -1,4 +1,4 @@
-import { PROD_GEOSERVER_URL, HAZARDS_WORKSPACE, PROD_POSTGREST_URL, GEN_GIS_WORKSPACE } from "@/lib/constants";
+import { PROD_GEOSERVER_URL, HAZARDS_WORKSPACE, PROD_POSTGREST_URL } from "@/lib/constants";
 import { LayerProps, WMSLayerProps } from "@/lib/types/mapping-types";
 import GeoJSON from "geojson";
 
@@ -808,21 +808,21 @@ const karstFeaturesWMSConfig: WMSLayerProps = {
     ],
 }
 
-const quads24kLayerName = '24kquads';
-const quads24kWMSTitle = 'USGS 1:24,000-Scale Quadrangle Boundaries: Review';
-const quads24kWMSConfig: WMSLayerProps = {
-    type: 'wms',
-    url: `${PROD_GEOSERVER_URL}/wms`,
-    title: quads24kWMSTitle,
-    visible: false,
-    sublayers: [
-        {
-            name: `${GEN_GIS_WORKSPACE}:${quads24kLayerName}`,
-            popupEnabled: false,
-            queryable: false,
-        },
-    ],
-}
+// const quads24kLayerName = '24kquads';
+// const quads24kWMSTitle = 'USGS 1:24,000-Scale Quadrangle Boundaries: Review';
+// const quads24kWMSConfig: WMSLayerProps = {
+//     type: 'wms',
+//     url: `${PROD_GEOSERVER_URL}/wms`,
+//     title: quads24kWMSTitle,
+//     visible: false,
+//     sublayers: [
+//         {
+//             name: `${GEN_GIS_WORKSPACE}:${quads24kLayerName}`,
+//             popupEnabled: false,
+//             queryable: false,
+//         },
+//     ],
+// }
 
 const studyAreasLayerName = 'studyareas_review';
 const studyAreasWMSTitle = 'Mapped Areas: Review';
@@ -908,7 +908,7 @@ const layersConfig: LayerProps[] = [
     landslidesConfig,
     soilHazardsConfig,
     studyAreasWMSConfig,
-    quads24kWMSConfig,
+    // quads24kWMSConfig,
 ];
 
 // --- New "Review" Versions of Each Layer Config ---

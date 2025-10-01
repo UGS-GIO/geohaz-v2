@@ -4,7 +4,6 @@ import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
 import { useGetLayerConfigsData } from '@/hooks/use-get-layer-configs';
-import MapLoadingSpinner from '@/components/custom/map/map-loading-spinner';
 
 export default function ArcGISMap() {
     const layersConfig = useGetLayerConfigsData('layers');
@@ -34,13 +33,12 @@ export default function ArcGISMap() {
                 {...clickOrDragHandlers}
             >
                 <MapWidgets />
-                <MapLoadingSpinner />
             </div>
             <PopupDrawer
                 container={popupContainer}
                 drawerTriggerRef={drawerTriggerRef}
                 popupContent={popupContent}
-                popupTitle="Wetlands Information"
+                popupTitle="Feature Information"
             />
             <div ref={setPopupContainer} />
         </>
