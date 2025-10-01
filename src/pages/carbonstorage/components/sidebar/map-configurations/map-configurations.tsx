@@ -135,9 +135,17 @@ const parseCQLFilter = (cqlFilter: string | null | undefined): FilterState => {
     const formations = formationMatches.map(match => match.split(' ')[0]);
 
     let formation_operator: 'and' | undefined = undefined;
+
     // Only determine the operator if there are multiple formations to join.
     if (formations.length > 1) {
-        if (cqlFilter.includes("IS NOT NULL AND")) {
+        // this regex checks for "AND" between two "IS NOT NULL" clauses
+        // - case-insensitive (/i)
+        // - handles variable whitespace (\s+)
+        // - avoids the bug of matching ANDs between filter groups
+        const hasAndBetweenFormations =
+            /IS\s+NOT\s+NULL\s+AND\s+[a-zA-Z0-9_]+\s+IS\s+NOT\s+NULL/i.test(cqlFilter);
+
+        if (hasAndBetweenFormations) {
             formation_operator = 'and';
         }
     }
