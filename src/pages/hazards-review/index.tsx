@@ -83,7 +83,7 @@ export default function Map() {
                 <li className="flex gap-2">
                   <span className="font-bold shrink-0">•</span>
                   <span>
-                    <strong>Toggle Review and Live hazard data</strong> using the dedicated tab buttons within the layer controls window. Each layer's visibility can be controlled independently.
+                    <strong>Toggle “For Review” and “Published” hazard data</strong> using the dedicated tab buttons within the layer controls window. Each layer's visibility can be controlled independently.
                   </span>
                 </li>
                 <li className="flex gap-2">
