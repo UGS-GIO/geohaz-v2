@@ -57,8 +57,8 @@ const LayersWithReview = () => {
                         }}
                         className="justify-start"
                     >
-                        <ToggleGroupItem value="review">Review Layers</ToggleGroupItem>
-                        <ToggleGroupItem value="default">Live Layers</ToggleGroupItem>
+                        <ToggleGroupItem value="review">For Review</ToggleGroupItem>
+                        <ToggleGroupItem value="default">Published</ToggleGroupItem>
                     </ToggleGroup>
                 </div>
                 <CardDescription className="pt-2">
