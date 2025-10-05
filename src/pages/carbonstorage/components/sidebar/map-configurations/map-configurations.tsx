@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -26,8 +26,6 @@ import { useSidebar } from '@/hooks/use-sidebar';
 import Layers from '@/components/sidebar/layers';
 import { LayersIcon } from '@radix-ui/react-icons';
 import { findAndApplyWMSFilter } from '@/lib/sidebar/filter/util';
-
-
 
 type YesNoAll = "yes" | "no" | "all";
 
@@ -190,29 +188,38 @@ const useWellFilterManager = () => {
         [cqlFilter]
     );
 
-    // Memoize the update function to prevent unnecessary re-renders
+    const stateRef = useRef(simpleState);
+
+    useEffect(() => {
+        stateRef.current = simpleState;
+    }, [simpleState]);
+
     const updateFilters = useCallback((newState: Partial<FilterState>) => {
         const updatedState: FilterState = {
-            ...simpleState,
+            ...stateRef.current,
             ...newState
         };
 
         const combinedWellFilter = generateCQLFilter(updatedState);
-        const currentFilters = search.filters || {};
-        let newFilters: Record<string, string> | undefined;
 
-        if (combinedWellFilter) {
-            newFilters = { ...currentFilters, [wellWithTopsWMSTitle]: combinedWellFilter };
-        } else {
-            const { [wellWithTopsWMSTitle]: _, ...rest } = currentFilters;
-            newFilters = Object.keys(rest).length > 0 ? rest : undefined;
-        }
-
+        // Get current filters from the search object directly
         navigate({
-            search: (prev) => ({ ...prev, filters: newFilters }),
+            search: (prev) => {
+                const currentFilters = prev.filters || {};
+                let newFilters: Record<string, string> | undefined;
+
+                if (combinedWellFilter) {
+                    newFilters = { ...currentFilters, [wellWithTopsWMSTitle]: combinedWellFilter };
+                } else {
+                    const { [wellWithTopsWMSTitle]: _, ...rest } = currentFilters;
+                    newFilters = Object.keys(rest).length > 0 ? rest : undefined;
+                }
+
+                return { ...prev, filters: newFilters };
+            },
             replace: true,
         });
-    }, [simpleState, search.filters, navigate]);
+    }, [navigate]);
 
     return { simpleState, updateFilters };
 };
@@ -233,7 +240,7 @@ const MapConfigurations = () => {
     } = useQuery({
         queryKey: ['formationMappings'],
         queryFn: fetchFormationData,
-        staleTime: 1000 * 60 * 60, // 1 hour
+        staleTime: 1000 * 60 * 60,
     });
 
     const isWellsLayerVisible = useMemo(() => {
@@ -246,7 +253,6 @@ const MapConfigurations = () => {
         findAndApplyWMSFilter(map, wellWithTopsWMSTitle, filterFromUrl);
     }, [map, search.filters]);
 
-    // Memoize event handlers
     const handleCoordFormatChange = useCallback((value: 'dd' | 'dms') => {
         navigate({
             search: (prev) => ({ ...prev, coordinate_format: value }),
@@ -254,27 +260,22 @@ const MapConfigurations = () => {
         });
     }, [navigate]);
 
-    const handleHasCoreChange = useCallback((value: YesNoAll) =>
-        updateFilters({ core: value }),
-        [updateFilters]
-    );
+    const handleHasCoreChange = useCallback((value: YesNoAll) => {
+        updateFilters({ core: value });
+    }, [updateFilters]);
 
-    const handleHasLasChange = useCallback((value: YesNoAll) =>
-        updateFilters({ las: value }),
-        [updateFilters]
-    );
+    const handleHasLasChange = useCallback((value: YesNoAll) => {
+        updateFilters({ las: value });
+    }, [updateFilters]);
 
-    const handleFormationChange = useCallback((newFormations: string[]) =>
-        updateFilters({ formations: newFormations }),
-        [updateFilters]
-    );
+    const handleFormationChange = useCallback((newFormations: string[]) => {
+        updateFilters({ formations: newFormations });
+    }, [updateFilters]);
 
-    const handleFormationOperatorChange = useCallback((useAnd: boolean) =>
-        updateFilters({ formation_operator: useAnd ? 'and' : undefined }),
-        [updateFilters]
-    );
+    const handleFormationOperatorChange = useCallback((useAnd: boolean) => {
+        updateFilters({ formation_operator: useAnd ? 'and' : undefined });
+    }, [updateFilters]);
 
-    // Memoize the layers panel click handler
     const handleLayersPanelClick = useCallback(() => {
         setCurrentContent({
             title: 'Layers',

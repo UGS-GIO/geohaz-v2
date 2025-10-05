@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -10,6 +10,7 @@ import { XIcon } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { clearGraphics } from "@/lib/map/highlight-utils";
 import { useMap } from "@/hooks/use-map";
+
 interface CombinedSidebarDrawerProps {
     container: HTMLDivElement | null;
     popupContent: LayerContentProps[];
@@ -26,27 +27,39 @@ function PopupDrawer({
     const carouselRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [activeLayerTitle, setActiveLayerTitle] = useState<string>("");
-    const screenSize = useScreenSize()
+    const screenSize = useScreenSize();
     const isMobile = useIsMobile();
-    const { view } = useMap()
+    const { view } = useMap();
 
-    const layerContent = useMemo(() => popupContent, [popupContent]);
-
-    const groupedLayers = useMemo(() => {
-        // Create a flat list of layer titles, prioritizing non-empty layer titles
-        const layers = layerContent.map((item) => item.layerTitle || item.groupLayerTitle)
+    // Group layers and extract titles - NO side effects
+    const { groupedLayers, layerTitles } = useMemo(() => {
+        const layers = popupContent
+            .map((item) => item.layerTitle || item.groupLayerTitle)
             .filter(title => title !== '');
 
-        // Always set to the first layer when popupContent changes
-        setActiveLayerTitle(layers[0] || '');
-
-        return layerContent.reduce((acc, item) => {
+        const grouped = popupContent.reduce((acc, item) => {
             const { groupLayerTitle, layerTitle } = item;
             if (!acc[groupLayerTitle]) acc[groupLayerTitle] = [];
             if (layerTitle) acc[groupLayerTitle].push(layerTitle);
             return acc;
         }, {} as Record<string, string[]>);
-    }, [layerContent]);
+
+        return { groupedLayers: grouped, layerTitles: layers };
+    }, [popupContent]);
+
+    // Initialize active layer separately - runs once per popupContent change
+    useEffect(() => {
+        if (layerTitles.length > 0) {
+            setActiveLayerTitle(layerTitles[0]);
+        }
+    }, [layerTitles]);
+
+    // Create a stable key based on actual content
+    const contentKey = useMemo(() => {
+        return popupContent
+            .map(item => `${item.groupLayerTitle}-${item.layerTitle}`)
+            .join('|');
+    }, [popupContent]);
 
     const handleCarouselClick = useCallback((title: string) => {
         const element = document.getElementById(`section-${title}`);
@@ -61,18 +74,16 @@ function PopupDrawer({
     }, []);
 
     const onSectionChange = useCallback((layerTitle: string) => {
-        // Escape layerTitle for querySelector using CSS.escape
-        const escapedLayerTitle = CSS.escape(`layer-${layerTitle}`);
-
-        // Update active layer title
         setActiveLayerTitle(layerTitle);
 
-        // Center carousel item
-        const carouselItem = document.getElementById(`${escapedLayerTitle}`);
+        // Escape layerTitle for querySelector using CSS.escape
+        const escapedLayerTitle = CSS.escape(`layer-${layerTitle}`);
+        const carouselItem = document.getElementById(escapedLayerTitle);
+
         if (carouselItem) {
-            carouselItem.scrollIntoView({ behavior: "smooth", block: "center" });
+            carouselItem.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
         }
-    }, [])
+    }, []);
 
     const handleClose = useCallback(() => {
         if (view) {
@@ -85,9 +96,17 @@ function PopupDrawer({
     }, [view]);
 
     return (
-        <Drawer container={container} modal={false} onOpenChange={(open) => { if (!open) handleClose() }}>
+        <Drawer
+            container={container}
+            modal={false}
+            onOpenChange={(open) => {
+                if (!open) handleClose();
+            }}
+        >
             <DrawerTrigger asChild>
-                <Button ref={drawerTriggerRef} size="sm" className="hidden">Open Drawer</Button>
+                <Button ref={drawerTriggerRef} size="sm" className="hidden">
+                    Open Drawer
+                </Button>
             </DrawerTrigger>
 
             <DrawerContent className="z-60 max-h-[50vh] md:max-h-[85vh] overflow-hidden md:absolute md:right-4 md:max-w-[30vw] md:mb-10 left-auto w-full">
@@ -95,27 +114,41 @@ function PopupDrawer({
                     <DrawerTitle className="flex-1 pr-10">{popupTitle}</DrawerTitle>
                     {!isMobile && (
                         <DrawerClose asChild>
-                            <Button variant="outline" className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center">
-                                <XIcon />
+                            <Button
+                                variant="outline"
+                                className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center p-0"
+                            >
+                                <XIcon className="w-4 h-4" />
                             </Button>
                         </DrawerClose>
                     )}
                 </DrawerHeader>
 
-                <DrawerDescription className="hidden" /> {/* present but hidden to resolve console warning */}
+                <DrawerDescription className="sr-only">
+                    Popup content for {popupTitle}
+                </DrawerDescription>
+
                 <div className="grid grid-rows-[auto_1fr] h-full overflow-hidden mb-6">
-                    {screenSize.height > 1080 &&
+                    {screenSize.height > 1080 && layerTitles.length > 1 && (
                         <header className="border-b overflow-hidden h-12">
                             <Carousel className="w-full h-full relative px-8">
                                 <CarouselContent className="-ml-2 px-4" ref={carouselRef}>
                                     {Object.entries(groupedLayers).map(([groupTitle, layerTitles], groupIdx) => (
                                         <React.Fragment key={`group-${groupIdx}`}>
                                             {layerTitles.length === 0 ? (
-                                                <CarouselItem key={`group-${groupIdx}`} className="pl-2 basis-auto" id={`layer-${groupTitle}`}>
+                                                <CarouselItem
+                                                    key={`group-${groupIdx}`}
+                                                    className="pl-2 basis-auto"
+                                                    id={`layer-${groupTitle}`}
+                                                >
                                                     <button
-                                                        className={cn("px-3 py-2 text-sm font-bold transition-all text-secondary-foreground", {
-                                                            'underline text-primary': activeLayerTitle === groupTitle,
-                                                        })}
+                                                        type="button"
+                                                        className={cn(
+                                                            "px-3 py-2 text-sm font-bold transition-all text-secondary-foreground",
+                                                            {
+                                                                'underline text-primary': activeLayerTitle === groupTitle,
+                                                            }
+                                                        )}
                                                         onClick={() => handleCarouselClick(groupTitle)}
                                                     >
                                                         {groupTitle}
@@ -123,11 +156,19 @@ function PopupDrawer({
                                                 </CarouselItem>
                                             ) : (
                                                 layerTitles.map((layerTitle, layerIdx) => (
-                                                    <CarouselItem key={`layer-${layerIdx}`} className="pl-2 basis-auto" id={`layer-${layerTitle}`}>
+                                                    <CarouselItem
+                                                        key={`layer-${layerIdx}`}
+                                                        className="pl-2 basis-auto"
+                                                        id={`layer-${layerTitle}`}
+                                                    >
                                                         <button
-                                                            className={cn("px-3 py-2 text-sm font-bold transition-all text-secondary-foreground", {
-                                                                'underline text-primary': activeLayerTitle === layerTitle,
-                                                            })}
+                                                            type="button"
+                                                            className={cn(
+                                                                "px-3 py-2 text-sm font-bold transition-all text-secondary-foreground",
+                                                                {
+                                                                    'underline text-primary': activeLayerTitle === layerTitle,
+                                                                }
+                                                            )}
                                                             onClick={() => handleCarouselClick(layerTitle)}
                                                         >
                                                             {layerTitle}
@@ -142,16 +183,16 @@ function PopupDrawer({
                                 <CarouselNext className="absolute right-1 top-1/2 -translate-y-1/2" />
                             </Carousel>
                         </header>
-                    }
+                    )}
 
                     <div className="flex overflow-hidden pt-2">
                         <div
                             ref={setContainerRef}
-                            className={cn(`flex flex-1 flex-col gap-4 p-1 overflow-y-auto select-text`)}
+                            className="flex flex-1 flex-col gap-4 p-1 overflow-y-auto select-text"
                         >
                             <PopupContentWithPagination
-                                key={JSON.stringify(layerContent)}
-                                layerContent={layerContent}
+                                key={contentKey}
+                                layerContent={popupContent}
                                 onSectionChange={onSectionChange}
                             />
                         </div>
