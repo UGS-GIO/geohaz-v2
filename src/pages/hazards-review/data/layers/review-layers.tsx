@@ -701,6 +701,38 @@ const alluvialFanWMSConfig: WMSLayerProps = {
     ],
 }
 
+const floodAndDebrisLayerName = 'floodanddebrisflow_review';
+const floodAndDebrisWMSTitle = 'Flood and Debris-Flow Hazard: Review';
+const floodAndDebrisWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: floodAndDebrisWMSTitle,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${floodAndDebrisLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': { field: 'flhmappedscale', type: 'string' },
+            },
+            relatedTables: [
+                {
+                    fieldLabel: 'hazard_symbology_text',
+                    matchingField: 'Relate_ID',
+                    targetField: 'flhhazardunit',
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                }
+            ]
+        },
+    ],
+}
+
 const earthFissureLayerName = 'earthfissure_review';
 const earthFissureWMSTitle = 'Earth Fissure Hazard: Review';
 const earthFissureWMSConfig: WMSLayerProps = {
@@ -888,6 +920,7 @@ const soilHazardsConfig: LayerProps = {
     layers: [
         collapsibleSoilWMSConfig,
         corrosiveSoilRockWMSConfig,
+        floodAndDebrisWMSConfig,
         earthFissureWMSConfig,
         expansiveSoilRockWMSConfig,
         erosionHazardZoneWMSConfig,
