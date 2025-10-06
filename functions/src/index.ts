@@ -14,7 +14,6 @@ const SECRET_ID = "UTAH_MAPSERV_API_KEY";
 const GCP_PROJECT_ID = process.env.GCLOUD_PROJECT;
 const SECRET_VERSION_NAME = `projects/${GCP_PROJECT_ID}/secrets/${SECRET_ID}/versions/latest`;
 const secretManagerClient = new SecretManagerServiceClient(); // Instantiate client
-fgh
 
 // --- Modified getApiKey Function ---
 async function getApiKey(): Promise<string> {
