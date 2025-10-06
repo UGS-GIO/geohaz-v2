@@ -707,6 +707,7 @@ const floodAndDebrisWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: floodAndDebrisWMSTitle,
+    opacity: 0.75,
     visible: false,
     sublayers: [
         {
