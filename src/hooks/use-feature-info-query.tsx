@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Feature } from 'geojson';
 import { LayerOrderConfig } from "@/hooks/use-get-layer-configs";
 import { LayerContentProps } from '@/components/custom/popups/popup-content-with-pagination';
@@ -219,6 +219,10 @@ export function useFeatureInfoQuery({
     const [mapPoint, setMapPoint] = useState<MapPoint | null>(null);
     const { activeFilters } = useLayerUrl();
 
+    // Track unique click IDs - increment on each new click
+    const clickIdRef = useRef(0);
+    const [currentClickId, setCurrentClickId] = useState<number | null>(null);
+
     const queryFn = async (): Promise<LayerContentProps[]> => {
         if (!view || !mapPoint) return [];
 
@@ -256,7 +260,6 @@ export function useFeatureInfoQuery({
             queryableLayers.forEach(layerKey => {
                 const layerConfig = visibleLayersMap[layerKey];
                 const layerTitle = getLayerTitle(layerConfig);
-
                 // Collect filters for this specific layer
                 const layerFilters: string[] = [];
 
@@ -360,29 +363,34 @@ export function useFeatureInfoQuery({
             : layerInfoFiltered;
     };
 
+    // Remove activeFilters from queryKey - we don't want filter changes to invalidate the query
     const { data, isFetching, isSuccess, refetch } = useQuery({
-        queryKey: ['wmsFeatureInfo', coordinateAdapter.toJSON(mapPoint), activeFilters],
+        queryKey: ['wmsFeatureInfo', coordinateAdapter.toJSON(mapPoint), currentClickId],
         queryFn,
         enabled: false,
         refetchOnWindowFocus: false,
     });
 
     const fetchForPoint = (point: MapPoint) => {
+        // Generate new click ID for each map click
+        clickIdRef.current += 1;
+        setCurrentClickId(clickIdRef.current);
         setMapPoint(point);
     };
 
-    // trigger refetch when mapPoint changes
+    // trigger refetch when mapPoint changes (which means new click happened)
     useEffect(() => {
-        if (mapPoint) {
+        if (mapPoint && currentClickId !== null) {
             refetch();
         }
-    }, [mapPoint, refetch]);
+    }, [mapPoint, currentClickId, refetch]);
 
     return {
         fetchForPoint,
-        data: isSuccess ? data : [], // Return data only on success, otherwise an empty array
+        data: isSuccess ? data : [],
         isFetching,
         isSuccess,
         lastClickedPoint: mapPoint,
+        clickId: currentClickId,
     };
 }

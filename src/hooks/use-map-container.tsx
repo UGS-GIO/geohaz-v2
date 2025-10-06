@@ -77,7 +77,8 @@ export function useMapContainer({
         isSuccess: featureInfoQuery.isSuccess,
         featureData: featureInfoQuery.data || [],
         view,
-        drawerTriggerRef
+        drawerTriggerRef,
+        clickId: featureInfoQuery.clickId
     });
 
     // Handle map clicks with coordinate adapter

@@ -701,6 +701,42 @@ const alluvialFanWMSConfig: WMSLayerProps = {
     ],
 }
 
+const floodAndDebrisLayerName = 'floodanddebrisflow_review';
+const floodAndDebrisWMSTitle = 'Flood and Debris-Flow Hazard: Review';
+const floodAndDebrisWMSConfig: WMSLayerProps = {
+    type: 'wms',
+    url: `${PROD_GEOSERVER_URL}/wms`,
+    title: floodAndDebrisWMSTitle,
+    opacity: 0.75,
+    visible: false,
+    sublayers: [
+        {
+            name: `${HAZARDS_WORKSPACE}:${floodAndDebrisLayerName}`,
+            popupEnabled: false,
+            queryable: true,
+            popupFields: {
+                'Mapped Scale': { field: 'flhmappedscale', type: 'string' },
+            },
+            relatedTables: [
+                {
+                    fieldLabel: '',
+                    matchingField: 'relate_id',
+                    targetField: 'flhhazardunit',
+                    url: `${PROD_POSTGREST_URL}/unit_descriptions`,
+                    headers: {
+                        "Accept-Profile": 'hazards',
+                        "Accept": "application/json",
+                        "Cache-Control": "no-cache",
+                    },
+                    displayFields: [
+                        { field: 'description' }
+                    ]
+                }
+            ]
+        },
+    ],
+}
+
 const earthFissureLayerName = 'earthfissure_review';
 const earthFissureWMSTitle = 'Earth Fissure Hazard: Review';
 const earthFissureWMSConfig: WMSLayerProps = {
@@ -864,7 +900,7 @@ const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards: Review',
     visible: false,
-    layers: [shallowGroundwaterWMSConfig, alluvialFanWMSConfig],
+    layers: [floodAndDebrisWMSConfig, shallowGroundwaterWMSConfig, alluvialFanWMSConfig],
 };
 
 const earthquakesConfig: LayerProps = {
