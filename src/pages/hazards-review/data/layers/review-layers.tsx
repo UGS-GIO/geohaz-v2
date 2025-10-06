@@ -707,6 +707,7 @@ const floodAndDebrisWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
     title: floodAndDebrisWMSTitle,
+    opacity: 0.75,
     visible: false,
     sublayers: [
         {
@@ -718,8 +719,8 @@ const floodAndDebrisWMSConfig: WMSLayerProps = {
             },
             relatedTables: [
                 {
-                    fieldLabel: 'hazard_symbology_text',
-                    matchingField: 'Relate_ID',
+                    fieldLabel: '',
+                    matchingField: 'relate_id',
                     targetField: 'flhhazardunit',
                     url: `${PROD_POSTGREST_URL}/unit_descriptions`,
                     headers: {
@@ -727,6 +728,9 @@ const floodAndDebrisWMSConfig: WMSLayerProps = {
                         "Accept": "application/json",
                         "Cache-Control": "no-cache",
                     },
+                    displayFields: [
+                        { field: 'description' }
+                    ]
                 }
             ]
         },
