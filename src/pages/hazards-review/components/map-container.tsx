@@ -3,10 +3,10 @@ import { MapContextMenu } from "@/components/custom/map/map-context-menu";
 import { PopupDrawer } from "@/components/custom/popups/popup-drawer";
 import { useMapContainer } from "@/hooks/use-map-container";
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
-import { HazardsReviewSearchParamsSchema } from '@/routes/_map/hazards-review';
 import { useGetLayerConfigsData } from '@/hooks/use-get-layer-configs';
 import MapLoadingSpinner from '@/components/custom/map/map-loading-spinner';
 import { z } from 'zod';
+import { HazardsReviewSearchParamsSchema } from '@/routes/_map/hazards-review/route';
 
 
 export type HazardsReviewSearchParams = z.infer<typeof HazardsReviewSearchParamsSchema>;

@@ -1,11 +1,10 @@
-import Map from '@/pages/hazards-review'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { auth } from '@/lib/auth'
 import { z } from 'zod'
 
 export const HazardsReviewSearchParamsSchema = z.object({})
 
-export const Route = createFileRoute('/_map/hazards-review/')({
+export const Route = createFileRoute('/_map/hazards-review')({
   validateSearch: HazardsReviewSearchParamsSchema,
   beforeLoad: async ({ location }) => {
     // Wait for auth to initialize
@@ -26,5 +25,4 @@ export const Route = createFileRoute('/_map/hazards-review/')({
       })
     }
   },
-  component: () => <Map />,
 })
