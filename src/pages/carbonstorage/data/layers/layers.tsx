@@ -684,7 +684,7 @@ const wildernessStudyAreasWMSConfig: WMSLayerProps = {
 };
 
 const sitlaReportsLayerName = 'ccus_sitla_reports';
-const sitlaReportsWMSTitle = 'SITLA Reports';
+const sitlaReportsWMSTitle = 'CO₂ Storage Potential on SITLA Blocks';
 const sitlaReportsWMSConfig: WMSLayerProps = {
     type: 'wms',
     url: `${PROD_GEOSERVER_URL}/wms`,
