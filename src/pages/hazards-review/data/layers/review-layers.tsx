@@ -900,7 +900,7 @@ const floodHazardsConfig: LayerProps = {
     type: 'group',
     title: 'Flooding Hazards: Review',
     visible: false,
-    layers: [shallowGroundwaterWMSConfig, alluvialFanWMSConfig],
+    layers: [floodAndDebrisWMSConfig, shallowGroundwaterWMSConfig, alluvialFanWMSConfig],
 };
 
 const earthquakesConfig: LayerProps = {
@@ -924,7 +924,6 @@ const soilHazardsConfig: LayerProps = {
     layers: [
         collapsibleSoilWMSConfig,
         corrosiveSoilRockWMSConfig,
-        floodAndDebrisWMSConfig,
         earthFissureWMSConfig,
         expansiveSoilRockWMSConfig,
         erosionHazardZoneWMSConfig,
