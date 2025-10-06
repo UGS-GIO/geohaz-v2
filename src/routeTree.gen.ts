@@ -11,6 +11,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReportRouteImport } from './routes/_report'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -22,19 +23,14 @@ import { Route as MapCarbonstorageIndexRouteImport } from './routes/_map/carbons
 
 const MapWetlandsIndexLazyRouteImport = createFileRoute('/_map/wetlands/')()
 const MapMineralsIndexLazyRouteImport = createFileRoute('/_map/minerals/')()
-const MapHazardsReportAoiLazyRouteImport = createFileRoute(
-  '/_map/hazards/report/$aoi',
-)()
-const MapHazardsReviewReportNewreportLazyRouteImport = createFileRoute(
-  '/_map/hazards-review/report/newreport',
-)()
-const MapHazardsReviewReportAoiLazyRouteImport = createFileRoute(
-  '/_map/hazards-review/report/$aoi',
-)()
-const MapHazardsReportNewreportIndexLazyRouteImport = createFileRoute(
-  '/_map/hazards/report/newreport/',
+const ReportHazardsReportAoiLazyRouteImport = createFileRoute(
+  '/_report/hazards/report/$aoi',
 )()
 
+const ReportRoute = ReportRouteImport.update({
+  id: '/_report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MapRoute = MapRouteImport.update({
   id: '/_map',
   getParentRoute: () => rootRouteImport,
@@ -87,42 +83,13 @@ const MapCarbonstorageIndexRoute = MapCarbonstorageIndexRouteImport.update({
   path: '/carbonstorage/',
   getParentRoute: () => MapRoute,
 } as any)
-const MapHazardsReportAoiLazyRoute = MapHazardsReportAoiLazyRouteImport.update({
-  id: '/hazards/report/$aoi',
-  path: '/hazards/report/$aoi',
-  getParentRoute: () => MapRoute,
-} as any).lazy(() =>
-  import('./routes/_map/hazards/report/$aoi.lazy').then((d) => d.Route),
-)
-const MapHazardsReviewReportNewreportLazyRoute =
-  MapHazardsReviewReportNewreportLazyRouteImport.update({
-    id: '/hazards-review/report/newreport',
-    path: '/hazards-review/report/newreport',
-    getParentRoute: () => MapRoute,
+const ReportHazardsReportAoiLazyRoute =
+  ReportHazardsReportAoiLazyRouteImport.update({
+    id: '/hazards/report/$aoi',
+    path: '/hazards/report/$aoi',
+    getParentRoute: () => ReportRoute,
   } as any).lazy(() =>
-    import('./routes/_map/hazards-review/report/newreport.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-const MapHazardsReviewReportAoiLazyRoute =
-  MapHazardsReviewReportAoiLazyRouteImport.update({
-    id: '/hazards-review/report/$aoi',
-    path: '/hazards-review/report/$aoi',
-    getParentRoute: () => MapRoute,
-  } as any).lazy(() =>
-    import('./routes/_map/hazards-review/report/$aoi.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-const MapHazardsReportNewreportIndexLazyRoute =
-  MapHazardsReportNewreportIndexLazyRouteImport.update({
-    id: '/hazards/report/newreport/',
-    path: '/hazards/report/newreport/',
-    getParentRoute: () => MapRoute,
-  } as any).lazy(() =>
-    import('./routes/_map/hazards/report/newreport/index.lazy').then(
-      (d) => d.Route,
-    ),
+    import('./routes/_report/hazards.report.$aoi.lazy').then((d) => d.Route),
   )
 
 export interface FileRoutesByFullPath {
@@ -134,10 +101,7 @@ export interface FileRoutesByFullPath {
   '/hazards': typeof MapHazardsIndexRoute
   '/minerals': typeof MapMineralsIndexLazyRoute
   '/wetlands': typeof MapWetlandsIndexLazyRoute
-  '/hazards-review/report/$aoi': typeof MapHazardsReviewReportAoiLazyRoute
-  '/hazards-review/report/newreport': typeof MapHazardsReviewReportNewreportLazyRoute
-  '/hazards/report/$aoi': typeof MapHazardsReportAoiLazyRoute
-  '/hazards/report/newreport': typeof MapHazardsReportNewreportIndexLazyRoute
+  '/hazards/report/$aoi': typeof ReportHazardsReportAoiLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -148,16 +112,14 @@ export interface FileRoutesByTo {
   '/hazards': typeof MapHazardsIndexRoute
   '/minerals': typeof MapMineralsIndexLazyRoute
   '/wetlands': typeof MapWetlandsIndexLazyRoute
-  '/hazards-review/report/$aoi': typeof MapHazardsReviewReportAoiLazyRoute
-  '/hazards-review/report/newreport': typeof MapHazardsReviewReportNewreportLazyRoute
-  '/hazards/report/$aoi': typeof MapHazardsReportAoiLazyRoute
-  '/hazards/report/newreport': typeof MapHazardsReportNewreportIndexLazyRoute
+  '/hazards/report/$aoi': typeof ReportHazardsReportAoiLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
   '/_map': typeof MapRouteWithChildren
+  '/_report': typeof ReportRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_map/carbonstorage/': typeof MapCarbonstorageIndexRoute
   '/_map/geophysics/': typeof MapGeophysicsIndexRoute
@@ -165,10 +127,7 @@ export interface FileRoutesById {
   '/_map/hazards/': typeof MapHazardsIndexRoute
   '/_map/minerals/': typeof MapMineralsIndexLazyRoute
   '/_map/wetlands/': typeof MapWetlandsIndexLazyRoute
-  '/_map/hazards-review/report/$aoi': typeof MapHazardsReviewReportAoiLazyRoute
-  '/_map/hazards-review/report/newreport': typeof MapHazardsReviewReportNewreportLazyRoute
-  '/_map/hazards/report/$aoi': typeof MapHazardsReportAoiLazyRoute
-  '/_map/hazards/report/newreport/': typeof MapHazardsReportNewreportIndexLazyRoute
+  '/_report/hazards/report/$aoi': typeof ReportHazardsReportAoiLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,10 +140,7 @@ export interface FileRouteTypes {
     | '/hazards'
     | '/minerals'
     | '/wetlands'
-    | '/hazards-review/report/$aoi'
-    | '/hazards-review/report/newreport'
     | '/hazards/report/$aoi'
-    | '/hazards/report/newreport'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -195,15 +151,13 @@ export interface FileRouteTypes {
     | '/hazards'
     | '/minerals'
     | '/wetlands'
-    | '/hazards-review/report/$aoi'
-    | '/hazards-review/report/newreport'
     | '/hazards/report/$aoi'
-    | '/hazards/report/newreport'
   id:
     | '__root__'
     | '/'
     | '/_auth'
     | '/_map'
+    | '/_report'
     | '/_auth/login'
     | '/_map/carbonstorage/'
     | '/_map/geophysics/'
@@ -211,20 +165,25 @@ export interface FileRouteTypes {
     | '/_map/hazards/'
     | '/_map/minerals/'
     | '/_map/wetlands/'
-    | '/_map/hazards-review/report/$aoi'
-    | '/_map/hazards-review/report/newreport'
-    | '/_map/hazards/report/$aoi'
-    | '/_map/hazards/report/newreport/'
+    | '/_report/hazards/report/$aoi'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   MapRoute: typeof MapRouteWithChildren
+  ReportRoute: typeof ReportRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_report': {
+      id: '/_report'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_map': {
       id: '/_map'
       path: ''
@@ -295,33 +254,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapCarbonstorageIndexRouteImport
       parentRoute: typeof MapRoute
     }
-    '/_map/hazards/report/$aoi': {
-      id: '/_map/hazards/report/$aoi'
+    '/_report/hazards/report/$aoi': {
+      id: '/_report/hazards/report/$aoi'
       path: '/hazards/report/$aoi'
       fullPath: '/hazards/report/$aoi'
-      preLoaderRoute: typeof MapHazardsReportAoiLazyRouteImport
-      parentRoute: typeof MapRoute
-    }
-    '/_map/hazards-review/report/newreport': {
-      id: '/_map/hazards-review/report/newreport'
-      path: '/hazards-review/report/newreport'
-      fullPath: '/hazards-review/report/newreport'
-      preLoaderRoute: typeof MapHazardsReviewReportNewreportLazyRouteImport
-      parentRoute: typeof MapRoute
-    }
-    '/_map/hazards-review/report/$aoi': {
-      id: '/_map/hazards-review/report/$aoi'
-      path: '/hazards-review/report/$aoi'
-      fullPath: '/hazards-review/report/$aoi'
-      preLoaderRoute: typeof MapHazardsReviewReportAoiLazyRouteImport
-      parentRoute: typeof MapRoute
-    }
-    '/_map/hazards/report/newreport/': {
-      id: '/_map/hazards/report/newreport/'
-      path: '/hazards/report/newreport'
-      fullPath: '/hazards/report/newreport'
-      preLoaderRoute: typeof MapHazardsReportNewreportIndexLazyRouteImport
-      parentRoute: typeof MapRoute
+      preLoaderRoute: typeof ReportHazardsReportAoiLazyRouteImport
+      parentRoute: typeof ReportRoute
     }
   }
 }
@@ -343,10 +281,6 @@ interface MapRouteChildren {
   MapHazardsIndexRoute: typeof MapHazardsIndexRoute
   MapMineralsIndexLazyRoute: typeof MapMineralsIndexLazyRoute
   MapWetlandsIndexLazyRoute: typeof MapWetlandsIndexLazyRoute
-  MapHazardsReviewReportAoiLazyRoute: typeof MapHazardsReviewReportAoiLazyRoute
-  MapHazardsReviewReportNewreportLazyRoute: typeof MapHazardsReviewReportNewreportLazyRoute
-  MapHazardsReportAoiLazyRoute: typeof MapHazardsReportAoiLazyRoute
-  MapHazardsReportNewreportIndexLazyRoute: typeof MapHazardsReportNewreportIndexLazyRoute
 }
 
 const MapRouteChildren: MapRouteChildren = {
@@ -356,20 +290,26 @@ const MapRouteChildren: MapRouteChildren = {
   MapHazardsIndexRoute: MapHazardsIndexRoute,
   MapMineralsIndexLazyRoute: MapMineralsIndexLazyRoute,
   MapWetlandsIndexLazyRoute: MapWetlandsIndexLazyRoute,
-  MapHazardsReviewReportAoiLazyRoute: MapHazardsReviewReportAoiLazyRoute,
-  MapHazardsReviewReportNewreportLazyRoute:
-    MapHazardsReviewReportNewreportLazyRoute,
-  MapHazardsReportAoiLazyRoute: MapHazardsReportAoiLazyRoute,
-  MapHazardsReportNewreportIndexLazyRoute:
-    MapHazardsReportNewreportIndexLazyRoute,
 }
 
 const MapRouteWithChildren = MapRoute._addFileChildren(MapRouteChildren)
+
+interface ReportRouteChildren {
+  ReportHazardsReportAoiLazyRoute: typeof ReportHazardsReportAoiLazyRoute
+}
+
+const ReportRouteChildren: ReportRouteChildren = {
+  ReportHazardsReportAoiLazyRoute: ReportHazardsReportAoiLazyRoute,
+}
+
+const ReportRouteWithChildren =
+  ReportRoute._addFileChildren(ReportRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   MapRoute: MapRouteWithChildren,
+  ReportRoute: ReportRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
