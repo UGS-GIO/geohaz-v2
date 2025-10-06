@@ -16,13 +16,18 @@ import { Route as MapRouteImport } from './routes/_map'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
-import { Route as MapHazardsIndexRouteImport } from './routes/_map/hazards/index'
-import { Route as MapHazardsReviewIndexRouteImport } from './routes/_map/hazards-review/index'
-import { Route as MapGeophysicsIndexRouteImport } from './routes/_map/geophysics/index'
-import { Route as MapCarbonstorageIndexRouteImport } from './routes/_map/carbonstorage/index'
+import { Route as MapHazardsReviewRouteRouteImport } from './routes/_map/hazards-review/route'
 
 const MapWetlandsIndexLazyRouteImport = createFileRoute('/_map/wetlands/')()
 const MapMineralsIndexLazyRouteImport = createFileRoute('/_map/minerals/')()
+const MapHazardsIndexLazyRouteImport = createFileRoute('/_map/hazards/')()
+const MapHazardsReviewIndexLazyRouteImport = createFileRoute(
+  '/_map/hazards-review/',
+)()
+const MapGeophysicsIndexLazyRouteImport = createFileRoute('/_map/geophysics/')()
+const MapCarbonstorageIndexLazyRouteImport = createFileRoute(
+  '/_map/carbonstorage/',
+)()
 const ReportHazardsReportAoiLazyRouteImport = createFileRoute(
   '/_report/hazards/report/$aoi',
 )()
@@ -49,6 +54,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const MapHazardsReviewRouteRoute = MapHazardsReviewRouteRouteImport.update({
+  id: '/hazards-review',
+  path: '/hazards-review',
+  getParentRoute: () => MapRoute,
+} as any)
 const MapWetlandsIndexLazyRoute = MapWetlandsIndexLazyRouteImport.update({
   id: '/wetlands/',
   path: '/wetlands/',
@@ -63,26 +73,36 @@ const MapMineralsIndexLazyRoute = MapMineralsIndexLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/_map/minerals/index.lazy').then((d) => d.Route),
 )
-const MapHazardsIndexRoute = MapHazardsIndexRouteImport.update({
+const MapHazardsIndexLazyRoute = MapHazardsIndexLazyRouteImport.update({
   id: '/hazards/',
   path: '/hazards/',
   getParentRoute: () => MapRoute,
-} as any)
-const MapHazardsReviewIndexRoute = MapHazardsReviewIndexRouteImport.update({
-  id: '/hazards-review/',
-  path: '/hazards-review/',
-  getParentRoute: () => MapRoute,
-} as any)
-const MapGeophysicsIndexRoute = MapGeophysicsIndexRouteImport.update({
+} as any).lazy(() =>
+  import('./routes/_map/hazards/index.lazy').then((d) => d.Route),
+)
+const MapHazardsReviewIndexLazyRoute =
+  MapHazardsReviewIndexLazyRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => MapHazardsReviewRouteRoute,
+  } as any).lazy(() =>
+    import('./routes/_map/hazards-review/index.lazy').then((d) => d.Route),
+  )
+const MapGeophysicsIndexLazyRoute = MapGeophysicsIndexLazyRouteImport.update({
   id: '/geophysics/',
   path: '/geophysics/',
   getParentRoute: () => MapRoute,
-} as any)
-const MapCarbonstorageIndexRoute = MapCarbonstorageIndexRouteImport.update({
-  id: '/carbonstorage/',
-  path: '/carbonstorage/',
-  getParentRoute: () => MapRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_map/geophysics/index.lazy').then((d) => d.Route),
+)
+const MapCarbonstorageIndexLazyRoute =
+  MapCarbonstorageIndexLazyRouteImport.update({
+    id: '/carbonstorage/',
+    path: '/carbonstorage/',
+    getParentRoute: () => MapRoute,
+  } as any).lazy(() =>
+    import('./routes/_map/carbonstorage/index.lazy').then((d) => d.Route),
+  )
 const ReportHazardsReportAoiLazyRoute =
   ReportHazardsReportAoiLazyRouteImport.update({
     id: '/hazards/report/$aoi',
@@ -94,11 +114,12 @@ const ReportHazardsReportAoiLazyRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/hazards-review': typeof MapHazardsReviewRouteRouteWithChildren
   '/login': typeof AuthLoginRoute
-  '/carbonstorage': typeof MapCarbonstorageIndexRoute
-  '/geophysics': typeof MapGeophysicsIndexRoute
-  '/hazards-review': typeof MapHazardsReviewIndexRoute
-  '/hazards': typeof MapHazardsIndexRoute
+  '/carbonstorage': typeof MapCarbonstorageIndexLazyRoute
+  '/geophysics': typeof MapGeophysicsIndexLazyRoute
+  '/hazards-review/': typeof MapHazardsReviewIndexLazyRoute
+  '/hazards': typeof MapHazardsIndexLazyRoute
   '/minerals': typeof MapMineralsIndexLazyRoute
   '/wetlands': typeof MapWetlandsIndexLazyRoute
   '/hazards/report/$aoi': typeof ReportHazardsReportAoiLazyRoute
@@ -106,10 +127,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof AuthLoginRoute
-  '/carbonstorage': typeof MapCarbonstorageIndexRoute
-  '/geophysics': typeof MapGeophysicsIndexRoute
-  '/hazards-review': typeof MapHazardsReviewIndexRoute
-  '/hazards': typeof MapHazardsIndexRoute
+  '/carbonstorage': typeof MapCarbonstorageIndexLazyRoute
+  '/geophysics': typeof MapGeophysicsIndexLazyRoute
+  '/hazards-review': typeof MapHazardsReviewIndexLazyRoute
+  '/hazards': typeof MapHazardsIndexLazyRoute
   '/minerals': typeof MapMineralsIndexLazyRoute
   '/wetlands': typeof MapWetlandsIndexLazyRoute
   '/hazards/report/$aoi': typeof ReportHazardsReportAoiLazyRoute
@@ -120,11 +141,12 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_map': typeof MapRouteWithChildren
   '/_report': typeof ReportRouteWithChildren
+  '/_map/hazards-review': typeof MapHazardsReviewRouteRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
-  '/_map/carbonstorage/': typeof MapCarbonstorageIndexRoute
-  '/_map/geophysics/': typeof MapGeophysicsIndexRoute
-  '/_map/hazards-review/': typeof MapHazardsReviewIndexRoute
-  '/_map/hazards/': typeof MapHazardsIndexRoute
+  '/_map/carbonstorage/': typeof MapCarbonstorageIndexLazyRoute
+  '/_map/geophysics/': typeof MapGeophysicsIndexLazyRoute
+  '/_map/hazards-review/': typeof MapHazardsReviewIndexLazyRoute
+  '/_map/hazards/': typeof MapHazardsIndexLazyRoute
   '/_map/minerals/': typeof MapMineralsIndexLazyRoute
   '/_map/wetlands/': typeof MapWetlandsIndexLazyRoute
   '/_report/hazards/report/$aoi': typeof ReportHazardsReportAoiLazyRoute
@@ -133,10 +155,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/hazards-review'
     | '/login'
     | '/carbonstorage'
     | '/geophysics'
-    | '/hazards-review'
+    | '/hazards-review/'
     | '/hazards'
     | '/minerals'
     | '/wetlands'
@@ -158,6 +181,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_map'
     | '/_report'
+    | '/_map/hazards-review'
     | '/_auth/login'
     | '/_map/carbonstorage/'
     | '/_map/geophysics/'
@@ -212,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_map/hazards-review': {
+      id: '/_map/hazards-review'
+      path: '/hazards-review'
+      fullPath: '/hazards-review'
+      preLoaderRoute: typeof MapHazardsReviewRouteRouteImport
+      parentRoute: typeof MapRoute
+    }
     '/_map/wetlands/': {
       id: '/_map/wetlands/'
       path: '/wetlands'
@@ -230,28 +261,28 @@ declare module '@tanstack/react-router' {
       id: '/_map/hazards/'
       path: '/hazards'
       fullPath: '/hazards'
-      preLoaderRoute: typeof MapHazardsIndexRouteImport
+      preLoaderRoute: typeof MapHazardsIndexLazyRouteImport
       parentRoute: typeof MapRoute
     }
     '/_map/hazards-review/': {
       id: '/_map/hazards-review/'
-      path: '/hazards-review'
-      fullPath: '/hazards-review'
-      preLoaderRoute: typeof MapHazardsReviewIndexRouteImport
-      parentRoute: typeof MapRoute
+      path: '/'
+      fullPath: '/hazards-review/'
+      preLoaderRoute: typeof MapHazardsReviewIndexLazyRouteImport
+      parentRoute: typeof MapHazardsReviewRouteRoute
     }
     '/_map/geophysics/': {
       id: '/_map/geophysics/'
       path: '/geophysics'
       fullPath: '/geophysics'
-      preLoaderRoute: typeof MapGeophysicsIndexRouteImport
+      preLoaderRoute: typeof MapGeophysicsIndexLazyRouteImport
       parentRoute: typeof MapRoute
     }
     '/_map/carbonstorage/': {
       id: '/_map/carbonstorage/'
       path: '/carbonstorage'
       fullPath: '/carbonstorage'
-      preLoaderRoute: typeof MapCarbonstorageIndexRouteImport
+      preLoaderRoute: typeof MapCarbonstorageIndexLazyRouteImport
       parentRoute: typeof MapRoute
     }
     '/_report/hazards/report/$aoi': {
@@ -274,20 +305,33 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface MapHazardsReviewRouteRouteChildren {
+  MapHazardsReviewIndexLazyRoute: typeof MapHazardsReviewIndexLazyRoute
+}
+
+const MapHazardsReviewRouteRouteChildren: MapHazardsReviewRouteRouteChildren = {
+  MapHazardsReviewIndexLazyRoute: MapHazardsReviewIndexLazyRoute,
+}
+
+const MapHazardsReviewRouteRouteWithChildren =
+  MapHazardsReviewRouteRoute._addFileChildren(
+    MapHazardsReviewRouteRouteChildren,
+  )
+
 interface MapRouteChildren {
-  MapCarbonstorageIndexRoute: typeof MapCarbonstorageIndexRoute
-  MapGeophysicsIndexRoute: typeof MapGeophysicsIndexRoute
-  MapHazardsReviewIndexRoute: typeof MapHazardsReviewIndexRoute
-  MapHazardsIndexRoute: typeof MapHazardsIndexRoute
+  MapHazardsReviewRouteRoute: typeof MapHazardsReviewRouteRouteWithChildren
+  MapCarbonstorageIndexLazyRoute: typeof MapCarbonstorageIndexLazyRoute
+  MapGeophysicsIndexLazyRoute: typeof MapGeophysicsIndexLazyRoute
+  MapHazardsIndexLazyRoute: typeof MapHazardsIndexLazyRoute
   MapMineralsIndexLazyRoute: typeof MapMineralsIndexLazyRoute
   MapWetlandsIndexLazyRoute: typeof MapWetlandsIndexLazyRoute
 }
 
 const MapRouteChildren: MapRouteChildren = {
-  MapCarbonstorageIndexRoute: MapCarbonstorageIndexRoute,
-  MapGeophysicsIndexRoute: MapGeophysicsIndexRoute,
-  MapHazardsReviewIndexRoute: MapHazardsReviewIndexRoute,
-  MapHazardsIndexRoute: MapHazardsIndexRoute,
+  MapHazardsReviewRouteRoute: MapHazardsReviewRouteRouteWithChildren,
+  MapCarbonstorageIndexLazyRoute: MapCarbonstorageIndexLazyRoute,
+  MapGeophysicsIndexLazyRoute: MapGeophysicsIndexLazyRoute,
+  MapHazardsIndexLazyRoute: MapHazardsIndexLazyRoute,
   MapMineralsIndexLazyRoute: MapMineralsIndexLazyRoute,
   MapWetlandsIndexLazyRoute: MapWetlandsIndexLazyRoute,
 }
