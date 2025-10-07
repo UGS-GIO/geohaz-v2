@@ -1,6 +1,6 @@
 import { Link } from "@/components/custom/link";
 
-const appTitle = 'Wetland Plant Application';
+const appTitle = 'Wetland Plants Application';
 
 const references = (
     <ul className="list-disc ml-5 space-y-4">
