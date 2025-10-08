@@ -11,11 +11,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ReportRouteImport } from './routes/_report'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as ReportRouteRouteImport } from './routes/_report/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as ReportHazardsRouteRouteImport } from './routes/_report/hazards/route'
 import { Route as MapHazardsReviewRouteRouteImport } from './routes/_map/hazards-review/route'
 
 const MapWetlandsIndexLazyRouteImport = createFileRoute('/_map/wetlands/')()
@@ -32,16 +33,16 @@ const ReportHazardsReportAoiLazyRouteImport = createFileRoute(
   '/_report/hazards/report/$aoi',
 )()
 
-const ReportRoute = ReportRouteImport.update({
-  id: '/_report',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MapRoute = MapRouteImport.update({
   id: '/_map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRouteRoute = ReportRouteRouteImport.update({
+  id: '/_report',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => AuthRoute,
+} as any)
+const ReportHazardsRouteRoute = ReportHazardsRouteRouteImport.update({
+  id: '/hazards',
+  path: '/hazards',
+  getParentRoute: () => ReportRouteRoute,
 } as any)
 const MapHazardsReviewRouteRoute = MapHazardsReviewRouteRouteImport.update({
   id: '/hazards-review',
@@ -105,32 +111,32 @@ const MapCarbonstorageIndexLazyRoute =
   )
 const ReportHazardsReportAoiLazyRoute =
   ReportHazardsReportAoiLazyRouteImport.update({
-    id: '/hazards/report/$aoi',
-    path: '/hazards/report/$aoi',
-    getParentRoute: () => ReportRoute,
+    id: '/report/$aoi',
+    path: '/report/$aoi',
+    getParentRoute: () => ReportHazardsRouteRoute,
   } as any).lazy(() =>
-    import('./routes/_report/hazards.report.$aoi.lazy').then((d) => d.Route),
+    import('./routes/_report/hazards/report.$aoi.lazy').then((d) => d.Route),
   )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/hazards-review': typeof MapHazardsReviewRouteRouteWithChildren
+  '/hazards': typeof MapHazardsIndexLazyRoute
   '/login': typeof AuthLoginRoute
   '/carbonstorage': typeof MapCarbonstorageIndexLazyRoute
   '/geophysics': typeof MapGeophysicsIndexLazyRoute
   '/hazards-review/': typeof MapHazardsReviewIndexLazyRoute
-  '/hazards': typeof MapHazardsIndexLazyRoute
   '/minerals': typeof MapMineralsIndexLazyRoute
   '/wetlands': typeof MapWetlandsIndexLazyRoute
   '/hazards/report/$aoi': typeof ReportHazardsReportAoiLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/hazards': typeof MapHazardsIndexLazyRoute
   '/login': typeof AuthLoginRoute
   '/carbonstorage': typeof MapCarbonstorageIndexLazyRoute
   '/geophysics': typeof MapGeophysicsIndexLazyRoute
   '/hazards-review': typeof MapHazardsReviewIndexLazyRoute
-  '/hazards': typeof MapHazardsIndexLazyRoute
   '/minerals': typeof MapMineralsIndexLazyRoute
   '/wetlands': typeof MapWetlandsIndexLazyRoute
   '/hazards/report/$aoi': typeof ReportHazardsReportAoiLazyRoute
@@ -138,10 +144,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_report': typeof ReportRouteRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
   '/_map': typeof MapRouteWithChildren
-  '/_report': typeof ReportRouteWithChildren
   '/_map/hazards-review': typeof MapHazardsReviewRouteRouteWithChildren
+  '/_report/hazards': typeof ReportHazardsRouteRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_map/carbonstorage/': typeof MapCarbonstorageIndexLazyRoute
   '/_map/geophysics/': typeof MapGeophysicsIndexLazyRoute
@@ -156,32 +163,33 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/hazards-review'
+    | '/hazards'
     | '/login'
     | '/carbonstorage'
     | '/geophysics'
     | '/hazards-review/'
-    | '/hazards'
     | '/minerals'
     | '/wetlands'
     | '/hazards/report/$aoi'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/hazards'
     | '/login'
     | '/carbonstorage'
     | '/geophysics'
     | '/hazards-review'
-    | '/hazards'
     | '/minerals'
     | '/wetlands'
     | '/hazards/report/$aoi'
   id:
     | '__root__'
     | '/'
+    | '/_report'
     | '/_auth'
     | '/_map'
-    | '/_report'
     | '/_map/hazards-review'
+    | '/_report/hazards'
     | '/_auth/login'
     | '/_map/carbonstorage/'
     | '/_map/geophysics/'
@@ -194,20 +202,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ReportRouteRoute: typeof ReportRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   MapRoute: typeof MapRouteWithChildren
-  ReportRoute: typeof ReportRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_report': {
-      id: '/_report'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof ReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_map': {
       id: '/_map'
       path: ''
@@ -220,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_report': {
+      id: '/_report'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof ReportRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -235,6 +243,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/login'
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/_report/hazards': {
+      id: '/_report/hazards'
+      path: '/hazards'
+      fullPath: '/hazards'
+      preLoaderRoute: typeof ReportHazardsRouteRouteImport
+      parentRoute: typeof ReportRouteRoute
     }
     '/_map/hazards-review': {
       id: '/_map/hazards-review'
@@ -287,13 +302,36 @@ declare module '@tanstack/react-router' {
     }
     '/_report/hazards/report/$aoi': {
       id: '/_report/hazards/report/$aoi'
-      path: '/hazards/report/$aoi'
+      path: '/report/$aoi'
       fullPath: '/hazards/report/$aoi'
       preLoaderRoute: typeof ReportHazardsReportAoiLazyRouteImport
-      parentRoute: typeof ReportRoute
+      parentRoute: typeof ReportHazardsRouteRoute
     }
   }
 }
+
+interface ReportHazardsRouteRouteChildren {
+  ReportHazardsReportAoiLazyRoute: typeof ReportHazardsReportAoiLazyRoute
+}
+
+const ReportHazardsRouteRouteChildren: ReportHazardsRouteRouteChildren = {
+  ReportHazardsReportAoiLazyRoute: ReportHazardsReportAoiLazyRoute,
+}
+
+const ReportHazardsRouteRouteWithChildren =
+  ReportHazardsRouteRoute._addFileChildren(ReportHazardsRouteRouteChildren)
+
+interface ReportRouteRouteChildren {
+  ReportHazardsRouteRoute: typeof ReportHazardsRouteRouteWithChildren
+}
+
+const ReportRouteRouteChildren: ReportRouteRouteChildren = {
+  ReportHazardsRouteRoute: ReportHazardsRouteRouteWithChildren,
+}
+
+const ReportRouteRouteWithChildren = ReportRouteRoute._addFileChildren(
+  ReportRouteRouteChildren,
+)
 
 interface AuthRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
@@ -338,22 +376,11 @@ const MapRouteChildren: MapRouteChildren = {
 
 const MapRouteWithChildren = MapRoute._addFileChildren(MapRouteChildren)
 
-interface ReportRouteChildren {
-  ReportHazardsReportAoiLazyRoute: typeof ReportHazardsReportAoiLazyRoute
-}
-
-const ReportRouteChildren: ReportRouteChildren = {
-  ReportHazardsReportAoiLazyRoute: ReportHazardsReportAoiLazyRoute,
-}
-
-const ReportRouteWithChildren =
-  ReportRoute._addFileChildren(ReportRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ReportRouteRoute: ReportRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   MapRoute: MapRouteWithChildren,
-  ReportRoute: ReportRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
