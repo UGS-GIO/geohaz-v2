@@ -3,6 +3,7 @@ import { ReportLayout } from '../-components/layouts/ReportLayout'
 import { SectionTabs, Section } from '../-components/layouts/SectionTabs'
 import { FileText, AlertTriangle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Image } from '@/components/ui/image';
 
 // Import your query services
 import {
@@ -18,6 +19,7 @@ import config from '@/pages/hazards/report/report/config'
 import ThemeSwitch from '@/components/theme-switch'
 import { Link } from '@/components/custom/link'
 import { useGetPageInfo } from '@/hooks/use-get-page-info'
+import { HeroSection } from '@/components/custom/hero-section'
 
 interface HazardsReportProps {
     polygon: string
@@ -43,8 +45,7 @@ interface HazardGroup {
 export function HazardsReport({ polygon }: HazardsReportProps) {
     const [loading, setLoading] = useState(true)
     const [hazardGroups, setHazardGroups] = useState<HazardGroup[]>([])
-    const [coverPageData, setCoverPageData] = useState<any>(null)
-    const [activeSection, setActiveSection] = useState('cover')
+    const [activeSection, setActiveSection] = useState('summary')
     const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({})
     const { data: pageInfo, isLoading: isInfoLoading } = useGetPageInfo();
 
@@ -124,7 +125,6 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                 })
 
                 setHazardGroups(Object.values(groupMap).filter(g => g.hazards.length > 0))
-                setCoverPageData({ reportTextRows, date: new Date() })
             } catch (error) {
                 console.error('Error loading report data:', error)
             } finally {
@@ -139,7 +139,6 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
 
     // Build sections for tabs
     const sections: Section[] = [
-        { id: 'cover', label: 'Cover', icon: <FileText className="h-4 w-4" /> },
         { id: 'summary', label: 'Summary', icon: <FileText className="h-4 w-4" /> },
         ...hazardGroups.map(group => ({
             id: group.id,
@@ -221,14 +220,10 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                 </div>
             }
             hero={
-                <div className="container mx-auto px-4 py-8 bg-background">
-                    <h2 className="text-3xl font-bold mb-2 text-foreground">
-                        Geologic Hazards Assessment
-                    </h2>
-                    <p className="text-muted-foreground">
-                        Area of Interest Analysis • Generated {new Date().toLocaleDateString()}
-                    </p>
-                </div>
+                <HeroSection
+                    image={<Image src="https://geology.utah.gov/wp-content/uploads/geologic-hazards-banner-alstrom-point-1920px.jpg" alt="Hero" className="w-full h-48 object-cover" />}
+                    overlayText="Geological Hazards Report"
+                />
             }
             tabs={
                 <SectionTabs
@@ -245,23 +240,6 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
             }
         >
             <div className="space-y-12 bg-background">
-                {/* Cover Page */}
-                <section
-                    id="cover"
-                    ref={el => sectionRefs.current['cover'] = el}
-                    className="min-h-screen flex items-center justify-center"
-                >
-                    <div className="text-center space-y-4">
-                        <h1 className="text-5xl font-bold text-foreground">Geologic Hazards Report</h1>
-                        <p className="text-xl text-muted-foreground">
-                            Area of Interest Assessment
-                        </p>
-                        <p className="text-muted-foreground">
-                            Generated: {coverPageData?.date.toLocaleDateString()}
-                        </p>
-                    </div>
-                </section>
-
                 {/* Summary Page */}
                 <section
                     id="summary"
