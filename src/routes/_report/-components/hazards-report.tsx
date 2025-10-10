@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { ReportLayout } from '../-components/layouts/ReportLayout'
-import { SectionTabs, Section } from '../-components/layouts/SectionTabs'
+import { ReportLayout } from './layouts/report-layout'
+import { SectionTabs, Section } from './layouts/section-tabs'
 import { FileText, AlertTriangle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import ThemeSwitch from '@/components/theme-switch'
 import { Image } from '@/components/ui/image'
+import { REPORT_STATIC_CONTENT } from '../-data/report-content'
 
 // Import your query services
 import {
@@ -269,6 +270,25 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                         </p>
                     </div>
 
+                    {/* Static intro text */}
+                    <div className="prose max-w-none text-sm space-y-4">
+                        <p>{REPORT_STATIC_CONTENT.coverPageIntro}</p>
+
+                        {/* Map placeholder */}
+                        <Card>
+                            <CardContent className="p-4">
+                                <div className="bg-muted rounded-lg h-96 flex items-center justify-center">
+                                    <p className="text-muted-foreground text-sm text-center px-4">
+                                        AOI Overview Map
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <p className="text-xs text-muted-foreground italic">{REPORT_STATIC_CONTENT.disclaimer}</p>
+                    </div>
+
+                    {/* Keep dynamic intro if it exists */}
                     {reportText.Introduction && (
                         <div className="prose max-w-none text-sm">
                             <div dangerouslySetInnerHTML={{ __html: reportText.Introduction }} />
