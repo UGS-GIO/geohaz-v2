@@ -5,7 +5,9 @@ import { FileText, AlertTriangle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import ThemeSwitch from '@/components/theme-switch'
 import { Image } from '@/components/ui/image'
-import { REPORT_STATIC_CONTENT } from '../-data/report-content'
+import { HAZARDS_REPORT_CONTENT } from '@/routes/_report/-data/hazards-content'
+import { MapPlaceholder } from './shared/map-placeholder'
+import { LegendCard } from './shared/legend-card'
 
 // Import your query services
 import {
@@ -55,6 +57,8 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
     const [activeSection, setActiveSection] = useState('cover')
     const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({})
     const { data: pageInfo, isLoading: isInfoLoading } = useGetPageInfo();
+    const [groupScreenshots, setGroupScreenshots] = useState<Record<string, string>>({})
+
 
     useEffect(() => {
         const loadReportData = async () => {
@@ -272,20 +276,12 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
 
                     {/* Static intro text */}
                     <div className="prose max-w-none text-sm space-y-4">
-                        <p>{REPORT_STATIC_CONTENT.coverPageIntro}</p>
+                        <p>{HAZARDS_REPORT_CONTENT.coverPageIntro}</p>
 
                         {/* Map placeholder */}
-                        <Card>
-                            <CardContent className="p-4">
-                                <div className="bg-muted rounded-lg h-96 flex items-center justify-center">
-                                    <p className="text-muted-foreground text-sm text-center px-4">
-                                        AOI Overview Map
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <MapPlaceholder title="AOI Overview Map" />
 
-                        <p className="text-xs text-muted-foreground italic">{REPORT_STATIC_CONTENT.disclaimer}</p>
+                        <p className="text-xs text-muted-foreground italic">{HAZARDS_REPORT_CONTENT.disclaimer}</p>
                     </div>
 
                     {/* Keep dynamic intro if it exists */}
@@ -308,15 +304,7 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Map - 1/3 left */}
                         <div className="lg:col-span-1">
-                            <Card>
-                                <CardContent className="p-4">
-                                    <div className="bg-muted rounded-lg h-96 flex items-center justify-center">
-                                        <p className="text-muted-foreground text-sm text-center px-4">
-                                            AOI Overview Map
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <MapPlaceholder title="AOI Overview Map" />
                         </div>
 
                         {/* Summary text - 2/3 right */}
@@ -383,30 +371,16 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                             {/* Map + Legend side by side */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                 <div className="lg:col-span-2">
-                                    <Card>
-                                        <CardContent className="p-4">
-                                            <div className="bg-muted rounded-lg h-96 flex items-center justify-center">
-                                                <p className="text-muted-foreground text-sm">
-                                                    {group.name} Group Map
-                                                </p>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                    <MapPlaceholder title={`${group.name} Group Map`} />
                                 </div>
                                 <div className="lg:col-span-1">
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="text-base">Legend</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="text-sm space-y-2">
-                                            {group.layers.map(layer => (
-                                                <div key={layer.code} className="flex items-center gap-2">
-                                                    <div className="w-4 h-4 bg-orange-500 rounded-sm flex-shrink-0"></div>
-                                                    <span>{layer.name}</span>
-                                                </div>
-                                            ))}
-                                        </CardContent>
-                                    </Card>
+                                    <LegendCard
+                                        items={group.layers.map(layer => ({
+                                            id: layer.code,
+                                            label: layer.name,
+                                            color: '#f97316' // You can map different colors per layer
+                                        }))}
+                                    />
                                 </div>
                             </div>
 
@@ -457,37 +431,20 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                                 {/* Map + Legend */}
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                     <div className="lg:col-span-2">
-                                        <Card>
-                                            <CardContent className="p-4">
-                                                <div className="bg-muted rounded-lg h-96 flex items-center justify-center">
-                                                    <p className="text-muted-foreground text-sm">
-                                                        {layer.name} Map
-                                                    </p>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
+                                        <MapPlaceholder title={`${layer.name} Map`} />
                                     </div>
                                     <div className="lg:col-span-1">
-                                        <Card>
-                                            <CardHeader>
-                                                <CardTitle className="text-base">Legend</CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="space-y-2 text-sm">
-                                                {layer.units.map((unit, idx) => (
-                                                    <div key={idx}>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <div className="w-4 h-4 bg-orange-500 rounded-sm flex-shrink-0"></div>
-                                                            <span className="font-medium">{unit.UnitName}</span>
-                                                        </div>
-                                                        {unit.Description && (
-                                                            <p className="text-xs text-muted-foreground ml-6">
-                                                                {unit.Description.replace(/<[^>]*>/g, '').substring(0, 100)}...
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </CardContent>
-                                        </Card>
+                                        <LegendCard
+                                            items={layer.units.map((unit, idx) => ({
+                                                id: `${layer.code}-${idx}`,
+                                                label: unit.UnitName,
+                                                description: unit.Description ?
+                                                    unit.Description.replace(/<[^>]*>/g, '').substring(0, 100) + '...'
+                                                    : undefined,
+                                                color: '#f97316'
+                                            }))}
+                                            showDescriptions={true}
+                                        />
                                     </div>
                                 </div>
 
