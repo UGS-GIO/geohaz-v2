@@ -18,7 +18,7 @@ export function ReportLayout({
 }: ReportLayoutProps) {
     return (
         <>
-            <Layout.Header sticky>
+            <Layout.Header sticky className='p-0'>
                 {header}
             </Layout.Header>
 
