@@ -125,14 +125,17 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                 // Group hazards by their group
                 groupings.forEach((g: any) => {
                     const intro = hazardIntroText.find((h: any) => h.Hazard === g.HazardCode)
-                    const units = hazardUnitText.filter((u: any) => u.HazardUnit.startsWith(g.HazardCode))
+                    // Case-insensitive match for unit codes
+                    const units = hazardUnitText.filter((u: any) =>
+                        u.HazardUnit.toLowerCase().includes(g.HazardCode.toLowerCase())
+                    )
                     const refs = hazardReferences.filter((r: any) => r.Hazard === g.HazardCode)
 
                     if (groupMap[g.HazardGroup]) {
                         groupMap[g.HazardGroup].layers.push({
                             code: g.HazardCode,
                             name: units[0]?.HazardName || g.HazardCode,
-                            category: units[0]?.UnitName || '',
+                            category: g.HazardGroup,
                             introText: intro?.Text || '',
                             howToUse: units[0]?.HowToUse || '',
                             units: units.map((u: any) => ({
@@ -310,7 +313,12 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Map - 1/3 left */}
                         <div className="lg:col-span-1">
-                            <MapPlaceholder title="AOI Overview Map" />
+                            <ReportMap
+                                title="AOI Overview Map"
+                                polygon={polygon}
+                                hazardCodes={hazardGroups.flatMap(g => g.layers.map(l => l.code))}
+                                height={300}
+                            />
                         </div>
 
                         {/* Summary text - 2/3 right */}
@@ -333,13 +341,15 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {hazardGroups.map(group =>
-                                                group.layers.map(layer => (
-                                                    <tr key={layer.code} className="border-b">
-                                                        <td className="py-2">{layer.name}</td>
-                                                        <td className="py-2">{layer.category}</td>
-                                                    </tr>
-                                                ))
+                                            {hazardGroups.flatMap(group =>
+                                                group.layers.flatMap(layer =>
+                                                    layer.units.map((unit, idx) => (
+                                                        <tr key={`${layer.code}-${idx}`} className="border-b">
+                                                            <td className="py-2">{layer.name}</td>
+                                                            <td className="py-2">{unit.UnitName}</td>
+                                                        </tr>
+                                                    ))
+                                                )
                                             )}
                                         </tbody>
                                     </table>
@@ -377,14 +387,19 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                             {/* Map + Legend side by side */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                 <div className="lg:col-span-2">
-                                    <MapPlaceholder title={`${group.name} Group Map`} />
+                                    <ReportMap
+                                        title={`${group.name} Group Map`}
+                                        polygon={polygon}
+                                        hazardCodes={group.layers.map(l => l.code)}
+                                        height={400}
+                                    />
                                 </div>
                                 <div className="lg:col-span-1">
                                     <LegendCard
                                         items={group.layers.map(layer => ({
                                             id: layer.code,
                                             label: layer.name,
-                                            color: '#f97316' // You can map different colors per layer
+                                            color: '#f97316'
                                         }))}
                                     />
                                 </div>
@@ -437,7 +452,12 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                                 {/* Map + Legend */}
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                     <div className="lg:col-span-2">
-                                        <MapPlaceholder title={`${layer.name} Map`} />
+                                        <ReportMap
+                                            title={`${layer.name} Map`}
+                                            polygon={polygon}
+                                            hazardCodes={[layer.code]}
+                                            height={400}
+                                        />
                                     </div>
                                     <div className="lg:col-span-1">
                                         <LegendCard
