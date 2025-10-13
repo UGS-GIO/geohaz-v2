@@ -23,6 +23,7 @@ import config from '@/pages/hazards/report/report/config'
 import { HeroSection } from '@/components/custom/hero-section'
 import { Link } from '@/components/custom/link'
 import { useGetPageInfo } from '@/hooks/use-get-page-info'
+import { ReportMap } from './shared/report-map'
 
 interface HazardsReportProps {
     polygon: string
@@ -278,8 +279,13 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                     <div className="prose max-w-none text-sm space-y-4">
                         <p>{HAZARDS_REPORT_CONTENT.coverPageIntro}</p>
 
-                        {/* Map placeholder */}
-                        <MapPlaceholder title="AOI Overview Map" />
+                        {/* Map */}
+                        <ReportMap
+                            title="AOI Overview Map"
+                            polygon={polygon}
+                            hazardCodes={hazardGroups.flatMap(g => g.layers.map(l => l.code))}
+                            height={400}
+                        />
 
                         <p className="text-xs text-muted-foreground italic">{HAZARDS_REPORT_CONTENT.disclaimer}</p>
                     </div>
