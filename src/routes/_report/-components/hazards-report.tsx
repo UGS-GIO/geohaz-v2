@@ -483,16 +483,16 @@ function LayerLegendSimple({ layer }: { layer: HazardLayer }) {
     );
 }
 
-// Helper component for group-level legends
-function GroupLegend({ layers }: { layers: HazardLayer[] }) {
-    return (
-        <div className="space-y-4">
-            {layers.map(layer => (
-                <LayerLegend key={layer.code} layer={layer} showTitle={true} />
-            ))}
-        </div>
-    );
-}
+// // Helper component for group-level legends
+// function GroupLegend({ layers }: { layers: HazardLayer[] }) {
+//     return (
+//         <div className="space-y-4">
+//             {layers.map(layer => (
+//                 <LayerLegend key={layer.code} layer={layer} showTitle={true} />
+//             ))}
+//         </div>
+//     );
+// }
 
 // Helper component for summary cards
 function LayerSummaryCard({ layer }: { layer: HazardLayer }) {
