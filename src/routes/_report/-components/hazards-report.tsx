@@ -1,4 +1,3 @@
-import { useMemo, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ReportLayout } from './layouts/report-layout'
 import { SectionTabs, Section } from './layouts/section-tabs'
@@ -22,6 +21,8 @@ import { Link } from '@/components/custom/link'
 import { useGetPageInfo } from '@/hooks/use-get-page-info'
 import { ReportMap } from './shared/report-map'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
+import { useMemo, useRef } from 'react'
+import { useHazardLegend } from '../hazards/-hooks/use-hazards-legend'
 
 interface HazardsReportProps {
     polygon: string
@@ -344,31 +345,18 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                                         />
                                     </div>
                                     <div className="lg:col-span-1">
-                                        <LegendCard
-                                            items={group.layers.map(layer => ({
-                                                id: layer.code,
-                                                label: layer.name,
-                                                color: '#f97316'
-                                            }))}
-                                        />
+                                        <div className="space-y-4">
+                                            {group.layers.map(layer => (
+                                                <LayerLegendSimple key={layer.code} layer={layer} />
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Summary cards of hazards in this group */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {group.layers.map(layer => (
-                                        <Card key={layer.code}>
-                                            <CardHeader>
-                                                <CardTitle className="text-lg">{layer.name}</CardTitle>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <ul className="list-disc list-inside text-sm space-y-1">
-                                                    {layer.units.map((unit, idx) => (
-                                                        <li key={idx}>{unit.UnitName}</li>
-                                                    ))}
-                                                </ul>
-                                            </CardContent>
-                                        </Card>
+                                        <LayerSummaryCard key={layer.code} layer={layer} />
                                     ))}
                                 </div>
                             </div>
@@ -426,17 +414,7 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                                                 />
                                             </div>
                                             <div className="lg:col-span-1">
-                                                <LegendCard
-                                                    items={layer.units.map((unit, idx) => ({
-                                                        id: `${layer.code}-${idx}`,
-                                                        label: unit.UnitName,
-                                                        description: unit.Description ?
-                                                            unit.Description.replace(/<[^>]*>/g, '').substring(0, 100) + '...'
-                                                            : undefined,
-                                                        color: '#f97316'
-                                                    }))}
-                                                    showDescriptions={true}
-                                                />
+                                                <LayerLegend layer={layer} />
                                             </div>
                                         </div>
 
@@ -472,4 +450,128 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
             </div>
         </ReportLayout>
     )
+}
+
+// Helper component for simple group legends
+function LayerLegendSimple({ layer }: { layer: HazardLayer }) {
+    const { legendItems, isLoading } = useHazardLegend(layer.code);
+
+    if (isLoading) {
+        return (
+            <div className="border rounded-lg p-4">
+                <h4 className="font-semibold mb-2 text-sm">{layer.name}</h4>
+                <div className="text-xs text-muted-foreground">Loading...</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="border rounded-lg p-4">
+            <h4 className="font-semibold mb-2 text-sm">{layer.name}</h4>
+            <div className="space-y-1">
+                {legendItems.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs">
+                        <span
+                            className="w-3 h-3 rounded flex-shrink-0 border"
+                            style={{ backgroundColor: item.color || '#64748b' }}
+                        />
+                        <span>{item.label}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// Helper component for group-level legends
+function GroupLegend({ layers }: { layers: HazardLayer[] }) {
+    return (
+        <div className="space-y-4">
+            {layers.map(layer => (
+                <LayerLegend key={layer.code} layer={layer} showTitle={true} />
+            ))}
+        </div>
+    );
+}
+
+// Helper component for summary cards
+function LayerSummaryCard({ layer }: { layer: HazardLayer }) {
+    const { legendItems, isLoading } = useHazardLegend(layer.code);
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-lg">{layer.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                {isLoading ? (
+                    <div className="text-sm text-muted-foreground">Loading...</div>
+                ) : legendItems.length > 0 ? (
+                    <ul className="list-none text-sm space-y-1">
+                        {legendItems.map((item, idx) => (
+                            <li key={idx} className="flex items-center gap-2">
+                                <span
+                                    className="w-3 h-3 rounded-full flex-shrink-0"
+                                    style={{ backgroundColor: item.color || '#64748b' }}
+                                />
+                                <span>{item.label}</span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <ul className="list-disc list-inside text-sm space-y-1">
+                        {layer.units.map((unit, idx) => (
+                            <li key={idx}>{unit.UnitName}</li>
+                        ))}
+                    </ul>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
+// Helper component for individual layer legends
+function LayerLegend({ layer, showTitle = false }: { layer: HazardLayer; showTitle?: boolean }) {
+    const { legendItems, isLoading } = useHazardLegend(layer.code);
+
+    if (isLoading) {
+        return (
+            <div className="border rounded-lg p-4">
+                {showTitle && <h4 className="font-semibold mb-2">{layer.name}</h4>}
+                <div className="text-sm text-muted-foreground">Loading legend...</div>
+            </div>
+        );
+    }
+
+    if (!legendItems || legendItems.length === 0) {
+        // Fallback to database units if legend fetch fails
+        return (
+            <LegendCard
+                items={layer.units.map((unit, idx) => ({
+                    id: `${layer.code}-${idx}`,
+                    label: unit.UnitName,
+                    description: unit.Description
+                        ? unit.Description.replace(/<[^>]*>/g, '').substring(0, 100) + '...'
+                        : undefined,
+                    color: '#f97316'
+                }))}
+                showDescriptions={true}
+            />
+        );
+    }
+
+    return (
+        <LegendCard
+            items={legendItems.map((item, idx) => ({
+                id: item.unitCode || `${layer.code}-${idx}`,
+                label: item.label,
+                description: layer.units[idx]?.Description
+                    ? layer.units[idx].Description.replace(/<[^>]*>/g, '').substring(0, 100) + '...'
+                    : undefined,
+                color: item.color,
+                symbol: item.symbol
+            }))}
+            showDescriptions={true}
+        />
+    );
 }

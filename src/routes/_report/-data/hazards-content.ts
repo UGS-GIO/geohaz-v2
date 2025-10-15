@@ -160,3 +160,69 @@ export const HAZARDS_REPORT_CONTENT = {
         </div>
     `,
 };
+
+
+// Landslide Susceptibility Hazard Configuration
+export const LSS_HAZARD_UNITS = {
+    Hlss: {
+        code: 'Hlss',
+        name: 'High Landslide Susceptibility',
+        unitName: 'High LSS',
+        description: 'Areas with high susceptibility to landslides',
+        severity: 'high',
+        color: '#dc2626', // red-600
+        order: 1
+    },
+    Mlss: {
+        code: 'Mlss',
+        name: 'Moderate Landslide Susceptibility',
+        unitName: 'Moderate LSS',
+        description: 'Areas with moderate susceptibility to landslides',
+        severity: 'moderate',
+        color: '#f97316', // orange-500
+        order: 2
+    },
+    Llss: {
+        code: 'Llss',
+        name: 'Low Landslide Susceptibility',
+        unitName: 'Low LSS',
+        description: 'Areas with low susceptibility to landslides',
+        severity: 'low',
+        color: '#eab308', // yellow-500
+        order: 3
+    }
+} as const;
+
+// Type definitions
+export type LSSHazardUnitCode = keyof typeof LSS_HAZARD_UNITS;
+
+export interface LSSHazardUnit {
+    code: string;
+    name: string;
+    unitName: string;
+    description: string;
+    severity: 'high' | 'moderate' | 'low';
+    color: string;
+    order: number;
+}
+
+// Helper functions
+export const getLSSHazardUnit = (code: LSSHazardUnitCode): LSSHazardUnit => {
+    return LSS_HAZARD_UNITS[code];
+};
+
+export const getAllLSSHazardUnits = (): LSSHazardUnit[] => {
+    return Object.values(LSS_HAZARD_UNITS);
+};
+
+export const getLSSHazardUnitsSorted = (): LSSHazardUnit[] => {
+    return getAllLSSHazardUnits().sort((a, b) => a.order - b.order);
+};
+
+export const getLSSHazardUnitCodes = (): LSSHazardUnitCode[] => {
+    return Object.keys(LSS_HAZARD_UNITS) as LSSHazardUnitCode[];
+};
+
+export const isValidLSSHazardUnit = (code: string): code is LSSHazardUnitCode => {
+    return code in LSS_HAZARD_UNITS;
+};
