@@ -1,0 +1,210 @@
+{
+    "objectIdFieldName": "OBJECTID",
+    "uniqueIdField": {
+        "name": "OBJECTID",
+        "isSystemMaintained": true
+    },
+    "globalIdFieldName": "GlobalID",
+    "fields": [
+        {
+            "name": "HazardCode",
+            "type": "esriFieldTypeString",
+            "alias": "HazardCode",
+            "sqlType": "sqlTypeOther",
+            "length": 8000,
+            "domain": null,
+            "defaultValue": null
+        },
+        {
+            "name": "HazardGroup",
+            "type": "esriFieldTypeString",
+            "alias": "HazardGroup",
+            "sqlType": "sqlTypeOther",
+            "length": 8000,
+            "domain": null,
+            "defaultValue": null
+        }
+    ],
+    "features": [
+        {
+            "attributes": {
+                "HazardCode": "BPF",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "CAS",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "CRS",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "ERZ",
+                "HazardGroup": "Flooding"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "GSP",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "EFH",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "GRS",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "CSS",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "EXS",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "FLH",
+                "HazardGroup": "Flooding"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "LSS",
+                "HazardGroup": "Landslide"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "LQS",
+                "HazardGroup": "Earthquake"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "RFH",
+                "HazardGroup": "Landslide"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "SBP",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "SGS",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "SFR",
+                "HazardGroup": "Earthquake"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "LSF",
+                "HazardGroup": "Landslide"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "MKF",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "PES",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "SDH",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "SLS",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "WSS",
+                "HazardGroup": "Problem Soil/Rock"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "EGS",
+                "HazardGroup": "Earthquake"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "DFA",
+                "HazardGroup": "Flooding"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "QFF",
+                "HazardGroup": "Earthquake"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "LSC",
+                "HazardGroup": "Landslide"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "VOL",
+                "HazardGroup": "Volcanic"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "THR",
+                "HazardGroup": "Volcanic"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "VCN",
+                "HazardGroup": "Volcanic"
+            }
+        },
+        {
+            "attributes": {
+                "HazardCode": "AAF",
+                "HazardGroup": "Flooding"
+            }
+        }
+    ]
+}

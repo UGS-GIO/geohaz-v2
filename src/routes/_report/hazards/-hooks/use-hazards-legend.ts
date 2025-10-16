@@ -1,6 +1,6 @@
 // hooks/use-hazard-legend.ts
 import { useQuery } from '@tanstack/react-query';
-import { hazardLayerNameMap } from '@/routes/_report/-data/hazard-unit-map';
+import hazardsUnitsData from '@/routes/_report/-data/hazards-units.json';
 import { createSVGSymbol } from '@/lib/legend/symbol-generator';
 import { Legend } from '@/lib/types/geoserver-types';
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
@@ -12,6 +12,18 @@ export interface HazardLegendItem {
     symbol?: SVGSVGElement | HTMLElement;
     order?: number;
 }
+
+// Create a mapping from the JSON data
+// Adjust this based on the actual structure you need
+const hazardLayerNameMap: Record<string, string> = hazardsUnitsData.features.reduce((acc, feature) => {
+    const hazardUnit = feature.attributes.HazardUnit;
+    if (hazardUnit) {
+        // You'll need to define how HazardUnit maps to layer names
+        // This is a placeholder - adjust based on your actual mapping logic
+        acc[hazardUnit] = `workspace:${hazardUnit.toLowerCase()}`;
+    }
+    return acc;
+}, {} as Record<string, string>);
 
 type HazardCode = keyof typeof hazardLayerNameMap;
 

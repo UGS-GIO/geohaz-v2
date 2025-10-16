@@ -1,18 +1,40 @@
 import { useRef, useMemo, useCallback, useState } from 'react';
 import Map, { Source, Layer, MapRef } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
-
-// Import the existing hazard layer map
-import { hazardLayerNameMap as importedHazardLayerNameMap } from '@/routes/_report/-data/hazard-unit-map';
 import { PROD_GEOSERVER_URL } from '@/lib/constants';
-// Type it properly for indexing
-const hazardLayerNameMap: Record<string, string> = importedHazardLayerNameMap as Record<string, string>;
+
+const HAZARDS_WORKSPACE = 'hazards';
+const hazardLayerNameMap: Record<string, string> = {
+    'QFF': `${HAZARDS_WORKSPACE}:quaternaryfaults_current`,
+    'LQS': `${HAZARDS_WORKSPACE}:liquefaction_current`,
+    'SFR': `${HAZARDS_WORKSPACE}:surfacefaultrupture_current`,
+    'EGS': `${HAZARDS_WORKSPACE}:groundshaking_current`,
+    'FLH': `${HAZARDS_WORKSPACE}:floodanddebrisflow_current`,
+    'SGS': `${HAZARDS_WORKSPACE}:shallowgroundwater_current`,
+    'AAF': `${HAZARDS_WORKSPACE}:alluvialfan_current`,
+    'LSS': `${HAZARDS_WORKSPACE}:landslidesusceptibility_current`,
+    'LSF': `${HAZARDS_WORKSPACE}:landslideinventory_current`,
+    'LSC': `${HAZARDS_WORKSPACE}:landslidelegacy_current`,
+    'RFH': `${HAZARDS_WORKSPACE}:rockfall_current`,
+    'CSS': `${HAZARDS_WORKSPACE}:collapsiblesoil_current`,
+    'CRS': `${HAZARDS_WORKSPACE}:corrosivesoilrock_current`,
+    'EFH': `${HAZARDS_WORKSPACE}:earthfissure_current`,
+    'ERZ': `${HAZARDS_WORKSPACE}:erosionhazardzone_current`,
+    'EXS': `${HAZARDS_WORKSPACE}:expansivesoilrock_current`,
+    'MKF': `${HAZARDS_WORKSPACE}:karstfeatures_current`,
+    'PES': `${HAZARDS_WORKSPACE}:pipinganderosion_current`,
+    'GRS': `${HAZARDS_WORKSPACE}:radonsusceptibility_current`,
+    'SDH': `${HAZARDS_WORKSPACE}:salttectonicsdeformation_current`,
+    'SBP': `${HAZARDS_WORKSPACE}:shallowbedrock_current`,
+    'SLS': `${HAZARDS_WORKSPACE}:solublesoilandrock_current`,
+    'WSS': `${HAZARDS_WORKSPACE}:windblownsand_current`,
+};
 
 const hazardColorMap: Record<string, string> = {
-    'QFH': '#ef4444',
+    'QFF': '#ef4444',
     'LQS': '#f97316',
     'SFR': '#dc2626',
-    'GSH': '#ea580c',
+    'EGS': '#ea580c',
     'FLH': '#3b82f6',
     'SGS': '#0ea5e9',
     'AAF': '#06b6d4',
@@ -40,7 +62,7 @@ interface ReportMapProps {
     hazardCodes?: string[];
     height?: number;
     showControls?: boolean;
-    geoserverUrl?: string; // Allow override
+    geoserverUrl?: string;
 }
 
 // Parse polygon coordinates
@@ -56,8 +78,6 @@ function parsePolygonCoordinates(polygon: string | undefined): number[][] | null
             const wkid = parsed.spatialReference?.wkid || parsed.spatialReference?.latestWkid;
 
             // If it's Web Mercator (3857) or other projected system, we might need conversion
-            // For now, assume if wkid exists and isn't 4326, it needs conversion
-            // Most common case: Web Mercator (3857) to WGS84 (4326)
             if (wkid && wkid !== 4326) {
                 console.warn(`Polygon is in EPSG:${wkid}, conversion to EPSG:4326 may be needed`);
                 // For Web Mercator (3857) to WGS84 (4326) conversion
@@ -159,20 +179,16 @@ export function ReportMap({
         return createPolygonFeature(polygonCoords);
     }, [polygonCoords]);
 
-    // Fit bounds when map loads - only if needed for fine-tuning
+    // Fit bounds when map loads
     const onMapLoad = useCallback(() => {
-        // Optional: Remove this if initialViewState is sufficient
-        // Keeping it for fine-tuning with padding
         if (bounds && mapRef.current) {
             setTimeout(() => {
                 mapRef.current?.fitBounds(bounds, { padding: 50, duration: 0 });
-                // Add a slight delay to ensure all tiles are loaded
                 setTimeout(() => {
                     setIsMapLoaded(true);
                 }, 500);
             }, 100);
         } else {
-            // No bounds, just mark as loaded
             setTimeout(() => {
                 setIsMapLoaded(true);
             }, 500);
@@ -218,7 +234,6 @@ export function ReportMap({
             const latDiff = maxLat - minLat;
             const maxDiff = Math.max(lngDiff, latDiff);
 
-            // Approximate zoom level (adjust multiplier as needed)
             let zoom = 10;
             if (maxDiff > 1) zoom = 7;
             else if (maxDiff > 0.5) zoom = 8;

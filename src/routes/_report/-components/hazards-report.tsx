@@ -1,3 +1,4 @@
+import { useMemo, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ReportLayout } from './layouts/report-layout'
 import { SectionTabs, Section } from './layouts/section-tabs'
@@ -21,7 +22,6 @@ import { Link } from '@/components/custom/link'
 import { useGetPageInfo } from '@/hooks/use-get-page-info'
 import { ReportMap } from './shared/report-map'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
-import { useMemo, useRef } from 'react'
 import { useHazardLegend } from '../hazards/-hooks/use-hazards-legend'
 
 interface HazardsReportProps {
@@ -368,7 +368,6 @@ export function HazardsReport({ polygon }: HazardsReportProps) {
                                 const layerContent = layersObj[layer.code] || null
 
                                 if (!layerContent) return null
-
                                 return (
                                     <div key={layer.code} className="space-y-6 pt-8 border-t">
                                         <div>
@@ -470,29 +469,26 @@ function LayerLegendSimple({ layer }: { layer: HazardLayer }) {
             <h4 className="font-semibold mb-2 text-sm">{layer.name}</h4>
             <div className="space-y-1">
                 {legendItems.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-xs">
-                        <span
-                            className="w-3 h-3 rounded flex-shrink-0 border"
-                            style={{ backgroundColor: item.color || '#64748b' }}
-                        />
-                        <span>{item.label}</span>
+                    <div key={idx} className="flex items-start gap-2 text-xs">
+                        {item.symbol ? (
+                            <div
+                                className="flex-shrink-0 mt-0.5"
+                                style={{ width: '32px', height: '20px' }}
+                                dangerouslySetInnerHTML={{ __html: item.symbol.outerHTML }}
+                            />
+                        ) : (
+                            <span
+                                className="w-4 h-4 flex-shrink-0 mt-0.5 rounded border"
+                                style={{ backgroundColor: item.color || '#64748b' }}
+                            />
+                        )}
+                        <span className="flex-1 break-words">{item.label}</span>
                     </div>
                 ))}
             </div>
         </div>
     );
 }
-
-// // Helper component for group-level legends
-// function GroupLegend({ layers }: { layers: HazardLayer[] }) {
-//     return (
-//         <div className="space-y-4">
-//             {layers.map(layer => (
-//                 <LayerLegend key={layer.code} layer={layer} showTitle={true} />
-//             ))}
-//         </div>
-//     );
-// }
 
 // Helper component for summary cards
 function LayerSummaryCard({ layer }: { layer: HazardLayer }) {
@@ -507,14 +503,22 @@ function LayerSummaryCard({ layer }: { layer: HazardLayer }) {
                 {isLoading ? (
                     <div className="text-sm text-muted-foreground">Loading...</div>
                 ) : legendItems.length > 0 ? (
-                    <ul className="list-none text-sm space-y-1">
+                    <ul className="list-none text-sm space-y-2">
                         {legendItems.map((item, idx) => (
-                            <li key={idx} className="flex items-center gap-2">
-                                <span
-                                    className="w-3 h-3 rounded-full flex-shrink-0"
-                                    style={{ backgroundColor: item.color || '#64748b' }}
-                                />
-                                <span>{item.label}</span>
+                            <li key={idx} className="flex items-start gap-2">
+                                {item.symbol ? (
+                                    <div
+                                        className="flex-shrink-0 mt-0.5"
+                                        style={{ width: '32px', height: '20px' }}
+                                        dangerouslySetInnerHTML={{ __html: item.symbol.outerHTML }}
+                                    />
+                                ) : (
+                                    <span
+                                        className="w-4 h-4 flex-shrink-0 mt-0.5 rounded-full"
+                                        style={{ backgroundColor: item.color || '#64748b' }}
+                                    />
+                                )}
+                                <span className="flex-1 break-words">{item.label}</span>
                             </li>
                         ))}
                     </ul>
@@ -561,17 +565,35 @@ function LayerLegend({ layer, showTitle = false }: { layer: HazardLayer; showTit
     }
 
     return (
-        <LegendCard
-            items={legendItems.map((item, idx) => ({
-                id: item.unitCode || `${layer.code}-${idx}`,
-                label: item.label,
-                description: layer.units[idx]?.Description
-                    ? layer.units[idx].Description.replace(/<[^>]*>/g, '').substring(0, 100) + '...'
-                    : undefined,
-                color: item.color,
-                symbol: item.symbol
-            }))}
-            showDescriptions={true}
-        />
+        <div className="border rounded-lg p-4">
+            {showTitle && <h4 className="font-semibold mb-3">{layer.name}</h4>}
+            <div className="space-y-3">
+                {legendItems.map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-3">
+                        {item.symbol ? (
+                            <div
+                                className="flex-shrink-0 mt-1"
+                                style={{ width: '32px', height: '20px' }}
+                                dangerouslySetInnerHTML={{ __html: item.symbol.outerHTML }}
+                            />
+                        ) : (
+                            <span
+                                className="w-5 h-5 flex-shrink-0 mt-0.5 rounded border"
+                                style={{ backgroundColor: item.color || '#64748b' }}
+                            />
+                        )}
+                        <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium break-words">{item.label}</div>
+                            {layer.units[idx]?.Description && (
+                                <div className="text-xs text-muted-foreground mt-1 break-words">
+                                    {layer.units[idx].Description.replace(/<[^>]*>/g, '').substring(0, 150)}
+                                    {layer.units[idx].Description.length > 150 ? '...' : ''}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 }
