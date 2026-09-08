@@ -467,7 +467,15 @@ const ucrcWellsWFSConfig: PMTilesLayerProps = {
                 'Field': { field: 'field_name', type: 'string' },
                 'Purpose': { field: 'purpose', type: 'string' },
                 'Producing Formation': { field: 'producing_formation', type: 'string' },
-                'TD (ft)': { field: 'td_ft', type: 'number' },
+                'TD (ft)': {
+                    field: 'td_ft',
+                    type: 'custom',
+                    transform: (properties) => {
+                        const val = properties?.['td_ft'];
+                        if (val === null || val === undefined || val === 0 || val === '0') return null;
+                        return val;
+                    }
+                },
                 'Elevation (GL ft)': {
                     field: 'elevation_gl',
                     type: 'custom',
