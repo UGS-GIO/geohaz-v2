@@ -45,11 +45,6 @@ export type FilterFieldKind =
         step?: number;
         /** Round extent bounds to nearest `step` for snap-feel. */
         snapStep?: number;
-        /**
-         * Shown beneath the slider when the range is active: warns that features
-         * with a null value in this field are excluded while filtering (the range
-         * predicate can't match a null), e.g. wells with no recorded depth.
-         */
         nullExcludedNote?: string;
     }
     /** Three-state yes/no/all boolean. */
