@@ -575,13 +575,13 @@ const ucrcWellsWFSConfig: PMTilesLayerProps = {
                     targetField: 'uwi',
                     url: `${PROD_POSTGREST_URL}/enmin_ucrc_attachments_current`,
                     headers: { 'Accept-Profile': 'emp', 'Accept': 'application/json' },
-                    displayAs: 'accordion',
+                    displayAs: 'documents',
                     itemBaseUrl: 'https://ucrc-assets.geology.utah.gov',
-                    // displayFields drives the "has data" check + the labelValuePairs fallback; the
-                    // accordion itself renders from the raw rows.
+                    // displayFields drives the "has data" check; the documents panel renders from the
+                    // raw rows (filename + storage_path), grouped by type. Notes are intentionally not
+                    // surfaced in the public viewer.
                     displayFields: [
                         { field: 'filename', label: 'File' },
-                        { field: 'notes', label: 'Notes' },
                     ],
                 },
             ],

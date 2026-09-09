@@ -14,6 +14,7 @@ import {
 import { PopupImageGallery, type GalleryImage } from '@/components/maps/popups/popup-image-gallery';
 import { relatedRowToGalleryImage } from '@/lib/gallery-utils';
 import { sanitizeFilename } from '@/lib/download-utils';
+import { DocumentsPanel } from '@/components/maps/popups/documents-panel';
 
 interface ExpandedRelatedTableProps {
     relatedTable: RelatedTable;
@@ -86,6 +87,17 @@ export function ExpandedRelatedTable({ relatedTable, rows, colSpan }: ExpandedRe
                 </TableCell>
             </TableRow>
         )
+    }
+
+    if (relatedTable.displayAs === 'documents') {
+        return (
+            <TableRow className="bg-muted/30">
+                <TableCell colSpan={colSpan} className="px-3 py-2">
+                    {sectionHeader}
+                    {isOpen && <DocumentsPanel table={relatedTable} rows={rows as Record<string, unknown>[]} />}
+                </TableCell>
+            </TableRow>
+        );
     }
 
     // Table display
