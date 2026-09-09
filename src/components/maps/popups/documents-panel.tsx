@@ -6,6 +6,7 @@ import {
     classifyDocument,
     formatBadge,
     isPreviewable,
+    isJunkFile,
     DOC_CATEGORY_ORDER,
     type DocCategory,
 } from '@/lib/documents/classify';
@@ -29,7 +30,9 @@ const SEARCH_MIN = 8;
 
 function buildItems(table: RelatedTable, rows: AttachmentRow[]): DocItem[] {
     const base = table.itemBaseUrl;
-    return rows.map((row, i) => {
+    // Drop Windows/GIS sidecar files (Thumbs.db, .prj, .ovr, .aux.xml, .meta) — they are not
+    // documents anyone opens, and listing them with a badge just clutters the panel.
+    return rows.filter(row => !isJunkFile(String(row.filename ?? ''))).map((row, i) => {
         const filename = String(row.filename ?? 'Document');
         const path = row.storage_path ? String(row.storage_path) : '';
         // encodeURI (not encodeURIComponent): keep the path separators, escape spaces —
@@ -127,6 +130,14 @@ function DocGroup({ category, items, defaultOpen }: { category: DocCategory; ite
  * pagination so image-heavy wells stay usable. Opt-in via `displayAs: 'documents'`.
  */
 export function DocumentsPanel({ table, rows }: { table: RelatedTable; rows: AttachmentRow[] }) {
+    // Remount per well so a collapsed group, the current page, or a leftover search query from one
+    // well's popup doesn't carry into the next — map popups reuse the same React tree across features.
+    const mf = table.matchingField;
+    const wellKey = String((mf ? rows[0]?.[mf] : undefined) ?? rows.length);
+    return <DocumentsPanelInner key={wellKey} table={table} rows={rows} />;
+}
+
+function DocumentsPanelInner({ table, rows }: { table: RelatedTable; rows: AttachmentRow[] }) {
     const [query, setQuery] = useState('');
     const items = useMemo(() => buildItems(table, rows), [table, rows]);
 

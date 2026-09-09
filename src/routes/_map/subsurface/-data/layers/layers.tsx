@@ -577,9 +577,14 @@ const ucrcWellsWFSConfig: PMTilesLayerProps = {
                     headers: { 'Accept-Profile': 'emp', 'Accept': 'application/json' },
                     displayAs: 'documents',
                     itemBaseUrl: 'https://ucrc-assets.geology.utah.gov',
-                    // displayFields drives the "has data" check; the documents panel renders from the
-                    // raw rows (filename + storage_path), grouped by type. Notes are intentionally not
-                    // surfaced in the public viewer.
+                    sortBy: 'filename',
+                    sortDirection: 'asc',
+                    // The panel renders from the raw rows (filename + storage_path), grouped by type.
+                    // displayFields here drives only the "has data" gate and the related-table CSV
+                    // export. `notes` is deliberately left out: on this table it holds internal
+                    // backfill provenance ("Backfilled from Google Drive COREDOCS — ...") rather than
+                    // public document metadata, and there is no notes_public column, so it must not
+                    // land in the public CSV.
                     displayFields: [
                         { field: 'filename', label: 'File' },
                     ],

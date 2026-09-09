@@ -14,6 +14,7 @@ export type DocCategory =
     | 'Geochemistry & analyses'
     | 'Data & spreadsheets'
     | 'Core photos'
+    | 'Images & scans'
     | 'Archives'
     | 'Other';
 
@@ -24,6 +25,7 @@ export const DOC_CATEGORY_ORDER: DocCategory[] = [
     'Geochemistry & analyses',
     'Data & spreadsheets',
     'Core photos',
+    'Images & scans',
     'Archives',
     'Other',
 ];
@@ -42,22 +44,44 @@ export function fileExtension(filename: string): string {
     return m ? m[1].toLowerCase() : '';
 }
 
-// Curve/tool names and log markers. `gamm?a` catches the "GAMA" misspelling seen in the data.
-const LOG_RE = /induction|density|sonic|gamm?a|resistiv|poros|caliper|triple[\s_]?combo|neutron|welllog|well[\s_]?log/i;
+// Distinctive curve/tool/log stems. Safe as plain substrings — they don't collide with
+// non-log words in the real filenames. `gamm?a` catches the "GAMA" misspelling in the data;
+// `combo` catches "Triple Print Combo" etc.; `mud[\s_]?log` catches MUD_LOG / mudlog.
+const LOG_STEM_RE = /induction|resistiv|poro|caliper|neutron|density|sonic|gamm?a|spectralog|combo|cement[\s_]?bond|mud[\s_]?log|well[\s_]?log/i;
+// Short/ambiguous log tokens that need a separator boundary so they don't fire inside words
+// like "geological" or "catalog". Underscore counts as a separator here; \b does not, and
+// these filenames are underscore-heavy (MUD_LOG, ..._CBL_Page_1).
+const LOG_TOKEN_RE = /(?:^|[^a-z0-9])(?:logs?|cbl)(?![a-z])/i;
 const GEOCHEM_RE = /\bicp\b|\btoc\b|xrd|xrf|assay|geochem|analys/i;
 const REPORT_RE = /completion|coregraph|report|summary/i;
 const PHOTO_RE = /core[\s_]?photo|_photo|photo[\s_]/i;
 
+// Windows/GIS sidecar files that are not documents anyone opens (Thumbs.db, ESRI .prj/.ovr/
+// .aux.xml, log-tool .meta). Hidden from the panel entirely rather than shown with a badge.
+const JUNK_EXTS = new Set(['prj', 'ovr', 'aux', 'meta', 'xml', 'ini', 'tmp']);
+
+/** True for sidecar/junk files that should not be listed as documents. */
+export function isJunkFile(filename: string): boolean {
+    if (filename.toLowerCase().endsWith('thumbs.db')) return true;
+    return JUNK_EXTS.has(fileExtension(filename));
+}
+
 /**
- * Best-effort document type from a filename. Order matters: a curve-named `.tif`
- * or a keyword-bearing `.pdf` is classified by meaning before its format bucket.
+ * Best-effort document type from a filename. Order matters: meaning beats format, so a
+ * curve-named `.tif` or a keyword-bearing `.pdf` is classified before its extension bucket.
+ * The image-extension fallback is "Images & scans" (honest) rather than "Core photos" —
+ * only a filename that actually reads like a photo lands in Core photos.
  */
 export function classifyDocument(filename: string): DocCategory {
     const ext = fileExtension(filename);
-    if (ext === 'las' || LOG_RE.test(filename)) return 'Geophysical logs';
+    // Strong, unambiguous log signals (LAS, named curves/tools) win outright.
+    if (ext === 'las' || LOG_STEM_RE.test(filename)) return 'Geophysical logs';
+    // Geochem keywords beat the weaker bare-"log" token, so "ICP log.xlsx" stays geochem.
     if (GEOCHEM_RE.test(filename)) return 'Geochemistry & analyses';
+    if (LOG_TOKEN_RE.test(filename)) return 'Geophysical logs';
+    if (PHOTO_RE.test(filename)) return 'Core photos';
     if (REPORT_RE.test(filename) || REPORT_EXTS.has(ext)) return 'Reports & completion';
-    if (PHOTO_RE.test(filename) || IMAGE_EXTS.has(ext)) return 'Core photos';
+    if (IMAGE_EXTS.has(ext)) return 'Images & scans';
     if (DATA_EXTS.has(ext)) return 'Data & spreadsheets';
     if (ARCHIVE_EXTS.has(ext)) return 'Archives';
     return 'Other';
