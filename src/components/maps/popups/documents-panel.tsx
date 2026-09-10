@@ -1,12 +1,11 @@
 import { useId, useMemo, useState } from 'react';
-import { ChevronDown, ChevronRight, ExternalLink, Download } from 'lucide-react';
+import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import type { RelatedTable } from '@/lib/types/mapping-types';
 import { Input } from '@/components/ui/input';
 import {
     classifyDocument,
     formatBadge,
-    isPreviewable,
-    isJunkFile,
+    listedDocumentRows,
     DOC_CATEGORY_ORDER,
     type DocCategory,
 } from '@/lib/documents/classify';
@@ -19,7 +18,6 @@ interface DocItem {
     href?: string;
     category: DocCategory;
     badge: string;
-    previewable: boolean;
 }
 
 const PAGE_SIZE = 25;
@@ -30,9 +28,9 @@ const SEARCH_MIN = 8;
 
 function buildItems(table: RelatedTable, rows: AttachmentRow[]): DocItem[] {
     const base = table.itemBaseUrl;
-    // Drop Windows/GIS sidecar files (Thumbs.db, .prj, .ovr, .aux.xml, .meta) — they are not
-    // documents anyone opens, and listing them with a badge just clutters the panel.
-    return rows.filter(row => !isJunkFile(String(row.filename ?? ''))).map((row, i) => {
+    // Sidecar/junk files are dropped here too. Callers already filter for the count and empty-state
+    // gate; this keeps the panel correct on its own even if it is ever handed raw rows.
+    return listedDocumentRows(rows).map((row, i) => {
         const filename = String(row.filename ?? 'Document');
         const path = row.storage_path ? String(row.storage_path) : '';
         // encodeURI (not encodeURIComponent): keep the path separators, escape spaces —
@@ -44,7 +42,6 @@ function buildItems(table: RelatedTable, rows: AttachmentRow[]): DocItem[] {
             href,
             category: classifyDocument(filename),
             badge: formatBadge(filename),
-            previewable: isPreviewable(filename),
         };
     });
 }
@@ -63,7 +60,7 @@ function DocItemRow({ item }: { item: DocItem }) {
                     rel="noopener noreferrer"
                     className="inline-flex shrink-0 items-center gap-0.5 text-primary hover:underline"
                 >
-                    {item.previewable ? <>Open <ExternalLink size={11} /></> : <>Download <Download size={11} /></>}
+                    Open / download <ExternalLink size={11} />
                 </a>
             ) : (
                 <span className="shrink-0 italic text-muted-foreground">no link</span>
@@ -119,14 +116,16 @@ function DocGroup({ category, items, defaultOpen }: { category: DocCategory; ite
                 <span>{category}</span>
                 <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium">{items.length}</span>
             </button>
-            {open && <div id={contentId} className="mt-1 pl-1"><PaginatedList items={items} /></div>}
+            {/* hidden rather than unmounted so the paginated position survives a collapse/expand;
+                it also keeps the aria-controls target present in the DOM while collapsed */}
+            <div id={contentId} hidden={!open} className="mt-1 pl-1"><PaginatedList items={items} /></div>
         </div>
     );
 }
 
 /**
  * Renders the well's documents/attachments grouped by a filename-derived type,
- * with a format badge, an Open/Download link per row, in-panel search, and
+ * with a format badge, an open-or-download link per row, in-panel search, and
  * pagination so image-heavy wells stay usable. Opt-in via `displayAs: 'documents'`.
  */
 export function DocumentsPanel({ table, rows }: { table: RelatedTable; rows: AttachmentRow[] }) {

@@ -34,9 +34,6 @@ const IMAGE_EXTS = new Set(['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif', 'tiff']);
 const DATA_EXTS = new Set(['xls', 'xlsx', 'xlsb', 'xlsm', 'xlxs', 'csv', 'tsv', 'txt', 'xyz']);
 const ARCHIVE_EXTS = new Set(['zip', 'gz', '7z', 'tar', 'rar']);
 const REPORT_EXTS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'rtf']);
-// tif/tiff stay in IMAGE_EXTS for classification, but Chrome/Firefox/Edge download
-// TIFF rather than render it inline, so it's excluded here — the row reads "Download".
-const PREVIEWABLE_EXTS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp']);
 
 /** Lowercased extension without the dot, or '' when there is none. */
 export function fileExtension(filename: string): string {
@@ -54,16 +51,28 @@ const LOG_STEM_RE = /induction|resistiv|poro|caliper|neutron|density|sonic|gamm?
 const LOG_TOKEN_RE = /(?:^|[^a-z0-9])(?:logs?|cbl)(?![a-z])/i;
 const GEOCHEM_RE = /\bicp\b|\btoc\b|xrd|xrf|assay|geochem|analys/i;
 const REPORT_RE = /completion|coregraph|report|summary/i;
-const PHOTO_RE = /core[\s_]?photo|_photo|photo[\s_]/i;
+// `photos?` as a separator-led trailing word catches "... Sidewall Photos.pdf" / "Box 3 Photo.jpg";
+// the other alternatives catch "core photo" and mid-name "_photo_" forms.
+const PHOTO_RE = /core[\s_]?photo|_photo|photo[\s_]|(?:^|[\s_-])photos?\b/i;
 
-// Windows/GIS sidecar files that are not documents anyone opens (Thumbs.db, ESRI .prj/.ovr/
-// .aux.xml, log-tool .meta). Hidden from the panel entirely rather than shown with a badge.
-const JUNK_EXTS = new Set(['prj', 'ovr', 'aux', 'meta', 'xml', 'ini', 'tmp']);
+// Windows/GIS sidecar files that are not documents anyone opens. Matched narrowly: `.aux.xml` by
+// suffix (its extension is only "xml", and real metadata XML must stay visible), Thumbs.db by name,
+// and a short list of pure-sidecar extensions. Deliberately NOT whole families like `xml`.
+const JUNK_EXTS = new Set(['prj', 'ovr', 'meta']);
 
 /** True for sidecar/junk files that should not be listed as documents. */
 export function isJunkFile(filename: string): boolean {
-    if (filename.toLowerCase().endsWith('thumbs.db')) return true;
+    const lower = filename.toLowerCase();
+    if (lower.endsWith('thumbs.db') || lower.endsWith('.aux.xml')) return true;
     return JUNK_EXTS.has(fileExtension(filename));
+}
+
+/**
+ * The attachment rows the panel actually lists, with sidecar/junk dropped. Call this once at each
+ * render site so the section count, the empty-state check, and the panel all agree on the same set.
+ */
+export function listedDocumentRows(rows: Record<string, unknown>[]): Record<string, unknown>[] {
+    return rows.filter(row => !isJunkFile(String(row.filename ?? '')));
 }
 
 /**
@@ -74,11 +83,12 @@ export function isJunkFile(filename: string): boolean {
  */
 export function classifyDocument(filename: string): DocCategory {
     const ext = fileExtension(filename);
-    // Strong, unambiguous log signals (LAS, named curves/tools) win outright.
-    if (ext === 'las' || LOG_STEM_RE.test(filename)) return 'Geophysical logs';
-    // Geochem keywords beat the weaker bare-"log" token, so "ICP log.xlsx" stays geochem.
+    // A .las file is always a log. Otherwise geochem keywords win before the log patterns, because
+    // the log stems include unanchored `poro`/`density` that would otherwise pull core-analysis
+    // spreadsheets ("Bulk Density analyses.xlsx", "... porosity permeability.xlsx") out of Geochem.
+    if (ext === 'las') return 'Geophysical logs';
     if (GEOCHEM_RE.test(filename)) return 'Geochemistry & analyses';
-    if (LOG_TOKEN_RE.test(filename)) return 'Geophysical logs';
+    if (LOG_STEM_RE.test(filename) || LOG_TOKEN_RE.test(filename)) return 'Geophysical logs';
     if (PHOTO_RE.test(filename)) return 'Core photos';
     if (REPORT_RE.test(filename) || REPORT_EXTS.has(ext)) return 'Reports & completion';
     if (IMAGE_EXTS.has(ext)) return 'Images & scans';
@@ -94,9 +104,4 @@ export function formatBadge(filename: string): string {
     if (ext === 'jpeg') return 'JPG';
     if (ext === 'tiff') return 'TIF';
     return ext.toUpperCase();
-}
-
-/** Whether the browser can show this inline (so the row action reads "Open" vs "Download"). */
-export function isPreviewable(filename: string): boolean {
-    return PREVIEWABLE_EXTS.has(fileExtension(filename));
 }

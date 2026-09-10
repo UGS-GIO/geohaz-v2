@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { classifyDocument, formatBadge, isPreviewable, isJunkFile, fileExtension } from '../classify';
+import { classifyDocument, formatBadge, isJunkFile, fileExtension } from '../classify';
 
 describe('classifyDocument', () => {
     it('classifies LAS and curve/tool-named rasters as geophysical logs', () => {
@@ -32,6 +32,11 @@ describe('classifyDocument', () => {
         expect(classifyDocument('PR-15-7c ICP and TOC summary.xlsx')).toBe('Geochemistry & analyses');
     });
 
+    it('keeps core-analysis spreadsheets in geochemistry despite the poro/density log stems', () => {
+        expect(classifyDocument('Bulk Density analyses.xlsx')).toBe('Geochemistry & analyses');
+        expect(classifyDocument('Routine Core Analysis porosity permeability.xlsx')).toBe('Geochemistry & analyses');
+    });
+
     it('classifies completion/coregraph and keyword-free PDFs as reports', () => {
         expect(classifyDocument('Rector 8X Completion Coregraph(1.0).pdf')).toBe('Reports & completion');
         expect(classifyDocument('Federal Rabbit Creek narrative.pdf')).toBe('Reports & completion');
@@ -41,6 +46,9 @@ describe('classifyDocument', () => {
         expect(classifyDocument('Carbon_Canal_5-12_Core_Photo_overview_8805.0-8810.0.jpg')).toBe('Core photos');
         // the .pdf extension no longer wins over the photo keyword
         expect(classifyDocument('BARRETT_Sidewall Core Photos.pdf')).toBe('Core photos');
+        // trailing-word "Photos"/"Photo" (no "core" adjacent) also counts
+        expect(classifyDocument('BARRETT Sidewall Photos.pdf')).toBe('Core photos');
+        expect(classifyDocument('Box 3 Photo.jpg')).toBe('Core photos');
     });
 
     it('sends keyword-free image files to Images & scans (not Core photos)', () => {
@@ -68,10 +76,12 @@ describe('isJunkFile', () => {
         expect(isJunkFile('Thin Section_magnetic.gxf.aux.xml')).toBe(true);
         expect(isJunkFile('Geophysical_DSL.meta')).toBe(true);
     });
-    it('is false for real documents', () => {
+    it('is false for real documents, including real xml/ini that are no longer blanket-hidden', () => {
         expect(isJunkFile('MUD_LOG.jpg')).toBe(false);
         expect(isJunkFile('report.pdf')).toBe(false);
         expect(isJunkFile('0503306123_WELLLOG.LAS')).toBe(false);
+        expect(isJunkFile('well_metadata.xml')).toBe(false);
+        expect(isJunkFile('tool_config.ini')).toBe(false);
     });
 });
 
@@ -83,20 +93,6 @@ describe('formatBadge', () => {
         expect(formatBadge('a.jpeg')).toBe('JPG');
         expect(formatBadge('a.tiff')).toBe('TIF');
         expect(formatBadge('noext')).toBe('FILE');
-    });
-});
-
-describe('isPreviewable', () => {
-    it('is true for pdf and images, false for logs/data', () => {
-        expect(isPreviewable('a.pdf')).toBe(true);
-        expect(isPreviewable('a.jpg')).toBe(true);
-        expect(isPreviewable('a.las')).toBe(false);
-        expect(isPreviewable('a.xlsx')).toBe(false);
-    });
-
-    it('treats tif/tiff as not previewable (mainstream browsers download them)', () => {
-        expect(isPreviewable('0503306097_INDUCTION.tif')).toBe(false);
-        expect(isPreviewable('a.tiff')).toBe(false);
     });
 });
 
