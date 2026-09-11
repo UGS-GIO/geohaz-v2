@@ -1,3 +1,18 @@
+## 2.10.0 (2026-09-11)
+
+* **fix**(`common`): checker legend swatches so hollow polygons don't vanish into the panel (#549) ([549](///issues/549))
+* **fix**(`common`): hide sections and township lines when zoomed out [ALL-5727] (#551) ([551](///issues/551))
+* **fix**(`common`): show 'No legend available' when STAC render lacks legend [ALL-5799] (#548) ([548](///issues/548))
+* ****: [ALL-5842] fix(subsurface): show that unknown-depth wells are hidden when the depth filter is active (#560) ([560](///issues/560))
+* ****: [ALL-5845] feat(subsurface): group well documents by type with badges, search, and pagination (#563) ([563](///issues/563))
+* ****: Merge pull request #562 from UGS-GIO/develop ([562](///issues/562))
+* **feat**(`subsurface`): add beta tag to title and feedback form link (#567) ([567](///issues/567))
+* **feat**(`subsurface`): add beta to title (#566) ([566](///issues/566))
+* **fix**(`subsurface`): DMP review quick fixes (null TD, mailto links, orphaned file) (#559) ([559](///issues/559))
+* **feat**(`wetlandplants`): add ecoregional groups layer (#535) ([535](///issues/535))
+* **feat**(`wetlandplants`): swap Wetland Dashboard Sites layer for HUC8 boundaries (#540) ([540](///issues/540))
+* **feat**(`wetlandplants`): wire plant species as related table on survey sites (#534) ([534](///issues/534))
+
 ## 2.9.0 (2026-08-31)
 
 * **feat**(`common`): switch non petroleum wells to stac/pmtiles source  (#516) ([516](///issues/516))
