@@ -4,6 +4,8 @@ import { RelatedDataMap, EMPTY_RELATED_DATA_MAP } from "@/hooks/use-bulk-related
 import { Feature, Geometry, GeoJsonProperties } from "geojson";
 import { ChevronDown, ChevronRight, ExternalLink, Info } from "lucide-react";
 import { RelatedDataTable } from "@/components/maps/popups/related-data-table";
+import { DocumentsPanel } from "@/components/maps/popups/documents-panel";
+import { listedDocumentRows } from "@/lib/documents/classify";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { LayerContentProps } from "@/components/maps/popups/types";
 import { Link } from "@/components/ui/link";
@@ -489,6 +491,13 @@ const PopupContentDisplayInner = ({ feature, layout, layer, bulkRelatedData, rel
         // Use explicit displayAs config (defaults to 'list')
         const useTableFormat = table.displayAs === 'table' && !!table.displayFields && table.displayFields.length > 0;
 
+        // The documents panel hides sidecar/junk files. Filter once here so the section count, the
+        // empty-state skip below, and the panel all agree; skip the section when nothing survives.
+        const documentRows = table.displayAs === 'documents'
+            ? listedDocumentRows((data[tableIndex] ?? []) as Record<string, unknown>[])
+            : null;
+        if (documentRows && documentRows.length === 0) return;
+
         const sectionLabel = String(properties[table.fieldLabel] || table.fieldLabel);
         const collapsible = table.collapsible ?? sectionLabel.trim() !== '';
 
@@ -510,6 +519,10 @@ const PopupContentDisplayInner = ({ feature, layout, layer, bulkRelatedData, rel
                         </AccordionItem>
                     ))}
                 </Accordion>
+            );
+        } else if (table.displayAs === 'documents') {
+            innerContent = (
+                <DocumentsPanel table={table} rows={documentRows!} />
             );
         } else if (useTableFormat) {
             // Sortable: raw rows + column defs (TanStack) so sorting is numeric/
@@ -539,7 +552,7 @@ const PopupContentDisplayInner = ({ feature, layout, layer, bulkRelatedData, rel
         }
 
         const relatedContent = collapsible ? (
-            <CollapsibleSection key={`related-${table.fieldLabel}-${tableIndex}`} label={sectionLabel} count={groupedValues.length}>
+            <CollapsibleSection key={`related-${table.fieldLabel}-${tableIndex}`} label={sectionLabel} count={documentRows ? documentRows.length : groupedValues.length}>
                 {innerContent}
             </CollapsibleSection>
         ) : (
@@ -549,7 +562,7 @@ const PopupContentDisplayInner = ({ feature, layout, layer, bulkRelatedData, rel
         );
 
         const totalWords = flatValues.map(v => String(v.value)).join(" ").split(/\s+/).length;
-        const isLongContent = useTableFormat || table.displayAs === 'accordion' || totalWords > 20 || flatValues.length > 3;
+        const isLongContent = useTableFormat || table.displayAs === 'accordion' || table.displayAs === 'documents' || totalWords > 20 || flatValues.length > 3;
         // 'above' sorts related tables before the feature fields (which start at 0); 'below' (default) after them.
         const relatedIndex = (relatedTablesPosition === 'above' ? -1000 : 1000) + tableIndex;
         contentItems.push({ content: relatedContent, isLongContent, originalIndex: relatedIndex });

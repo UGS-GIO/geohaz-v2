@@ -467,7 +467,15 @@ const ucrcWellsWFSConfig: PMTilesLayerProps = {
                 'Field': { field: 'field_name', type: 'string' },
                 'Purpose': { field: 'purpose', type: 'string' },
                 'Producing Formation': { field: 'producing_formation', type: 'string' },
-                'TD (ft)': { field: 'td_ft', type: 'number' },
+                'TD (ft)': {
+                    field: 'td_ft',
+                    type: 'custom',
+                    transform: (properties) => {
+                        const val = properties?.['td_ft'];
+                        if (val === null || val === undefined || val === 0 || val === '0') return null;
+                        return val;
+                    }
+                },
                 'Elevation (GL ft)': {
                     field: 'elevation_gl',
                     type: 'custom',
@@ -567,13 +575,18 @@ const ucrcWellsWFSConfig: PMTilesLayerProps = {
                     targetField: 'uwi',
                     url: `${PROD_POSTGREST_URL}/enmin_ucrc_attachments_current`,
                     headers: { 'Accept-Profile': 'emp', 'Accept': 'application/json' },
-                    displayAs: 'accordion',
+                    displayAs: 'documents',
                     itemBaseUrl: 'https://ucrc-assets.geology.utah.gov',
-                    // displayFields drives the "has data" check + the labelValuePairs fallback; the
-                    // accordion itself renders from the raw rows.
+                    sortBy: 'filename',
+                    sortDirection: 'asc',
+                    // The panel renders from the raw rows (filename + storage_path), grouped by type.
+                    // displayFields here drives only the "has data" gate and the related-table CSV
+                    // export. `notes` is deliberately left out: on this table it holds internal
+                    // backfill provenance ("Backfilled from Google Drive COREDOCS — ...") rather than
+                    // public document metadata, and there is no notes_public column, so it must not
+                    // land in the public CSV.
                     displayFields: [
                         { field: 'filename', label: 'File' },
-                        { field: 'notes', label: 'Notes' },
                     ],
                 },
             ],
